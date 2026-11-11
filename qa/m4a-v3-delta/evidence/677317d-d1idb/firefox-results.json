@@ -1,0 +1,472 @@
+[
+ {
+  "n": "BUILD runtime id (want ~677317d+m4on)",
+  "pass": true,
+  "i": {
+   "id": "m3-rc1-pre+677317d+m4on",
+   "ok": true
+  }
+ },
+ {
+  "n": "D1-stub m2-rc1-v5-40min: migration aborted, save byte-identical right after load (no tracksV7)",
+  "pass": true,
+  "i": {
+   "identical": true,
+   "inLen": 723,
+   "outLen": 723,
+   "bkAttemptsAtLoad": 4,
+   "fillN": null
+  }
+ },
+ {
+  "n": "D1-stub m2-rc1-v5-40min: later saves still written as v6 without tracksV7",
+  "pass": false,
+  "i": {
+   "saveWrites": 0,
+   "after": {
+    "version": 5,
+    "savedAt": 1792087200000,
+    "F": 19,
+    "C": 17,
+    "coins": 1291591,
+    "refund": 0,
+    "tracksV7": null
+   }
+  }
+ },
+ {
+  "n": "D1-stub m2-rc1-v5-40min: no committed migration: idb main has no tracksV7, backup attempted in the failing store",
+  "pass": true,
+  "i": {
+   "lsBkAttempts": 11,
+   "idbBkAttempts": 0,
+   "lsBkPresent": false,
+   "idbBkPresent": false
+  }
+ },
+ {
+  "n": "D1-stub m2-rc1-v5-40min: after page close progress survived (v6, no marker) and next load retries the migration",
+  "pass": false,
+  "i": {
+   "reload": {
+    "version": 5,
+    "savedAt": 1792087200000,
+    "F": 19,
+    "C": 17,
+    "coins": 1291591,
+    "refund": 0
+   },
+   "retryAttempts": {
+    "lsBk": 4,
+    "idbBk": 0
+   }
+  }
+ },
+ {
+  "n": "D1-stub m2-rc1-v5-40min: failure surfaced: telemetry save_migration_aborted {store:'ls'} (ADR M4-12); log/UI reported as info",
+  "pass": false,
+  "i": {
+   "surfacedTel": false,
+   "surfacedLog": false,
+   "surfacedUi": false,
+   "ui": "Turn your phoneEgg Farm plays best in portrait.",
+   "logs": [],
+   "telemTail": "_summary\",\n      \"ts\": 1792180210100,\n      \"sessionMs\": 2104,\n      \"windowMs\": 5796\n    },\n    {\n      \"id\": 336,\n      \"N\": 50,\n      \"type\": \"customer_arrive\",\n      \"ts\": 1792180216299,\n      \"sessionMs\": 8303\n    },\n    {\n      \"wage_market_hand_cents\": 8,\n      \"type\": \"worker_summary\",\n      \"ts\": 1792180216099,\n      \"sessionMs\": 8103,\n      \"windowMs\": 608,\n      \"open\": true\n    }\n  ]\n}"
+  }
+ },
+ {
+  "n": "D1-stub m2-rc1-v5-40min: zero console errors",
+  "pass": true,
+  "i": {
+   "errors": [],
+   "warnings": 0
+  }
+ },
+ {
+  "n": "D1-stub v6-from-a01faea: migration aborted, save byte-identical right after load (no tracksV7)",
+  "pass": true,
+  "i": {
+   "identical": true,
+   "inLen": 922,
+   "outLen": 922,
+   "bkAttemptsAtLoad": 3,
+   "fillN": null
+  }
+ },
+ {
+  "n": "D1-stub v6-from-a01faea: later saves still written as v6 without tracksV7",
+  "pass": false,
+  "i": {
+   "saveWrites": 0,
+   "after": {
+    "version": 6,
+    "savedAt": 1792178018723,
+    "F": 19,
+    "C": 17,
+    "coins": 1317637,
+    "refund": 0,
+    "tracksV7": null
+   }
+  }
+ },
+ {
+  "n": "D1-stub v6-from-a01faea: no committed migration: idb main has no tracksV7, backup attempted in the failing store",
+  "pass": true,
+  "i": {
+   "lsBkAttempts": 10,
+   "idbBkAttempts": 0,
+   "lsBkPresent": false,
+   "idbBkPresent": false
+  }
+ },
+ {
+  "n": "D1-stub v6-from-a01faea: after page close progress survived (v6, no marker) and next load retries the migration",
+  "pass": true,
+  "i": {
+   "reload": {
+    "version": 6,
+    "savedAt": 1792178018723,
+    "F": 19,
+    "C": 17,
+    "coins": 1317637,
+    "refund": 0
+   },
+   "retryAttempts": {
+    "lsBk": 3,
+    "idbBk": 0
+   }
+  }
+ },
+ {
+  "n": "D1-stub v6-from-a01faea: failure surfaced: telemetry save_migration_aborted {store:'ls'} (ADR M4-12); log/UI reported as info",
+  "pass": false,
+  "i": {
+   "surfacedTel": false,
+   "surfacedLog": false,
+   "surfacedUi": false,
+   "ui": "Turn your phoneEgg Farm plays best in portrait.",
+   "logs": [],
+   "telemTail": "  },\n    {\n      \"id\": 336,\n      \"N\": 50,\n      \"partial\": false,\n      \"type\": \"customer_served\",\n      \"ts\": 1792180228765,\n      \"sessionMs\": 8507\n    },\n    {\n      \"wage_market_hand_cents\": 8,\n      \"market_hand_eggs\": 50,\n      \"market_hand_cents\": 60700,\n      \"type\": \"worker_summary\",\n      \"ts\": 1792180228762,\n      \"sessionMs\": 8504,\n      \"windowMs\": 187,\n      \"open\": true\n    }\n  ]\n}"
+  }
+ },
+ {
+  "n": "D1-stub v6-from-a01faea: zero console errors",
+  "pass": true,
+  "i": {
+   "errors": [],
+   "warnings": 0
+  }
+ },
+ {
+  "n": "D1-quota m2-rc1-v5-40min: migration aborted, save byte-identical right after load (no tracksV7)",
+  "pass": true,
+  "i": {
+   "identical": true,
+   "inLen": 723,
+   "outLen": 723,
+   "bkAttemptsAtLoad": 4,
+   "fillN": "14"
+  }
+ },
+ {
+  "n": "D1-quota m2-rc1-v5-40min: later saves still written as v6 without tracksV7",
+  "pass": false,
+  "i": {
+   "saveWrites": 0,
+   "after": {
+    "version": 5,
+    "savedAt": 1792087200000,
+    "F": 19,
+    "C": 17,
+    "coins": 1291591,
+    "refund": 0,
+    "tracksV7": null
+   }
+  }
+ },
+ {
+  "n": "D1-quota m2-rc1-v5-40min: no committed migration: idb main has no tracksV7, backup attempted in the failing store",
+  "pass": true,
+  "i": {
+   "lsBkAttempts": 11,
+   "idbBkAttempts": 0,
+   "lsBkPresent": false,
+   "idbBkPresent": false
+  }
+ },
+ {
+  "n": "D1-quota m2-rc1-v5-40min: after page close progress survived (v6, no marker) and next load retries the migration",
+  "pass": false,
+  "i": {
+   "reload": {
+    "version": 5,
+    "savedAt": 1792087200000,
+    "F": 19,
+    "C": 17,
+    "coins": 1291591,
+    "refund": 0
+   },
+   "retryAttempts": {
+    "lsBk": 4,
+    "idbBk": 0
+   }
+  }
+ },
+ {
+  "n": "D1-quota m2-rc1-v5-40min: failure surfaced: telemetry save_migration_aborted {store:'ls'} (ADR M4-12); log/UI reported as info",
+  "pass": false,
+  "i": {
+   "surfacedTel": false,
+   "surfacedLog": false,
+   "surfacedUi": false,
+   "ui": "Turn your phoneEgg Farm plays best in portrait.",
+   "logs": [],
+   "telemTail": "_summary\",\n      \"ts\": 1792180234525,\n      \"sessionMs\": 2104,\n      \"windowMs\": 5780\n    },\n    {\n      \"id\": 336,\n      \"N\": 50,\n      \"type\": \"customer_arrive\",\n      \"ts\": 1792180240725,\n      \"sessionMs\": 8304\n    },\n    {\n      \"wage_market_hand_cents\": 8,\n      \"type\": \"worker_summary\",\n      \"ts\": 1792180240526,\n      \"sessionMs\": 8105,\n      \"windowMs\": 588,\n      \"open\": true\n    }\n  ]\n}"
+  }
+ },
+ {
+  "n": "D1-quota m2-rc1-v5-40min: zero console errors",
+  "pass": true,
+  "i": {
+   "errors": [],
+   "warnings": 0
+  }
+ },
+ {
+  "n": "D1-quota v6-from-a01faea: migration aborted, save byte-identical right after load (no tracksV7)",
+  "pass": true,
+  "i": {
+   "identical": true,
+   "inLen": 922,
+   "outLen": 922,
+   "bkAttemptsAtLoad": 3,
+   "fillN": "15"
+  }
+ },
+ {
+  "n": "D1-quota v6-from-a01faea: later saves still written as v6 without tracksV7",
+  "pass": false,
+  "i": {
+   "saveWrites": 0,
+   "after": {
+    "version": 6,
+    "savedAt": 1792178018723,
+    "F": 19,
+    "C": 17,
+    "coins": 1317637,
+    "refund": 0,
+    "tracksV7": null
+   }
+  }
+ },
+ {
+  "n": "D1-quota v6-from-a01faea: no committed migration: idb main has no tracksV7, backup attempted in the failing store",
+  "pass": true,
+  "i": {
+   "lsBkAttempts": 10,
+   "idbBkAttempts": 0,
+   "lsBkPresent": false,
+   "idbBkPresent": false
+  }
+ },
+ {
+  "n": "D1-quota v6-from-a01faea: after page close progress survived (v6, no marker) and next load retries the migration",
+  "pass": true,
+  "i": {
+   "reload": {
+    "version": 6,
+    "savedAt": 1792178018723,
+    "F": 19,
+    "C": 17,
+    "coins": 1317637,
+    "refund": 0
+   },
+   "retryAttempts": {
+    "lsBk": 3,
+    "idbBk": 0
+   }
+  }
+ },
+ {
+  "n": "D1-quota v6-from-a01faea: failure surfaced: telemetry save_migration_aborted {store:'ls'} (ADR M4-12); log/UI reported as info",
+  "pass": false,
+  "i": {
+   "surfacedTel": false,
+   "surfacedLog": false,
+   "surfacedUi": false,
+   "ui": "Turn your phoneEgg Farm plays best in portrait.",
+   "logs": [],
+   "telemTail": "  },\n    {\n      \"id\": 336,\n      \"N\": 50,\n      \"partial\": false,\n      \"type\": \"customer_served\",\n      \"ts\": 1792180253085,\n      \"sessionMs\": 8507\n    },\n    {\n      \"wage_market_hand_cents\": 8,\n      \"market_hand_eggs\": 50,\n      \"market_hand_cents\": 60700,\n      \"type\": \"worker_summary\",\n      \"ts\": 1792180253082,\n      \"sessionMs\": 8504,\n      \"windowMs\": 181,\n      \"open\": true\n    }\n  ]\n}"
+  }
+ },
+ {
+  "n": "D1-quota v6-from-a01faea: zero console errors",
+  "pass": true,
+  "i": {
+   "errors": [],
+   "warnings": 0
+  }
+ },
+ {
+  "n": "D1-idb m2-rc1-v5-40min: migration aborted, save byte-identical right after load (no tracksV7)",
+  "pass": false,
+  "i": {
+   "identical": false,
+   "inLen": 723,
+   "outLen": 980,
+   "bkAttemptsAtLoad": 1,
+   "fillN": null
+  }
+ },
+ {
+  "n": "D1-idb m2-rc1-v5-40min: later saves still written as v6 without tracksV7",
+  "pass": false,
+  "i": {
+   "saveWrites": 10,
+   "after": {
+    "version": 6,
+    "savedAt": 1792180264627,
+    "F": 19,
+    "C": 17,
+    "H": 19,
+    "V": 13,
+    "coins": 2160626,
+    "refund": 0,
+    "tracksV7": 1
+   }
+  }
+ },
+ {
+  "n": "D1-idb m2-rc1-v5-40min: no committed migration: idb main has no tracksV7, backup attempted in the failing store",
+  "pass": false,
+  "i": {
+   "lsBkAttempts": 1,
+   "idbBkAttempts": 1,
+   "lsBkPresent": true,
+   "idbBkPresent": false,
+   "idbMainV": 6
+  }
+ },
+ {
+  "n": "D1-idb m2-rc1-v5-40min: after page close progress survived (v6, no marker) and next load retries the migration",
+  "pass": false,
+  "i": {
+   "reload": {
+    "version": 6,
+    "savedAt": 1792180266681,
+    "F": 19,
+    "C": 17,
+    "H": 19,
+    "V": 13,
+    "coins": 2160618,
+    "refund": 0,
+    "tracksV7": 1
+   },
+   "retryAttempts": {
+    "lsBk": 0,
+    "idbBk": 0
+   }
+  }
+ },
+ {
+  "n": "D1-idb m2-rc1-v5-40min: failure surfaced: telemetry save_migration_aborted {store:'idb'} (ADR M4-12); log/UI reported as info",
+  "pass": false,
+  "i": {
+   "surfacedTel": false,
+   "surfacedLog": false,
+   "surfacedUi": false,
+   "ui": "Coop upgraded! | Turn your phoneEgg Farm plays best in portrait.",
+   "logs": [],
+   "telemTail": "_summary\",\n      \"ts\": 1792180258847,\n      \"sessionMs\": 2105,\n      \"windowMs\": 5780\n    },\n    {\n      \"id\": 336,\n      \"N\": 50,\n      \"type\": \"customer_arrive\",\n      \"ts\": 1792180265047,\n      \"sessionMs\": 8305\n    },\n    {\n      \"wage_market_hand_cents\": 8,\n      \"type\": \"worker_summary\",\n      \"ts\": 1792180264848,\n      \"sessionMs\": 8106,\n      \"windowMs\": 594,\n      \"open\": true\n    }\n  ]\n}"
+  }
+ },
+ {
+  "n": "D1-idb m2-rc1-v5-40min: zero console errors",
+  "pass": true,
+  "i": {
+   "errors": [],
+   "warnings": 0
+  }
+ },
+ {
+  "n": "D1-idb v6-from-a01faea: migration aborted, save byte-identical right after load (no tracksV7)",
+  "pass": false,
+  "i": {
+   "identical": false,
+   "inLen": 922,
+   "outLen": 1023,
+   "bkAttemptsAtLoad": 1,
+   "fillN": null
+  }
+ },
+ {
+  "n": "D1-idb v6-from-a01faea: later saves still written as v6 without tracksV7",
+  "pass": false,
+  "i": {
+   "saveWrites": 9,
+   "after": {
+    "version": 6,
+    "savedAt": 1792180276512,
+    "F": 19,
+    "C": 17,
+    "H": 19,
+    "V": 13,
+    "coins": 2159962,
+    "refund": 0,
+    "tracksV7": 1
+   }
+  }
+ },
+ {
+  "n": "D1-idb v6-from-a01faea: no committed migration: idb main has no tracksV7, backup attempted in the failing store",
+  "pass": false,
+  "i": {
+   "lsBkAttempts": 1,
+   "idbBkAttempts": 1,
+   "lsBkPresent": true,
+   "idbBkPresent": false,
+   "idbMainV": 6
+  }
+ },
+ {
+  "n": "D1-idb v6-from-a01faea: after page close progress survived (v6, no marker) and next load retries the migration",
+  "pass": false,
+  "i": {
+   "reload": {
+    "version": 6,
+    "savedAt": 1792180278548,
+    "F": 19,
+    "C": 17,
+    "H": 19,
+    "V": 13,
+    "coins": 2220654,
+    "refund": 0,
+    "tracksV7": 1
+   },
+   "retryAttempts": {
+    "lsBk": 0,
+    "idbBk": 0
+   }
+  }
+ },
+ {
+  "n": "D1-idb v6-from-a01faea: failure surfaced: telemetry save_migration_aborted {store:'idb'} (ADR M4-12); log/UI reported as info",
+  "pass": false,
+  "i": {
+   "surfacedTel": false,
+   "surfacedLog": false,
+   "surfacedUi": false,
+   "ui": "Turn your phoneEgg Farm plays best in portrait.",
+   "logs": [],
+   "telemTail": "  },\n    {\n      \"id\": 336,\n      \"N\": 50,\n      \"partial\": false,\n      \"type\": \"customer_served\",\n      \"ts\": 1792180277136,\n      \"sessionMs\": 8508\n    },\n    {\n      \"wage_market_hand_cents\": 8,\n      \"market_hand_eggs\": 50,\n      \"market_hand_cents\": 60700,\n      \"type\": \"worker_summary\",\n      \"ts\": 1792180277133,\n      \"sessionMs\": 8505,\n      \"windowMs\": 188,\n      \"open\": true\n    }\n  ]\n}"
+  }
+ },
+ {
+  "n": "D1-idb v6-from-a01faea: zero console errors",
+  "pass": true,
+  "i": {
+   "errors": [],
+   "warnings": 0
+  }
+ }
+]

@@ -1,0 +1,43 @@
+== cf00e62
+
+ scripts/recorded-pid.mjs   | 22 +++++++++++++++-------
+ tests/recorded-pid.test.ts | 35 +++++++++++++++++++++++++++++++++++
+ 2 files changed, 50 insertions(+), 7 deletions(-)
+== 6c5919f
+
+ scripts/recorded-pid.mjs   | 61 ++++++++++++++++++++++++++++++++++++++++++-
+ scripts/serve-own.mjs      | 23 ++++++++++------
+ tests/recorded-pid.test.ts | 65 ++++++++++++++++++++++++++++++++++++++++++++--
+ 3 files changed, 138 insertions(+), 11 deletions(-)
+== 568784e
+
+ scripts/artux-shots.mjs        |  9 +++++----
+ scripts/d2-kill-browser.mjs    |  2 +-
+ scripts/m41-9-bignum-shots.mjs |  9 +++++----
+ scripts/mk24-1-overflow.mjs    | 10 +++++-----
+ scripts/perf-ab.mjs            |  6 +++---
+ scripts/perf-sm9.mjs           |  6 +++---
+ scripts/pt1-13-webkit.mjs      |  7 ++++---
+ scripts/queue-qa.mjs           |  7 ++++---
+ scripts/recorded-pid.mjs       | 11 +++++++++--
+ scripts/screenshot.mjs         |  6 +++---
+ scripts/smoke.mjs              |  6 +++---
+ 11 files changed, 45 insertions(+), 34 deletions(-)
+== 2a8d90a
+
+ tests/recorded-pid.test.ts                | 20 +++++--------
+ tests/rule21-rules.ts                     | 24 ++++++++++++++++
+ tests/rule21-source.test.ts               | 47 +++++++++++++++++++++++++++++++
+ 53 files changed, 131 insertions(+), 13 deletions(-)
+== 9a05af1
+
+ scripts/d2-guard.mjs        | 46 +++++++++++++++++++++++++++++++++++++++
+ scripts/d2-kill-browser.mjs | 38 +++++++++++++++++++++------------
+ tests/d2-guard.test.ts      | 52 +++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 123 insertions(+), 13 deletions(-)
+== a32faeb
+
+ scripts/d2-guard.mjs        | 44 +++++++++++++++++++++++++-
+ scripts/d2-kill-browser.mjs | 18 ++++++-----
+ tests/d2-guard.test.ts      | 76 ++++++++++++++++++++++++++++++++++++++++++++-
+ 3 files changed, 128 insertions(+), 10 deletions(-)

@@ -1,0 +1,322 @@
+diff --git a/src/config/breeds.ts b/src/config/breeds.ts
+index 667e3bc..8ebd49e 100644
+--- a/src/config/breeds.ts
++++ b/src/config/breeds.ts
+@@ -20,11 +20,13 @@ export const BC_SPEC_DEFAULTS = {
+   unlock_farm: 10, slot2_farm: 14, slot3_farm: 20, rare_farm: 14, legendary_farm: 24, hatch_cost_s: 45, hatch_farm_share_bp: 10000,
+   hatch_min_cents: 50000, hatch_time_s: 60, settle_s: 300, incubators: 1, w_common: 70, w_rare: 22, w_epic: 7, w_legendary: 1,
+   pity_rare_after: 8, star_cap: 2, star_bonus_bp: 2500,
++  /** BR-R12b / A8: calm-hands Present window (focus s) and counted-tap threshold. */
++  present_calm_w_s: 10, present_calm_k: 6,
+   /**
+    * Family clamps (spec §4.3 L365–368 / §5; E8/E9). Verified vs m5.1-breeds-spec.ea922eb8:
+    * lay_cap_bp_lt18=700, lay_cap_bp=1500, away_cap_bp=3000, broody_cap_bp=2000.
+    * TODO(Econ/RC-PIN): economy.csv (8dc90e2b) and live product CSV have no bc_* columns yet (manifest row 27);
+-   * bc() reads these defaults until the M5.1 CSV lands. lay_cap_farm=18 is the E9 F18 boundary implied by lt18 (not a CSV column).
++   * bc() reads these defaults until the M5.1 CSV lands. lay_cap_farm=18 is the E9 F18 boundary (PR-B stub / E9).
+    */
+   lay_cap_bp_lt18: 700, lay_cap_bp: 1500, lay_cap_farm: 18,
+   away_cap_bp: 3000, broody_cap_bp: 2000,
+diff --git a/src/game.ts b/src/game.ts
+index 07b827b..a60deba 100644
+--- a/src/game.ts
++++ b/src/game.ts
+@@ -5,6 +5,8 @@ import { coopCap } from './sim/tracks';
+ import { advance } from './sim/tick';
+ import { apply, Action, isUpgrade } from './sim/actions';
+ import { applyOffline } from './sim/offline';
++import { sessionEndPresentFields, awayBp } from './sim/breeds-traits';
++import { offlineGrantV5 } from './telemetry/v5-fields';
+ import type { BreedId } from './config/breeds';
+ import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
+ import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
+@@ -114,7 +116,12 @@ export class Game {
+   }
+   private grantOffline(gapMs: number) {
+     const r = applyOffline(this.state, gapMs, this.b); this.state = r.state; if (r.reveal) this.pendingReveal = r.reveal;
+-    if (r.eggs > 0) { this.offline = { eggs: r.eggs, awayS: r.awayS }; this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs }); }
++    // Row 32: away_bp on every offline_grant when breeds on (incl. eggs=0). Modal still only when eggs > 0.
++    const v5 = offlineGrantV5(this.b, awayBp(this.state, this.b));
++    if (r.eggs > 0 || v5.away_bp !== undefined) {
++      if (r.eggs > 0) this.offline = { eggs: r.eggs, awayS: r.awayS };
++      this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs, ...v5 });
++    }
+     return r.eggs;
+   }
+   private emit(evs: SimEvent[]) {
+@@ -310,7 +317,8 @@ export class Game {
+   endSession() {
+     if (this.resetting || this.inactive || this.held()) return;
+     const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
+-    this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
++    // Row 32 (HoE/breeds-sim-prB-traits): present_* only. Other breeds session_end fields = gen/breeds-telemetry.
++    this.telemetry.track('session_end', sessionEndPresentFields(this.state, this.b)); this.save(); this.telemetry.flush(true); }
+   dispatch(a: Action) {
+     if (this.inactive || this.held()) return;
+     const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev, this.attendedNow()); this.emit(ev); this.checkCoopFull(); // Q-F1c-1 (D-HOP-2026-10-29-06)
+diff --git a/src/save/m5-fields.ts b/src/save/m5-fields.ts
+index 93dd3a6..44e631f 100644
+--- a/src/save/m5-fields.ts
++++ b/src/save/m5-fields.ts
+@@ -33,7 +33,7 @@ export const BROODY_NEST_MAX_CENTS = 1e15; export const BROODY_SLOTS = 12;
+ /** Never saved (F1a M5_SESSION_FIELDS: golden R10a on-screen egg, streak R11 s, I_ref ring, Broody nestScaled/brRng). */
+ export const M5_SESSION_KEYS = M5_SESSION_FIELDS; // ONE list, owned by sim/m5-state.ts (CCR m1 on #77)
+ /** Session keys outside F1a M5Fields: the #2 streak run stats (streak_peak, sim/streak.ts). Never saved either. */
+-const SESSION_ONLY_KEYS: readonly string[] = [...M5_SESSION_KEYS, 'streakRun', 'breedsRawSlots', 'goldenPending', 'frenzyRun']; // + #1 golden session records // + M5.1 breeds E10 shadow (PMC Q5)
++const SESSION_ONLY_KEYS: readonly string[] = [...M5_SESSION_KEYS, 'streakRun', 'breedsRawSlots', 'breedsCalm', 'goldenPending', 'frenzyRun']; // + #1 golden // + breeds E10 shadow + BR-R12b calm
+ const fin = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0;
+ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+ const isU32 = (v: unknown) => Number.isInteger(v) && (v as number) > 0 && (v as number) <= 0xffffffff;
+diff --git a/src/sim/actions.ts b/src/sim/actions.ts
+index 2259d9f..b12825c 100644
+--- a/src/sim/actions.ts
++++ b/src/sim/actions.ts
+@@ -6,6 +6,7 @@ import { Track, salePriceCents, trackLock, trackCost, trackLevel, reachedMilesto
+ import type { Sink } from './events';
+ import { saleValueCents } from './payout';
+ import { creditTap, streakSaleFactor, addStreakExtra } from './streak';
++import { breedsNoteCreditedTap } from './breeds-traits';
+ import { playerSaleCtx } from './effects';
+ import { incomeRefOn, recordSale } from './income-ref';
+ import { tapCoinsOn, tapCoinsFor } from './tap-coins';
+@@ -76,7 +77,8 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended =
+       ev?.push(c.credited === undefined ? { type: 'collect', eggs: n } : bonus === undefined ? { type: 'collect', eggs: n, credited: c.credited }
+         : { type: 'collect', eggs: n, credited: c.credited, bonus_cents: bonus });
+       if (c.started) ev?.push({ type: 'streak_started', farm_level: s.farmLevel, collection_level: s.collectionLevel });
+-      return { ...c.s, coop: s.coop - n, basket: s.basket + n, ...(bonus ? { coinsCents: c.s.coinsCents + bonus } : {}) };
++      const afterTap = breedsNoteCreditedTap(c.s, b, c.credited);
++      return { ...afterTap, coop: s.coop - n, basket: s.basket + n, ...(bonus ? { coinsCents: afterTap.coinsCents + bonus } : {}) };
+     }
+     case 'sell': return sellTo(s, a.customerId, b, ev, 'player', !attended);
+     case 'sellAll': { let r = s; for (const c of s.customers) { if (r.basket < 1) break; r = sellTo(r, c.id, b, ev, 'player', !attended); } return r; }
+diff --git a/src/sim/breeds-traits.ts b/src/sim/breeds-traits.ts
+new file mode 100644
+index 0000000..d4ef7e9
+--- /dev/null
++++ b/src/sim/breeds-traits.ts
+@@ -0,0 +1,135 @@
++/**
++ * M5.1 breeds PR-B traits (spec v0.2 rev 3.8.9 ea922eb8 §4.4): Present calm-gate (BR-R12/R12b), Away (BR-R13), Broody (BR-R14).
++ * Session-only calm ring (not saved; every load / offline ≥ 60 s starts empty → gate open). Flag-off: identity, no new state.
++ */
++import type { Balance } from '../config/balance';
++import { m4On, tcNum as tc } from '../config/formulas';
++import { BP_ONE, bc } from '../config/breeds';
++import { familyActiveBp } from './breeds-family';
++import { prodEggsPerSec, coopCap } from './tracks';
++import type { GameState } from './state';
++
++/** Session-only calm-hands ring (BR-R12b). Not in M5_SAVED_FIELDS / M5_SESSION_FIELDS; stripped like breedsRawSlots. */
++export interface BreedsCalm {
++  /** Cumulative focus advance this session, integer ms. */
++  focusMs: number;
++  /** Counted-tap stamps (focusMs after that tick's fT), newest last; capacity ≥ k. */
++  stamps: number[];
++  /** Σ fT (ms) while ≥1 settled Present slotted and gate open. */
++  activeMs: number;
++  /** open → closed transitions while Present was slotted. */
++  lostCount: number;
++  /** Last evaluated gate (true = open). */
++  open: boolean;
++}
++
++const EPS = 1e-9;
++/** m4.flags.breeds without importing flagOn (keeps this file out of the F3 flagOn scan). */
++const breedsFlag = (b: Balance) => m4On(b) && b.m4?.flags?.breeds === 1;
++const emptyCalm = (): BreedsCalm => ({ focusMs: 0, stamps: [], activeMs: 0, lostCount: 0, open: true });
++
++/** Clamped family bp via shared familyActiveBp (breeds-family / commit 0) — no duplicate clamp math. */
++export const presentBp = (s: GameState, b: Balance) => familyActiveBp(s, b, 'present');
++export const awayBp = (s: GameState, b: Balance) => familyActiveBp(s, b, 'away');
++export const broodyBreedBp = (s: GameState, b: Balance) => familyActiveBp(s, b, 'broody');
++
++/** BR-R14: broodyBp_eff = floor(broodyBp × (10000 + broodyBreedBp) / 10000), broodyBp = round(tc_broody_income_share × 10000).
++ *  broodyBreedBp is familyActiveBp(..., "broody") clamped to bc_broody_cap_bp (= 2000). Nest accrual (when built) must use broodyBpEff. */
++export const broodyBaseBp = (b: Balance) => Math.round(tc(b, 'broody_income_share') * BP_ONE);
++export const broodyBpEff = (s: GameState, b: Balance) =>
++  Math.floor(broodyBaseBp(b) * (BP_ONE + broodyBreedBp(s, b)) / BP_ONE);
++
++/** Pure BR-R12b gate: open iff stamps in (focusMs − W×1000, focusMs] < k. k = 0 → always open (BR-AC48). */
++export function calmGateOpen(focusMs: number, stamps: readonly number[], wS: number, k: number): boolean {
++  if (k === 0) return true;
++  if (stamps.length === 0) return true;
++  const Wms = wS * 1000;
++  let n = 0;
++  for (const t of stamps) if (focusMs - t < Wms) n++;
++  return n < k;
++}
++
++/** PR-B stub API: presentGateOpen(s, b). Flag-off / empty ring → open; k from bc_present_calm_k. */
++export function presentGateOpen(s: GameState, b: Balance): boolean {
++  if (!breedsFlag(b)) return true;
++  const calm = s.breedsCalm;
++  if (!calm) return true;
++  return calmGateOpen(calm.focusMs, calm.stamps, bc(b, 'present_calm_w_s'), bc(b, 'present_calm_k'));
++}
++
++/** session_end present_* (errata / Q-COL-9): required breeds-on; 0 if no Present slotted; absent flag-off. */
++export function sessionEndPresentFields(s: GameState, b: Balance): { present_active_s?: number; present_lost_count?: number } {
++  if (!breedsFlag(b)) return {};
++  const calm = s.breedsCalm;
++  const activeMs = calm?.activeMs ?? 0;
++  // Q-COL-9 / BR-AC53: round(ΣfT/100)/10 half-up on integer ms (Math.round).
++  return {
++    present_active_s: Math.round(activeMs / 100) / 10,
++    present_lost_count: calm?.lostCount ?? 0,
++  };
++}
++
++/** Credited-tap stamp for the calm ring. Runs whenever breeds is on (HoE Q-COL-12), even with streak/tapCoins off. */
++export function breedsNoteCreditedTap(s: GameState, b: Balance, credited: boolean | undefined): GameState {
++  if (!breedsFlag(b) || !s.breeds) return s;
++  // When streak/tapCoins reported credited explicitly: only stamp on true.
++  if (credited === false) return s;
++  if (credited === true) return stamp(s, b, false);
++  // breeds-only detector (streak + tapCoins both off): unlock + 1 s window, pay nothing.
++  return stamp(s, b, true);
++}
++
++function stamp(s: GameState, b: Balance, ownWindow: boolean): GameState {
++  if (ownWindow) {
++    if (s.farmLevel < tc(b, 'streak_unlock_farm') || (s.tapCreditCdS ?? 0) > EPS) return s;
++  }
++  const calm = s.breedsCalm ?? emptyCalm();
++  const k = bc(b, 'present_calm_k');
++  const cap = k > 0 ? k : 1;
++  const stamps = calm.stamps.length >= cap ? [...calm.stamps.slice(calm.stamps.length - cap + 1), calm.focusMs] : [...calm.stamps, calm.focusMs];
++  const out: GameState = { ...s, breedsCalm: { ...calm, stamps } };
++  return ownWindow ? { ...out, tapCreditCdS: tc(b, 'tap_credit_min_s') } : out;
++}
++
++/**
++ * Per focused tick (BR-R12b order (0)/(4)/(5)): advance focusMs, eval gate, accumulate activeMs / lostCount,
++ * then add Present eggs: prodEggsPerSec × focusS × presentBp / 10000 (gate open). Also ages the breeds-only credit window.
++ */
++export function breedsPresentTick(s: GameState, dt: number, focusS: number, b: Balance): GameState {
++  if (!breedsFlag(b) || !s.breeds) return s;
++  let out = s;
++  // breeds-only credit window (sim dt); streak/tapCoins own the countdown when either is on.
++  const streakOrTap = (m4On(b) && (b.m4?.flags?.streak === 1 || b.m4?.flags?.tapCoins === 1));
++  if (!streakOrTap && (out.tapCreditCdS ?? 0) > EPS) {
++    out = { ...out, tapCreditCdS: Math.max(0, out.tapCreditCdS! - dt) };
++  }
++  const fT = focusS > 0 ? Math.round(focusS * 1000) : 0;
++  if (fT <= 0 && !out.breedsCalm) return out;
++  let calm = out.breedsCalm ?? emptyCalm();
++  if (fT > 0) {
++    calm = { ...calm, focusMs: calm.focusMs + fT };
++    const open = calmGateOpen(calm.focusMs, calm.stamps, bc(b, 'present_calm_w_s'), bc(b, 'present_calm_k'));
++    const hasPresent = presentBp(out, b) > 0;
++    let lost = calm.lostCount, active = calm.activeMs;
++    if (hasPresent && calm.open && !open) lost++;
++    if (hasPresent && open) active += fT;
++    calm = { ...calm, open, lostCount: lost, activeMs: active };
++  }
++  out = { ...out, breedsCalm: calm };
++  // Present eggs (BR-R12): only on focus, gate open, bp > 0. Base coop fill already ran on full dt.
++  const bp = calm.open ? presentBp(out, b) : 0;
++  if (bp > 0 && focusS > 0) {
++    const add = prodEggsPerSec(out, b, { suspended: false }) * focusS * bp / BP_ONE;
++    if (add > 0) {
++      const cap = coopCap(out, b);
++      out = { ...out, coop: Math.min(cap, out.coop + add) };
++    }
++  }
++  return out;
++}
++
++/** E22b / BR-AC49: offline ≥ 60 s empties the ring (gate open); keeps activeMs / lostCount / focusMs. */
++export function breedsCalmClearRing(s: GameState): GameState {
++  if (!s.breedsCalm) return s;
++  return { ...s, breedsCalm: { ...s.breedsCalm, stamps: [], open: true } };
++}
+diff --git a/src/sim/offline.ts b/src/sim/offline.ts
+index f61597a..0227b04 100644
+--- a/src/sim/offline.ts
++++ b/src/sim/offline.ts
+@@ -3,12 +3,17 @@ import { GameState, eggsPerSec } from './state';
+ import { prodEggsPerSec, offlineMult } from './tracks';
+ import { m4On, clampL } from '../config/formulas';
+ import { breedsOffline } from './breeds';
++import { breedsCalmClearRing, awayBp } from './breeds-traits';
++import { BP_ONE } from '../config/breeds';
+ /** spec v1.14 M4A-4 (M4 on): floor(min(min(away, cap) x CSV offline_eggs_per_sec[H], CSV offline_max_eggs_2h[H]) x Hens milestone mult).
+  *  Rate and cap are read from data (balance.m4.offline via sync-economy), never derived from rate x eps. Flag off: unchanged (AC11). */
+-export function m4OfflineEggs(awayS: number, hensLevel: number, b: Balance, mult = 1): number {
++/** BR-R13: optional awayBpN (0 = unchanged). Callers pass awayBp(=familyActiveBp), already clamped to bc_away_cap_bp.
++ *  Order: min(min(away,cap)×rate×(10000+awayBp)/10000, maxEggs2h)×mult, then floor. */
++export function m4OfflineEggs(awayS: number, hensLevel: number, b: Balance, mult = 1, awayBpN = 0): number {
+   const o = b.offline, t = b.m4!.offline!; if (!isFinite(awayS) || awayS < o.offlineMinSeconds) return 0;
+   const L = clampL(hensLevel, b);
+-  return Math.floor(Math.min(Math.min(awayS, o.offlineCapSeconds) * t.eggsPerSec[L], t.maxEggs2h[L]) * mult);
++  const rate = t.eggsPerSec[L] * (BP_ONE + awayBpN) / BP_ONE;
++  return Math.floor(Math.min(Math.min(awayS, o.offlineCapSeconds) * rate, t.maxEggs2h[L]) * mult);
+ }
+ /** AC11: eggs = floor(min(away,cap) * mult * eggs_per_sec(saved farm L)); <60s or negative => 0. */
+ /** `eps` overrides the Farm curve (M4-A: the Hens track rate). */
+@@ -21,9 +26,12 @@ export function offlineEggs(awayS: number, farmLevel: number, b: Balance, eps =
+ /** D-HOP-2026-11-06-01 (a) / Pause v1.3.15: the egg grant depends on hen state, the eligible gap, and the cap.
+  *  Pause, hire, and m4.flags.pause do not change it. */
+ export function applyOffline(s: GameState, awayMs: number, b: Balance) {
+-  const eggs = m4On(b) && b.m4?.offline ? m4OfflineEggs(awayMs / 1000, s.hensLevel, b, offlineMult(s, b))
++  const eggs = m4On(b) && b.m4?.offline ? m4OfflineEggs(awayMs / 1000, s.hensLevel, b, offlineMult(s, b), awayBp(s, b))
+     : offlineEggs(awayMs / 1000, s.farmLevel, b, prodEggsPerSec(s, b), offlineMult(s, b));
+   const awayS = Math.max(0, Math.min(awayMs / 1000, b.offline.offlineCapSeconds));
+   const br = breedsOffline(s, awayMs, b); // M5.1 BR-R18: same capped gap, even when the grant is 0 eggs; identity when flag off
+-  return { state: eggs > 0 ? { ...br.state, pendingOfflineEggs: br.state.pendingOfflineEggs + eggs } : br.state, eggs, awayS, reveal: br.reveal };
++  // E22b / BR-AC49: hide ≥ offlineMinSeconds empties the Present calm ring (gate open on return).
++  let state = br.state;
++  if (m4On(b) && b.m4?.flags?.breeds === 1 && awayMs >= b.offline.offlineMinSeconds * 1000) state = breedsCalmClearRing(state);
++  return { state: eggs > 0 ? { ...state, pendingOfflineEggs: state.pendingOfflineEggs + eggs } : state, eggs, awayS, reveal: br.reveal };
+ }
+diff --git a/src/sim/state.ts b/src/sim/state.ts
+index db07b88..e5884bd 100644
+--- a/src/sim/state.ts
++++ b/src/sim/state.ts
+@@ -35,6 +35,8 @@ export interface GameState extends M5Fields {
+   /** M5.1 breeds E10 / PMC Q5 (session only, outside F1a M5Fields like streakRun): raw unknown slot ids from the save, written
+    *  back by m5Persist (breedsSaveView) while that slot stays null; stripped by m5Persist SESSION_ONLY_KEYS. */
+   breedsRawSlots?: (string | null)[];
++  /** M5.1 breeds BR-R12b calm ring (session only, outside F1a; not saved). Empty / absent = gate open. */
++  breedsCalm?: import('./breeds-traits').BreedsCalm;
+   /** v5 #1 golden (session only, outside F1a M5Fields like streakRun; Architect slice-2 ruling 2/5): the pending spawn's
+    *  interval/deferral/R15 retry and the live Frenzy's frenzy_ended stats. Stripped by m5Persist SESSION_ONLY_KEYS. */
+   goldenPending?: import('./golden').GoldenPending;
+diff --git a/src/sim/timers.ts b/src/sim/timers.ts
+index eeb8265..bd315a7 100644
+--- a/src/sim/timers.ts
++++ b/src/sim/timers.ts
+@@ -14,6 +14,7 @@ import { incomeRefTick } from './income-ref';
+ import { frenzyTick, goldenTick } from './golden';
+ import { ensureBreeds } from './breeds';
+ import { breedsTick } from './breeds-hatch';
++import { breedsPresentTick } from './breeds-traits';
+ import { abilitiesTick } from './abilities';
+ /** dt = sim seconds of this tick; focusS = focus seconds of this tick (dt or 0). */
+ export type TimerSystem = (s: GameState, dt: number, focusS: number, b: Balance, clock: StepClock | undefined, ev?: Sink) => GameState;
+@@ -26,7 +27,7 @@ const seedEvRng: TimerSystem = (s, _dt, _f, b) => (evRngFlagOn(b) ? ensureEvRng(
+ const streak: TimerSystem = (s, dt, f, b, _c, ev) => streakTick(s, dt, f, b, ev);
+ /** M5.1 breeds (tick-semantics note point 1): settle -> incubator/reveal -> sinceUnlockMs on sim dt (breedsTick), then Q2
+  *  creates `breeds` at the end of the first flag-on tick (so the creating tick counts nothing). Identity unless m4.flags.breeds. */
+-const breeds: TimerSystem = (s, dt, _f, b, c) => ensureBreeds(breedsTick(s, dt, b, c?.slotsFarm), b);
++const breeds: TimerSystem = (s, dt, f, b, c) => breedsPresentTick(ensureBreeds(breedsTick(s, dt, b, c?.slotsFarm), b), dt, f, b);
+ /** #3 I_ref (§4.1/§4.1a): the 1 s sim-time ring rolls and refWarmS advances on sim dt (hidden ticks too). Identity unless m4.flags.tapCoins. */
+ const incomeRef: TimerSystem = (s, dt, _f, b) => incomeRefTick(s, dt, b);
+ /** #1 golden R23: frenzyRemainingS counts down on focus seconds (frozen under menus / hidden). Identity unless m4.flags.golden. */
+diff --git a/src/telemetry/v5-fields.ts b/src/telemetry/v5-fields.ts
+new file mode 100644
+index 0000000..2464a9a
+--- /dev/null
++++ b/src/telemetry/v5-fields.ts
+@@ -0,0 +1,11 @@
++/**
++ * v5 telemetry field builders that read M5 flags (HoE/tel-st-ac19-20; errata v5 rev. 15 sha1 5e12a591 V-2b).
++ * Kept out of game.ts so the F3 no-literal scan of flag readers covers only this small module.
++ * Row 32 (HoE/breeds-sim-prB-traits): offline_grant.away_bp — real Away bp (BR-R13), not the #123 AWAY_BP_NONE stub.
++ */
++import type { Balance } from '../config/balance';
++import { flagOn } from '../config/flags';
++
++/** offline_grant.away_bp (breeds §8 / errata V-2b): required breeds-on (0 if none); absent flag-off; emit even when eggs=0 (PMC). */
++export const offlineGrantV5 = (b: Balance, away_bp = 0): { away_bp?: number } =>
++  (flagOn(b, 'breeds') ? { away_bp } : {});

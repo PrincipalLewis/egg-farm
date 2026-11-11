@@ -1,0 +1,18 @@
+7ae964d4e4237f6970155f0ddaf65f08f5c5b00ba257850a55a36e40df35be43  artifacts/v5-m5load-sanitize-7d59dda/results/SHA256SUMS
+45
+non-OK above (none = all OK)
+== diff.patch vs git
+1266975955fc4c7aebcd236fecea61efa0d823f29158608b09332e2e20479ad3  -
+1266975955fc4c7aebcd236fecea61efa0d823f29158608b09332e2e20479ad3  artifacts/v5-m5load-sanitize-7d59dda/results/diff.patch
+gate v5-m5load-sanitize-7d59dda
+HEAD 7d59ddac8f1e5b610ddef4db9c1b62de9799da5a tree 5403b5c3b3ac9dd048959006d38a08d589dbab4f
+parents of HEAD^ (merge a202ed1): fb4015d831d9211877f4cd0c0bb95240ce044105 458f74cc76767452c9c980b2fed382bc0e461376; HEAD^ = a202ed1b7c812cbe75123e3c454383cf999b41f3
+origin/rc/v5 458f74cc76767452c9c980b2fed382bc0e461376
+diff vs origin/rc/v5:  7 files changed, 109 insertions(+), 4 deletions(-)
+SAVE_VERSION lines in diff: 0
+balance.json diff lines: 0
+start 2026-10-30 09:33:49 CET loadavg 3.93 3.86 4.58 6/2634 966530
+sync-economy --check exit=0 (0s)
+tsc exit=0 (5s)
+vitest-targeted exit=0 (211s)
+deferred under load caps: full unit suite, golden, builds, check-globals, rc0

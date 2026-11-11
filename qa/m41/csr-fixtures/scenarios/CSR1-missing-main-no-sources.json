@@ -1,0 +1,18 @@
+{
+ "id": "CSR1-missing-main-no-sources",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-1"
+ ],
+ "ls": {},
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "recovery": false,
+  "newGame": true,
+  "notice": null,
+  "noSaveCorrupt": true
+ }
+}

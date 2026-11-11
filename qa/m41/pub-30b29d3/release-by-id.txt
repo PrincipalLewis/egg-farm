@@ -1,0 +1,7 @@
+== releases/422922551 2026-10-24T21:00:12+02:00
+{"assets":[{"digest":"sha256:dd919d616fe0138a89c362b1db269458558a0a2c85827b3e4fc104d36b22979b","id":673050571,"label":"egg-farm.html","name":"egg-farm.html","size":547466,"updated_at":"2026-10-24T18:58:40Z"}],"draft":true,"id":422922551,"name":"M4.1 patch 1 (30b29d3)","prerelease":false,"published_at":null,"tag_name":"m4.1-p1-30b29d3","target_commitish":"30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134"}
+== tag ref
+30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134 commit
+30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134	refs/tags/m4.1-p1-30b29d3
+== latest
+m4.1-5d9efa6 draft=false

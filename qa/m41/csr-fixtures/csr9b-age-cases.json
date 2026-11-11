@@ -1,0 +1,46 @@
+[
+ {
+  "ageMs": 299000,
+  "text": "a few minutes"
+ },
+ {
+  "ageMs": 300000,
+  "text": "5 minutes"
+ },
+ {
+  "ageMs": 3599000,
+  "text": "59 minutes"
+ },
+ {
+  "ageMs": 3600000,
+  "text": "about 1 hour"
+ },
+ {
+  "ageMs": 7199000,
+  "text": "about 1 hour"
+ },
+ {
+  "ageMs": 172740000,
+  "text": "about 47 hours"
+ },
+ {
+  "ageMs": 172800000,
+  "text": "2 days"
+ },
+ {
+  "ageMs": 86400000,
+  "text": "about 24 hours"
+ },
+ {
+  "ageMs": -5000,
+  "text": "a few minutes"
+ },
+ {
+  "ageMs": 60000,
+  "text": "1 minute (formatter unit; unreachable in M2)"
+ },
+ {
+  "ageMs": 86400000,
+  "text": "1 day (formatter given n=1 day; unit)"
+ }
+]

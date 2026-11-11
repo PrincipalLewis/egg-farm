@@ -1,0 +1,27 @@
+{
+  "checked_at_cet": "2026-11-06 02:03 CET",
+  "run_id": 42139212027,
+  "status": "in_progress",
+  "conclusion": null,
+  "jobs": [
+    {
+      "id": 127635340347,
+      "name": "casual",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 127635340667,
+      "name": "seller15",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 127635340815,
+      "name": "optimal",
+      "status": "in_progress",
+      "conclusion": null
+    }
+  ],
+  "aggregate": "not yet scheduled"
+}

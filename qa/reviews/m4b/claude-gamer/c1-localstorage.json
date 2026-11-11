@@ -1,0 +1,8 @@
+{
+ "eggfarm.save": "{\"version\":6,\"savedAt\":1792396188146,\"saveSeq\":144,\"sum\":\"fa960ea0\",\"state\":{\"coinsCents\":1736,\"coop\":5.650000000000222,\"basket\":879,\"collectionLevel\":9,\"farmLevel\":7,\"customers\":[],\"nextCustomerInS\":3.0099999999999483,\"nextCustomerId\":119,\"rng\":722533152,\"pendingOfflineEggs\":0,\"celebratedTier\":1,\"workers\":{\"market_hand\":{\"energy\":78.64444444445476,\"cdS\":0.9},\"coop_hand\":{\"energy\":99.2666666666670",
+ "eggfarm.lease": "{\"id\":\"tj61gy2uygfmvey3cx5\",\"at\":1792396190951}",
+ "eggfarm.telemetry": "[{\"install_id\":\"eab7781b-652e-4acd-b5ad-22546c5868fc\",\"build\":\"m3-rc1-pre+246de09\",\"type\":\"session_start\",\"ts\":1792395652951,\"sessionMs\":0},{\"step\":1,\"name\":\"collect\",\"type\":\"onboarding_step\",\"ts\":1792395652957,\"sessionMs\":6},{\"step\":2,\"name\":\"sell\",\"type\":\"onboarding_step\",\"ts\":1792395654755,\"sessionMs\":1804},{\"type\":\"tap\",\"ts\":1792395654755,\"sessionMs\":1804,\"count\":1,\"eggs\":2},{\"type\":\"tap\",\"ts\"",
+ "eggfarm.ui": "{\"sfx\":true,\"reducedMotion\":false,\"seenSlots\":7,\"onboardingDone\":true,\"sessions\":1,\"replayOnboarding\":false,\"workersIntroA\":true,\"workersIntroB\":true}",
+ "eggfarm.save.bak": "{\"version\":6,\"savedAt\":1792396187982,\"saveSeq\":143,\"sum\":\"4696be31\",\"state\":{\"coinsCents\":30236,\"coop\":4.650000000000222,\"basket\":879,\"collectionLevel\":9,\"farmLevel\":7,\"customers\":[],\"nextCustomerInS\":3.1099999999999484,\"nextCustomerId\":119,\"rng\":722533152,\"pendingOfflineEggs\":0,\"celebratedTier\":1,\"workers\":{\"market_hand\":{\"energy\":78.65555555556587,\"cdS\":1},\"coop_hand\":{\"energy\":99.27777777777813",
+ "eggfarm.install_id": "eab7781b-652e-4acd-b5ad-22546c5868fc"
+}

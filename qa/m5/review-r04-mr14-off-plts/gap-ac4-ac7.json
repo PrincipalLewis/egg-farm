@@ -1,0 +1,223 @@
+{
+  "PL_AC4": {
+    "optimal": {
+      "band": {
+        "F11-15": {
+          "P95": 89.0,
+          "worst": 131.0,
+          "before_P95": 81,
+          "AC4a_le180": true,
+          "AC4b_no_regression": false
+        },
+        "F16-20": {
+          "P95": 117.0,
+          "worst": 153.0,
+          "before_P95": 125,
+          "AC4a_le180": true,
+          "AC4b_no_regression": true
+        },
+        "F21-25": {
+          "P95": 114.0,
+          "worst": 182.0,
+          "before_P95": 121,
+          "AC4a_le180": true,
+          "AC4b_no_regression": true
+        },
+        "F26-30": {
+          "P95": 122.0,
+          "worst": 181.0,
+          "before_P95": 157,
+          "AC4a_le180": true,
+          "AC4b_no_regression": true
+        }
+      },
+      "perL_over180_P95": {},
+      "seeds_over_180": [
+        {
+          "seed": 130,
+          "L": 25,
+          "gap": 182.0
+        },
+        {
+          "seed": 175,
+          "L": 27,
+          "gap": 181.0
+        }
+      ],
+      "n_seeds_over_180": 2,
+      "AC4a_pass": true,
+      "AC4b_pass": false
+    },
+    "seller15": {
+      "band": {
+        "F11-15": {
+          "P95": 66.0,
+          "worst": 92.0,
+          "before_P95": 53,
+          "AC4a_le180": true,
+          "AC4b_no_regression": false
+        },
+        "F16-20": {
+          "P95": 82.0,
+          "worst": 107.0,
+          "before_P95": 79,
+          "AC4a_le180": true,
+          "AC4b_no_regression": false
+        },
+        "F21-25": {
+          "P95": 72.0,
+          "worst": 108.0,
+          "before_P95": 77,
+          "AC4a_le180": true,
+          "AC4b_no_regression": true
+        },
+        "F26-30": {
+          "P95": 89.0,
+          "worst": 113.0,
+          "before_P95": 115,
+          "AC4a_le180": true,
+          "AC4b_no_regression": true
+        }
+      },
+      "perL_over180_P95": {},
+      "seeds_over_180": [],
+      "n_seeds_over_180": 0,
+      "AC4a_pass": true,
+      "AC4b_pass": false
+    },
+    "casual": {
+      "band": {
+        "F11-15": {
+          "P95": 46.0,
+          "worst": 71.0,
+          "before_P95": 35,
+          "AC4a_le180": true,
+          "AC4b_no_regression": false
+        },
+        "F16-20": {
+          "P95": 49.0,
+          "worst": 83.0,
+          "before_P95": 59,
+          "AC4a_le180": true,
+          "AC4b_no_regression": true
+        },
+        "F21-25": {
+          "P95": 59.0,
+          "worst": 96.0,
+          "before_P95": 58,
+          "AC4a_le180": true,
+          "AC4b_no_regression": false
+        },
+        "F26-30": {
+          "P95": 64.0,
+          "worst": 94.0,
+          "before_P95": 93,
+          "AC4a_le180": true,
+          "AC4b_no_regression": true
+        }
+      },
+      "perL_over180_P95": {},
+      "seeds_over_180": [],
+      "n_seeds_over_180": 0,
+      "AC4a_pass": true,
+      "AC4b_pass": false
+    }
+  },
+  "PL_AC7": {
+    "optimal": {
+      "bands": {
+        "F11-15": {
+          "tP50_min": 6.87,
+          "before": 5.53,
+          "delta": 0.2417,
+          "pass": false
+        },
+        "F16-20": {
+          "tP50_min": 9.36,
+          "before": 11.22,
+          "delta": -0.1659,
+          "pass": true
+        },
+        "F21-25": {
+          "tP50_min": 9.06,
+          "before": 10.75,
+          "delta": -0.1571,
+          "pass": true
+        },
+        "F26-30": {
+          "tP50_min": 5.76,
+          "before": 7.15,
+          "delta": -0.1951,
+          "pass": true
+        }
+      },
+      "pass": false,
+      "misses": [
+        "F11-15"
+      ]
+    },
+    "seller15": {
+      "bands": {
+        "F11-15": {
+          "tP50_min": 6.88,
+          "before": 5.69,
+          "delta": 0.2088,
+          "pass": false
+        },
+        "F16-20": {
+          "tP50_min": 9.08,
+          "before": 10.31,
+          "delta": -0.1191,
+          "pass": true
+        },
+        "F21-25": {
+          "tP50_min": 9.02,
+          "before": 10.79,
+          "delta": -0.1643,
+          "pass": true
+        },
+        "F26-30": {
+          "tP50_min": 5.86,
+          "before": 7.44,
+          "delta": -0.2128,
+          "pass": false
+        }
+      },
+      "pass": false,
+      "misses": [
+        "F11-15",
+        "F26-30"
+      ]
+    },
+    "casual": {
+      "bands": {
+        "F11-15": {
+          "tP50_min": 6.29,
+          "before": 5.48,
+          "delta": 0.1481,
+          "pass": true
+        },
+        "F16-20": {
+          "tP50_min": 8.84,
+          "before": 9.02,
+          "delta": -0.0201,
+          "pass": true
+        },
+        "F21-25": {
+          "tP50_min": 9.09,
+          "before": 11.13,
+          "delta": -0.1837,
+          "pass": true
+        },
+        "F26-30": {
+          "tP50_min": 6.12,
+          "before": 7.65,
+          "delta": -0.1993,
+          "pass": true
+        }
+      },
+      "pass": true,
+      "misses": []
+    }
+  }
+}

@@ -1,0 +1,108 @@
+# rg over a32faeb tree (scripts/ tests/ excluding fixtures), 2026-10-30T09:25:06+01:00
+## A: JS kill forms
+scripts/recorded-pid.mjs:53:  try { process.kill(group ? -rec.pid : rec.pid, signal); } catch (e) { // rule-21 guarded site: after recordProblem
+scripts/recorded-pid.mjs:93:  try { process.kill(-rec.pid, 0); return 'members'; } // rule-21 guarded site: signal 0 probe
+tests/serve-own.test.ts:106:    p.kill('SIGTERM'); expect(await exited).toBe(143);
+tests/verify.test.ts:426:      p.stderr.on('data', c => { err += c; if (/verify: run 24 h/.test(err) && !p.killed) p.kill('SIGKILL'); });
+tests/rule21-rules.ts:14:  { id: 'js-kill-call', re: /\.\s*kill\s*\(/ },                                         // process.kill(, process.kill (, child.kill(
+tests/rule21-rules.ts:15:  { id: 'js-kill-index', re: /\[\s*['"`]kill['"`]\s*\]/ },                               // process['kill']
+tests/rule21-rules.ts:16:  { id: 'js-kill-destructure', re: /\{[^}]*\bkill\b[^}]*\}\s*=\s*process\b/ },          // const { kill } = process
+tests/d2-guard.test.ts:66:  const NEG = ["browser.process().kill('SIGKILL')", "ctx.browser().process()", "await ctx.close({ reason: 'x' })", "await browser.close({timeout:1})",
+## B: shell/exec kill, tools, ps, timeout
+## C: /proc enumeration
+scripts/recorded-pid.mjs:3:// time (field 22 of /proc/<pid>/stat), its parent (must be this process) and the boot id. Before any signal we re-read
+scripts/recorded-pid.mjs:4:// /proc/<pid>/stat for that ONE pid and refuse if anything differs: gone or zombie, another boot, another start time (a
+scripts/recorded-pid.mjs:6:// There is no /proc walk and no name or pattern matching here, by design. Linux only.
+scripts/recorded-pid.mjs:8:const BOOT_ID = '/proc/sys/kernel/random/boot_id';
+scripts/recorded-pid.mjs:11:/** /proc/<pid>/stat of exactly this pid, or null when it does not exist. The comm field may hold spaces or ')', so
+scripts/recorded-pid.mjs:14:  let s; try { s = fs.readFileSync(`/proc/${pid}/stat`, 'utf8'); } catch { return null; } // rule-21 guarded site: one pid
+scripts/recorded-pid.mjs:71:/** Direct children of ONE pid, from its own /proc/<pid>/task/<tid>/children files (no /proc scan). */
+scripts/recorded-pid.mjs:73:  let tids = []; try { tids = fs.readdirSync(`/proc/${pid}/task`); } catch { return []; } // rule-21 guarded site: one recorded pid
+scripts/recorded-pid.mjs:75:  for (const t of tids) { try { out.push(...fs.readFileSync(`/proc/${pid}/task/${t}/children`, 'utf8').trim().split(/\s+/).filter(Boolean).map(Number)); } catch {} } // rule-21 guarded site
+scripts/d2-kill-browser.mjs:8://    identity check. No /proc walk, no name or pattern matching.
+scripts/d2-kill-browser.mjs:11:// Based on QA's qa/m3-scripts/rc0-ac14f-kill.mjs. Linux only (/proc/<pid>/stat of the recorded pid).
+tests/recorded-pid.test.ts:25:    expect(fs.readFileSync(`/proc/${c.pid}/stat`, 'utf8')).toContain(`(sleep)`);
+tests/recorded-pid.test.ts:114:// The source check (no /proc walk, no pattern or raw kill) lives in tests/rule21-source.test.ts (UI QA #89 F3).
+tests/recorded-pid.test.ts:117:// /proc scan), reported with its PID and a non-ok result, and never signalled again. It is a `sleep 2` that expires on
+tests/d2-guard.test.ts:68:    "ctx.close = async () => {}", "ctx._browser._connection.close()", "import x from 'playwright-core/lib/server/utils/processLauncher.js'", "page.setDefaultTimeout(1)"];
+## D: detach
+scripts/recorded-pid.mjs:68:  const child = spawn(cmd, args, { ...opts, detached: true }); // rule-21 guarded site: detached spawn, recorded below
+## E: SIGKILL/SIGTERM literals
+scripts/recorded-pid.mjs:50:export function killRecorded(rec, signal = 'SIGTERM', { group = true } = {}) {
+scripts/recorded-pid.mjs:59:export function stopChild(child, rec, signal = 'SIGTERM', opts = {}) {
+scripts/recorded-pid.mjs:112:export function stopGroup(child, rec, { signal = 'SIGTERM', graceMs = 3000, members = [] } = {}) {
+scripts/d2-kill-browser.mjs:3:// 1. Kill test: persistent profile, seed the 40-min fixture, buy via the real `button.buy`, SIGKILL the browser's process
+scripts/d2-kill-browser.mjs:7://    recorded at launch (recorded-pid.mjs: start time, parent, boot id) and only that group is SIGKILLed, after the
+scripts/d2-kill-browser.mjs:52:  L.members = [...L.members, ...groupMembers(L.rec)]; // refresh the snapshot (renderers etc.) right before the SIGKILL
+scripts/d2-kill-browser.mjs:53:  await guard.checkpoint(); guard.expectExit(L); // our own SIGKILL is the announced exit
+scripts/d2-kill-browser.mjs:54:  const k = killRecorded(L.rec, 'SIGKILL', { group: true }); const n = k.ok ? 1 : 0; // groups signalled: only the recorded one
+scripts/d2-kill-browser.mjs:62:  console.log(`${pass ? 'PASS' : 'FAIL'} [${ENGINE}] SIGKILL at ${D} ms rep ${rep}: ${L0}->${L1}, reopen ${after.L}, SIGKILLed recorded browser group ${k.pid} (${n ? 'ok' : 'refused'})`);
+scripts/d2-guard.mjs:2:// SIGKILLed (or that signal is refused), the group is re-checked for leftovers from the launch-time snapshot plus a signal-0
+scripts/d2-guard.mjs:38:  /** F4: after the SIGKILL of the recorded group: the group must be verifiably empty, else halt. */
+scripts/d2-guard.mjs:40:    if (!k.ok) return halt(`SIGKILL refused for browser group ${k.pid}: ${k.reason}`, launch);
+scripts/d2-guard.mjs:42:    if (!s.clean) return halt(`group leftovers after SIGKILL of ${launch.rec.pid}: pids ${s.live.join(' ') || '(none in the snapshot)'}, probe ${s.probe}`, launch);
+scripts/d2-guard.mjs:47:  //     in tests/d2-guard.test.ts). (b) If Playwright's own group SIGKILL may have fired anyway (our close() watchdog expired, close()
+scripts/serve-own.mjs:99: *  error, SIGINT/SIGTERM from `timeout`) - CCR n4. */
+scripts/serve-own.mjs:103:  for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => { stop(); process.exit(sig === 'SIGINT' ? 130 : 143); });
+tests/verify.test.ts:420:  it('m1 (M17/M18/M19): a run SIGKILLed mid-sim (no handler runs) leaves neither verify.json nor verify.png', async () => {
+tests/verify.test.ts:426:      p.stderr.on('data', c => { err += c; if (/verify: run 24 h/.test(err) && !p.killed) p.kill('SIGKILL'); });
+tests/verify.test.ts:430:    expect(res.signal).toBe('SIGKILL'); // killed mid-run, before any report
+tests/recorded-pid.test.ts:18:  for (const c of mine.splice(0)) if (c.exitCode === null && c.signalCode === null && c.pid) { expect(killRecorded(recordPid(c.pid), 'SIGKILL', { group: false }).ok).toBe(true); await exited(c); } // N2: own children, guarded API
+tests/recorded-pid.test.ts:28:  it('killRecorded SIGTERMs the recorded process group and the child exits by that signal', async () => {
+tests/recorded-pid.test.ts:31:    expect(spy).toHaveBeenCalledTimes(1); expect(spy).toHaveBeenCalledWith(-c.pid!, 'SIGTERM');
+tests/recorded-pid.test.ts:32:    await exited(c); expect(c.signalCode).toBe('SIGTERM');
+tests/recorded-pid.test.ts:34:  it('stopChild (serve-own stop path) stops a live recorded child with the given signal (SIGKILL, as d2-kill-browser)', async () => {
+tests/recorded-pid.test.ts:36:    expect(stopChild(c, rec, 'SIGKILL').ok).toBe(true); await exited(c); expect(c.signalCode).toBe('SIGKILL');
+tests/recorded-pid.test.ts:40:    expect(killRecorded(rec, 'SIGTERM', { group: false }).ok).toBe(true); expect(spy).toHaveBeenCalledWith(c.pid, 'SIGTERM');
+tests/recorded-pid.test.ts:41:    await exited(c); expect(c.signalCode).toBe('SIGTERM');
+tests/recorded-pid.test.ts:59:      const r = killRecorded({ pid: g, starttime: st.starttime, bootId: bootId(), parent: sh.pid }, 'SIGTERM', { group });
+tests/recorded-pid.test.ts:63:    const r2 = killRecorded({ pid: g, starttime: st.starttime, bootId: bootId(), parent: process.pid }, 'SIGTERM', { group: false });
+tests/recorded-pid.test.ts:66:    const shRec = recordPid(sh.pid); expect(killRecorded(shRec, 'SIGTERM').ok).toBe(true); await exited(sh); // group TERM: sh + its sleep
+tests/recorded-pid.test.ts:70:    const r = killRecorded({ pid: process.ppid, starttime: st.starttime, bootId: bootId(), parent: process.pid }, 'SIGTERM', { group: false });
+tests/recorded-pid.test.ts:99:      expect(killRecorded(r, 'SIGKILL', { group }).reason, JSON.stringify(r)).toMatch(why);
+tests/recorded-pid.test.ts:100:      expect(stopChild(c, r, 'SIGKILL', { group }).reason).toMatch(why);
+tests/recorded-pid.test.ts:105:    const c = sleeper(); const rec = recordPid(c.pid); expect(killRecorded(rec, 'SIGKILL').ok).toBe(true); await exited(c);
+tests/recorded-pid.test.ts:138:    expect(spy.mock.calls.filter(c => c[1] !== 0)).toEqual([[-child.pid!, 'SIGTERM']]); // one real signal, the recorded group
+tests/recorded-pid.test.ts:139:    await exited(child); expect(child.signalCode).toBe('SIGTERM');
+tests/recorded-pid.test.ts:146:    expect(killRecorded(rec, 'SIGTERM', { group: false }).ok).toBe(true); await exited(child); // only the leader dies
+tests/d2-guard.test.ts:14:  for (const c of mine.splice(0)) if (c.exitCode === null && c.signalCode === null) { expect(killRecorded(recordPid(c.pid), 'SIGKILL', { group: true }).ok).toBe(true); await exited(c); }
+tests/d2-guard.test.ts:25:  it('clean kill: group SIGKILLed, leftovers clean, no halt, no stop list', async () => {
+tests/d2-guard.test.ts:27:    const k = killRecorded(L.rec, 'SIGKILL', { group: true }); expect(k.ok).toBe(true);
+tests/d2-guard.test.ts:32:    // stand-in for a member the group SIGKILL did not reach: only the leader is killed (group:false). The member is a
+tests/d2-guard.test.ts:36:    const k = killRecorded(L.rec, 'SIGKILL', { group: false }); expect(k.ok).toBe(true);
+tests/d2-guard.test.ts:39:    expect(list).toMatch(/HALT: group leftovers after SIGKILL/); expect(list).toContain(`${member.pid} ${member.starttime} ALIVE group member`);
+tests/d2-guard.test.ts:48:    const k = killRecorded(bad, 'SIGKILL', { group: true }); expect(k.ok).toBe(false);
+tests/d2-guard.test.ts:49:    await expect(g.afterKill(k, L)).rejects.toThrow(/HALT: SIGKILL refused for browser group \d+: start time/);
+tests/d2-guard.test.ts:66:  const NEG = ["browser.process().kill('SIGKILL')", "ctx.browser().process()", "await ctx.close({ reason: 'x' })", "await browser.close({timeout:1})",
+tests/d2-guard.test.ts:67:    "pw.chromium.launchServer({})", "T.launchPersistentContext(d, { handleSIGTERM: false })", "process.env.PW_TEST_TIMEOUT = '1'",
+tests/d2-guard.test.ts:74:  it("d2's only SIGKILL is the guarded killRecorded of the recorded group", () => {
+tests/d2-guard.test.ts:75:    const l = fs.readFileSync('scripts/d2-kill-browser.mjs', 'utf8').split('\n').filter(x => /['"`]SIGKILL['"`]/.test(x));
+tests/d2-guard.test.ts:76:    expect(l).toHaveLength(1); expect(l[0]).toMatch(/killRecorded\(L\.rec, 'SIGKILL', \{ group: true \}\)/);
+tests/d2-guard.test.ts:102:  it('an announced exit (our own SIGKILL / closeCtx) is not a halt', async () => {
+tests/serve-own.test.ts:100:describe('CCR delta m1: SIGTERM during server startup leaves nothing listening', () => {
+tests/serve-own.test.ts:106:    p.kill('SIGTERM'); expect(await exited).toBe(143);
+tests/rule21-source.test.ts:40:      '// 2/5 sold then timeout -> card collapses', 'killRecorded(rec, "SIGKILL", { group: true })', 'skillful', 'const procs = 3', 'SIGKILLed recorded browser group'])
+## F: browser launches in scripts/ and tests/
+scripts/m41-p1-shots.mjs:20:const browser = ENGINE === 'webkit' ? await webkit.launch() : ENGINE === 'firefox' ? await firefox.launch() : await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] });
+scripts/d2-kill-browser.mjs:28:const REAL_EXE = ENGINE === 'chromium' ? (process.env.CHROME ?? '/usr/bin/google-chrome') : T.executablePath();
+scripts/d2-kill-browser.mjs:34:  const ctx = await T.launchPersistentContext(path.join(root, 'profile'), { ...opts, executablePath: wrap, viewport: { width: 390, height: 844 } });
+scripts/m41-9-scroll-sweep.mjs:48:const br = eng === 'chromium' ? await pw.chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] }) : await pw[eng].launch();
+scripts/artux-shots.mjs:25:const br = eng === 'webkit' ? await webkit.launch() : await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] }); let bad = 0;
+scripts/queue-qa.mjs:9:const br = eng === 'webkit' ? await webkit.launch() : await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] });
+scripts/m41-8-shots.mjs:19:const br = eng === 'chromium' ? await pw.chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] }) : await pw[eng].launch();
+scripts/rc0-browser.mjs:25:const browser = ENGINE === 'webkit' ? await webkit.launch({ headless }) : ENGINE === 'firefox' ? await firefox.launch({ headless }) : await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', headless, args: ['--no-sandbox'] });
+scripts/tab-guard-browser.mjs:9:const br = ENGINE === 'chromium' ? await pw.chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] }) : await pw[ENGINE].launch();
+scripts/perf-sm9.mjs:13:const browser = await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', headless: !headed, args: ['--no-sandbox'] });
+scripts/screenshot.mjs:8:const browser = await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'] });
+scripts/m41-9-bignum-shots.mjs:33:const br = eng === 'webkit' ? await webkit.launch() : eng === 'firefox' ? await firefox.launch() : await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] });
+scripts/README.md:18:4. **Screenshot.** It loads the built html with the end state in headless Chromium (playwright-core, `/usr/bin/google-chrome` or `CHROME=`). The end state is saved marked like a fresh M4 farm (`tracksV7: 1` plus a fixed `v6BackupId`, as `src/game.ts` does), so the load doesn't price-match it as a pre-M4 save. The page clock is installed paused at the save time and advanced only in fixed steps, with real-time I/O allowed to finish before each step, and toasts are hidden. The same end state gives the same `verify.png` bytes on the same machine and Chromium. `verify.json` stays the cross-machine determinism proof. It opens Settings, where the game shows its build label (`Egg Farm <build id>`), and saves one 390x844 `verify.png`.
+scripts/pt1-13-webkit.mjs:9:const br = await webkit.launch(); let bad = 0; const shots = process.env.SHOTS; if (shots) mkdirSync(shots, { recursive: true });
+scripts/mk24-1-overflow.mjs:16:const browser = await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] });
+scripts/release-globals-browser.mjs:8:const br = ENGINE === 'chromium' ? await pw.chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] }) : await pw[ENGINE].launch();
+scripts/m41-9-uxm-shots.mjs:32:const br = eng === 'chromium' ? await pw.chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] }) : await pw[eng].launch();
+scripts/smoke.mjs:6:const browser = await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] });
+scripts/verify/shot.mjs:7:// Usage: node scripts/verify/shot.mjs <egg-farm.html> <save.json> <out.png>    CHROME=/path/to/chrome overrides /usr/bin/google-chrome
+scripts/verify/shot.mjs:31:  br = await pw.chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox', '--font-render-hinting=none', '--disable-lcd-text', '--force-color-profile=srgb'] });
+scripts/perf-ab.mjs:31:const br = eng === 'webkit' ? await webkit.launch({ headless: !process.env.HEADED }) : await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'], headless: !process.env.HEADED });
+scripts/m41-8-f4-14a.mjs:15:const br = eng === 'chromium' ? await pw.chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] }) : await pw[eng].launch();
+tests/d2-guard.test.ts:67:    "pw.chromium.launchServer({})", "T.launchPersistentContext(d, { handleSIGTERM: false })", "process.env.PW_TEST_TIMEOUT = '1'",

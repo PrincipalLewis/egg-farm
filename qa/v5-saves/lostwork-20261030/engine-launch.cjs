@@ -1,0 +1,2 @@
+const pw=require('/workspace/egg-farm-studio/qa/v5-saves/tools/node_modules/playwright-core');
+(async()=>{for(const [n,o] of [['chromium',{executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']}],['firefox',{}],['webkit',{}]]){try{const b=await pw[n].launch(o);const p=await b.newPage();await p.setContent('<p>ok</p>');console.log(n,'OK',b.version());await b.close();}catch(e){console.log(n,'FAIL',String(e.message).split('\n')[0]);}}})();

@@ -1,0 +1,89 @@
+﻿2026-11-06T01:39:34.8462895Z ##[group]Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+2026-11-06T01:39:34.8463859Z with:
+2026-11-06T01:39:34.8464275Z   repository: PrincipalLewis/egg-farm
+2026-11-06T01:39:34.8468140Z   token: ***
+2026-11-06T01:39:34.8468533Z   ssh-strict: true
+2026-11-06T01:39:34.8468929Z   ssh-user: git
+2026-11-06T01:39:34.8469325Z   persist-credentials: true
+2026-11-06T01:39:34.8469764Z   clean: true
+2026-11-06T01:39:34.8470170Z   sparse-checkout-cone-mode: true
+2026-11-06T01:39:34.8470652Z   fetch-depth: 1
+2026-11-06T01:39:34.8471046Z   fetch-tags: false
+2026-11-06T01:39:34.8471441Z   show-progress: true
+2026-11-06T01:39:34.8471850Z   lfs: false
+2026-11-06T01:39:34.8472225Z   submodules: false
+2026-11-06T01:39:34.8472699Z   set-safe-directory: true
+2026-11-06T01:39:34.8473142Z   allow-unsafe-pr-checkout: false
+2026-11-06T01:39:34.8473849Z ##[endgroup]
+2026-11-06T01:39:35.4984115Z Syncing repository: PrincipalLewis/egg-farm
+2026-11-06T01:39:35.4987720Z ##[group]Getting Git version info
+2026-11-06T01:39:35.4988746Z Working directory is '/home/runner/work/egg-farm/egg-farm'
+2026-11-06T01:39:35.4990003Z [command]/usr/bin/git version
+2026-11-06T01:39:35.5044667Z git version 2.56.0
+2026-11-06T01:39:35.5064282Z ##[endgroup]
+2026-11-06T01:39:35.5078334Z Temporarily overriding HOME='/home/runner/work/_temp/72cd195e-a67a-4624-867a-4dfc410e7767' before making global git config changes
+2026-11-06T01:39:35.5083188Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-06T01:39:35.5085308Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/egg-farm/egg-farm
+2026-11-06T01:39:35.5140845Z Deleting the contents of '/home/runner/work/egg-farm/egg-farm'
+2026-11-06T01:39:35.5150854Z ##[group]Initializing the repository
+2026-11-06T01:39:35.5153865Z [command]/usr/bin/git init /home/runner/work/egg-farm/egg-farm
+2026-11-06T01:39:35.5242405Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-06T01:39:35.5245048Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-06T01:39:35.5247349Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-06T01:39:35.5249291Z hint: call:
+2026-11-06T01:39:35.5250555Z hint:
+2026-11-06T01:39:35.5252047Z hint: 	git config --global init.defaultBranch <name>
+2026-11-06T01:39:35.5253635Z hint:
+2026-11-06T01:39:35.5255283Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-06T01:39:35.5257730Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-06T01:39:35.5259489Z hint:
+2026-11-06T01:39:35.5260400Z hint: 	git branch -m <name>
+2026-11-06T01:39:35.5261417Z hint:
+2026-11-06T01:39:35.5262761Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-06T01:39:35.6585921Z Initialized empty Git repository in /home/runner/work/egg-farm/egg-farm/.git/
+2026-11-06T01:39:35.6595402Z [command]/usr/bin/git remote add origin https://github.com/PrincipalLewis/egg-farm
+2026-11-06T01:39:35.6650802Z ##[endgroup]
+2026-11-06T01:39:35.6652600Z ##[group]Disabling automatic garbage collection
+2026-11-06T01:39:35.6654277Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-06T01:39:35.6693046Z ##[endgroup]
+2026-11-06T01:39:35.6694844Z ##[group]Setting up auth
+2026-11-06T01:39:35.6698849Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-06T01:39:35.6741083Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-06T01:39:35.7059284Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-06T01:39:35.7100002Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-06T01:39:35.7320071Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-06T01:39:35.7363133Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-06T01:39:35.7579845Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-06T01:39:35.7647366Z ##[endgroup]
+2026-11-06T01:39:35.7649329Z ##[group]Fetching the repository
+2026-11-06T01:39:35.7660795Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +69f9c6194e405a94866c513645541765c6852cd4:refs/remotes/pull/107/merge
+2026-11-06T01:39:36.1788993Z From https://github.com/PrincipalLewis/egg-farm
+2026-11-06T01:39:36.1790705Z  * [new ref]         69f9c6194e405a94866c513645541765c6852cd4 -> pull/107/merge
+2026-11-06T01:39:36.1794897Z ##[endgroup]
+2026-11-06T01:39:36.1796482Z ##[group]Determining the checkout info
+2026-11-06T01:39:36.1798580Z ##[endgroup]
+2026-11-06T01:39:36.1806904Z [command]/usr/bin/git sparse-checkout disable
+2026-11-06T01:39:36.1862837Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-06T01:39:36.1901477Z ##[group]Checking out the ref
+2026-11-06T01:39:36.1902929Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/107/merge
+2026-11-06T01:39:36.2224283Z Note: switching to 'refs/remotes/pull/107/merge'.
+2026-11-06T01:39:36.2225517Z 
+2026-11-06T01:39:36.2226427Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-06T01:39:36.2228914Z changes and commit them, and you can discard any commits you make in this
+2026-11-06T01:39:36.2231101Z state without impacting any branches by switching back to a branch.
+2026-11-06T01:39:36.2232093Z 
+2026-11-06T01:39:36.2232815Z If you want to create a new branch to retain commits you create, you may
+2026-11-06T01:39:36.2234846Z do so (now or later) by using -c with the switch command. Example:
+2026-11-06T01:39:36.2235801Z 
+2026-11-06T01:39:36.2236211Z   git switch -c <new-branch-name>
+2026-11-06T01:39:36.2236831Z 
+2026-11-06T01:39:36.2237206Z Or undo this operation with:
+2026-11-06T01:39:36.2238031Z 
+2026-11-06T01:39:36.2238435Z   git switch -
+2026-11-06T01:39:36.2238916Z 
+2026-11-06T01:39:36.2239679Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-06T01:39:36.2240733Z 
+2026-11-06T01:39:36.2241947Z HEAD is now at 69f9c61 Merge a5f8e3c916833eae0a68aca03940e2fd08e01725 into 71375901de8b72acfaa49c695c5c18f0d0088080
+2026-11-06T01:39:36.2245400Z ##[endgroup]
+2026-11-06T01:39:36.2283248Z [command]/usr/bin/git log -1 --format=%H
+2026-11-06T01:39:36.2314837Z 69f9c6194e405a94866c513645541765c6852cd4

@@ -1,0 +1,8 @@
+{
+ "eggfarm.save": "{\"version\":6,\"savedAt\":1792394457255,\"sum\":\"a1bdd2fc\",\"state\":{\"coinsCents\":7638,\"coop\":2.3499999999999654,\"basket\":0,\"collectionLevel\":6,\"farmLevel\":1,\"customers\":[{\"id\":29,\"demand\":11,\"filled\":6,\"waitedS\":26.200000000000102},{\"id\":30,\"demand\":9,\"filled\":0,\"waitedS\":21.500000000000036},{\"id\":31,\"demand\":9,\"filled\":0,\"waitedS\":16.699999999999967},{\"id\":32,\"demand\":8,\"filled\":0,\"waitedS\":11.9999999",
+ "eggfarm.lease": "{\"id\":\"674sabsxcbqmvex9z9t\",\"at\":1792394460239}",
+ "eggfarm.telemetry": "[{\"install_id\":\"864d04eb-fe00-43e2-9a54-0bfc615e4250\",\"build\":\"m3-rc1-pre+dd52bfd\",\"type\":\"session_start\",\"ts\":1792394282239,\"sessionMs\":0},{\"step\":1,\"name\":\"collect\",\"type\":\"onboarding_step\",\"ts\":1792394282243,\"sessionMs\":4},{\"step\":2,\"name\":\"sell\",\"type\":\"onboarding_step\",\"ts\":1792394284009,\"sessionMs\":1770},{\"type\":\"tap\",\"ts\":1792394284009,\"sessionMs\":1770,\"count\":1,\"eggs\":2},{\"type\":\"tap\",\"ts\"",
+ "eggfarm.ui": "{\"sfx\":true,\"reducedMotion\":false,\"seenSlots\":6,\"onboardingDone\":true,\"sessions\":1,\"replayOnboarding\":false}",
+ "eggfarm.save.bak": "{\"version\":6,\"savedAt\":1792394452255,\"sum\":\"6ea01d91\",\"state\":{\"coinsCents\":5828,\"coop\":2.349999999999963,\"basket\":0,\"collectionLevel\":6,\"farmLevel\":1,\"customers\":[{\"id\":28,\"demand\":14,\"filled\":10,\"waitedS\":26.0000000000001},{\"id\":29,\"demand\":11,\"filled\":0,\"waitedS\":21.20000000000003},{\"id\":30,\"demand\":9,\"filled\":0,\"waitedS\":16.499999999999964},{\"id\":31,\"demand\":9,\"filled\":0,\"waitedS\":11.699999999",
+ "eggfarm.install_id": "864d04eb-fe00-43e2-9a54-0bfc615e4250"
+}

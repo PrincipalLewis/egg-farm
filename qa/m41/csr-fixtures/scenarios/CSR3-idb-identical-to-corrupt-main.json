@@ -1,0 +1,44 @@
+{
+ "id": "CSR3-idb-identical-to-corrupt-main",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-3",
+  "CSR-7"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-OQ1-abc.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": [
+   {
+    "key": "main",
+    "ref": "raw/IDB-same-bytes-as-main.raw"
+   }
+  ]
+ },
+ "expect": {
+  "recovery": true,
+  "recovered_from": "none",
+  "notice": "M3",
+  "corruptLsExact": 1,
+  "idbCorruptExact": 1,
+  "tried": [
+   [
+    "bak",
+    "absent"
+   ],
+   [
+    "idb",
+    "invalid",
+    "invalid_state"
+   ],
+   [
+    "v6_backup",
+    "absent"
+   ]
+  ]
+ }
+}

@@ -1,0 +1,40 @@
+diff --git a/src/config/balance.ts b/src/config/balance.ts
+remerge CONFLICT (content): Merge conflict in src/config/balance.ts
+index d1db7d6..b4053ec 100644
+--- a/src/config/balance.ts
++++ b/src/config/balance.ts
+@@ -1,10 +1,6 @@
+ import raw from './balance.json';
+-<<<<<<< 22b6db4 (Merge origin/rc/v5 (6bcc194, #80 F1c + #88) into feat/saves-v5-streak-sim-2)
+ import { validateCostGrowthSegments, validateCostTable, M5_TC_KEYS, m4On, tcNum, type EconomyParams } from './formulas';
+-=======
+-import { validateCostGrowthSegments, validateCostTable, type EconomyParams } from './formulas';
+ import { validateM5 } from './m5-rules';
+->>>>>>> 1a61b36 (v5 F3: m4.flags.* block (+fatigueCue), m4.zeroGain.confirm, isPaused selector, validateBalance M5 rules (#82))
+ /** TEST-ONLY scenario hooks (m2-proposal §8 item 17, AC-W1 casual). Never in balance.json; rejected in production builds. */
+ export interface SimTestHooks { poisson_arrivals?: boolean; demand_scale?: number; }
+ export type Balance = typeof raw & EconomyParams & { sim_test?: SimTestHooks };
+@@ -45,12 +41,9 @@ export function validateBalance(b: Balance, prod = !!import.meta.env?.PROD): Bal
+   if (!W.grader.tiers.length || W.grader.tiers.some((t, i, a) => t.mult <= 1 || (i > 0 && (t.farm <= a[i - 1].farm || t.mult <= a[i - 1].mult))))
+     throw new Error('balance.workers.grader.tiers: farm and mult must increase, mult > 1');
+   for (const k of ['tired_bonus_share', 'asleep_bonus_share'] as const) if (W.grader[k] > 1) throw new Error(`balance.workers.grader.${k} must be <= 1`);
+-<<<<<<< 22b6db4 (Merge origin/rc/v5 (6bcc194, #80 F1c + #88) into feat/saves-v5-streak-sim-2)
++  validateM5(b.m4, W); // v5 F3: m4.flags (0/1, known names) + M5 tunable rules
+   // v5: every tc_* key an ON m4.flags item reads must exist (tcNum throws with the column name)
+   if (m4On(b)) for (const [f, ks] of Object.entries(M5_TC_KEYS)) if ((b.m4?.flags as any)?.[f] === 1) ks.forEach(k => tcNum(b, k));
+-=======
+-  validateM5(b.m4, W); // v5 F3: m4.flags (0/1, known names) + M5 tunable rules
+->>>>>>> 1a61b36 (v5 F3: m4.flags.* block (+fatigueCue), m4.zeroGain.confirm, isPaused selector, validateBalance M5 rules (#82))
+   return b;
+ }
+ export const balance: Balance = validateBalance(raw as Balance);
+diff --git a/tests/v5-f2-helpers.ts b/tests/v5-f2-helpers.ts
+index d47c419..fdf0b72 100644
+--- a/tests/v5-f2-helpers.ts
++++ b/tests/v5-f2-helpers.ts
+@@ -4,4 +4,4 @@ import { balance as b } from '../src/config/balance';
+ export const G3 = { streak_unlock_farm: 8, tap_credit_min_s: 1, streak_tier_count: 4, streak_cap: 0.28 };
+ /** v5 F2 tests: the shipping balance with the M5 release flags on (D-C1 m4.flags; shipping has none = all off), plus G3
+  *  (validateBalance requires every tc key a flag reads, so the streak flag needs them). */
+-export const ON = { ...b, m4: { ...b.m4!, flags: { golden: 1, streak: 1, broody: 1, abilities: 1 }, tc: { ...b.m4!.tc!, ...G3 } } } as typeof b;
++export const ON = { ...b, m4: { ...b.m4!, flags: { ...b.m4!.flags, golden: 1, streak: 1, broody: 1, abilities: 1 }, tc: { ...b.m4!.tc!, ...G3 } } } as typeof b;

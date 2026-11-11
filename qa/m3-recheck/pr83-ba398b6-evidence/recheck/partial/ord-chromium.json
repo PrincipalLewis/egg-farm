@@ -1,0 +1,182 @@
+[
+ {
+  "engine": "chromium",
+  "W": 360,
+  "H": 640,
+  "bid": "m4.1+ba398b6",
+  "t400": {
+   "vis": true,
+   "btns": [
+    {
+     "t": "Sell 5+$5.00",
+     "state": "order partial",
+     "rectH": 44,
+     "offH": 44,
+     "minH": "44px",
+     "tfs": [],
+     "anims": [
+      "BUTTON.btn.sell.buy.affordable:glow:running"
+     ]
+    },
+    {
+     "t": "Sell 5+$5.00",
+     "state": "order partial",
+     "rectH": 44,
+     "offH": 44,
+     "minH": "44px",
+     "tfs": [],
+     "anims": [
+      "BUTTON.btn.sell.buy.affordable:glow:running"
+     ]
+    },
+    {
+     "t": "Sell 5+$5.00",
+     "state": "order partial",
+     "rectH": 44,
+     "offH": 44,
+     "minH": "44px",
+     "tfs": [],
+     "anims": [
+      "BUTTON.btn.sell.buy.affordable:glow:running"
+     ]
+    }
+   ]
+  },
+  "t2900": {
+   "vis": true,
+   "btns": [
+    {
+     "t": "Sell 5+$5.00",
+     "state": "order partial",
+     "rectH": 44,
+     "offH": 44,
+     "minH": "44px",
+     "tfs": [],
+     "anims": [
+      "BUTTON.btn.sell.buy.affordable:glow:running"
+     ]
+    },
+    {
+     "t": "Sell 5+$5.00",
+     "state": "order partial",
+     "rectH": 44,
+     "offH": 44,
+     "minH": "44px",
+     "tfs": [],
+     "anims": [
+      "BUTTON.btn.sell.buy.affordable:glow:running"
+     ]
+    },
+    {
+     "t": "Sell 5+$5.00",
+     "state": "order partial",
+     "rectH": 44,
+     "offH": 44,
+     "minH": "44px",
+     "tfs": [],
+     "anims": [
+      "BUTTON.btn.sell.buy.affordable:glow:running"
+     ]
+    }
+   ]
+  },
+  "errs": [],
+  "shots": [
+   "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/recheck/partial/ord-chromium-360x640-t400.png",
+   "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/recheck/partial/ord-chromium-360x640-settled.png"
+  ],
+  "partialSeen": true,
+  "passSettled": true,
+  "passT400": true
+ },
+ {
+  "engine": "chromium",
+  "W": 390,
+  "H": 844,
+  "bid": "m4.1+ba398b6",
+  "t400": {
+   "vis": true,
+   "btns": [
+    {
+     "t": "Sell 5+$5.00",
+     "state": "order partial",
+     "rectH": 44,
+     "offH": 44,
+     "minH": "44px",
+     "tfs": [],
+     "anims": [
+      "BUTTON.btn.sell.buy.affordable:glow:running"
+     ]
+    },
+    {
+     "t": "Sell 5+$5.00",
+     "state": "order partial",
+     "rectH": 44,
+     "offH": 44,
+     "minH": "44px",
+     "tfs": [],
+     "anims": [
+      "BUTTON.btn.sell.buy.affordable:glow:running"
+     ]
+    },
+    {
+     "t": "Sell 5+$5.00",
+     "state": "order partial",
+     "rectH": 44,
+     "offH": 44,
+     "minH": "44px",
+     "tfs": [],
+     "anims": [
+      "BUTTON.btn.sell.buy.affordable:glow:running"
+     ]
+    }
+   ]
+  },
+  "t2900": {
+   "vis": true,
+   "btns": [
+    {
+     "t": "Sell 5+$5.00",
+     "state": "order partial",
+     "rectH": 44,
+     "offH": 44,
+     "minH": "44px",
+     "tfs": [],
+     "anims": [
+      "BUTTON.btn.sell.buy.affordable:glow:running"
+     ]
+    },
+    {
+     "t": "Sell 5+$5.00",
+     "state": "order partial",
+     "rectH": 44,
+     "offH": 44,
+     "minH": "44px",
+     "tfs": [],
+     "anims": [
+      "BUTTON.btn.sell.buy.affordable:glow:running"
+     ]
+    },
+    {
+     "t": "Sell 5+$5.00",
+     "state": "order partial",
+     "rectH": 44,
+     "offH": 44,
+     "minH": "44px",
+     "tfs": [],
+     "anims": [
+      "BUTTON.btn.sell.buy.affordable:glow:running"
+     ]
+    }
+   ]
+  },
+  "errs": [],
+  "shots": [
+   "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/recheck/partial/ord-chromium-390x844-t400.png",
+   "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/recheck/partial/ord-chromium-390x844-settled.png"
+  ],
+  "partialSeen": true,
+  "passSettled": true,
+  "passT400": true
+ }
+]

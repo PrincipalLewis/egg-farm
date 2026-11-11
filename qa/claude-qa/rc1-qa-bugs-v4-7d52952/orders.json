@@ -1,0 +1,850 @@
+{
+ "320": {
+  "k12960": {
+   "orders": [
+    {
+     "text": "0/20K eggs · $20K Sell 13K +$12.9K",
+     "btnAria": "Sell 13K · +$12,960.00",
+     "btn": {
+      "w": 88,
+      "tw": 48,
+      "clipped": false
+     },
+     "sk": {
+      "w": 48,
+      "tw": 48,
+      "clipped": false
+     },
+     "sy": {
+      "w": 39,
+      "tw": 39,
+      "clipped": false
+     },
+     "l1": {
+      "w": 116,
+      "tw": 116,
+      "clipped": false
+     },
+     "v": {
+      "w": 52,
+      "tw": 52,
+      "clipped": false
+     },
+     "n": {
+      "w": 49,
+      "tw": 49,
+      "clipped": false
+     }
+    }
+   ],
+   "sellAll": [
+    {
+     "t": "Sell all (13K eggs · $13K)",
+     "w": 288,
+     "sw": 284,
+     "cw": 284
+    }
+   ],
+   "hud": "Egg Farm $5.00 13K $5.00, 13K eggs 20K 1"
+  },
+  "b999": {
+   "orders": [
+    {
+     "text": "0/999.9B eggs · $999.9B Sell 999.9B +$999.9B",
+     "btnAria": "Sell 999.9B · +$999,900,000,000.00",
+     "btn": {
+      "w": 88,
+      "tw": 68,
+      "clipped": false
+     },
+     "sk": {
+      "w": 68,
+      "tw": 68,
+      "clipped": false
+     },
+     "sy": {
+      "w": 46,
+      "tw": 46,
+      "clipped": false
+     },
+     "l1": {
+      "w": 116,
+      "tw": 148,
+      "clipped": true
+     },
+     "v": {
+      "w": 76,
+      "tw": 76,
+      "clipped": false
+     },
+     "n": {
+      "w": 72,
+      "tw": 72,
+      "clipped": false
+     }
+    },
+    {
+     "text": "500B/1.2T eggs · $1.2T Sell 700B +$700B",
+     "btnAria": "Sell 700B · +$700,000,000,000.00",
+     "btn": {
+      "w": 88,
+      "tw": 58,
+      "clipped": false
+     },
+     "sk": {
+      "w": 58,
+      "tw": 58,
+      "clipped": false
+     },
+     "sy": {
+      "w": 38,
+      "tw": 38,
+      "clipped": false
+     },
+     "l1": {
+      "w": 116,
+      "tw": 138,
+      "clipped": true
+     },
+     "v": {
+      "w": 55,
+      "tw": 55,
+      "clipped": false
+     },
+     "n": {
+      "w": 82,
+      "tw": 82,
+      "clipped": false
+     }
+    }
+   ],
+   "sellAll": [
+    {
+     "t": "Sell all (999.9B eggs · $999.9B)",
+     "w": 288,
+     "sw": 286,
+     "cw": 284
+    }
+   ],
+   "hud": "Egg Farm $123.5M 999.9B $123.5M, 999.9B "
+  },
+  "t1500": {
+   "orders": [
+    {
+     "text": "0/2000T eggs · $2000T Sell 1500T +$1500T",
+     "btnAria": "Sell 1500T · +$1,500,000,000,000,000.00",
+     "btn": {
+      "w": 88,
+      "tw": 64,
+      "clipped": false
+     },
+     "sk": {
+      "w": 64,
+      "tw": 64,
+      "clipped": false
+     },
+     "sy": {
+      "w": 43,
+      "tw": 43,
+      "clipped": false
+     },
+     "l1": {
+      "w": 116,
+      "tw": 138,
+      "clipped": true
+     },
+     "v": {
+      "w": 71,
+      "tw": 71,
+      "clipped": false
+     },
+     "n": {
+      "w": 67,
+      "tw": 67,
+      "clipped": false
+     }
+    },
+    {
+     "text": "0/1000000T eggs · $1000000T Sell 1500T +$1500T",
+     "btnAria": "Sell 1500T · +$1,500,000,000,000,000.00",
+     "btn": {
+      "w": 88,
+      "tw": 64,
+      "clipped": false
+     },
+     "sk": {
+      "w": 64,
+      "tw": 64,
+      "clipped": false
+     },
+     "sy": {
+      "w": 43,
+      "tw": 43,
+      "clipped": false
+     },
+     "l1": {
+      "w": 116,
+      "tw": 195,
+      "clipped": true
+     },
+     "v": {
+      "w": 99,
+      "tw": 99,
+      "clipped": false
+     },
+     "n": {
+      "w": 96,
+      "tw": 96,
+      "clipped": false
+     }
+    }
+   ],
+   "sellAll": [
+    {
+     "t": "Sell all (1500T eggs · $1500T)",
+     "w": 288,
+     "sw": 284,
+     "cw": 284
+    }
+   ],
+   "hud": "Egg Farm $9990T 1500T $9990T, 1500T eggs"
+  }
+ },
+ "360": {
+  "k12960": {
+   "orders": [
+    {
+     "text": "0/20K eggs · $20K Sell 13K +$12.9K",
+     "btnAria": "Sell 13K · +$12,960.00",
+     "btn": {
+      "w": 88,
+      "tw": 48,
+      "clipped": false
+     },
+     "sk": {
+      "w": 48,
+      "tw": 48,
+      "clipped": false
+     },
+     "sy": {
+      "w": 39,
+      "tw": 39,
+      "clipped": false
+     },
+     "l1": {
+      "w": 156,
+      "tw": 137,
+      "clipped": false
+     },
+     "v": {
+      "w": 52,
+      "tw": 52,
+      "clipped": false
+     },
+     "n": {
+      "w": 49,
+      "tw": 49,
+      "clipped": false
+     }
+    }
+   ],
+   "sellAll": [
+    {
+     "t": "Sell all (13K eggs · $13K)",
+     "w": 328,
+     "sw": 324,
+     "cw": 324
+    }
+   ],
+   "hud": "Egg Farm $5.00 13K $5.00, 13K eggs 20K 1"
+  },
+  "b999": {
+   "orders": [
+    {
+     "text": "0/999.9B eggs · $999.9B Sell 999.9B +$999.9B",
+     "btnAria": "Sell 999.9B · +$999,900,000,000.00",
+     "btn": {
+      "w": 88,
+      "tw": 68,
+      "clipped": false
+     },
+     "sk": {
+      "w": 68,
+      "tw": 68,
+      "clipped": false
+     },
+     "sy": {
+      "w": 46,
+      "tw": 46,
+      "clipped": false
+     },
+     "l1": {
+      "w": 156,
+      "tw": 156,
+      "clipped": false
+     },
+     "v": {
+      "w": 76,
+      "tw": 76,
+      "clipped": false
+     },
+     "n": {
+      "w": 72,
+      "tw": 72,
+      "clipped": false
+     }
+    },
+    {
+     "text": "500B/1.2T eggs · $1.2T Sell 700B +$700B",
+     "btnAria": "Sell 700B · +$700,000,000,000.00",
+     "btn": {
+      "w": 88,
+      "tw": 58,
+      "clipped": false
+     },
+     "sk": {
+      "w": 58,
+      "tw": 58,
+      "clipped": false
+     },
+     "sy": {
+      "w": 38,
+      "tw": 38,
+      "clipped": false
+     },
+     "l1": {
+      "w": 156,
+      "tw": 156,
+      "clipped": false
+     },
+     "v": {
+      "w": 55,
+      "tw": 55,
+      "clipped": false
+     },
+     "n": {
+      "w": 82,
+      "tw": 82,
+      "clipped": false
+     }
+    }
+   ],
+   "sellAll": [
+    {
+     "t": "Sell all (999.9B eggs · $999.9B)",
+     "w": 328,
+     "sw": 324,
+     "cw": 324
+    }
+   ],
+   "hud": "Egg Farm $123.5M 999.9B $123.5M, 999.9B "
+  },
+  "t1500": {
+   "orders": [
+    {
+     "text": "0/2000T eggs · $2000T Sell 1500T +$1500T",
+     "btnAria": "Sell 1500T · +$1,500,000,000,000,000.00",
+     "btn": {
+      "w": 88,
+      "tw": 64,
+      "clipped": false
+     },
+     "sk": {
+      "w": 64,
+      "tw": 64,
+      "clipped": false
+     },
+     "sy": {
+      "w": 43,
+      "tw": 43,
+      "clipped": false
+     },
+     "l1": {
+      "w": 156,
+      "tw": 156,
+      "clipped": false
+     },
+     "v": {
+      "w": 71,
+      "tw": 71,
+      "clipped": false
+     },
+     "n": {
+      "w": 67,
+      "tw": 67,
+      "clipped": false
+     }
+    },
+    {
+     "text": "0/1000000T eggs · $1000000T Sell 1500T +$1500T",
+     "btnAria": "Sell 1500T · +$1,500,000,000,000,000.00",
+     "btn": {
+      "w": 88,
+      "tw": 64,
+      "clipped": false
+     },
+     "sk": {
+      "w": 64,
+      "tw": 64,
+      "clipped": false
+     },
+     "sy": {
+      "w": 43,
+      "tw": 43,
+      "clipped": false
+     },
+     "l1": {
+      "w": 156,
+      "tw": 195,
+      "clipped": true
+     },
+     "v": {
+      "w": 99,
+      "tw": 99,
+      "clipped": false
+     },
+     "n": {
+      "w": 96,
+      "tw": 96,
+      "clipped": false
+     }
+    }
+   ],
+   "sellAll": [
+    {
+     "t": "Sell all (1500T eggs · $1500T)",
+     "w": 328,
+     "sw": 324,
+     "cw": 324
+    }
+   ],
+   "hud": "Egg Farm $9990T 1500T $9990T, 1500T eggs"
+  }
+ },
+ "390": {
+  "k12960": {
+   "orders": [
+    {
+     "text": "0/20K eggs · $20K Sell 13K +$12.9K",
+     "btnAria": "Sell 13K · +$12,960.00",
+     "btn": {
+      "w": 88,
+      "tw": 48,
+      "clipped": false
+     },
+     "sk": {
+      "w": 48,
+      "tw": 48,
+      "clipped": false
+     },
+     "sy": {
+      "w": 39,
+      "tw": 39,
+      "clipped": false
+     },
+     "l1": {
+      "w": 186,
+      "tw": 137,
+      "clipped": false
+     },
+     "v": {
+      "w": 52,
+      "tw": 52,
+      "clipped": false
+     },
+     "n": {
+      "w": 49,
+      "tw": 49,
+      "clipped": false
+     }
+    }
+   ],
+   "sellAll": [
+    {
+     "t": "Sell all (13K eggs · $13K)",
+     "w": 358,
+     "sw": 354,
+     "cw": 354
+    }
+   ],
+   "hud": "Egg Farm $5.00 13K $5.00, 13K eggs 20K 1"
+  },
+  "b999": {
+   "orders": [
+    {
+     "text": "0/999.9B eggs · $999.9B Sell 999.9B +$999.9B",
+     "btnAria": "Sell 999.9B · +$999,900,000,000.00",
+     "btn": {
+      "w": 88,
+      "tw": 68,
+      "clipped": false
+     },
+     "sk": {
+      "w": 68,
+      "tw": 68,
+      "clipped": false
+     },
+     "sy": {
+      "w": 46,
+      "tw": 46,
+      "clipped": false
+     },
+     "l1": {
+      "w": 186,
+      "tw": 184,
+      "clipped": false
+     },
+     "v": {
+      "w": 76,
+      "tw": 76,
+      "clipped": false
+     },
+     "n": {
+      "w": 72,
+      "tw": 72,
+      "clipped": false
+     }
+    },
+    {
+     "text": "500B/1.2T eggs · $1.2T Sell 700B +$700B",
+     "btnAria": "Sell 700B · +$700,000,000,000.00",
+     "btn": {
+      "w": 88,
+      "tw": 58,
+      "clipped": false
+     },
+     "sk": {
+      "w": 58,
+      "tw": 58,
+      "clipped": false
+     },
+     "sy": {
+      "w": 38,
+      "tw": 38,
+      "clipped": false
+     },
+     "l1": {
+      "w": 186,
+      "tw": 173,
+      "clipped": false
+     },
+     "v": {
+      "w": 55,
+      "tw": 55,
+      "clipped": false
+     },
+     "n": {
+      "w": 82,
+      "tw": 82,
+      "clipped": false
+     }
+    }
+   ],
+   "sellAll": [
+    {
+     "t": "Sell all (999.9B eggs · $999.9B)",
+     "w": 358,
+     "sw": 354,
+     "cw": 354
+    }
+   ],
+   "hud": "Egg Farm $123.5M 999.9B $123.5M, 999.9B "
+  },
+  "t1500": {
+   "orders": [
+    {
+     "text": "0/2000T eggs · $2000T Sell 1500T +$1500T",
+     "btnAria": "Sell 1500T · +$1,500,000,000,000,000.00",
+     "btn": {
+      "w": 88,
+      "tw": 64,
+      "clipped": false
+     },
+     "sk": {
+      "w": 64,
+      "tw": 64,
+      "clipped": false
+     },
+     "sy": {
+      "w": 43,
+      "tw": 43,
+      "clipped": false
+     },
+     "l1": {
+      "w": 186,
+      "tw": 174,
+      "clipped": false
+     },
+     "v": {
+      "w": 71,
+      "tw": 71,
+      "clipped": false
+     },
+     "n": {
+      "w": 67,
+      "tw": 67,
+      "clipped": false
+     }
+    },
+    {
+     "text": "0/1000000T eggs · $1000000T Sell 1500T +$1500T",
+     "btnAria": "Sell 1500T · +$1,500,000,000,000,000.00",
+     "btn": {
+      "w": 88,
+      "tw": 64,
+      "clipped": false
+     },
+     "sk": {
+      "w": 64,
+      "tw": 64,
+      "clipped": false
+     },
+     "sy": {
+      "w": 43,
+      "tw": 43,
+      "clipped": false
+     },
+     "l1": {
+      "w": 186,
+      "tw": 195,
+      "clipped": true
+     },
+     "v": {
+      "w": 99,
+      "tw": 99,
+      "clipped": false
+     },
+     "n": {
+      "w": 96,
+      "tw": 96,
+      "clipped": false
+     }
+    }
+   ],
+   "sellAll": [
+    {
+     "t": "Sell all (1500T eggs · $1500T)",
+     "w": 358,
+     "sw": 354,
+     "cw": 354
+    }
+   ],
+   "hud": "Egg Farm $9990T 1500T $9990T, 1500T eggs"
+  }
+ },
+ "1280": {
+  "k12960": {
+   "orders": [
+    {
+     "text": "0/20K eggs · $20K Sell 13K +$12.9K",
+     "btnAria": "Sell 13K · +$12,960.00",
+     "btn": {
+      "w": 88,
+      "tw": 48,
+      "clipped": false
+     },
+     "sk": {
+      "w": 48,
+      "tw": 48,
+      "clipped": false
+     },
+     "sy": {
+      "w": 39,
+      "tw": 39,
+      "clipped": false
+     },
+     "l1": {
+      "w": 194,
+      "tw": 137,
+      "clipped": false
+     },
+     "v": {
+      "w": 52,
+      "tw": 52,
+      "clipped": false
+     },
+     "n": {
+      "w": 49,
+      "tw": 49,
+      "clipped": false
+     }
+    }
+   ],
+   "sellAll": [
+    {
+     "t": "Sell all (13K eggs · $13K)",
+     "w": 366,
+     "sw": 362,
+     "cw": 362
+    }
+   ],
+   "hud": "Egg Farm $5.00 13K $5.00, 13K eggs 20K 1"
+  },
+  "b999": {
+   "orders": [
+    {
+     "text": "0/999.9B eggs · $999.9B Sell 999.9B +$999.9B",
+     "btnAria": "Sell 999.9B · +$999,900,000,000.00",
+     "btn": {
+      "w": 88,
+      "tw": 68,
+      "clipped": false
+     },
+     "sk": {
+      "w": 68,
+      "tw": 68,
+      "clipped": false
+     },
+     "sy": {
+      "w": 46,
+      "tw": 46,
+      "clipped": false
+     },
+     "l1": {
+      "w": 194,
+      "tw": 184,
+      "clipped": false
+     },
+     "v": {
+      "w": 76,
+      "tw": 76,
+      "clipped": false
+     },
+     "n": {
+      "w": 72,
+      "tw": 72,
+      "clipped": false
+     }
+    },
+    {
+     "text": "500B/1.2T eggs · $1.2T Sell 700B +$700B",
+     "btnAria": "Sell 700B · +$700,000,000,000.00",
+     "btn": {
+      "w": 88,
+      "tw": 58,
+      "clipped": false
+     },
+     "sk": {
+      "w": 58,
+      "tw": 58,
+      "clipped": false
+     },
+     "sy": {
+      "w": 38,
+      "tw": 38,
+      "clipped": false
+     },
+     "l1": {
+      "w": 194,
+      "tw": 173,
+      "clipped": false
+     },
+     "v": {
+      "w": 55,
+      "tw": 55,
+      "clipped": false
+     },
+     "n": {
+      "w": 82,
+      "tw": 82,
+      "clipped": false
+     }
+    }
+   ],
+   "sellAll": [
+    {
+     "t": "Sell all (999.9B eggs · $999.9B)",
+     "w": 366,
+     "sw": 362,
+     "cw": 362
+    }
+   ],
+   "hud": "Egg Farm $123.5M 999.9B $123.5M, 999.9B "
+  },
+  "t1500": {
+   "orders": [
+    {
+     "text": "0/2000T eggs · $2000T Sell 1500T +$1500T",
+     "btnAria": "Sell 1500T · +$1,500,000,000,000,000.00",
+     "btn": {
+      "w": 88,
+      "tw": 64,
+      "clipped": false
+     },
+     "sk": {
+      "w": 64,
+      "tw": 64,
+      "clipped": false
+     },
+     "sy": {
+      "w": 43,
+      "tw": 43,
+      "clipped": false
+     },
+     "l1": {
+      "w": 194,
+      "tw": 174,
+      "clipped": false
+     },
+     "v": {
+      "w": 71,
+      "tw": 71,
+      "clipped": false
+     },
+     "n": {
+      "w": 67,
+      "tw": 67,
+      "clipped": false
+     }
+    },
+    {
+     "text": "0/1000000T eggs · $1000000T Sell 1500T +$1500T",
+     "btnAria": "Sell 1500T · +$1,500,000,000,000,000.00",
+     "btn": {
+      "w": 88,
+      "tw": 64,
+      "clipped": false
+     },
+     "sk": {
+      "w": 64,
+      "tw": 64,
+      "clipped": false
+     },
+     "sy": {
+      "w": 43,
+      "tw": 43,
+      "clipped": false
+     },
+     "l1": {
+      "w": 194,
+      "tw": 195,
+      "clipped": true
+     },
+     "v": {
+      "w": 99,
+      "tw": 99,
+      "clipped": false
+     },
+     "n": {
+      "w": 96,
+      "tw": 96,
+      "clipped": false
+     }
+    }
+   ],
+   "sellAll": [
+    {
+     "t": "Sell all (1500T eggs · $1500T)",
+     "w": 366,
+     "sw": 362,
+     "cw": 362
+    }
+   ],
+   "hud": "Egg Farm $9990T 1500T $9990T, 1500T eggs"
+  }
+ },
+ "marketSeedRng": [
+  1478832577,
+  1478832577
+ ]
+}

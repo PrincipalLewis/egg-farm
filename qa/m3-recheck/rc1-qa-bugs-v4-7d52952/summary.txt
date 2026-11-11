@@ -1,0 +1,58 @@
+2026-10-16 20:18:45 CEST sha=7d52952e197fd1bb264950acc9a2ca401b7abdfb engines=[chromium] steps=[setup build] ports=4291-4295 wt=/tmp/qa-rc1v4-7d52952
+2026-10-16 20:18:45 CEST on fix/rc1-qa-bugs-v4: yes
+2026-10-16 20:18:45 CEST contains origin/main (a01faea): yes
+2026-10-16 20:18:46 CEST npm ci ok
+2026-10-16 20:18:50 CEST build+check-release-build exit=0 6 check lines
+2026-10-16 20:18:54 CEST build:qa exit=0
+2026-10-16 20:18:54 CEST ---- chromium ----
+2026-10-16 20:18:54 CEST WARN: server left listening
+2026-10-16 20:18:54 CEST done. evidence: /workspace/egg-farm-studio/qa/m3-recheck/rc1-qa-bugs-v4-7d52952  (write report: qa/m3-recheck/rc1-qa-bugs-v4-7d52952.md)
+2026-10-16 20:20:22 CEST sha=7d52952e197fd1bb264950acc9a2ca401b7abdfb engines=[chromium firefox webkit] steps=[setup unit build neg guard layout rc0 extra] ports=4311-4315 wt=/tmp/qa-rc1v4-7d52952
+2026-10-16 20:20:22 CEST on fix/rc1-qa-bugs-v4: yes
+2026-10-16 20:20:22 CEST contains origin/main (a01faea): yes
+2026-10-16 20:20:25 CEST npm ci ok
+2026-10-16 20:22:28 CEST unit exit=0       Tests  513 passed | 2 skipped (515)
+2026-10-16 20:22:37 CEST build+check-release-build exit=0 6 check lines
+2026-10-16 20:22:46 CEST build:qa exit=0
+2026-10-16 20:22:47 CEST neg: exits exit=0 exit=1 exit=0 exit=1 exit=0  (want 0,!0,info,!0,0; case3 computed key is a known blind spot -> report)
+2026-10-16 20:22:47 CEST ---- chromium ----
+2026-10-16 20:22:53 CEST guard release chromium exit=0
+2026-10-16 20:23:00 CEST guard qa chromium exit=0
+2026-10-16 20:23:30 CEST layout chromium exit=0 ALL PASS chromium
+2026-10-16 20:26:42 CEST rc0 chromium exit=0 200/200 passed TUT-1: 3/3 pass
+2026-10-16 20:27:50 CEST extra chromium exit=0 NO FAILS chromium PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,NOT-IN-BUILD,PASS,NOT-IN-BUILD
+2026-10-16 20:27:50 CEST ---- firefox ----
+2026-10-16 20:27:57 CEST guard release firefox exit=0
+2026-10-16 20:28:04 CEST guard qa firefox exit=0
+2026-10-16 20:28:46 CEST layout firefox exit=0 ALL PASS firefox
+2026-10-16 21:09:31 CEST sha=7d52952e197fd1bb264950acc9a2ca401b7abdfb engines=[firefox] steps=[guard rc0 extra] ports=4311-4315 wt=/tmp/qa-rc1v4-7d52952
+2026-10-16 21:09:31 CEST on fix/rc1-qa-bugs-v4: yes
+2026-10-16 21:09:31 CEST contains origin/main (a01faea): yes
+2026-10-16 21:09:31 CEST ---- firefox ----
+2026-10-16 21:09:38 CEST guard release firefox exit=1
+2026-10-16 21:09:41 CEST guard qa firefox exit=3
+2026-10-16 21:09:41 CEST STOP: build id check failed for firefox
+2026-10-16 21:09:41 CEST done. evidence: /workspace/egg-farm-studio/qa/m3-recheck/rc1-qa-bugs-v4-7d52952  (write report: qa/m3-recheck/rc1-qa-bugs-v4-7d52952.md)
+2026-10-16 21:11:37 CEST sha=7d52952e197fd1bb264950acc9a2ca401b7abdfb engines=[firefox] steps=[guard rc0 extra] ports=4311-4315 wt=/tmp/qa-rc1v4-7d52952
+2026-10-16 21:11:37 CEST on fix/rc1-qa-bugs-v4: yes
+2026-10-16 21:11:37 CEST contains origin/main (a01faea): yes
+2026-10-16 21:11:37 CEST ---- firefox ----
+2026-10-16 21:16:44 CEST guard release firefox exit=0
+2026-10-16 21:21:56 CEST guard qa firefox exit=0
+2026-10-16 21:33:08 CEST rc0 firefox exit=0 200/200 passed TUT-1: 3/3 pass
+2026-10-16 21:39:06 CEST extra firefox exit=0 NO FAILS firefox PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,NOT-IN-BUILD,PASS,NOT-IN-BUILD
+2026-10-16 21:39:06 CEST done. evidence: /workspace/egg-farm-studio/qa/m3-recheck/rc1-qa-bugs-v4-7d52952  (write report: qa/m3-recheck/rc1-qa-bugs-v4-7d52952.md)
+2026-10-16 21:57:17 CEST sha=7d52952e197fd1bb264950acc9a2ca401b7abdfb engines=[webkit] steps=[guard layout rc0 extra] ports=4311-4315 wt=/tmp/qa-rc1v4-7d52952
+2026-10-16 21:57:17 CEST on fix/rc1-qa-bugs-v4: yes
+2026-10-16 21:57:17 CEST contains origin/main (a01faea): yes
+2026-10-16 21:57:17 CEST ---- webkit ----
+2026-10-16 22:01:37 CEST sha=7d52952e197fd1bb264950acc9a2ca401b7abdfb engines=[webkit] steps=[guard layout rc0 extra] ports=4311-4315 wt=/tmp/qa-rc1v4-7d52952
+2026-10-16 22:01:37 CEST on fix/rc1-qa-bugs-v4: yes
+2026-10-16 22:01:37 CEST contains origin/main (a01faea): yes
+2026-10-16 22:01:37 CEST ---- webkit ----
+2026-10-16 22:14:04 CEST guard release webkit exit=0
+2026-10-16 22:19:44 CEST guard qa webkit exit=0
+2026-10-16 22:30:57 CEST layout webkit exit=0 ALL PASS webkit
+2026-10-16 22:37:48 CEST rc0 webkit exit=0 200/200 passed TUT-1: 3/3 pass
+2026-10-16 22:51:32 CEST extra webkit exit=0 NO FAILS webkit PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,PASS,NOT-IN-BUILD,PASS,NOT-IN-BUILD
+2026-10-16 22:51:32 CEST done. evidence: /workspace/egg-farm-studio/qa/m3-recheck/rc1-qa-bugs-v4-7d52952  (write report: qa/m3-recheck/rc1-qa-bugs-v4-7d52952.md)

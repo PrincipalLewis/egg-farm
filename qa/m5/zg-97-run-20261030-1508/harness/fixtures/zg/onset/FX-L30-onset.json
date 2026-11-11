@@ -1,0 +1,102 @@
+{
+ "id": "FX-L30-ON",
+ "spec": "product/collection/m5.1-zero-gain-purchase-ui.md v0.3.5 sha1 1098f14e100edb0e80b43a099777be22fa13fd04 \u00a79",
+ "ac": [
+  "ZG-AC11",
+  "ZG-AC14",
+  "ZG-AC17",
+  "ZG-AC21"
+ ],
+ "state": {
+  "farmLevel": 30,
+  "hensLevel": 30,
+  "eggValueLevel": 30,
+  "collectionLevel": 27,
+  "graderTier": "tiers.length",
+  "workers": {
+   "market_hand": {
+    "energy": 100,
+    "cdS": 0
+   },
+   "coop_hand": {
+    "energy": 100,
+    "cdS": 0
+   },
+   "hawker": {
+    "energy": 100,
+    "cdS": 0
+   },
+   "grader": {
+    "energy": 100,
+    "cdS": 0
+   }
+  },
+  "breeds": {
+   "owned": {
+    "cream_legbar": {
+     "stars": 2
+    },
+    "brahma": {
+     "stars": 2
+    },
+    "cochin": {
+     "stars": 2
+    }
+   },
+   "slots": [
+    "cream_legbar",
+    "brahma",
+    "cochin"
+   ],
+   "incubator": null,
+   "settleMs": [
+    0,
+    0,
+    0
+   ],
+   "hatches": 9,
+   "pity": 0,
+   "rng": 123456789,
+   "freeHatchUsed": 1,
+   "flockCompleteLogged": 0
+  }
+ },
+ "coins": {
+  "rule": "cost(COLL)+1",
+  "drainMarginCents": 2000,
+  "drainNote": "+2000 cents (QA_DRAIN_CENTS) so live wage drain between state set and tap cannot make the just-affordable row unaffordable; preconditions re-checked with the margin by zg-unit.ts"
+ },
+ "flags": {
+  "m4.enabled": 1,
+  "m4.flags.streak": 1,
+  "m4.flags.tapCoins": 1,
+  "m4.flags.golden": 1,
+  "m4.flags.breeds": 1,
+  "m4.flags.abilities": 1,
+  "m4.flags.pause": 1,
+  "m4.flags.rc2Refill": 1,
+  "m4.flags.autoRefill": 1,
+  "m4.flags.broody": 1,
+  "m4.flags.zeroGainUi": 1,
+  "m4.flags.clockWage": 1,
+  "m4.flags.salesStopped": 1,
+  "m4.flags.fatigueCue": 1,
+  "m4.flags.bestBuyV2": 1,
+  "m4.zeroGain.confirm": 0
+ },
+ "pre": [
+  "options==[COLL]",
+  "gain(COLL)<=0",
+  "affordable(COLL)",
+  "flags.breeds==1"
+ ],
+ "bbv2": "real run when m4.flags.bestBuyV2 is built (ship set on disk 3fdd98ab: bestBuyV2 = 1, D-HOP-47); options/gain/affordable are bestBuyV2-independent (oracle checked at 0 and 1); assert pre per run",
+ "onset": {
+  "derivedFrom": "FX-L30 sha256 f85b36dafd47b0f1f69bd020d989e3a28763af9ab696a42ed932653ce724eae5",
+  "request": "artifacts/v5-ui/harness-rc-next/tests/FX-L30-ONSET-REQUEST.md sha256 4280c04e457458f07674d85efe5906f790e5fd7797be7e8fd3a4ad7c0866ce21",
+  "csv": "scratch/k10-breeds/csv/economy.k10-candidate.csv sha256 9f72ca849dfdd3a6bcd91c1f34db8116b79b277dd1915b04f7ce26594a9e5df7 (bc_* from ad27fe73, tc_streak_cap 0.27); SHA-DEPENDENT, reissue on the final CSV sha",
+  "build": "rc/v5 65a7443951b1967abb20cdd640a6b22ab1c7e1e3 (read-only, git archive)",
+  "loadout": "slot0 cream_legbar 2* Present 400*1.5=600 bp (< bc_lay_cap_bp 1500); slot1 brahma 2* Away 2000*1.5=3000 bp (= bc_away_cap_bp 3000); slot2 cochin 2* Broody 1500*1.5=2250 -> clamped 2000 (bc_broody_cap_bp); flock incomplete (3/8 owned) so flockCompleteLogged 0",
+  "breedNeutral": "BR-BB2 / BR-AC21: incomePerSec, optionGain, options are breed-free, so the oracle equals FX-L30 by construction (checked)"
+ }
+}

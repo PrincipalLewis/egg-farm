@@ -1,0 +1,377 @@
+{
+ "engine": "chromium",
+ "cases": {
+  "fresh-coreloop": {
+   "errors": [],
+   "modal": [
+    null
+   ],
+   "buildIds": [
+    "m3-rc1-pre+246de09"
+   ],
+   "start": {
+    "ver": 6,
+    "seq": 2,
+    "coins": 0,
+    "F": 0,
+    "C": 0,
+    "H": 0,
+    "V": 0,
+    "tracksV7": 1,
+    "v6BackupId": "24a3a90c967901f0",
+    "seen": null,
+    "bak": true,
+    "bakF": 0,
+    "v6b": false,
+    "v6bId": null,
+    "v6bRawF": null,
+    "v6bRawCoins": null,
+    "card": 0,
+    "recovery": null,
+    "keys": [
+     "eggfarm.install_id",
+     "eggfarm.lease",
+     "eggfarm.save",
+     "eggfarm.save.bak",
+     "eggfarm.telemetry",
+     "eggfarm.ui"
+    ],
+    "win": false
+   },
+   "end": {
+    "ver": 6,
+    "seq": 8,
+    "coins": 900,
+    "F": 0,
+    "C": 0,
+    "H": 0,
+    "V": 0,
+    "tracksV7": 1,
+    "v6BackupId": "24a3a90c967901f0",
+    "seen": null,
+    "bak": true,
+    "bakF": 0,
+    "v6b": false,
+    "v6bId": null,
+    "v6bRawF": null,
+    "v6bRawCoins": null,
+    "card": 0,
+    "recovery": null,
+    "keys": [
+     "eggfarm.install_id",
+     "eggfarm.lease",
+     "eggfarm.save",
+     "eggfarm.save.bak",
+     "eggfarm.telemetry",
+     "eggfarm.ui"
+    ],
+    "win": false
+   },
+   "steps": "sell,sell,sell,sell,sell,sell",
+   "cards": 0
+  },
+  "M1-L18-dd52bfd": {
+   "errors": [],
+   "modal": [
+    "Welcome back!",
+    null,
+    null
+   ],
+   "pre": {
+    "coins": 4567890,
+    "F": 18,
+    "C": 11
+   },
+   "s1": {
+    "ver": 6,
+    "seq": 5,
+    "coins": 4567890,
+    "F": 18,
+    "C": 11,
+    "H": 18,
+    "V": 10,
+    "tracksV7": 1,
+    "v6BackupId": "4335d1ce54e58026",
+    "seen": true,
+    "bak": true,
+    "bakF": 18,
+    "v6b": true,
+    "v6bId": "4335d1ce54e58026",
+    "v6bRawF": 18,
+    "v6bRawCoins": 4567890,
+    "card": 1,
+    "recovery": null,
+    "keys": [
+     "eggfarm.install_id",
+     "eggfarm.lease",
+     "eggfarm.save",
+     "eggfarm.save.bak",
+     "eggfarm.save.v6_backup",
+     "eggfarm.telemetry",
+     "eggfarm.ui"
+    ],
+    "win": false
+   },
+   "s2": {
+    "ver": 6,
+    "seq": 11,
+    "coins": 4567890,
+    "F": 18,
+    "C": 11,
+    "H": 18,
+    "V": 10,
+    "tracksV7": 1,
+    "v6BackupId": "4335d1ce54e58026",
+    "seen": true,
+    "bak": true,
+    "bakF": 18,
+    "v6b": true,
+    "v6bId": "4335d1ce54e58026",
+    "v6bRawF": 18,
+    "v6bRawCoins": 4567890,
+    "card": 0,
+    "recovery": null,
+    "keys": [
+     "eggfarm.install_id",
+     "eggfarm.lease",
+     "eggfarm.save",
+     "eggfarm.save.bak",
+     "eggfarm.save.v6_backup",
+     "eggfarm.telemetry",
+     "eggfarm.ui"
+    ],
+    "win": false
+   },
+   "s3": {
+    "ver": 6,
+    "seq": 17,
+    "coins": 4567890,
+    "F": 18,
+    "C": 11,
+    "H": 18,
+    "V": 10,
+    "tracksV7": 1,
+    "v6BackupId": "4335d1ce54e58026",
+    "seen": true,
+    "bak": true,
+    "bakF": 18,
+    "v6b": true,
+    "v6bId": "4335d1ce54e58026",
+    "v6bRawF": 18,
+    "v6bRawCoins": 4567890,
+    "card": 0,
+    "recovery": null,
+    "keys": [
+     "eggfarm.install_id",
+     "eggfarm.lease",
+     "eggfarm.save",
+     "eggfarm.save.bak",
+     "eggfarm.save.v6_backup",
+     "eggfarm.telemetry",
+     "eggfarm.ui"
+    ],
+    "win": false
+   }
+  },
+  "v6-F30-732e70e": {
+   "errors": [],
+   "modal": [
+    "Welcome back!",
+    null,
+    null
+   ],
+   "pre": {
+    "coins": 123456789,
+    "F": 30,
+    "C": 30
+   },
+   "s1": {
+    "ver": 6,
+    "seq": 7,
+    "coins": 123456789,
+    "F": 30,
+    "C": 30,
+    "H": 30,
+    "V": 20,
+    "tracksV7": 1,
+    "v6BackupId": "9b499acf9cbf3bd5",
+    "seen": true,
+    "bak": true,
+    "bakF": 30,
+    "v6b": true,
+    "v6bId": "9b499acf9cbf3bd5",
+    "v6bRawF": 30,
+    "v6bRawCoins": 123456789,
+    "card": 1,
+    "recovery": null,
+    "keys": [
+     "eggfarm.install_id",
+     "eggfarm.lease",
+     "eggfarm.save",
+     "eggfarm.save.bak",
+     "eggfarm.save.v6_backup",
+     "eggfarm.telemetry",
+     "eggfarm.ui"
+    ],
+    "win": false
+   },
+   "s2": {
+    "ver": 6,
+    "seq": 13,
+    "coins": 123456789,
+    "F": 30,
+    "C": 30,
+    "H": 30,
+    "V": 20,
+    "tracksV7": 1,
+    "v6BackupId": "9b499acf9cbf3bd5",
+    "seen": true,
+    "bak": true,
+    "bakF": 30,
+    "v6b": true,
+    "v6bId": "9b499acf9cbf3bd5",
+    "v6bRawF": 30,
+    "v6bRawCoins": 123456789,
+    "card": 0,
+    "recovery": null,
+    "keys": [
+     "eggfarm.install_id",
+     "eggfarm.lease",
+     "eggfarm.save",
+     "eggfarm.save.bak",
+     "eggfarm.save.v6_backup",
+     "eggfarm.telemetry",
+     "eggfarm.ui"
+    ],
+    "win": false
+   },
+   "s3": {
+    "ver": 6,
+    "seq": 19,
+    "coins": 123456789,
+    "F": 30,
+    "C": 30,
+    "H": 30,
+    "V": 20,
+    "tracksV7": 1,
+    "v6BackupId": "9b499acf9cbf3bd5",
+    "seen": true,
+    "bak": true,
+    "bakF": 30,
+    "v6b": true,
+    "v6bId": "9b499acf9cbf3bd5",
+    "v6bRawF": 30,
+    "v6bRawCoins": 123456789,
+    "card": 0,
+    "recovery": null,
+    "keys": [
+     "eggfarm.install_id",
+     "eggfarm.lease",
+     "eggfarm.save",
+     "eggfarm.save.bak",
+     "eggfarm.save.v6_backup",
+     "eggfarm.telemetry",
+     "eggfarm.ui"
+    ],
+    "win": false
+   }
+  },
+  "nearcap-F29": {
+   "errors": [],
+   "modal": [
+    "Welcome back!",
+    null
+   ],
+   "s1": {
+    "ver": 6,
+    "seq": 10,
+    "coins": 9000000000,
+    "F": 29,
+    "C": 20,
+    "H": 29,
+    "V": 17,
+    "tracksV7": 1,
+    "v6BackupId": "8b7dc70e175fc7fc",
+    "seen": true,
+    "bak": true,
+    "bakF": 29,
+    "v6b": true,
+    "v6bId": "8b7dc70e175fc7fc",
+    "v6bRawF": 29,
+    "v6bRawCoins": 9000000000,
+    "card": 1,
+    "recovery": null,
+    "keys": [
+     "eggfarm.install_id",
+     "eggfarm.lease",
+     "eggfarm.save",
+     "eggfarm.save.bak",
+     "eggfarm.save.v6_backup",
+     "eggfarm.telemetry",
+     "eggfarm.ui"
+    ],
+    "win": false
+   },
+   "clicks": [
+    "err",
+    {
+     "lsF": 29,
+     "lv": null,
+     "dis": null,
+     "btn": null
+    },
+    "err",
+    {
+     "lsF": 29,
+     "lv": null,
+     "dis": null,
+     "btn": null
+    },
+    "err",
+    {
+     "lsF": 29,
+     "lv": null,
+     "dis": null,
+     "btn": null
+    },
+    "err",
+    {
+     "lsF": 29,
+     "lv": null,
+     "dis": null,
+     "btn": null
+    }
+   ],
+   "s2": {
+    "ver": 6,
+    "seq": 19,
+    "coins": 9000000000,
+    "F": 29,
+    "C": 20,
+    "H": 29,
+    "V": 17,
+    "tracksV7": 1,
+    "v6BackupId": "8b7dc70e175fc7fc",
+    "seen": true,
+    "bak": true,
+    "bakF": 29,
+    "v6b": true,
+    "v6bId": "8b7dc70e175fc7fc",
+    "v6bRawF": 29,
+    "v6bRawCoins": 9000000000,
+    "card": 0,
+    "recovery": null,
+    "keys": [
+     "eggfarm.install_id",
+     "eggfarm.lease",
+     "eggfarm.save",
+     "eggfarm.save.bak",
+     "eggfarm.save.v6_backup",
+     "eggfarm.telemetry",
+     "eggfarm.ui"
+    ],
+    "win": false
+   }
+  }
+ }
+}

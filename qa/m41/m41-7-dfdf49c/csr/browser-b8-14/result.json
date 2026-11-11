@@ -1,0 +1,475 @@
+{
+ "port": "5961",
+ "sha7": "dfdf49c",
+ "cases": {
+  "B-CSR8a-owner-loses-to-newer-tab": {
+   "checks": [
+    {
+     "n": "runtime build-id",
+     "pass": true,
+     "v": "m3-rc1-pre+dfdf49c"
+    },
+    {
+     "n": "A (loser) shows 'Game open in another tab'",
+     "pass": true,
+     "v": null
+    },
+    {
+     "n": "A: 0 LS eggfarm.save* writes after B took over (12 s, > 2 autosaves)",
+     "pass": true,
+     "v": []
+    },
+    {
+     "n": "A: 0 IDB puts/deletes after B took over",
+     "pass": true,
+     "v": []
+    },
+    {
+     "n": "B: tab_guard_takeover recorded, B is the live owner",
+     "pass": true,
+     "v": [
+      "session_start",
+      "offline_grant",
+      "onboarding_step",
+      "session_start",
+      "tab_guard_takeover",
+      "customer_arrive",
+      "customer_arrive",
+      "customer_arrive"
+     ]
+    }
+   ],
+   "buildId": "m3-rc1-pre+dfdf49c",
+   "aWritesAfterTakeover": {
+    "ls": [],
+    "idb": []
+   },
+   "bTelemetry": [
+    "session_start",
+    "offline_grant",
+    "onboarding_step",
+    "session_start",
+    "tab_guard_takeover",
+    "customer_arrive",
+    "customer_arrive",
+    "customer_arrive"
+   ]
+  },
+  "B-CSR8b-race-loser-during-idb-copy": {
+   "checks": [
+    {
+     "n": "B (loser) shows 'Game open in another tab'",
+     "pass": true,
+     "v": "Game open in another tab\n\nYour farm is running in another tab. Play here to continue from your latest save.\n\nPlay here"
+    },
+    {
+     "n": "B: no Game created (no window.eggfarm)",
+     "pass": true,
+     "v": null
+    },
+    {
+     "n": "B: 0 LS eggfarm.save* writes",
+     "pass": true,
+     "v": [
+      "set:eggfarm.lease"
+     ]
+    },
+    {
+     "n": "B: 0 IDB puts to main",
+     "pass": true,
+     "v": [
+      "put:corrupt.1792695879551",
+      "delete:main"
+     ]
+    },
+    {
+     "n": "B: IDB ops limited to the awaited corrupt.* copy tx (info: main delete in that tx)",
+     "pass": true,
+     "v": [
+      "put:corrupt.1792695879551",
+      "delete:main"
+     ]
+    },
+    {
+     "n": "the seeded corrupt IDB bytes survive (main or corrupt.*) -- never destroyed",
+     "pass": true,
+     "v": {
+      "corrupt.1792695879551": 225,
+      "main": 512
+     }
+    },
+    {
+     "n": "C (winner): not a silent new game (recovery dialog shown or save_corrupt x1)",
+     "pass": false,
+     "v": {
+      "dialog": false,
+      "notice": null,
+      "save_corrupt": [],
+      "isNewGame": true
+     }
+    },
+    {
+     "n": "no page errors (B, C)",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "bText": "Game open in another tab\n\nYour farm is running in another tab. Play here to continue from your latest save.\n\nPlay here",
+   "bWrites": {
+    "ls": [
+     "set:eggfarm.lease"
+    ],
+    "idb": [
+     "put:corrupt.1792695879551",
+     "delete:main"
+    ],
+    "errors": []
+   },
+   "bIdbOps": [
+    "put:corrupt.1792695879551",
+    "delete:main"
+   ],
+   "idbAfter": {
+    "corrupt.1792695879551": 225,
+    "main": 512
+   },
+   "c": {
+    "dialog": false,
+    "notice": null,
+    "save_corrupt": [],
+    "isNewGame": true
+   }
+  },
+  "B-CSR14-M5-lease-quota": {
+   "checks": [
+    {
+     "n": "dialog shown",
+     "pass": true,
+     "v": true
+    },
+    {
+     "n": "M5 title",
+     "pass": true,
+     "v": "Your farm is back!"
+    },
+    {
+     "n": "M5 body",
+     "pass": true,
+     "v": "Saving is paused on this device right now, so progress may not be kept."
+    },
+    {
+     "n": "M5 button",
+     "pass": true,
+     "v": "Continue"
+    },
+    {
+     "n": "M5 secondary 'Export save file'",
+     "pass": true,
+     "v": "Export save file"
+    },
+    {
+     "n": "M5 export aria names the CURRENT farm",
+     "pass": true,
+     "v": "Export save file, downloads a copy of your current farm"
+    },
+    {
+     "n": "export downloads the current farm (F20), never the corrupt bytes",
+     "pass": true,
+     "v": 20
+    },
+    {
+     "n": "notice_shown x1 notice=M5",
+     "pass": true,
+     "v": [
+      {
+       "notice": "M5",
+       "source": "bak",
+       "store": "ls",
+       "type": "save_recovery_notice_shown",
+       "ts": 1792695892948,
+       "sessionMs": 87
+      }
+     ]
+    },
+    {
+     "n": "no-storage notice after closing M5",
+     "pass": true,
+     "v": true
+    },
+    {
+     "n": "notice_dismissed x1 notice=M5",
+     "pass": true,
+     "v": [
+      {
+       "notice": "M5",
+       "source": "bak",
+       "store": "ls",
+       "type": "save_recovery_notice_dismissed",
+       "ts": 1792695893285,
+       "sessionMs": 424
+      }
+     ]
+    },
+    {
+     "n": "farmLevel=20 (restored from .bak)",
+     "pass": true,
+     "v": null
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "copy": {
+    "t": "Your farm is back!",
+    "b": "Saving is paused on this device right now, so progress may not be kept.",
+    "g": "Continue"
+   },
+   "export": {
+    "exText": "Export save file",
+    "aria": "Export save file, downloads a copy of your current farm"
+   },
+   "exportFile": "eggfarm-save-20261022-2104.json",
+   "shown": [
+    {
+     "notice": "M5",
+     "source": "bak",
+     "store": "ls",
+     "type": "save_recovery_notice_shown",
+     "ts": 1792695892948,
+     "sessionMs": 87
+    }
+   ]
+  },
+  "B-CSR14-Q-preserve-quota": {
+   "checks": [
+    {
+     "n": "dialog shown",
+     "pass": true,
+     "v": true
+    },
+    {
+     "n": "save_corrupt x1 copy_failed=true",
+     "pass": true,
+     "v": [
+      {
+       "reason": "invalid_state",
+       "had_backup": false,
+       "restored_from_backup": false,
+       "build": "m3-rc1-pre+dfdf49c",
+       "copy_failed": true,
+       "recovered_from": "none",
+       "store": "ls",
+       "tried": [
+        {
+         "source": "bak",
+         "result": "absent"
+        },
+        {
+         "source": "idb",
+         "result": "absent"
+        },
+        {
+         "source": "v6_backup",
+         "result": "absent"
+        }
+       ],
+       "migrated": false,
+       "type": "save_corrupt",
+       "ts": 1792695894075,
+       "sessionMs": 3
+      }
+     ]
+    },
+    {
+     "n": "LS corrupt.* write was attempted and refused",
+     "pass": true,
+     "v": null
+    },
+    {
+     "n": "export (from memory) = the corrupt main bytes",
+     "pass": true,
+     "v": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "layer": {
+    "outcome": "storage",
+    "variant": null,
+    "title": "A fresh start",
+    "body": "We couldn't open your farm. Export it now to keep a copy."
+   },
+   "save_corrupt": [
+    {
+     "reason": "invalid_state",
+     "had_backup": false,
+     "restored_from_backup": false,
+     "build": "m3-rc1-pre+dfdf49c",
+     "copy_failed": true,
+     "recovered_from": "none",
+     "store": "ls",
+     "tried": [
+      {
+       "source": "bak",
+       "result": "absent"
+      },
+      {
+       "source": "idb",
+       "result": "absent"
+      },
+      {
+       "source": "v6_backup",
+       "result": "absent"
+      }
+     ],
+     "migrated": false,
+     "type": "save_corrupt",
+     "ts": 1792695894075,
+     "sessionMs": 3
+    }
+   ],
+   "exportFile": "eggfarm-old-save-20261022-2104.json"
+  },
+  "REMEASURE-M3@360": {
+   "checks": [
+    {
+     "n": "primary >= 48 CSS px (strict) @360",
+     "pass": false,
+     "v": {
+      "w": 219.3000030517578,
+      "h": 40.79998779296875,
+      "minHeight": "48px"
+     }
+    },
+    {
+     "n": "export link >= 44 CSS px (strict) @360",
+     "pass": false,
+     "v": {
+      "w": 122.90469360351562,
+      "h": 37.399993896484375,
+      "minHeight": "44px"
+     }
+    },
+    {
+     "n": "card width == min(440, vw-48) @360 (info, ±1)",
+     "pass": false,
+     "v": 265.20001220703125
+    }
+   ],
+   "m": {
+    "card": {
+     "w": 265.20001220703125,
+     "h": 281.8414306640625,
+     "minHeight": "auto"
+    },
+    "go": {
+     "w": 219.3000030517578,
+     "h": 40.79998779296875,
+     "minHeight": "48px"
+    },
+    "ex": {
+     "w": 122.90469360351562,
+     "h": 37.399993896484375,
+     "minHeight": "44px"
+    },
+    "dpr": 1
+   }
+  },
+  "REMEASURE-M3@375": {
+   "checks": [
+    {
+     "n": "primary >= 48 CSS px (strict) @375",
+     "pass": false,
+     "v": {
+      "w": 246.13479614257812,
+      "h": 43.276458740234375,
+      "minHeight": "48px"
+     }
+    },
+    {
+     "n": "export link >= 44 CSS px (strict) @375",
+     "pass": false,
+     "v": {
+      "w": 130.3646697998047,
+      "h": 39.67010498046875,
+      "minHeight": "44px"
+     }
+    },
+    {
+     "n": "card width == min(440, vw-48) @375 (info, ±1)",
+     "pass": false,
+     "v": 294.82080078125
+    }
+   ],
+   "m": {
+    "card": {
+     "w": 294.82080078125,
+     "h": 298.9484558105469,
+     "minHeight": "auto"
+    },
+    "go": {
+     "w": 246.13479614257812,
+     "h": 43.276458740234375,
+     "minHeight": "48px"
+    },
+    "ex": {
+     "w": 130.3646697998047,
+     "h": 39.67010498046875,
+     "minHeight": "44px"
+    },
+    "dpr": 1
+   }
+  },
+  "REMEASURE-M3@390": {
+   "checks": [
+    {
+     "n": "primary >= 48 CSS px (strict) @390",
+     "pass": false,
+     "v": {
+      "w": 271.34283447265625,
+      "h": 45.22381591796875,
+      "minHeight": "48px"
+     }
+    },
+    {
+     "n": "export link >= 44 CSS px (strict) @390",
+     "pass": false,
+     "v": {
+      "w": 136.2308349609375,
+      "h": 41.45513916015625,
+      "minHeight": "44px"
+     }
+    },
+    {
+     "n": "card width == min(440, vw-48) @390 (info, ±1)",
+     "pass": false,
+     "v": 322.2196044921875
+    }
+   ],
+   "m": {
+    "card": {
+     "w": 322.2196044921875,
+     "h": 312.4005126953125,
+     "minHeight": "auto"
+    },
+    "go": {
+     "w": 271.34283447265625,
+     "h": 45.22381591796875,
+     "minHeight": "48px"
+    },
+    "ex": {
+     "w": 136.2308349609375,
+     "h": 41.45513916015625,
+     "minHeight": "44px"
+    },
+    "dpr": 1
+   }
+  }
+ },
+ "fails": 10
+}

@@ -1,0 +1,41 @@
+PASS [webkit] PT1-8 tabs >=44x44 at 1280x720 — [[119,44],[119,44],[119,44]]
+PASS [webkit] PT1-8 tab hit areas don't overlap at 1280
+PASS [webkit] PT1-8 tabs >=44x44 at 960x600 — [[119,44],[119,44],[119,44]]
+PASS [webkit] PT1-8 tab hit areas don't overlap at 960
+PASS [webkit] PT1-4 fresh fallback resets onboarding + Workers-tip flags — {"sfx":false,"reducedMotion":false,"seenSlots":6,"onboardingDone":false,"sessions":1,"onbStep":1}
+PASS [webkit] PT1-5 reload mid-onboarding logs onboarding_abandon — [{"atStep":2,"reason":"reload","type":"onboarding_abandon","ts":1792103984749,"sessionMs":3}]
+PASS [webkit] PT1-5 overlay not left half-running after reload
+PASS [webkit] PT1-6 axe: no serious issue on #queue/#scene/onboarding dialog — []
+PASS [webkit] PT1-6 axe: page-has-heading-one fixed
+PASS [webkit] axe other serious/critical (info) — []
+PASS [webkit] B1 "New helper!" banner shows before hiring and is gone after hiring (+30 s) — before=1
+PASS [webkit] B2 L5 toast shows then leaves the screen fully (390) — {"shown":{"top":64,"vis":"visible","text":"Coop upgraded! +1 customer slot"},"after":{"bottom":-8,"vis":"hidden","op":"0"}}
+PASS [webkit] B2 L5 toast shows then leaves the screen fully (1280) — {"shown":{"top":64,"vis":"visible","text":"Coop upgraded! +1 customer slot"},"after":{"bottom":-8,"vis":"hidden","op":"0"}}
+PASS [webkit] B3 chip aria-label matches visible target/timer, no "1 minutes" — {"aria":"Next goal: Collection L1, +5/tap. Sell eggs to earn coins.","label":"Collection L1: +5/tap","status":"—","live":""}
+PASS [webkit] B3 live region cleared after announcing (never stale)
+PASS [webkit] B6 Collect bar clear of the side panel by >=12px (1280x800) — {"bar":720,"collect":720,"goal":720,"panel":880,"sw":1280,"cw":1280}
+PASS [webkit] B6 Collect bar clear of the side panel by >=12px (960x600) — {"bar":536,"collect":536,"goal":536,"panel":560,"sw":960,"cw":960}
+PASS [webkit] B6 Collect bar clear of the side panel by >=12px (1920x1080) — {"bar":1040,"collect":1040,"goal":1040,"panel":1520,"sw":1920,"cw":1920}
+PASS [webkit] B6 stress (F21, 5 customers, big numbers): Collect bar clear of panel, starts >=12px from the left (960) — {"farmL":0,"farmR":560,"bar":536,"barL":24,"collect":536,"panel":560,"sw":960}
+PASS [webkit] B6 stress (F21, 5 customers, big numbers): Collect bar clear of panel, starts >=12px from the left (1024) — {"farmL":0,"farmR":624,"bar":592,"barL":32,"collect":592,"panel":624,"sw":1024}
+PASS [webkit] B6 stress (F21, 5 customers, big numbers): Collect bar clear of panel, starts >=12px from the left (1212) — {"farmL":0,"farmR":812,"bar":686,"barL":126,"collect":686,"panel":812,"sw":1212}
+PASS [webkit] B8 exactly one Farm View Manage all button in the DOM (390)
+PASS [webkit] B5 workers at 81-98% -> no Manage all shown (390) — dom=1
+PASS [webkit] B5 one worker <= 40% -> Farm View button visible + "(1 need it)" (390) — vis=1 pill=Manage all (1 need it)
+PASS [webkit] B8 exactly one Farm View Manage all button in the DOM (1280)
+PASS [webkit] B5 workers at 81-98% -> no Manage all shown (1280) — dom=1
+PASS [webkit] B8 desktop Manage all sits in the Upgrades header, 44x44 — {"x":1012.421875,"y":436,"width":44,"height":44}
+PASS [webkit] B5 one worker <= 40% -> Farm View button visible + "(1 need it)" (1280) — vis=1 pill=Manage all (1 need it)
+PASS [webkit] Bug9 no sideways scroll on farm/market/upgrades/workers at 360x640 — {"farm":{"sw":360,"cw":360,"bsw":360,"wide":0},"market":{"sw":360,"cw":360,"bsw":360,"wide":0},"upgrades":{"sw":360,"cw":360,"bsw":360,"wide":0},"workers":{"sw":360,"cw":360,"bsw":360,"wide":0}}
+PASS [webkit] Bug9 Sell buttons inside the card (>=8px), order text <=2 lines, short copy at 360 — [{"inside":true,"lines":1,"text":"113/113 eggs\n· $553.70"},{"inside":true,"lines":1,"text":"113/113 eggs\n· $553.70"}]
+PASS [webkit] Bug9 tab labels not clipped at 360 — [true,true,true]
+PASS [webkit] Bug9 no sideways scroll on farm/market/upgrades/workers at 375x812 — {"farm":{"sw":375,"cw":375,"bsw":375,"wide":0},"market":{"sw":375,"cw":375,"bsw":375,"wide":0},"upgrades":{"sw":375,"cw":375,"bsw":375,"wide":0},"workers":{"sw":375,"cw":375,"bsw":375,"wide":0}}
+PASS [webkit] Bug9 Sell buttons inside the card (>=8px), order text <=2 lines, short copy at 375 — [{"inside":true,"lines":1,"text":"113/113 eggs\n· $553.70"},{"inside":true,"lines":1,"text":"113/113 eggs\n· $553.70"}]
+PASS [webkit] Bug9 tab labels not clipped at 375 — [true,true,true]
+PASS [webkit] Bug9 no sideways scroll on farm/market/upgrades/workers at 375x600 — {"farm":{"sw":375,"cw":375,"bsw":375,"wide":0},"market":{"sw":375,"cw":375,"bsw":375,"wide":0},"upgrades":{"sw":375,"cw":375,"bsw":375,"wide":0},"workers":{"sw":375,"cw":375,"bsw":375,"wide":0}}
+PASS [webkit] Bug9 Sell buttons inside the card (>=8px), order text <=2 lines, short copy at 375 — [{"inside":true,"lines":1,"text":"113/113 eggs\n· $553.70"},{"inside":true,"lines":1,"text":"113/113 eggs\n· $553.70"}]
+PASS [webkit] Bug9 tab labels not clipped at 375 — [true,true,true]
+PASS [webkit] Bug9 no sideways scroll on farm/market/upgrades/workers at 390x844 — {"farm":{"sw":390,"cw":390,"bsw":390,"wide":0},"market":{"sw":390,"cw":390,"bsw":390,"wide":0},"upgrades":{"sw":390,"cw":390,"bsw":390,"wide":0},"workers":{"sw":390,"cw":390,"bsw":390,"wide":0}}
+PASS [webkit] Bug9 Sell buttons inside the card (>=8px), order text <=2 lines, short copy at 390 — [{"inside":true,"lines":1,"text":"113/113 eggs\n· $553.70"},{"inside":true,"lines":1,"text":"113/113 eggs\n· $553.70"}]
+PASS [webkit] Bug9 tab labels not clipped at 390 — [true,true,true]
+40/40 passed

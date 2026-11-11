@@ -1,0 +1,13 @@
+{
+ "engine": "chromium",
+ "duringQE": {
+  "card": false,
+  "storageFailed": true,
+  "mem": false
+ },
+ "persistedBefore": null,
+ "persistedAfterWait": null,
+ "persistedAfterSave": null,
+ "cardOnReload": true,
+ "pageErrors": []
+}

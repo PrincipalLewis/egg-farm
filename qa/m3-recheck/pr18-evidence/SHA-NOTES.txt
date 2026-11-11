@@ -1,0 +1,3 @@
+NOTE: Chromium on lane2 at 6f19823 (globals PASS, rc0 195/197 FAIL B5). Remote head now a913934.
+NOTE: Prequeued globals chromium on old head 79edfa1: PASS.
+Firefox/WebKit will run on whatever head is built in /tmp/pr18-new when the main lock is acquired.

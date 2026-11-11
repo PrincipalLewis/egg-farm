@@ -1,0 +1,45 @@
+# QA queue: M4.1 re-plan (D-CEO-20261021-01). Reset 2026-10-21 17:20 CEST by Head of QA
+Previous queue archived verbatim: [archive/queue-2026-10-21-pre-replan.md](archive/queue-2026-10-21-pre-replan.md). Base main dd223f5. **L30+ is out of M4.1** (moved to M4.2 with D-CEO-16/18/19 unchanged; former rows 6 and M4.1 items 1/5/6 are parked there).
+
+## Intake rule (D-CEO-20261018-01), unchanged
+To join this queue a build needs: the full SHA; whether it's pushed and on which branch; the PR number; a list of what changed; and for data changes, the CSV sha256 plus the harness and code SHA. Until CI is green, the interim evidence is local gates on committed scripts at a pushed SHA (D-CEO-15). Nothing goes Latest without green CI.
+
+## M4.1 intake (caps are limits)
+| # | Item | Code cap | Gate | QA lane | Status |
+|---|------|----------|------|---------|--------|
+| 1 | M41-11 lock label (#60 @ 5789805, replaces #54) — **QA PASS 20:15 Oct 22** (m41/m41-11-5789805.md) | 19:00 Oct 21 | m4a-spec v1.24 FROZEN (38e95a5d…): B1-6b, B1-9, B1-10, F4-19 ('Needs Farm L50' / 'Max for this farm' / MAX). N comes from tracks.ts trackCap/trackLock per row. Property test on main data. B1-11 and F4-25 are N/A (no L30+) | UI QA (edb6ef85) | DONE (QA PASS) |
+| 2 | M41-10 build-id (#61 @ 33f1538, replaces #53) — **QA PASS 19:40 Oct 22** (m41/m41-10-33f1538.md) | 19:00 Oct 21 | build-id shows the QA-passed SHA with no +dirty | Saves QA (33ec1b55) | DONE (QA PASS) |
+| 3 | M41-6 QE-LATE-e | 20:00 Oct 21 | Spec v0.3 FROZEN (c6a37023…). gate4-explainer 17/17. Chromium qe-late-browser QEL-12/13. QEL-7 byte-identical LS/IDB. QEL-8 exactly 2 hits for `rg mirrorOnFail src` | Saves QA | **QA PASS 20:05 Oct 22** @ 1682a0c (#59), m41/qe-late-e-1682a0c.md. FF and WK not run. Rerun on the combined SHA if CSR loadsafe lands on top |
+| 4 | M41-8 F3/F4 (#62 @ 09cee47 — **QA PASS 23:16 Oct 22**, m41/m41-8-09cee47.md; Art PASS) + M41-9 (#64 @ 3110e88 — **QA PASS 00:46 Oct 23**, m41/m41-9-3110e88.md; Art PASS @ 9b6fc4a, re-check at RC; #65 @ c877f69 — **QA PASS 05:22 Oct 23**, m41/m41-9-c877f69.md; Art PASS @ c877f69) | 23:00 Oct 21 | UI gate plus Art & UX sign-off at the RC SHA | UI QA | DONE (ALL QA PASS) |
+| 5 | M41-7 CSR v0.2.3 incl. IndexedDB must-have (D-HOP-34) (#63 @ 3c86720, code 8694222) — **QA PASS 03:38 Oct 23** (m41/m41-7-3c86720-csr.md; Art PASS @ 8694222) | spec 18:30, code 03:00 Oct 22 | Spec of record product/farm/corrupt-save-recovery-spec.m41-final.md (2fbcd4eb / 530b29d3, D-HOP-23-01 reset.surfaced key membership ACs 1–4 + D-HOP-22-06/-07(a) M1/M2 explainer). Includes QE-LATE-e §7 rerun (1682a0c) + #58 (66680eb) | Saves QA; spec review HoQA | DONE (QA PASS @ 3c86720; RC gate reruns merged tracks-explainer.ts cases) |
+| 6 | MK-60/61 copy | — | — | — | OUT: stays in M4.2 (HoP 17:21) |
+| 7 | RC at one SHA | 04:00 Oct 22 | Full gate set: rows 1–5, AC7/acw1/L10 no-regression vs dd223f5, save/load/migration, Art & UX sign-off, verify-before-publish | Saves QA + UI QA | SHIPPED — Latest m4.1-5d9efa6, post-publish CONFIRMED 17:40 |
+| 8 | QA verdict | 08:00 Oct 22 | All ACs pass, no open blocker or critical bugs, report filed | HoQA | — |
+| 9 | Latest | 10:00 Oct 22 | Only if CI is green and the verify-before-publish check passes | HoE, verified by Saves QA | — |
+
+## v5 single RC (D-CEO-20261029-01, GO 19:32 Oct 29): one RC, gated once
+| # | Lane | Owner | Gate (evidence in artifacts/<gate-id>/results/ + sha256 manifest, rule 19) | Status |
+|---|------|-------|------|--------|
+| V5-S | Saves/migration/offline on combined save version; telemetry v0.6.2; Saves-lane rows of every qa/m5 plan; SS-15 Rule 2 share-guard unit; offline fixture shared with UI QA; verify-before-publish + post-publish | Saves QA (33ec1b55) | one run on rc SHA | ACCEPTED 19:38 Oct 29 by Saves QA (33ec1b55); prep in progress (cases, fixtures, telemetry checker, publish-verify script); runs once on HoE's RC SHA |
+| V5-U | P2a/P2b (unheld), zero-gain UI ZG-AC1–21+17b, sales-stopped UI rows incl. SS-12/20/23a/25 (v1.3.10), M5.1 worker UI (AC-FC9/12, AC-LR14/17/18), UI-lane rows of every qa/m5 plan, 3-browser screenshot set for Art; results artifacts/v5-rc-ui/results/; waiting on HoE seams (Q4 hook, Q9 stall.force, Q8 flag paths) | UI QA (edb6ef85) | one run on rc SHA | ACCEPTED 19:37 Oct 29 by UI QA (edb6ef85); prep in progress (case list, harness, screenshot-set plan under artifacts/v5-ui/); runs once on HoE's RC SHA |
+| V5-E | 2x gate, G4, pacing ±20%, o1a on TS bot (bot-m5.ts parity first; TG-LR10-G), M5.2 PM1–PM3 | HoQA | gate def agreed 19:48 (QA-D-1029-O1ATS); artifacts/m5-o1a-ts/results/ | waiting on HoE bot-m5 + rc SHA |
+| V5-C | Claude QA Tester + Claude Gamer, one pass each | HoQA assigns | on final RC only | not started |
+| V5-V | Release verdict | HoQA | all lanes; cut pieces N/A | — |
+
+## Reviewer pass cadence (D-CEO-20261028-02, from 07:47 Oct 28)
+Claude QA Tester (b009dd7a) and Claude Gamer (5ea347e1) run **one pass per milestone RC, plus one for any Latest release that changes gameplay or economy**, never per build. Second opinions only: nothing waits on them, and they block only for a real bug. Unchanged: green CI, the sha256/build-ID check, Saves QA verify-before-publish. Published-asset smoke lives only in engineering/release-checklist.md step 5 (G5b row removed from status.md). Copy-, tooling- or a11y-only patches get no Claude pass.
+
+## Rollback re-verify (D-CEO-20261028-03, release-checklist step 8)
+After any rollback of Latest, **Saves QA (33ec1b55)** downloads the republished egg-farm.html, checks its sha256 (and build-id) against the QA-passed release it restores, and reports PASS/FAIL **at once** to HoE and the CEO (priority), with the release URL and sha256; the CEO sends Vadim the link. A mismatch is a Blocker: escalate to HoE + CEO immediately. Pre-launch only (covered by Vadim's standing Latest policy); for the public launch it applies only after Vadim's launch go. Owner: Saves QA; HoQA accountable. **ACCEPTED 19:38 Oct 29 by Saves QA (33ec1b55).**
+
+## Carried over / closed
+- M4 B reviewer passes: Player, Critic and Claude QA Tester are done. Claude Gamer's status is checked at the RC (per-RC cadence, D-CEO-20261028-02). Write up the M4 B report from qa/reviews/m4b/.
+- RV-6 closed (it was the Farm L23 buy). Wage drift S3 → M4.2.
+
+## Release rule (D-CEO-20261019-13), unchanged
+Verify-before-publish: HoE posts the built HTML sha256 and build-id with the merge request. Saves QA checks both against the QA-passed SHA before the tag goes Latest.
+
+| 6b | #66 rc0/check-globals tooling guard @ 8c568b0 — **QA PASS 04:04 Oct 23** (m3-recheck/pr66-8c568b0.md) | — | rc0 tooling correctness, no assertion change | Saves QA | DONE (QA PASS) |
+| P1 | M4.1-P1 yard hen pill/sprites from hensLevel + asleep-signal hotfix (D-HOP-11, AC-R1–R9 as passed on 8a49d35; D-CEO-07 one patch SHA) + **sales-stopped patch lane** (spec v1.3.3 final, `fix/m41-patch1`; qa/m5/test-plan-sales-stopped.md §2a): SS-15 live income fix, SS-20 MH/CH banner strings (AC-R1m/R1c, AC-B11/B11u), SS-27 AC7 hashes seeds 1–200 + `working`-path unit (hard merge gate), SS-28 steady-ETA "—" | after M4.1 Latest | AC per product queue M4.1-P1 (rev: M4 on min(hens[H],12) sprites, pill hens[H] only >12; M4 off legacy S.hens(F)), one run on final SHA + Art UI review | UI QA | QA PASS @ 30b29d3 (PR #70, merged d1fb206); verify-before-publish GO-with-conditions 21:10 (asset sha256 dd919d61…, tag m4.1-p1-30b29d3); SHIPPED — Latest m4.1-p1-30b29d3 21:11, post-publish CONFIRMED 21:14; m-P1-1 Minor → next patch; SS-15 Rule 2 clause → M5.0 |
+| P2a | m-P1-1 (Minor, a11y WCAG 2.5.3): in asleep scenes the nav Upgrades button, Workers tab (count not in name) and nav Refill aria labels do not start with the visible text; axe label-content-name-mismatch in 3 engines; repro in m41/p1-30b29d3.md. **Spec: rc1-asleep-state-spec v1.0.12 AC-R17, sha1 666e8fd54e90e054dcde2c28aa76560e50f78223 (re-pinned 23:15; v1.0.11 b1f85dca superseded, L90 precedence wording only); cases TP1-R17a–e in m41/test-plan-patch1.md.** Fix owner: HoE (61b89361) | next M4.1 patch SHA | axe clean on asleep scenes at 360/375/390/1280 in Cr/FF/WK; aria starts with visible text; Workers tab name includes the count | UI QA (edb6ef85) | LIVE per D-CEO-20261029-01 (v5 go 19:32 CET; was HELD per D-CEO-20261025-01; p2 code NO-GO while Vadim playtests p1; frozen scope engineering/m4.1-p2-scope.md; starts on Vadim's go), owner HoQA. Revive-or-kill 2026-10-31 (ships in next patch or HoP rules it backlog) |
+| P2b | rc1-asleep v1.0.10 Unpaid ACs (D-HOP-32/17; spec sha1 eae29f97): AC-R2a, AC-R10–R16, TP1-U1–U3, TP1-C1/C2. Plan: m41/test-plan-patch1.md. Spec owner: PM Workers (d2229f86); build owner: HoE | next M4.1 patch SHA | all cases in test-plan-patch1.md, one run on the final SHA | UI QA (edb6ef85) | LIVE per D-CEO-20261029-01 (v5 go 19:32 CET; was HELD per D-CEO-20261025-01; plan ready; frozen scope engineering/m4.1-p2-scope.md; starts on Vadim's go), owner HoQA. Revive-or-kill 2026-10-31 |

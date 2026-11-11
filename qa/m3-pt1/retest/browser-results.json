@@ -1,0 +1,137 @@
+{
+ "chromium": {
+  "bootMs": 20,
+  "install_id": "8242d808-d209-41a1-866a-a2843a79ba5b",
+  "session_start": [
+   {
+    "install_id": "8242d808-d209-41a1-866a-a2843a79ba5b",
+    "build": "m3-pt1+0345680"
+   }
+  ],
+  "export": {
+   "via": "download",
+   "file": "eggfarm-log-8242d808-2026-10-15.json",
+   "events": 2,
+   "msg": "Log downloaded."
+  },
+  "telBefore": 1,
+  "afterReset": {
+   "id": "8242d808-d209-41a1-866a-a2843a79ba5b",
+   "telEvents": 4,
+   "save_reset": 1,
+   "session_starts": 2,
+   "sfx": false,
+   "reducedMotion": true,
+   "onboardingDone": false,
+   "newGameOverlay": true,
+   "farm": 0
+  },
+  "afterCorrupt": "8242d808-d209-41a1-866a-a2843a79ba5b",
+  "idStable": true,
+  "errors": []
+ },
+ "firefox": {
+  "bootMs": 523,
+  "install_id": "0dd604bc-5cd7-427e-9842-8d16105d32a1",
+  "session_start": [
+   {
+    "install_id": "0dd604bc-5cd7-427e-9842-8d16105d32a1",
+    "build": "m3-pt1+0345680"
+   }
+  ],
+  "export": {
+   "via": "download",
+   "file": "eggfarm-log-0dd604bc-2026-10-15.json",
+   "events": 2,
+   "msg": "Log downloaded."
+  },
+  "telBefore": 1,
+  "afterReset": {
+   "id": "0dd604bc-5cd7-427e-9842-8d16105d32a1",
+   "telEvents": 4,
+   "save_reset": 1,
+   "session_starts": 2,
+   "sfx": false,
+   "reducedMotion": true,
+   "onboardingDone": false,
+   "newGameOverlay": true,
+   "farm": 0
+  },
+  "afterCorrupt": "0dd604bc-5cd7-427e-9842-8d16105d32a1",
+  "idStable": true,
+  "errors": []
+ },
+ "webkit": {
+  "bootMs": 121,
+  "install_id": "d96edfd4-516f-48b9-ab19-d88a1ed5a2ce",
+  "session_start": [
+   {
+    "install_id": "d96edfd4-516f-48b9-ab19-d88a1ed5a2ce",
+    "build": "m3-pt1+0345680"
+   }
+  ],
+  "export": {
+   "via": "download",
+   "file": "eggfarm-log-d96edfd4-2026-10-15.json",
+   "events": 2,
+   "msg": "Log downloaded."
+  },
+  "telBefore": 1,
+  "afterReset": {
+   "id": "d96edfd4-516f-48b9-ab19-d88a1ed5a2ce",
+   "telEvents": 4,
+   "save_reset": 1,
+   "session_starts": 2,
+   "sfx": false,
+   "reducedMotion": true,
+   "onboardingDone": false,
+   "newGameOverlay": true,
+   "farm": 0
+  },
+  "afterCorrupt": "d96edfd4-516f-48b9-ab19-d88a1ed5a2ce",
+  "idStable": true,
+  "errors": []
+ },
+ "ios-webkit": {
+  "bootMs": 103,
+  "install_id": "98f95341-c744-47ce-8382-c50281693c43",
+  "session_start": [
+   {
+    "install_id": "98f95341-c744-47ce-8382-c50281693c43",
+    "build": "m3-pt1+0345680"
+   }
+  ],
+  "export": {
+   "via": "clipboard",
+   "ok": true,
+   "msg": "Log copied to clipboard — paste it into a message."
+  },
+  "share": {
+   "file": "eggfarm-log-98f95341-2026-10-15.json",
+   "msg": "Log shared."
+  },
+  "shareCancel": {
+   "clip": true,
+   "msg": "Log copied to clipboard — paste it into a message."
+  },
+  "telBefore": 1,
+  "afterReset": {
+   "id": "98f95341-c744-47ce-8382-c50281693c43",
+   "telEvents": 4,
+   "save_reset": 1,
+   "session_starts": 2,
+   "sfx": false,
+   "reducedMotion": true,
+   "onboardingDone": false,
+   "newGameOverlay": true,
+   "farm": 0
+  },
+  "afterCorrupt": "98f95341-c744-47ce-8382-c50281693c43",
+  "idStable": true,
+  "errors": []
+ },
+ "chromiumHungAudio": {
+  "booted": true,
+  "ms": 213
+ }
+}

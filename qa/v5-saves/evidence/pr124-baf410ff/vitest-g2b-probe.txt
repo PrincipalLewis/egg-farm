@@ -1,0 +1,39 @@
+LOCK+START 2026-11-10T00:55:26+01:00 loadavg=1.74 3.76 5.96 3/2440 419675
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/pr124-baf410ff/wt
+
+ ❯ tests/_qa_g2b_pr124_probe.test.ts (10 tests | 1 failed) 14ms
+   × G2b M5S-BR-D6-RARITY-ENUM > long rarity strings accept; single-letter reject 6ms
+     → expected [ …(2) ] to deeply equal []
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/_qa_g2b_pr124_probe.test.ts > G2b M5S-BR-D6-RARITY-ENUM > long rarity strings accept; single-letter reject
+AssertionError: expected [ …(2) ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   "breed_revealed.offline: required",
++   "breed_revealed.duplicate: unknown field",
++ ]
+
+ ❯ tests/_qa_g2b_pr124_probe.test.ts:110:185
+    108|     expect(validateEvent({ ...baseEvt, rarity: 'C' } as any).some((e: …
+    109|     for (const r of ['Rare', 'Epic', 'Legendary'] as const) {
+    110|       expect(validateEvent({ type: 'breed_revealed', ts: 1, sid: 'a1b2…
+       |                                                                                                                                                                                         ^
+    111|     }
+    112|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 passed (10)
+   Start at  00:55:26
+   Duration  391ms (transform 170ms, setup 0ms, collect 204ms, tests 14ms, environment 0ms, prepare 51ms)
+
+EXIT=1
+END 2026-11-10T00:55:27+01:00

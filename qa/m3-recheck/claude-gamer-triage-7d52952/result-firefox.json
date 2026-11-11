@@ -1,0 +1,530 @@
+{
+ "390": {
+  "B2": {
+   "basket": "8",
+   "sellAll": "No eggs to sell",
+   "errs": []
+  },
+  "B3": {
+   "before": [
+    {
+     "cls": "order ready",
+     "hidden": false,
+     "txt": "0/8 eggs · $9.44 Sell 8 +$9.44",
+     "op": "1"
+    }
+   ],
+   "after": [
+    {
+     "ms": 80,
+     "rows": [
+      {
+       "cls": "order ready",
+       "hidden": false,
+       "txt": "0/8 eggs · $9.44 Sell 8 +$9.44",
+       "op": "1"
+      }
+     ],
+     "sellAll": "No eggs to sell"
+    },
+    {
+     "ms": 300,
+     "rows": [
+      {
+       "cls": "order ready leaving",
+       "hidden": false,
+       "txt": "0/8 eggs · $9.44 Sell 8 +$9.44",
+       "op": "0.677973"
+      }
+     ],
+     "sellAll": "No eggs to sell"
+    },
+    {
+     "ms": 700,
+     "rows": [],
+     "sellAll": "No eggs to sell"
+    },
+    {
+     "ms": 1500,
+     "rows": [],
+     "sellAll": "No eggs to sell"
+    }
+   ],
+   "fresh": [
+    {
+     "cls": "order wait",
+     "hidden": false,
+     "txt": "0/8 eggs · $9.44 Need 8",
+     "op": "1"
+    }
+   ],
+   "basket": 0,
+   "floaters": [],
+   "errs": []
+  },
+  "plus2": {
+   "cover": {
+    "collectId": "collect",
+    "covered": true,
+    "topEl": "body order-list"
+   },
+   "realClick": "blocked: locator.click: Timeout 1500ms exceeded.",
+   "floaters": [
+    {
+     "t": "+10",
+     "x": 165.78334045410156,
+     "y": 689.5833129882812,
+     "z": "auto"
+    }
+   ]
+  },
+  "B4": [
+   {
+    "ms": 0,
+    "m": {
+     "text": "$65.00",
+     "imgs": [
+      {
+       "c": "",
+       "src": "/assets/icon-coin.svg",
+       "x": 189.75,
+       "w": 20,
+       "h": 20,
+       "op": "1"
+      }
+     ],
+     "txt": [
+      {
+       "t": "$65.00",
+       "x": 217.75,
+       "r": 268.25,
+       "w": 50.5
+      }
+     ]
+    }
+   },
+   {
+    "ms": 100,
+    "m": {
+     "text": "$104.00",
+     "imgs": [
+      {
+       "c": "",
+       "src": "/assets/icon-coin.svg",
+       "x": 185.4166717529297,
+       "w": 20,
+       "h": 20,
+       "op": "1"
+      }
+     ],
+     "txt": [
+      {
+       "t": "$104.00",
+       "x": 213.4166717529297,
+       "r": 272.56666564941406,
+       "w": 59.149993896484375
+      }
+     ]
+    }
+   },
+   {
+    "ms": 400,
+    "m": {
+     "text": "$104.00",
+     "imgs": [
+      {
+       "c": "",
+       "src": "/assets/icon-coin.svg",
+       "x": 185.4166717529297,
+       "w": 20,
+       "h": 20,
+       "op": "1"
+      }
+     ],
+     "txt": [
+      {
+       "t": "$104.00",
+       "x": 213.4166717529297,
+       "r": 272.56666564941406,
+       "w": 59.149993896484375
+      }
+     ]
+    }
+   },
+   {
+    "ms": 1000,
+    "m": {
+     "text": "$104.00",
+     "imgs": [
+      {
+       "c": "",
+       "src": "/assets/icon-coin.svg",
+       "x": 185.4166717529297,
+       "w": 20,
+       "h": 20,
+       "op": "1"
+      }
+     ],
+     "txt": [
+      {
+       "t": "$104.00",
+       "x": 213.4166717529297,
+       "r": 272.56666564941406,
+       "w": 59.149993896484375
+      }
+     ]
+    }
+   },
+   {
+    "ms": 2500,
+    "m": {
+     "text": "$104.00",
+     "imgs": [
+      {
+       "c": "",
+       "src": "/assets/icon-coin.svg",
+       "x": 185.4166717529297,
+       "w": 20,
+       "h": 20,
+       "op": "1"
+      }
+     ],
+     "txt": [
+      {
+       "t": "$104.00",
+       "x": 213.4166717529297,
+       "r": 272.56666564941406,
+       "w": 59.149993896484375
+      }
+     ]
+    }
+   }
+  ],
+  "full": {
+   "coop": 100,
+   "collect": "Collect +10",
+   "bg": "rgb(255, 201, 60)",
+   "op": "1",
+   "disabled": "false",
+   "full": true,
+   "fullTxt": "Full!",
+   "coopFullMsg": [],
+   "goal": "Collection L2: +5/tap — ›"
+  },
+  "wages": [
+   {
+    "coins": 16609,
+    "inc": 243.58333333333334,
+    "wage": 2.083333333333333,
+    "net": 241.5,
+    "vis": [],
+    "goal": "Collection L5: +5/tap Ready! ›"
+   },
+   {
+    "coins": 16605,
+    "inc": 243.58333333333334,
+    "wage": 2.083333333333333,
+    "net": 241.5,
+    "vis": [],
+    "goal": "Collection L5: +5/tap Ready! ›"
+   },
+   {
+    "coins": 22521,
+    "inc": 342.25,
+    "wage": 2.083333333333333,
+    "net": 340.1666666666667,
+    "vis": [],
+    "goal": "Collection L5: +5/tap Ready! ›"
+   },
+   {
+    "coins": 22517,
+    "inc": 342.25,
+    "wage": 2.083333333333333,
+    "net": 340.1666666666667,
+    "vis": [],
+    "goal": "Collection L5: +5/tap Ready! ›"
+   },
+   {
+    "coins": 28248,
+    "inc": 437.8333333333333,
+    "wage": 2.083333333333333,
+    "net": 435.75,
+    "vis": [],
+    "goal": "Collection L5: +5/tap Ready! ›"
+   },
+   {
+    "coins": 28243,
+    "inc": 437.8333333333333,
+    "wage": 2.083333333333333,
+    "net": 435.75,
+    "vis": [],
+    "goal": "Collection L5: +5/tap Ready! ›"
+   }
+  ]
+ },
+ "1280": {
+  "B2": {
+   "basket": "8",
+   "sellAll": "No eggs to sell",
+   "errs": []
+  },
+  "B3": {
+   "before": [
+    {
+     "cls": "order ready",
+     "hidden": false,
+     "txt": "0/8 eggs · $9.44 Sell 8 +$9.44",
+     "op": "1"
+    }
+   ],
+   "after": [
+    {
+     "ms": 80,
+     "rows": [
+      {
+       "cls": "order ready",
+       "hidden": false,
+       "txt": "0/8 eggs · $9.44 Sell 8 +$9.44",
+       "op": "1"
+      }
+     ],
+     "sellAll": "No eggs to sell"
+    },
+    {
+     "ms": 300,
+     "rows": [
+      {
+       "cls": "order ready leaving",
+       "hidden": false,
+       "txt": "0/8 eggs · $9.44 Sell 8 +$9.44",
+       "op": "0.683895"
+      }
+     ],
+     "sellAll": "No eggs to sell"
+    },
+    {
+     "ms": 700,
+     "rows": [],
+     "sellAll": "No eggs to sell"
+    },
+    {
+     "ms": 1500,
+     "rows": [],
+     "sellAll": "No eggs to sell"
+    }
+   ],
+   "fresh": [
+    {
+     "cls": "order wait",
+     "hidden": false,
+     "txt": "0/8 eggs · $9.44 Need 8",
+     "op": "1"
+    }
+   ],
+   "basket": 0,
+   "floaters": [],
+   "errs": []
+  },
+  "plus2": {
+   "cover": {
+    "collectId": "collect",
+    "covered": false,
+    "topEl": "btn xl"
+   },
+   "realClick": "clicked",
+   "floaters": [
+    {
+     "t": "+20",
+     "x": 420.54998779296875,
+     "y": 705.566650390625,
+     "z": "auto"
+    }
+   ]
+  },
+  "B4": [
+   {
+    "ms": 0,
+    "m": {
+     "text": "$65.00",
+     "imgs": [
+      {
+       "c": "",
+       "src": "/assets/icon-coin.svg",
+       "x": 1126.75,
+       "w": 20,
+       "h": 20,
+       "op": "1"
+      }
+     ],
+     "txt": [
+      {
+       "t": "$65.00",
+       "x": 1154.75,
+       "r": 1205.25,
+       "w": 50.5
+      }
+     ]
+    }
+   },
+   {
+    "ms": 100,
+    "m": {
+     "text": "$104.00",
+     "imgs": [
+      {
+       "c": "",
+       "src": "/assets/icon-coin.svg",
+       "x": 1122.4166259765625,
+       "w": 20,
+       "h": 20,
+       "op": "1"
+      }
+     ],
+     "txt": [
+      {
+       "t": "$104.00",
+       "x": 1150.4166259765625,
+       "r": 1209.5666198730469,
+       "w": 59.149993896484375
+      }
+     ]
+    }
+   },
+   {
+    "ms": 400,
+    "m": {
+     "text": "$104.00",
+     "imgs": [
+      {
+       "c": "",
+       "src": "/assets/icon-coin.svg",
+       "x": 1122.4166259765625,
+       "w": 20,
+       "h": 20,
+       "op": "1"
+      }
+     ],
+     "txt": [
+      {
+       "t": "$104.00",
+       "x": 1150.4166259765625,
+       "r": 1209.5666198730469,
+       "w": 59.149993896484375
+      }
+     ]
+    }
+   },
+   {
+    "ms": 1000,
+    "m": {
+     "text": "$104.00",
+     "imgs": [
+      {
+       "c": "",
+       "src": "/assets/icon-coin.svg",
+       "x": 1122.4166259765625,
+       "w": 20,
+       "h": 20,
+       "op": "1"
+      }
+     ],
+     "txt": [
+      {
+       "t": "$104.00",
+       "x": 1150.4166259765625,
+       "r": 1209.5666198730469,
+       "w": 59.149993896484375
+      }
+     ]
+    }
+   },
+   {
+    "ms": 2500,
+    "m": {
+     "text": "$104.00",
+     "imgs": [
+      {
+       "c": "",
+       "src": "/assets/icon-coin.svg",
+       "x": 1122.4166259765625,
+       "w": 20,
+       "h": 20,
+       "op": "1"
+      }
+     ],
+     "txt": [
+      {
+       "t": "$104.00",
+       "x": 1150.4166259765625,
+       "r": 1209.5666198730469,
+       "w": 59.149993896484375
+      }
+     ]
+    }
+   }
+  ],
+  "full": {
+   "coop": 100,
+   "collect": "Collect +10",
+   "bg": "rgb(255, 201, 60)",
+   "op": "1",
+   "disabled": "false",
+   "full": true,
+   "fullTxt": "Full!",
+   "coopFullMsg": [],
+   "goal": "Collection L2: +5/tap — ›"
+  },
+  "wages": [
+   {
+    "coins": 16609,
+    "inc": 243.58333333333334,
+    "wage": 2.083333333333333,
+    "net": 241.5,
+    "vis": [],
+    "goal": "Collection L5: +5/tap Ready! ›"
+   },
+   {
+    "coins": 16605,
+    "inc": 243.58333333333334,
+    "wage": 2.083333333333333,
+    "net": 241.5,
+    "vis": [],
+    "goal": "Collection L5: +5/tap Ready! ›"
+   },
+   {
+    "coins": 22521,
+    "inc": 342.25,
+    "wage": 2.083333333333333,
+    "net": 340.1666666666667,
+    "vis": [],
+    "goal": "Collection L5: +5/tap Ready! ›"
+   },
+   {
+    "coins": 22517,
+    "inc": 342.25,
+    "wage": 2.083333333333333,
+    "net": 340.1666666666667,
+    "vis": [],
+    "goal": "Collection L5: +5/tap Ready! ›"
+   },
+   {
+    "coins": 28248,
+    "inc": 437.8333333333333,
+    "wage": 2.083333333333333,
+    "net": 435.75,
+    "vis": [],
+    "goal": "Collection L5: +5/tap Ready! ›"
+   },
+   {
+    "coins": 28243,
+    "inc": 437.8333333333333,
+    "wage": 2.083333333333333,
+    "net": 435.75,
+    "vis": [],
+    "goal": "Collection L5: +5/tap Ready! ›"
+   }
+  ]
+ },
+ "engine": "firefox",
+ "build": "m3-rc1-pre+7d52952"
+}

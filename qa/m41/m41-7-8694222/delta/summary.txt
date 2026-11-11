@@ -1,0 +1,25 @@
+2026-10-23 01:59:34 CEST === M41-7 delta on 86942226ed792598efa2dbc5b473dc7bc93073ab steps='prep testdiff csr9c qel rc0' DRY=0
+2026-10-23 01:59:34 CEST spec sha256: 530b29d3d37ab965… (want 2fbcd4eb61115c7f…, D-HOP-2026-10-23-01)
+2026-10-23 01:59:35 CEST ancestors: dd223f5 Y, 1682a0c Y, 66680eb Y, 9cce82d Y, 4c94704 Y, dfdf49c Y, b986cd3 Y,  pushed on: origin/fix/saves-csr-loadsafe 
+2026-10-23 01:59:39 CEST build:qa exit=0 build-id: m3-rc1-pre+8694222 
+2026-10-23 01:59:39 CEST -07 testdiff exit=0 TESTDIFF m4-exp1 IDENTICAL (HARD: m4-exp1 must be IDENTICAL to dfdf49c unless HoE justifies each line in /workspace/egg-farm-studio/qa/m41/m41-7-8694222/delta/testdiff/m4-exp1.changed-lines.txt)
+2026-10-23 01:59:41 CEST unit tests/m4-exp1-explainer.test.ts (incl. EXP-B1 AC(4) M4 off) exit=0       Tests  25 passed (25)
+2026-10-23 02:06:58 CEST csr9c-explainer exit=1 437s
+2026-10-23 02:06:58 CEST   CSR9C_EXPLAINER FAIL fails=12 build=m3-rc1-pre+8694222
+2026-10-23 02:09:57 CEST qe-late-browser exit=0 179s
+2026-10-23 02:09:57 CEST   QE_LATE_BROWSER chromium PASS checks=58 fails=0 buildId={"meta":"m3-rc1-pre+8694222","app":"m3-rc1-pre+8694222","tele":"m3-rc1-pre+8694222"}
+2026-10-23 02:12:11 CEST buildid-dist exit=1 134s
+2026-10-23 02:12:11 CEST   
+2026-10-23 02:14:23 CEST check-globals exit=1 132s
+2026-10-23 02:16:33 CEST rc0-chromium exit=1 130s
+2026-10-23 02:16:33 CEST porcelain end: 0 (want 0); :5961 STILL LISTENING
+2026-10-23 02:16:33 CEST DELTA_DONE
+2026-10-23 03:20:44 CEST === M41-7 delta on 86942226ed792598efa2dbc5b473dc7bc93073ab steps='rc0' DRY=0
+2026-10-23 03:20:44 CEST spec sha256: 530b29d3d37ab965… (want 2fbcd4eb61115c7f…, D-HOP-2026-10-23-01)
+2026-10-23 03:20:44 CEST ancestors: dd223f5 Y, 1682a0c Y, 66680eb Y, 9cce82d Y, 4c94704 Y, dfdf49c Y, b986cd3 Y,  pushed on: origin/fix/saves-csr-loadsafe 
+2026-10-23 03:20:50 CEST buildid-dist exit=0 6s
+2026-10-23 03:20:50 CEST   PASS runtime build-id [chromium] want m3-rc1-pre+8694222 [BUILD_PREFIX='m3-rc1-pre' from scripts/build-id.ts@8694222; no suffix allowed]
+2026-10-23 03:20:58 CEST check-globals exit=0 8s
+2026-10-23 03:25:53 CEST rc0-chromium exit=0 295s
+2026-10-23 03:25:53 CEST porcelain end: 0 (want 0); :5961 free
+2026-10-23 03:25:53 CEST DELTA_DONE

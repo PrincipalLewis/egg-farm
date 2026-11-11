@@ -1,0 +1,44 @@
+=== git diff --stat 49ee46ddce010f0087515c173d34c6076d47ea44..66c918442d4eab6c6d064d7a59bd1a9ecf29ce34 ===
+ src/save/m5-fields.ts          |  19 ++-
+ src/sim/abilities.ts           | 119 +++++++++++++++++++
+ src/sim/effects.ts             |   8 +-
+ src/sim/events.ts              |   2 +-
+ src/sim/m5-state.ts            |   6 +-
+ src/sim/payout.ts              |   3 +-
+ src/sim/timers.ts              |   5 +-
+ src/sim/workers.ts             |   7 +-
+ tests/v5-abilities-sim.test.ts | 260 +++++++++++++++++++++++++++++++++++++++++
+ tests/v5-f1a-fields.test.ts    |   2 +-
+ tests/v5-f2-m5-fields.test.ts  |  54 +++++++++
+ 11 files changed, 470 insertions(+), 15 deletions(-)
+
+=== git diff --name-status ===
+M	src/save/m5-fields.ts
+A	src/sim/abilities.ts
+M	src/sim/effects.ts
+M	src/sim/events.ts
+M	src/sim/m5-state.ts
+M	src/sim/payout.ts
+M	src/sim/timers.ts
+M	src/sim/workers.ts
+A	tests/v5-abilities-sim.test.ts
+M	tests/v5-f1a-fields.test.ts
+M	tests/v5-f2-m5-fields.test.ts
+
+FILE_COUNT=11
+PATCH_ID_tip_vs_rc=f07b8396e501ee3902e0a7555b46956293e1d6c4
+PATCH_ID_98e1af5_vs_f8036e8=f07b8396e501ee3902e0a7555b46956293e1d6c4
+EXPECTED_PATCH_ID=f07b8396e501ee3902e0a7555b46956293e1d6c4
+PATCH_ID_MATCH=YES
+
+=== reverts? ===
+
+=== commits 49ee46ddce010f0087515c173d34c6076d47ea44..66c918442d4eab6c6d064d7a59bd1a9ecf29ce34 (first 20) ===
+66c9184 Merge origin/rc/v5 49ee46dd into fix/saves-endcalls-durs (HoE merge-forward for #114; #106+#113 landed)
+98e1af5 Merge feat/v5-abilities-sim 7a492e5 into fix/saves-endcalls-durs (HoE merge-forward for #114) Co-authored-by: Korshunov Vadim <PrincipalLewis@users.noreply.github.com>
+7a492e5 Merge origin/rc/v5 (f8036e8, #105) into feat/v5-abilities-sim
+9e043c4 Merge rc/v5 f8036e8 into fix/saves-endcalls-durs (HoE merge-forward for #114)
+86973e5 v5 Saves: endCalls honors AbilityState.durS (D-HOE-41)
+c43d2db Merge rc/v5 into feat/v5-abilities-sim (HoQA merge-forward for #112)
+2ec5b80 fix(v5): abilities durS on AbilityState; drop top-level abilityDurS (#112 contract)
+cc0642a feat(v5): abilities sim — fireAbility/activateAll, call timer, Rush/Shout/Sweep/Inspect effects

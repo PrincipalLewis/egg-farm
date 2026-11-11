@@ -1,0 +1,32 @@
+2026-10-30T13:09:49.667Z # fatigue-cue selftest chromium 156.0.8078.47 fixture sha256 a3a531a1c198f8dc55a4a92eb4ddfdb213114df5588b533dba375fc6ca1b8e1e port 5281 pid 3787972
+2026-10-30T13:12:45.126Z # positive: 437 pass, 0 fail, 8 unverified, 1 blocked (175 s)
+2026-10-30T13:12:45.459Z PASS  NEG chip740    -> SS-38a: caught: .fslot not rendered at >=740; .hud .fchip rendered at >=740; no CSSOM rule with media (max-height: 739px)
+2026-10-30T13:12:45.841Z PASS  NEG debounce   -> SS-38b: caught: 739->740: 2 rAF after resize variant=icon, want subline (JS-debounced or not CSS-driven)
+2026-10-30T13:12:46.995Z PASS  NEG bucket     -> SS-38e: caught: viewport_h '<740' != '740-899' at innerHeight 740
+2026-10-30T13:12:47.423Z PASS  NEG geom       -> SS-41: caught: chip 220.4,5–264.4,49 != 216.4,5–260.4,49
+2026-10-30T13:12:47.860Z PASS  NEG coinsbtn   -> SS-41: caught: coins pill is focusable (FC-SV16: no tabindex, non-focusable); coins pill has an interactive role/handler (button)
+2026-10-30T13:12:50.343Z PASS  NEG arialabel  -> SS-39a: caught: icon has aria-label "Tired workers" (must be content-based); name raw "Tired workers" != "Tired workers are costing $999.9K per second. Show details."
+2026-10-30T13:12:54.159Z PASS  NEG cover      -> SS-40a,SS-37: caught: popover 26.4,190–260.7,242 != 26.1,62–260.4,114; Manage 172.7,194–254.7,238 != 172.4,66–254.4,110; popover covers golden spot(s) S1
+2026-10-30T13:12:56.555Z PASS  NEG shift      -> SS-40a: caught: layout shift 10 px on open/close
+2026-10-30T13:12:59.004Z PASS  NEG trap       -> SS-40a: caught: Tab from chip: manage>manage (want Manage, then out of the popover: no focus trap); Shift+Tab from Manage -> manage (want chip, FC-SV15)
+2026-10-30T13:13:01.436Z PASS  NEG labelclip  -> LAYOUT: caught: label fpop-t clipped (scrollWidth 121 > clientWidth 40)
+2026-10-30T13:13:06.357Z PASS  NEG swallow    -> SS-40p1: caught: target received 0 click events (want exactly 1: swallowed); 0 activations by state/handler delta (want exactly 1); golden egg still present
+2026-10-30T13:13:11.036Z PASS  NEG double     -> SS-40p3: caught: target received 2 click events (want exactly 1: double activation)
+2026-10-30T13:13:27.544Z PASS  NEG timeout    -> SS-40c: caught: idle10s: popover closed (want open, no timeout)
+2026-10-30T13:13:44.066Z PASS  NEG resizeopen -> SS-38c: caught: i 360x739->360x740 open-chip: popover still open after the crossing
+2026-10-30T13:13:44.239Z PASS  NEG rmscale    -> SS-40e: caught: scale animation under reduced motion on popover,popover
+2026-10-30T13:13:44.725Z PASS  NEG tapnav     -> SS-42: caught: h 740: sub-line tap did not open Workers; h 740: sub-line tap opened the popover; Workers order unreadable
+2026-10-30T13:13:45.923Z PASS  NEG ratex      -> SS-RATE: caught: #rate "−$999.9K/s" shows the fatigue loss X $999.9K
+2026-10-30T13:13:47.273Z PASS  NEG sub740     -> SS-37: caught: counts 5/5/2 != flag-off 8/7/4; failing spot set S4,S5,S8 != flag-off S4; Broody-eligible 0,11 != flag-off 0,5,8,9,10,11
+2026-10-30T13:13:55.433Z PASS  NEG tapclose   -> SS-48t: caught: chipClose: 0 fatigue_cue_tapped (want exactly 1, SS-48 spec v1.3.27 L485-489)
+2026-10-30T13:14:03.818Z PASS  NEG esclog     -> SS-48t: caught: esc: 1 fatigue_cue_tapped (want exactly 0, SS-48 spec v1.3.27 L485-489)
+2026-10-30T13:14:06.717Z PASS  NEG stallkeep  -> SS-47: caught: popover still open after the stall chip showed
+2026-10-30T13:14:09.467Z PASS  NEG refire     -> SS-47: caught: 1 fatigue_cue_* event(s) across stall show/clear (fatigue_cue_shown): no log, no re-fired shown
+2026-10-30T13:14:09.821Z PASS  NEG subsr      -> SS-39s: caught: name raw "Tired −$999.9K/s Open workers." != "Tired −$999.9K/s"
+2026-10-30T13:14:10.187Z PASS  NEG sub400     -> SS-39s: caught: name raw "Tired −$999.9K/s" != "Tired workers −$999.9K/s"
+2026-10-30T13:14:12.622Z PASS  NEG dialog     -> SS-40a: caught: popover role=dialog (want group, not dialog; FC-SV15)
+2026-10-30T13:14:15.155Z PASS  NEG oldname    -> SS-39a: caught: name raw "Tired workers are costing $999.9K per second. Open workers." != "Tired workers are costing $999.9K per second. Show details."
+2026-10-30T13:14:15.549Z PASS  NEG nohyst     -> SS-49: caught: 2 fatigue_cue_shown, model expects 1 episode(s) (Rule 2 hysteresis)
+2026-10-30T13:14:17.124Z PASS  NEG rowtie     -> SS-40d: caught: Shift sheet focused row hawker != coop_hand (max workerAtRisk, ties in code id order market_hand > coop_hand > hawker > grader)
+2026-10-30T13:14:21.082Z PASS  NEG swallow@960 -> SS-40p3: caught: target received 0 click events (want exactly 1: swallowed); 0 activations by state/handler delta (want exactly 1); basket not emptied
+2026-10-30T13:14:21.083Z # chromium: SELFTEST PASS (positive fails 0, negatives missed 0/29) 271 s

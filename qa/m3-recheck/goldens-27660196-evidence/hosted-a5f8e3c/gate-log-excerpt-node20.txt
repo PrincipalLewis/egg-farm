@@ -1,0 +1,14 @@
+120:2026-11-06T01:39:36.2241951Z HEAD is now at 69f9c61 Merge a5f8e3c916833eae0a68aca03940e2fd08e01725 into 71375901de8b72acfaa49c695c5c18f0d0088080
+126:2026-11-06T01:39:36.3073648Z   node-version: 20
+135:2026-11-06T01:39:37.2375329Z Acquiring 20.20.2 - x64 from https://github.com/actions/node-versions/releases/download/20.20.2-23521894959/node-20.20.2-linux-x64.tar.gz
+140:2026-11-06T01:39:40.9073744Z node: v20.20.2
+558:2026-11-06T01:44:40.4566541Z [2m Test Files [22m [1m[32m153 passed[39m[22m[90m (153)[39m
+613:2026-11-06T01:50:32.8133847Z [2m Test Files [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+636:2026-11-06T01:50:39.3931941Z check-release-build: m4.1+69f9c61 ok
+647:2026-11-06T01:50:39.4283045Z ##[group]Run npm run check-globals -- chromium
+648:2026-11-06T01:50:39.4283377Z [36;1mnpm run check-globals -- chromium[0m
+657:2026-11-06T01:51:20.2532329Z PASS [chromium] B-4 release ?perf=1: eggfarm* globals ["eggfarmExportTelemetry"], no perf overlay
+658:2026-11-06T01:51:21.5826032Z PASS [chromium] refused newer-save boot window globals vs blank page: []
+659:2026-11-06T01:51:21.5827769Z PASS [chromium] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]
+671:2026-11-06T01:51:28.3328564Z check-release-build: m4.1+69f9c61 ok
+687:2026-11-06T01:51:28.4126417Z check-release-build: m4.1+69f9c61 ok

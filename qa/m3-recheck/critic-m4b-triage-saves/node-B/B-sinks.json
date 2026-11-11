@@ -1,0 +1,36 @@
+{
+ "state": {
+  "F": 23,
+  "H": 15,
+  "V": 20,
+  "C": 15,
+  "coinsCents": 154300,
+  "graderTier": 1
+ },
+ "wageCentsPerSec": 28.749999999999996,
+ "noPurchase5s": {
+  "coinsDeltaCents": -162,
+  "wageEventsCents": 162,
+  "otherCoinEvents": 0
+ },
+ "sinks": {
+  "hens_L16": 1842,
+  "eggValue_L21": 14397,
+  "collect_L16": 11529,
+  "farm_L24": 68756,
+  "grader_tier2": 9100
+ },
+ "hensHypothesis": {
+  "secondsToAffordFrom1543": 0.964516129032258,
+  "coinsAfterBuy": 0,
+  "secondsAfterBuyToShow369": 1.1903225806451614,
+  "totalSecondsFrom1543To369": 2.1548387096774193
+ },
+ "hensBuyCheck": {
+  "coinsAfter": 0,
+  "hensLevel": 16,
+  "events": [
+   "upgrade"
+  ]
+ }
+}

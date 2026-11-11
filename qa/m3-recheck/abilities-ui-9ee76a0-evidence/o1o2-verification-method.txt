@@ -1,0 +1,14 @@
+O1/O2 approved meanings (Architect abilities-ui-9ee76a0-architect-addendum + prior a3c6dc5 CHANGES):
+O1: docking mid-close (matchMedia docked flip while upgradesClosePending) must call sheetCloseComplete so anySheetOpen clears and attendance resumes; sheet hidden.
+O2: reopen Upgrades while pending must complete pending first (openPanel always sheetCloseComplete if pending) so stale transitionend cannot hide the newly open panel.
+
+Executed this turn (meaningful lifecycle, not fixture-only):
+1) Full product suite tests/v5-abilities-ui.test.ts via vitest mountApp + fake matchMedia — 15/15 PASS (includes AB-14 sheetCloseComplete hold + O1/O2).
+2) Named verbose filter `-t 'O1:|O2:|sheetCloseComplete hold'`:
+   - O1: docking mid-close completes pending sheet and restores attendance — PASS
+   - O2: reopen Upgrades during pending close cancels stale listener before open — PASS
+   - AB-14 fireAbility/activateAll hold until sheetCloseComplete — PASS
+   Result: 4 passed | 11 skipped (15), exit 0. Log: o1o2-verbose.log
+
+NOT RUN: Chromium/Playwright full-GUI O1/O2 with screenshots. No tip-local browser harness for these edges was found; Architect/product evidence is jsdom/mountApp. If HoQA requires engine GUI screenshots for O1/O2, parent should authorize computerUse/browser harness on exact tip with: one engine at a time, own port ≠4173, browser lock timeout 600, active-tab assertion + shots immediately after measurement, open verify shots.
+Screenshots: none produced (no GUI run). Fixtures alone were not credited as live PASS — product vitest exercises real sheetCloseComplete/openPanel paths on tip UI code.

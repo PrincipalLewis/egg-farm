@@ -1,0 +1,9 @@
+HEAD 5789805911ad7f96c23fdf42d06a1854a936c0c3 porcelain=0
+sync-check exit=0 1s
+tsc exit=0 2s
+vitest exit=0 188s
+build exit=0 7s
+build-html exit=0 7s
+build-qa exit=0 7s
+check-globals exit=0 59s
+porcelain-after=

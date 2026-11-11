@@ -1,0 +1,44 @@
+# diff origin/rc/v5 (eed62687) .. f46544efaae907217126491b29588d77258ab28a
+ 14 files changed, 494 insertions(+), 37 deletions(-)
+M	src/config/formulas.ts
+M	src/game.ts
+M	src/main.ts
+M	src/save/m5-fields.ts
+M	src/save/save.ts
+M	src/sim/actions.ts
+M	src/sim/golden.ts
+M	src/sim/state.ts
+M	src/sim/timers.ts
+M	src/ui/app.ts
+M	tests/v5-f1b-clock-rng.test.ts
+A	tests/v5-golden-m5persist.test.ts
+A	tests/v5-golden-spawn.test.ts
+M	tests/v5-streak-sim.test.ts
+3	1	src/config/formulas.ts
+3	3	src/game.ts
+1	1	src/main.ts
+23	12	src/save/m5-fields.ts
+5	5	src/save/save.ts
+7	2	src/sim/actions.ts
+97	7	src/sim/golden.ts
+4	0	src/sim/state.ts
+5	3	src/sim/timers.ts
+1	1	src/ui/app.ts
+2	1	tests/v5-f1b-clock-rng.test.ts
+121	0	tests/v5-golden-m5persist.test.ts
+220	0	tests/v5-golden-spawn.test.ts
+2	1	tests/v5-streak-sim.test.ts
+--- status letters other than A/M:
+none
+--- commits in tip not in rc/v5:
+f46544e Merge rc/v5 into feat/v5-golden-spawn (#108 mergefwd onto eed62687)
+0055233 Merge feat/v5-golden-rewards into feat/v5-golden-spawn (#108 mergefwd onto a5f8e3c)
+647a4f0 Merge feat/v5-golden-rewards into feat/v5-golden-spawn (Architect APPROVE)
+811c7da Merge pull request #109 from PrincipalLewis/fix/saves-golden-m5persist
+90fb447 v5 #1 golden: restore M5_TC_KEYS.abilities (Architect M1)
+98d2cbe v5 golden persist B: debugBackdateSave passes the live balance into its backdated save, so an on-screen egg gets the same copy-draw as a normal save.
+dfaffa6 Merge GE-AC26 rewards validation into golden spawn stack
+ca04b06 v5 golden persist B: m5Persist draws one R3 gap on a detached copy when golden is on and an egg is on screen, and stores that advanced evRngState with the new countdown. Live state is unchanged, SAVE_VERSION stays 6, and a missing egg (including spawn-due 0) is still strip-only.
+b0d7e85 v5 #1 golden slice 2: spawnGolden{valid spot ids} + R15 deferral (500 ms focus recheck), focus-clock first spawn/gap/lifetime, tapGolden (R19 grace, one grant), evRng gap->slot->reward, collectible_*/frenzy_* sim events, session-only pending/Frenzy run, goldenUnload seam, tc_frenzy_all_sales must be 1; flag golden 0, no UI/save change
+--- revert-subject commits:
+--- pure deletions (files with 0 added, >0 deleted):

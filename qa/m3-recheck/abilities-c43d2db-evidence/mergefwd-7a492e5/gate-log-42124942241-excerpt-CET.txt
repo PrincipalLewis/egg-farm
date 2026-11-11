@@ -1,0 +1,17 @@
+raw line 120: 2026-11-05 23:54:29 CET (Europe/Belgrade) HEAD is now at 8e47eeb Merge 7a492e5fea47f9bb92ae2d07e82820c64471ec5a into f8036e8f0826ca76fcc0ee13092d575533d4969b
+raw line 140: 2026-11-05 23:54:33 CET (Europe/Belgrade) node: v20.20.2
+raw line 178: 2026-11-05 23:54:35 CET (Europe/Belgrade) balance.json up to date with economy.csv
+raw line 196: 2026-11-05 23:54:40 CET (Europe/Belgrade)    ✓ QA-D-1030-SHIPFLAGS: the run records balance.json sha256 + m4 flags (results/ and SHA256SUMS) > `pacing-x1-stack.ts -- inputs` writes balance.txt (sha256 first, every m4 flag) and a byte copy whose sha256 is the tree file 1061ms
+raw line 545: 2026-11-05 23:57:56 CET (Europe/Belgrade)  Test Files  149 passed (149)
+raw line 546: 2026-11-05 23:57:56 CET (Europe/Belgrade)       Tests  2167 passed | 1 skipped (2168)
+raw line 600: 2026-11-06 00:01:47 CET (Europe/Belgrade)  Test Files  4 passed (4)
+raw line 601: 2026-11-06 00:01:47 CET (Europe/Belgrade)       Tests  17 passed | 1 skipped (18)
+raw line 613: 2026-11-06 00:01:47 CET (Europe/Belgrade) balance.json up to date with economy.csv
+raw line 634: 2026-11-06 00:01:52 CET (Europe/Belgrade) ##[group]Run npm run check-globals -- chromium
+raw line 635: 2026-11-06 00:01:52 CET (Europe/Belgrade) npm run check-globals -- chromium
+raw line 639: 2026-11-06 00:01:52 CET (Europe/Belgrade) > egg-farm@0.1.0 check-globals
+raw line 643: 2026-11-06 00:01:53 CET (Europe/Belgrade) check-globals: dist m4.1+8e47eeb on port 46081
+raw line 644: 2026-11-06 00:02:14 CET (Europe/Belgrade) PASS [chromium] B-4 release ?perf=1: eggfarm* globals ["eggfarmExportTelemetry"], no perf overlay
+raw line 645: 2026-11-06 00:02:15 CET (Europe/Belgrade) PASS [chromium] refused newer-save boot window globals vs blank page: []
+raw line 646: 2026-11-06 00:02:15 CET (Europe/Belgrade) PASS [chromium] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]
+raw line 655: 2026-11-06 00:02:16 CET (Europe/Belgrade) balance.json up to date with economy.csv

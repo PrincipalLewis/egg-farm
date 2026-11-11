@@ -1,0 +1,8 @@
+--- scratch/backup-f2-1252/run-flagsoff.sh	2026-10-30 10:40:02.597467016 +0100
++++ v5-saves/probes/run-flagsoff.sh	2026-10-30 12:52:09.127047197 +0100
+@@ -7,4 +7,4 @@
+     rm -f tests/zz-qa-flagsoff.test.ts; echo "status:[$(git status --porcelain)]" >> $O/probe-${r:0:7}.log ); done
+ node $P/flagsoff-compare.mjs $O/probe-${C:0:7}.jsonl $O/probe-458f74c.jsonl > $O/compare.txt 2>&1; echo "compare exit=$?" >> $O/compare.txt
+ for r in 458f74c $C; do git -C $G worktree remove --force $S/wt-flagsoff-${r:0:7}; done; git -C $G worktree prune
+-(cd $O && find . -type f ! -name SHA256SUMS | sort | xargs sha256sum > SHA256SUMS); echo DONE >> $O/compare.txt
++echo DONE >> $O/compare.txt; (cd $O && find . -type f ! -name SHA256SUMS | sort | xargs sha256sum > SHA256SUMS)

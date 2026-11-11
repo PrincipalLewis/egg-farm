@@ -1,0 +1,31 @@
+PASS fixture k10/balance-9a73bd8a.json sha256 pinned 9a73bd8a :: 9a73bd8a6ebb936792c9c5fc667f37d295ecb9f8b74149112d50b297d228bb89
+PASS fixture balance-883d1b0d.json sha256 pinned 883d1b0d :: 883d1b0dbc29c44af2f032ee81529aa0d138bf6fe44c41e5f517202aa605dc18
+PASS k10 balance-9a73bd8a (no bbv2, bestBuyV2=0) validates :: OK
+PASS VER-1h balance-883d1b0d (no bbv2, bestBuyV2=0) validates :: OK
+PASS k10 fixture + bestBuyV2=1 (no block) FAILS :: THROW balance.telemetry.bbv2.shown_min_gap_s must be > 0
+PASS shipping balance.json validates :: OK
+PASS missing block + bestBuyV2=0 validates :: OK
+PASS missing block + bestBuyV2=absent validates :: OK
+PASS missing block + bestBuyV2=1 FAILS :: THROW balance.telemetry.bbv2.shown_min_gap_s must be > 0
+PASS present shown_min_gap_s=0 rejected (> 0) :: THROW balance.telemetry.bbv2.shown_min_gap_s must be > 0
+PASS present shown_min_gap_s=-1 rejected (> 0) :: THROW balance.telemetry.bbv2.shown_min_gap_s must be > 0
+PASS present zero_gain_eta_max_s=0 rejected (> 0) :: THROW balance.telemetry.bbv2.zero_gain_eta_max_s must be > 0
+PASS present zero_gain_eta_max_s=-1 rejected (> 0) :: THROW balance.telemetry.bbv2.zero_gain_eta_max_s must be > 0
+PASS present dead_zone_min_s=0 rejected (> 0) :: THROW balance.telemetry.bbv2.dead_zone_min_s must be > 0
+PASS present dead_zone_min_s=-1 rejected (> 0) :: THROW balance.telemetry.bbv2.dead_zone_min_s must be > 0
+PASS present zero_gain_purchase_cap=0 rejected (> 0) :: THROW balance.telemetry.bbv2.zero_gain_purchase_cap must be > 0
+PASS present zero_gain_purchase_cap=-1 rejected (> 0) :: THROW balance.telemetry.bbv2.zero_gain_purchase_cap must be > 0
+PASS partial block (no shown_min_gap_s), bestBuyV2=0 FAILS :: THROW balance.telemetry.bbv2.shown_min_gap_s must be > 0
+PASS partial block (no shown_min_gap_s), bestBuyV2=1 FAILS :: THROW balance.telemetry.bbv2.shown_min_gap_s must be > 0
+PASS partial block (no zero_gain_eta_max_s), bestBuyV2=0 FAILS :: THROW balance.telemetry.bbv2.zero_gain_eta_max_s must be > 0
+PASS partial block (no zero_gain_eta_max_s), bestBuyV2=1 FAILS :: THROW balance.telemetry.bbv2.zero_gain_eta_max_s must be > 0
+PASS partial block (no dead_zone_min_s), bestBuyV2=0 FAILS :: THROW balance.telemetry.bbv2.dead_zone_min_s must be > 0
+PASS partial block (no dead_zone_min_s), bestBuyV2=1 FAILS :: THROW balance.telemetry.bbv2.dead_zone_min_s must be > 0
+PASS partial block (no zero_gain_purchase_cap), bestBuyV2=0 FAILS :: THROW balance.telemetry.bbv2.zero_gain_purchase_cap must be > 0
+PASS partial block (no zero_gain_purchase_cap), bestBuyV2=1 FAILS :: THROW balance.telemetry.bbv2.zero_gain_purchase_cap must be > 0
+PASS empty block {} FAILS :: THROW balance.telemetry.bbv2.shown_min_gap_s must be > 0
+PASS bbv2:null treated as present -> FAILS :: THROW balance.telemetry.bbv2.shown_min_gap_s must be > 0
+PASS cap 1.5 rejected (integer) :: THROW balance.telemetry.bbv2.zero_gain_purchase_cap must be an integer
+PASS shown_min_gap_s '5' (string) rejected :: THROW balance.telemetry.bbv2.shown_min_gap_s must be > 0
+PASS INFO bestBuyV2=true (non-1) + no block :: THROW balance.m4.flags.bestBuyV2 invalid
+VB: PASS 30/30

@@ -1,0 +1,18 @@
+=== pacing-x1-stack aggregate 42114562232 / job 127572997956 ===
+headSha: d9539a54e3f0beb36168d4dc247e337d1bd878b4
+run conclusion: failure (expected: RC-only row 904)
+shards: casual SUCCESS, optimal SUCCESS, seller15 SUCCESS
+observed Europe/Belgrade: aggregate completed ~2026-11-05T23:35:00+01:00
+
+## pacing-x1-stack: **FAIL**
+- data: shipped-tree; CSV sha256 a8c4e268…; balance.json sha256 ddd02fba…
+- rows: 45 PASS, 0 FAIL, 1 WARN, 20 INFO, 0 PENDING-REPRED, 3 N/A (row 903), 12 NOT-WIRED (3 blocking), 24 EXCLUDED
+- **FAIL: blocking row 904 optimal NOT-WIRED**
+- **FAIL: blocking row 904 seller15 NOT-WIRED**
+WARN L897 optimal N / H: worst 191 > 180 s (pre-existing L0–30 dead zone, known risk)
+FAIL: blocking row 904 optimal NOT-WIRED
+FAIL: blocking row 904 seller15 NOT-WIRED
+FAIL: blocking row 904 casual NOT-WIRED
+##[error]Process completed with exit code 1.
+
+Full log: pacing-aggregate-full.txt

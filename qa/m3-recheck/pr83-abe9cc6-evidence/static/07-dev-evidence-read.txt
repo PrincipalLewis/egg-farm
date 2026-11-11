@@ -1,0 +1,9 @@
+# developer shots opened by QA (developer evidence, not QA evidence), 2026-10-30T11:49:17+01:00
+036c81bd4bf188875db352650e2f85b004b23ac7f0ea27fa8cfbc266ea38ab91  artifacts/m41-p2/results-abe9cc6/shots/chromium-nav-upgrades-n1-360.png
+dd65d08dcf2b704e10ffcc544a31f6738566aac5e838ec0f8931f7a00065d767  artifacts/m41-p2/results-abe9cc6/shots/webkit-nav-upgrades-n2-390.png
+65a0d79f8df25d2344847de6e01cc5467791ace5827e5896621310a0afddbbce  artifacts/m41-p2/results-abe9cc6/shots/firefox-cooldown-max-0-30-360.png
+f5a015add5816100d4aa773cd138b35f9cd7c8f229577c73eacde2a896d54b5f  artifacts/m41-p2/results-abe9cc6/shots/webkit-cooldown-max-0-30-1280.png
+2c7af2af48810194433bfa838ed4e3e6b88a4f3b64bef363bad611cc2b6ee0f6  artifacts/m41-p2/results-abe9cc6/shots/firefox-focus-under-refill-bar-360.png
+# HoE results-abe9cc6/SHA256SUMS: 143 entries, sha256sum -c rc 0 (11:47 CET)
+# 11-m41-p2-browser-{chromium,firefox,webkit}.log: 281/281 checks pass each (+0 INFO, 0 findings), node v20.19.2, .browser-test.lock
+# 11-m41-p2-browser-webkit.run1-load22.log (superseded first WebKit run, load ~22): 2 FAIL (Art n1 #70 refund-pop frame count; UI-M1-3/4 popin 815ms) - timing-under-load, re-run passed at load 8.86

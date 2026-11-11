@@ -1,0 +1,643 @@
+diff --git a/src/game.ts b/src/game.ts
+index 07b827b..0746c39 100644
+--- a/src/game.ts
++++ b/src/game.ts
+@@ -19,6 +19,8 @@ import type { IdbBoot } from './save/idb-mirror';
+ import { TELEMETRY_KEY } from './telemetry/telemetry';
+ import { migrateStoredTracksV7 } from './sim/migrate-v7';
+ import { Telemetry, installId } from './telemetry/telemetry';
++import { flushBreedsTel } from './sim/breeds'; // M5.1 breeds §8 (drift row 34)
++import { sessionEndBreedsFields } from './telemetry/breeds-session'; // M5.1 breeds §8 (drift row 34)
+ export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
+ /** Glue between sim, storage and telemetry; UI only talks to this. */
+ /** The same balance with the M4 flag off: a pending or aborted track migration runs the session as plain v6 (M4-14). */
+@@ -113,7 +115,8 @@ export class Game {
+     if (!this.readOnly) this.save(); // never on a refused newer save (M4A-31(f)6); persist pending offline eggs + new timestamp so the grant never repeats for one absence
+   }
+   private grantOffline(gapMs: number) {
+-    const r = applyOffline(this.state, gapMs, this.b); this.state = r.state; if (r.reveal) this.pendingReveal = r.reveal;
++    const ev: SimEvent[] = []; const r = applyOffline(this.state, gapMs, this.b, ev); this.state = r.state; if (r.reveal) this.pendingReveal = r.reveal;
++    this.emit(ev); // M5.1 breeds §8: breed_revealed{offline:true} / flock_complete / breed_slotted from the grant step (none flag off)
+     if (r.eggs > 0) { this.offline = { eggs: r.eggs, awayS: r.awayS }; this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs }); }
+     return r.eggs;
+   }
+@@ -310,7 +313,12 @@ export class Game {
+   endSession() {
+     if (this.resetting || this.inactive || this.held()) return;
+     const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
+-    this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
++    // ---- M5.1 breeds session_end (HoE/breeds-telemetry-emitters, drift row 34; gen/breeds-telemetry). Flag off: {} (absent). ----
++    // present_active_s / present_lost_count belong to Saves (saves/breeds-sim-prB-traits): merge their fields in beside breedsEnd.
++    { const ev: SimEvent[] = []; this.state = flushBreedsTel(this.state, this.b, ev); this.emit(ev); } // open breed_slotted windows close
++    const breedsEnd = sessionEndBreedsFields(this.state, this.b);
++    // ---- end M5.1 breeds session_end block ----
++    this.telemetry.track('session_end', { ...breedsEnd }); this.save(); this.telemetry.flush(true); }
+   dispatch(a: Action) {
+     if (this.inactive || this.held()) return;
+     const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev, this.attendedNow()); this.emit(ev); this.checkCoopFull(); // Q-F1c-1 (D-HOP-2026-10-29-06)
+diff --git a/src/save/m5-fields.ts b/src/save/m5-fields.ts
+index 93dd3a6..b27b20b 100644
+--- a/src/save/m5-fields.ts
++++ b/src/save/m5-fields.ts
+@@ -33,7 +33,7 @@ export const BROODY_NEST_MAX_CENTS = 1e15; export const BROODY_SLOTS = 12;
+ /** Never saved (F1a M5_SESSION_FIELDS: golden R10a on-screen egg, streak R11 s, I_ref ring, Broody nestScaled/brRng). */
+ export const M5_SESSION_KEYS = M5_SESSION_FIELDS; // ONE list, owned by sim/m5-state.ts (CCR m1 on #77)
+ /** Session keys outside F1a M5Fields: the #2 streak run stats (streak_peak, sim/streak.ts). Never saved either. */
+-const SESSION_ONLY_KEYS: readonly string[] = [...M5_SESSION_KEYS, 'streakRun', 'breedsRawSlots', 'goldenPending', 'frenzyRun']; // + #1 golden session records // + M5.1 breeds E10 shadow (PMC Q5)
++const SESSION_ONLY_KEYS: readonly string[] = [...M5_SESSION_KEYS, 'streakRun', 'breedsRawSlots', 'goldenPending', 'frenzyRun', 'breedsTel']; // + #1 golden session records // + M5.1 breeds E10 shadow (PMC Q5) // + breeds §8 telemetry
+ const fin = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0;
+ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+ const isU32 = (v: unknown) => Number.isInteger(v) && (v as number) > 0 && (v as number) <= 0xffffffff;
+diff --git a/src/sim/actions.ts b/src/sim/actions.ts
+index 2259d9f..11d28cd 100644
+--- a/src/sim/actions.ts
++++ b/src/sim/actions.ts
+@@ -112,8 +112,8 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended =
+       ev?.push({ type: 'worker_manage_all', workers: need, energyBefore: need.map(id => Math.round(s.workers[id]!.energy)) });
+       return { ...s, workers, manageCdS: b.workers.energy.manage_cooldown_s };
+     }
+-    case 'hatch': return startHatch(s, b);
+-    case 'placeBreed': return placeBreed(s, b, a.slot, a.id);
++    case 'hatch': return startHatch(s, b, ev); // §8 hatch_started (drift row 34)
++    case 'placeBreed': return placeBreed(s, b, a.slot, a.id); // §8 breed_slotted: opens a 1,000 ms window; the tick sink emits it on close
+     case 'markCelebrated': return { ...s, celebratedTier: Math.max(s.celebratedTier, a.tier) };
+     // Closing the welcome-back modal without tapping Collect still grants the eggs.
+     // S2-3a / MK-22: closing the welcome-back modal brings the first customer on the next tick (deterministic: timer -> 0).
+diff --git a/src/sim/breeds-hatch.ts b/src/sim/breeds-hatch.ts
+index 94864ff..8a3a336 100644
+--- a/src/sim/breeds-hatch.ts
++++ b/src/sim/breeds-hatch.ts
+@@ -9,21 +9,28 @@ import { BP_HALF, BP_ONE, FARM_SOON_HATCH_MULT, BREED_IDS, CENTS_PER_DOLLAR, RAR
+ import { farmCost } from '../config/formulas';
+ import { incomePerSec } from '../econ/income';
+ import { nextRand, type GameState } from './state';
+-import { on, revealHatch, isFlockComplete, dropRawSlots, type BreedsSave } from './breeds';
++import { on, revealHatch, isFlockComplete, dropRawSlots, rarityName, noteSlotChange, tickSlotWindows, addFamilyMs, noteHatch, type BreedsSave } from './breeds';
++import type { Sink } from './events';
+ const br = (s: GameState) => s.breeds as BreedsSave;
+ /** Tick (note point 1), at the end of step after streak, on SIM dt (never focus): (a) settle timers of slots filled before this
+  *  tick, (b) incubator, reveal + auto-slot (full settle, not decremented this tick), (c) sinceUnlockMs (frozen after flock_complete).
+  *  Q4 (D-HOE-20261030-14): `slotsFarm` = the Farm level at the START of the frame, so a slot unlocked by a purchase in this
+  *  frame can't take the auto-slot (E15: reveal first, then the unlock). No clock (bots, hidden sim) = the current level. */
+-export function breedsTick(s: GameState, dt: number, b: Balance, slotsFarm?: number): GameState {
++/** §8 telemetry (ev): open breed_slotted windows advance by dt first (a window opened this tick is not counted down this tick);
++ *  breed_family_s adds dt for each slot settled at the start of the tick; revealHatch emits breed_revealed / flock_complete and the
++ *  auto-slot opens a window (cause auto_reveal). Session-only `breedsTel` only; the saved `breeds` blob is unchanged by telemetry. */
++export function breedsTick(s: GameState, dt: number, b: Balance, slotsFarm?: number, ev?: Sink): GameState {
+   if (!on(s, b)) return s;
+   const dtMs = Math.round(dt * 1000); let x = br(s);
++  s = addFamilyMs(tickSlotWindows(s, dtMs, ev), x, dtMs);
+   if (x.settleMs.some(v => v > 0)) x = { ...x, settleMs: x.settleMs.map(v => Math.max(0, v - dtMs)) as BreedsSave['settleMs'] };
++  let slot = -1;
+   if (x.incubator) {
+     x = { ...x, incubator: { ...x.incubator, remainingMs: x.incubator.remainingMs - dtMs } };
+-    if (x.incubator!.remainingMs <= 0) x = revealHatch(x, b, unlockedSlots(Math.min(s.farmLevel, slotsFarm ?? s.farmLevel), b)).br;
++    if (x.incubator!.remainingMs <= 0) { const r = revealHatch(x, b, unlockedSlots(Math.min(s.farmLevel, slotsFarm ?? s.farmLevel), b), { ev, farm: s.farmLevel }); x = r.br; slot = r.slot; }
+   }
+   if (s.farmLevel >= bc(b, 'unlock_farm') && x.flockCompleteLogged !== 1) x = { ...x, sinceUnlockMs: (x.sinceUnlockMs ?? 0) + dtMs };
++  if (slot >= 0) s = noteSlotChange(s, slot, null, null, 'auto_reveal', x); // §8 breed_slotted cause auto_reveal
+   return dropRawSlots({ ...s, breeds: x }, br(s).slots, x.slots); // E10 / PMC Q5: the auto-slot index drops its raw id
+ }
+ /** BR-R10 eligibility: not owned or below the star cap, and the rarity's Farm gate is open (Rare/Epic F14, Legendary F24). */
+@@ -58,17 +65,22 @@ export function hatchCostFrom(planRefCents: number, farmStepCents: number, b: Ba
+ }
+ /** BR-R6/R7 the Hatch press: F >= unlock, incubator free, flock not complete, something eligible, coins >= this frame's cost
+  *  (first hatch free, always Common). Otherwise nothing is charged and nothing starts (E1/E4/E5). */
+-export function startHatch(s: GameState, b: Balance): GameState {
++/** §8 hatch_started (errata #15): emitted only for a press that starts a hatch (a refused / unaffordable press emits nothing);
++ *  cost / coinsBefore in cents, never `track` / `cost_cents`; not an `upgrade` (no TTFU / is_first_upgrade / upgrades count). */
++export function startHatch(s: GameState, b: Balance, ev?: Sink): GameState {
+   if (!on(s, b) || s.farmLevel < bc(b, 'unlock_farm')) return s;
+   const x = br(s), free = x.freeHatchUsed !== 1; if (x.incubator || isFlockComplete(x, b)) return s;
+   const cost = free ? 0 : hatchCostCents(s, b); if (s.coinsCents < cost) return s;
+   const r = rollBreed(x, s.farmLevel, b, free); if (!r) return s;
+   const rare = ROSTER[r.id][0] !== 'C';
+-  return { ...s, coinsCents: s.coinsCents - cost, breeds: { ...x, rng: r.rng, hatches: x.hatches + 1, pity: rare ? 0 : x.pity + 1, freeHatchUsed: 1,
++  ev?.push({ type: 'hatch_started', breed_id: r.id, rarity: rarityName(r.id), cost, coinsBefore: s.coinsCents, pity_before: x.pity, free, farm_level: s.farmLevel });
++  return { ...noteHatch(s, cost), coinsCents: s.coinsCents - cost, breeds: { ...x, rng: r.rng, hatches: x.hatches + 1, pity: rare ? 0 : x.pity + 1, freeHatchUsed: 1,
+     incubator: { breed: r.id, remainingMs: bc(b, 'hatch_time_s') * 1000, costCents: cost } } };
+ }
+ /** BR-R3/R4: place an owned breed (or null) in an unlocked slot. Moving a slotted breed keeps its settle state (E7, E23);
+  *  a breed newly placed settles for bc_settle_s. */
++/** §8 breed_slotted (errata #17): a real change opens / joins the destination slot's 1,000 ms window (a move = 1 change, cause
++ *  move); a no-op (same breed into the same slot, empty over empty) emits nothing. */
+ export function placeBreed(s: GameState, b: Balance, slot: number, id: string | null): GameState {
+   if (!on(s, b) || !Number.isInteger(slot) || slot < 0 || slot >= unlockedSlots(s.farmLevel, b)) return s;
+   const x = br(s); if (id !== null && !(isBreedId(id) && x.owned[id])) return s;
+@@ -76,8 +88,10 @@ export function placeBreed(s: GameState, b: Balance, slot: number, id: string |
+   if (from === slot) return s;
+   const carry = from >= 0 ? settleMs[from] : bc(b, 'settle_s') * 1000; if (from >= 0) { slots[from] = null; settleMs[from] = 0; }
+   slots[slot] = id; settleMs[slot] = id === null ? 0 : carry;
++  const nx = { ...x, slots, settleMs }, was = x.slots[slot];
++  const t = was === id ? s : noteSlotChange(s, slot, from >= 0 ? from : null, isBreedId(was) ? was : null, from >= 0 ? 'move' : 'manual', nx);
+   // E10 / PMC Q5: a real change overwrites the raw id at every index written (the target, and the source of a move)
+-  return dropRawSlots({ ...s, breeds: { ...x, slots, settleMs } }, x.slots, slots, slot);
++  return dropRawSlots({ ...t, breeds: nx }, x.slots, slots, slot);
+ }
+ /** BR-R4 settle gate + §4.3 star value: a slot's trait bp, 0 while settling or empty. floor(base x (1 + stars x star_bonus)). */
+ export function slotTraitBp(x: BreedsSave, slot: number, b: Balance): number {
+diff --git a/src/sim/breeds.ts b/src/sim/breeds.ts
+index 8f14298..ddaddd8 100644
+--- a/src/sim/breeds.ts
++++ b/src/sim/breeds.ts
+@@ -7,10 +7,10 @@
+  */
+ import type { Balance } from '../config/balance';
+ import { flagOn } from '../config/flags';
+-import { BREED_IDS, BREEDS_RNG_SALT, breedsSanitiseEvent, SLOT_IDX, bc, isBreedId, unlockedSlots, type BreedId } from '../config/breeds';
++import { BREED_IDS, BREEDS_RNG_SALT, breedsSanitiseEvent, ROSTER, SLOT_IDX, bc, isBreedId, unlockedSlots, type BreedId, type Rarity } from '../config/breeds';
+ import { mixSeed, type GameState } from './state';
+ import { isRngState } from './rng';
+-import type { SimEvent } from './events';
++import type { SimEvent, Sink, BreedRarityName, BreedsSimEvent } from './events';
+ export interface BreedsSave {
+   owned: Partial<Record<string, { stars: number }>>; slots: (string | null)[];
+   incubator: { breed: string; remainingMs: number; costCents: number } | null;
+@@ -18,6 +18,67 @@ export interface BreedsSave {
+   sinceUnlockMs?: number; sinceUnlockBackfilled?: 0 | 1;
+ }
+ export const on = (s: GameState, b: Balance) => flagOn(b, 'breeds') && !!s.breeds;
++/** m4.flags.breeds alone (session_end: every breeds field is present with the flag on, absent with it off; §8). */
++export const breedsFlagOn = (b: Balance) => flagOn(b, 'breeds');
++
++// ---- §8 telemetry (HoE/breeds-telemetry-emitters, drift row 34; errata rev 15 5e12a591 #15-18) -------------------------
++/** errata #15/#16: rarity enum strings on the wire (weights 70/22/7/1). */
++export const RARITY_NAME: Record<Rarity, BreedRarityName> = { C: 'Common', R: 'Rare', E: 'Epic', L: 'Legendary' };
++export const rarityName = (id: BreedId) => RARITY_NAME[ROSTER[id][0]];
++const FAMILY_KEY = { present: 'P', away: 'A', broody: 'B' } as const;
++type FamKey = 'P' | 'A' | 'B';
++/** errata #17 `loadout` / §8 `breed_loadout_end`: family counts of the slotted breeds, `P<n>A<n>B<n>`. settledOnly = only slots whose
++ *  settle timer is done (session_end KPI); otherwise settling breeds count too (breed_slotted). */
++export function breedsLoadout(br: Pick<BreedsSave, 'slots' | 'settleMs'>, settledOnly = false): string {
++  const n = { P: 0, A: 0, B: 0 };
++  SLOT_IDX.forEach(i => { const id = br.slots[i]; if (isBreedId(id) && (!settledOnly || !(br.settleMs[i] > 0))) n[FAMILY_KEY[ROSTER[id][1]]]++; });
++  return `P${n.P}A${n.A}B${n.B}`;
++}
++const settlingCount = (br: BreedsSave) => SLOT_IDX.filter(i => isBreedId(br.slots[i]) && br.settleMs[i] > 0).length;
++/** §8 breed_slotted coalescing window of record: one event per slot per 1,000 ms of sim time (HoQA N2). */
++export const SLOT_WINDOW_MS = 1000;
++type Slotted = Extract<BreedsSimEvent, { type: 'breed_slotted' }>;
++/** An open breed_slotted window for one destination slot: `ev` holds the first change's prev_* and the last change's rest. */
++export interface SlotWindow { leftMs: number; ev: Slotted }
++/** Session-only telemetry accumulators (never saved: m5Persist SESSION_ONLY_KEYS). Absent until the first hatch, slot change
++ *  or settled slotted tick, so flag-on/no-hatch states stay byte-identical (§7). */
++export interface BreedsTel { hatches: number; spendCents: number; familyMs: Record<FamKey, number>; win: (SlotWindow | null)[];
++  /** session_end breed_present_eggs / breed_away_eggs / breed_broody_cents: fed by the BR-R12/R13/R14 traits (not on this base). */
++  presentEggs?: number; awayEggs?: number; broodyCents?: number }
++const emptyTel = (): BreedsTel => ({ hatches: 0, spendCents: 0, familyMs: { P: 0, A: 0, B: 0 }, win: SLOT_IDX.map(() => null) });
++export const breedsTel = (s: GameState): BreedsTel => s.breedsTel ?? emptyTel();
++/** One slot change (placeBreed or the auto-slot) into its destination slot's window; merged changes keep the FIRST prev_slot /
++ *  prev_breed_id, take slot / breed_id / cause / loadout / settling from the last, and count them. No event here: the window
++ *  emits when it closes (tick, offline grant, or the session_end flush). */
++export function noteSlotChange(s: GameState, slot: number, prevSlot: number | null, prevId: BreedId | null, cause: Slotted['cause'], after: BreedsSave): GameState {
++  const t = breedsTel(s), w = t.win[slot], id = after.slots[slot];
++  const last = { slot, breed_id: isBreedId(id) ? id : null, cause, loadout: breedsLoadout(after), settling: settlingCount(after) };
++  const ev: Slotted = w ? { ...w.ev, ...last, count: w.ev.count + 1 }
++    : { type: 'breed_slotted', ...last, prev_slot: prevSlot, prev_breed_id: prevId, count: 1 };
++  const win = [...t.win]; win[slot] = { leftMs: w ? w.leftMs : SLOT_WINDOW_MS, ev };
++  return { ...s, breedsTel: { ...t, win } };
++}
++/** Advance the open windows by `dtMs` of sim time; emit (slot order) and drop each one that has run its 1,000 ms. dtMs = Infinity
++ *  closes every window (offline grant, session_end). Same state object when no window is open. */
++export function tickSlotWindows(s: GameState, dtMs: number, ev?: Sink): GameState {
++  const t = s.breedsTel; if (!t || t.win.every(w => w === null)) return s;
++  const win = t.win.map(w => { if (!w) return null; const leftMs = w.leftMs - dtMs; if (leftMs > 0) return { ...w, leftMs }; ev?.push(w.ev); return null; });
++  return { ...s, breedsTel: { ...t, win } };
++}
++/** session_end / pagehide: close every open breed_slotted window now (flag on only; identity otherwise). */
++export const flushBreedsTel = (s: GameState, b: Balance, ev?: Sink): GameState => (breedsFlagOn(b) ? tickSlotWindows(s, Infinity, ev) : s);
++/** §8 breed_family_s: one tick of sim dt for every slot that is settled at the start of the tick (the BR-R4 gate's view). */
++export function addFamilyMs(s: GameState, br: BreedsSave, dtMs: number): GameState {
++  const add = { P: 0, A: 0, B: 0 }; let any = false;
++  SLOT_IDX.forEach(i => { const id = br.slots[i]; if (isBreedId(id) && !(br.settleMs[i] > 0)) { add[FAMILY_KEY[ROSTER[id][1]]] += dtMs; any = true; } });
++  if (!any) return s;
++  const t = breedsTel(s), f = t.familyMs;
++  return { ...s, breedsTel: { ...t, familyMs: { P: f.P + add.P, A: f.A + add.A, B: f.B + add.B } } };
++}
++/** §8 hatch_started -> session_end breed_hatches / breed_spend_cents (= Σ hatch_started.cost this session). */
++export function noteHatch(s: GameState, costCents: number): GameState {
++  const t = breedsTel(s); return { ...s, breedsTel: { ...t, hatches: t.hatches + 1, spendCents: t.spendCents + costCents } };
++}
+ const int0 = (v: unknown) => (Number.isInteger(v) && (v as number) >= 0 ? (v as number) : 0);
+ const isPlainObject = (v: unknown): boolean => !!v && typeof v === 'object' && !Array.isArray(v);
+ /** §6 default breeds blob (ensureBreeds + D2 invalid_root re-create). */
+@@ -37,27 +98,45 @@ export const isFlockComplete = (br: BreedsSave, b: Balance) => BREED_IDS.every(i
+ /** BR-R11 reveal + auto-slot, ONE pure function for step (PR B) and applyOffline. New -> 0★, duplicate -> +1★; first empty
+  *  UNLOCKED slot gets it with a full settle. Q4: `slotsOpen` is the slot count at the START of the frame (PR B passes it);
+  *  a slot unlocked in the same frame is never auto-filled. Offline the Farm level can't change, so it's unlockedSlots(F). */
+-export function revealHatch(br: BreedsSave, b: Balance, slotsOpen: number): { br: BreedsSave; revealed: BreedId | null } {
+-  const inc = br.incubator; if (!inc || inc.remainingMs > 0 || !isBreedId(inc.breed)) return { br, revealed: null };
+-  const id = inc.breed, prev = br.owned[id];
+-  const owned = { ...br.owned, [id]: { stars: prev ? Math.min(bc(b, 'star_cap'), prev.stars + 1) : 0 } };
++/** §8 telemetry (ctx.ev): breed_revealed exactly once per hatch, here at completion (tick path, or applyOffline with offline:true);
++ *  wait_ms = sim ms from start to completion = bc_hatch_time_s x 1000 - remainingMs (Σ tick dt, plus the offline decrement, which is
++ *  capped at what was left). Then flock_complete once per save (flockCompleteLogged 0 -> 1, which also freezes sinceUnlockMs);
++ *  ctx.preMs = the offline ms that elapsed before completion, counted into sinceUnlockMs first. `slot` = the auto-slot index or -1. */
++export interface RevealCtx { ev?: Sink; offline?: boolean; farm?: number; preMs?: number }
++export function revealHatch(br: BreedsSave, b: Balance, slotsOpen: number, ctx: RevealCtx = {}): { br: BreedsSave; revealed: BreedId | null; slot: number } {
++  const inc = br.incubator; if (!inc || inc.remainingMs > 0 || !isBreedId(inc.breed)) return { br, revealed: null, slot: -1 };
++  const id = inc.breed, prev = br.owned[id], stars = prev ? Math.min(bc(b, 'star_cap'), prev.stars + 1) : 0;
++  const owned = { ...br.owned, [id]: { stars } };
+   const slots = [...br.slots], settleMs = [...br.settleMs] as BreedsSave['settleMs'];
+-  if (!slots.includes(id)) { const i = slots.findIndex((x, k) => x === null && k < slotsOpen); if (i >= 0) { slots[i] = id; settleMs[i] = bc(b, 'settle_s') * 1000; } }
+-  return { br: { ...br, owned, slots, settleMs, incubator: null }, revealed: id };
++  let slot = -1;
++  if (!slots.includes(id)) { const i = slots.findIndex((x, k) => x === null && k < slotsOpen); if (i >= 0) { slots[i] = id; settleMs[i] = bc(b, 'settle_s') * 1000; slot = i; } }
++  let out: BreedsSave = { ...br, owned, slots, settleMs, incubator: null };
++  ctx.ev?.push({ type: 'breed_revealed', breed_id: id, rarity: rarityName(id), dupe: !!prev, stars_after: stars, offline: !!ctx.offline,
++    wait_ms: Math.max(0, Math.round(bc(b, 'hatch_time_s') * 1000 - inc.remainingMs)) });
++  if (out.flockCompleteLogged !== 1 && isFlockComplete(out, b)) {
++    const F = ctx.farm ?? 0, sinceUnlockMs = int0(out.sinceUnlockMs) + (F >= bc(b, 'unlock_farm') ? int0(ctx.preMs) : 0);
++    out = { ...out, flockCompleteLogged: 1, ...(('sinceUnlockMs' in out || sinceUnlockMs > 0) && { sinceUnlockMs }) };
++    ctx.ev?.push({ type: 'flock_complete', hatches: out.hatches, farm_level: F, elapsed_since_unlock_s: Math.floor(sinceUnlockMs / 1000),
++      backfilled: out.sinceUnlockBackfilled === 1 });
++  }
++  return { br: out, revealed: id, slot };
+ }
+ /** BR-R18: closed-form offline settle, called ONLY from applyOffline (once per gap: the caller re-stamps savedAt / the hide
+  *  snapshot; an invalid savedAt never reaches here). `awayMs` is capped to offlineCapSeconds like the egg grant; gaps under
+  *  offlineMinSeconds do nothing. settleMs does NOT run offline (BR-R4). sinceUnlockMs (telemetry only) gets the same capped ms
+  *  from unlock until flock_complete freezes it. No rng draw. */
+-export function breedsOffline(s: GameState, awayMs: number, b: Balance): { state: GameState; reveal: BreedId | null } {
++export function breedsOffline(s: GameState, awayMs: number, b: Balance, ev?: Sink): { state: GameState; reveal: BreedId | null } {
+   const o = b.offline;
+   if (!on(s, b) || !Number.isFinite(awayMs) || awayMs < o.offlineMinSeconds * 1000) return { state: s, reveal: null };
+   const ms = Math.floor(Math.min(awayMs, o.offlineCapSeconds * 1000)), br0 = s.breeds as BreedsSave;
+-  let br: BreedsSave = br0, reveal: BreedId | null = null;
+-  if (br.incubator) { br = { ...br, incubator: { ...br.incubator, remainingMs: Math.max(0, br.incubator.remainingMs - ms) } };
+-    const r = revealHatch(br, b, unlockedSlots(s.farmLevel, b)); br = r.br; reveal = r.revealed; }
++  let br: BreedsSave = br0, reveal: BreedId | null = null, slot = -1;
++  if (br.incubator) { const preMs = Math.min(Math.max(0, br.incubator.remainingMs), ms);
++    br = { ...br, incubator: { ...br.incubator, remainingMs: Math.max(0, br.incubator.remainingMs - ms) } };
++    const r = revealHatch(br, b, unlockedSlots(s.farmLevel, b), { ev, offline: true, farm: s.farmLevel, preMs }); br = r.br; reveal = r.revealed; slot = r.slot; }
+   if (br !== br0 && s.breedsRawSlots) s = dropRawSlots(s, br0.slots, br.slots); // E10 / PMC Q5: the auto-slot index drops its raw id
+   if (s.farmLevel >= bc(b, 'unlock_farm') && br.flockCompleteLogged !== 1) br = { ...br, sinceUnlockMs: int0(br.sinceUnlockMs) + ms };
++  if (slot >= 0) s = noteSlotChange(s, slot, null, null, 'auto_reveal', br); // §8 breed_slotted (offline auto-slot)
++  s = tickSlotWindows(s, Infinity, ev); // the capped away ms (>= offlineMinSeconds) outlasts every 1,000 ms window
+   return br === br0 ? { state: s, reveal } : { state: { ...s, breeds: br }, reveal };
+ }
+ /** §4.8 E10-E12 on load (flag on only). Unknown owned ids are kept and ignored (E10); one save_migrated if anything changed.
+diff --git a/src/sim/events.ts b/src/sim/events.ts
+index d66fe52..0c908dc 100644
+--- a/src/sim/events.ts
++++ b/src/sim/events.ts
+@@ -1,4 +1,5 @@
+ import type { WorkerId, WorkerMood } from './workers';
++import type { BreedId } from '../config/breeds';
+ /** Events the pure sim reports to an optional sink (telemetry lives outside the sim). */
+ export type SimEvent =
+   | { type: 'save_migrated'; migration: 'breeds_sanitise'; from: 6; to: 6; reason: 'invalid_root' | 'invalid_values'; refund_cents: number; farm_level: number; backup_stores: [] } // M5.1 breeds E12 / D1 (BR-AC26)
+@@ -19,7 +20,15 @@ export type SimEvent =
+   | { type: 'grader_tier'; tier: number; mult: number; cost: number }
+   | { type: 'milestone_reached'; id: string; track: 'hens' | 'egg_value'; level: number; mult: number }
+   | { type: 'balanced_tier'; id: string; tier: number; min_level: number }
+-  | M5SimEvent;
++  | M5SimEvent
++  | BreedsSimEvent;
++/** M5.1 breeds §8 telemetry (rev 3.8.9 ea922eb8 L692-695; errata rev 15 5e12a591 #15-18). Emitted only with m4.flags.breeds on. */
++export type BreedRarityName = 'Common' | 'Rare' | 'Epic' | 'Legendary';
++export type BreedsSimEvent =
++  | { type: 'hatch_started'; breed_id: BreedId; rarity: BreedRarityName; cost: number; coinsBefore: number; pity_before: number; free: boolean; farm_level: number }
++  | { type: 'breed_revealed'; breed_id: BreedId; rarity: BreedRarityName; dupe: boolean; stars_after: number; offline: boolean; wait_ms: number }
++  | { type: 'breed_slotted'; slot: number; prev_slot: number | null; breed_id: BreedId | null; prev_breed_id: BreedId | null; cause: 'manual' | 'auto_reveal' | 'move'; loadout: string; settling: number; count: number }
++  | { type: 'flock_complete'; hatches: number; farm_level: number; elapsed_since_unlock_s: number; backfilled: boolean };
+ /** M5.0 sim events (F1(d)); emitted only with their m4.flags.* on. Field names follow telemetry-spec v0.6.2 as quoted in the
+  *  feature specs. Game adds the UI-only fields when forwarding to telemetry: `collectible_id` (per-session counter shared by
+  *  golden egg and Broody), `layout`, and for Broody `slot_id` Y0..Y11 / `restored`. */
+diff --git a/src/sim/offline.ts b/src/sim/offline.ts
+index f61597a..2f21a8c 100644
+--- a/src/sim/offline.ts
++++ b/src/sim/offline.ts
+@@ -3,6 +3,7 @@ import { GameState, eggsPerSec } from './state';
+ import { prodEggsPerSec, offlineMult } from './tracks';
+ import { m4On, clampL } from '../config/formulas';
+ import { breedsOffline } from './breeds';
++import type { Sink } from './events';
+ /** spec v1.14 M4A-4 (M4 on): floor(min(min(away, cap) x CSV offline_eggs_per_sec[H], CSV offline_max_eggs_2h[H]) x Hens milestone mult).
+  *  Rate and cap are read from data (balance.m4.offline via sync-economy), never derived from rate x eps. Flag off: unchanged (AC11). */
+ export function m4OfflineEggs(awayS: number, hensLevel: number, b: Balance, mult = 1): number {
+@@ -20,10 +21,10 @@ export function offlineEggs(awayS: number, farmLevel: number, b: Balance, eps =
+ /** Coop untouched; eggs parked in pendingOfflineEggs until the modal's Collect (bypasses coop cap). */
+ /** D-HOP-2026-11-06-01 (a) / Pause v1.3.15: the egg grant depends on hen state, the eligible gap, and the cap.
+  *  Pause, hire, and m4.flags.pause do not change it. */
+-export function applyOffline(s: GameState, awayMs: number, b: Balance) {
++export function applyOffline(s: GameState, awayMs: number, b: Balance, ev?: Sink) { // ev: §8 breed_revealed{offline:true} etc.
+   const eggs = m4On(b) && b.m4?.offline ? m4OfflineEggs(awayMs / 1000, s.hensLevel, b, offlineMult(s, b))
+     : offlineEggs(awayMs / 1000, s.farmLevel, b, prodEggsPerSec(s, b), offlineMult(s, b));
+   const awayS = Math.max(0, Math.min(awayMs / 1000, b.offline.offlineCapSeconds));
+-  const br = breedsOffline(s, awayMs, b); // M5.1 BR-R18: same capped gap, even when the grant is 0 eggs; identity when flag off
++  const br = breedsOffline(s, awayMs, b, ev); // M5.1 BR-R18: same capped gap, even when the grant is 0 eggs; identity when flag off
+   return { state: eggs > 0 ? { ...br.state, pendingOfflineEggs: br.state.pendingOfflineEggs + eggs } : br.state, eggs, awayS, reveal: br.reveal };
+ }
+diff --git a/src/sim/state.ts b/src/sim/state.ts
+index db07b88..c6466e1 100644
+--- a/src/sim/state.ts
++++ b/src/sim/state.ts
+@@ -35,6 +35,9 @@ export interface GameState extends M5Fields {
+   /** M5.1 breeds E10 / PMC Q5 (session only, outside F1a M5Fields like streakRun): raw unknown slot ids from the save, written
+    *  back by m5Persist (breedsSaveView) while that slot stays null; stripped by m5Persist SESSION_ONLY_KEYS. */
+   breedsRawSlots?: (string | null)[];
++  /** M5.1 breeds §8 telemetry (session only, like breedsRawSlots): breed_slotted windows + session_end accumulators. Stripped by
++   *  m5Persist SESSION_ONLY_KEYS; absent until the first hatch / slot change / settled tick (HoE/breeds-telemetry-emitters). */
++  breedsTel?: import('./breeds').BreedsTel;
+   /** v5 #1 golden (session only, outside F1a M5Fields like streakRun; Architect slice-2 ruling 2/5): the pending spawn's
+    *  interval/deferral/R15 retry and the live Frenzy's frenzy_ended stats. Stripped by m5Persist SESSION_ONLY_KEYS. */
+   goldenPending?: import('./golden').GoldenPending;
+diff --git a/src/sim/timers.ts b/src/sim/timers.ts
+index eeb8265..9c21c2e 100644
+--- a/src/sim/timers.ts
++++ b/src/sim/timers.ts
+@@ -26,7 +26,7 @@ const seedEvRng: TimerSystem = (s, _dt, _f, b) => (evRngFlagOn(b) ? ensureEvRng(
+ const streak: TimerSystem = (s, dt, f, b, _c, ev) => streakTick(s, dt, f, b, ev);
+ /** M5.1 breeds (tick-semantics note point 1): settle -> incubator/reveal -> sinceUnlockMs on sim dt (breedsTick), then Q2
+  *  creates `breeds` at the end of the first flag-on tick (so the creating tick counts nothing). Identity unless m4.flags.breeds. */
+-const breeds: TimerSystem = (s, dt, _f, b, c) => ensureBreeds(breedsTick(s, dt, b, c?.slotsFarm), b);
++const breeds: TimerSystem = (s, dt, _f, b, c, ev) => ensureBreeds(breedsTick(s, dt, b, c?.slotsFarm, ev), b); // + §8 breeds telemetry sink
+ /** #3 I_ref (§4.1/§4.1a): the 1 s sim-time ring rolls and refWarmS advances on sim dt (hidden ticks too). Identity unless m4.flags.tapCoins. */
+ const incomeRef: TimerSystem = (s, dt, _f, b) => incomeRefTick(s, dt, b);
+ /** #1 golden R23: frenzyRemainingS counts down on focus seconds (frozen under menus / hidden). Identity unless m4.flags.golden. */
+diff --git a/src/telemetry/breeds-session.ts b/src/telemetry/breeds-session.ts
+new file mode 100644
+index 0000000..5c49da7
+--- /dev/null
++++ b/src/telemetry/breeds-session.ts
+@@ -0,0 +1,31 @@
++/**
++ * M5.1 breeds session_end fields (spec rev 3.8.9 ea922eb8 §8 L698; errata rev 15 5e12a591), HoE/breeds-telemetry-emitters (drift row 34).
++ * Read from the sim state only (the UI never emits). Flag off: {} (every breed field absent, not 0). Flag on: every field below.
++ * NOT here: present_active_s / present_lost_count (Saves, saves/breeds-sim-prB-traits) and offline_grant.away_bp (Saves).
++ * breed_present_eggs / breed_away_eggs / breed_broody_cents read the BreedsTel trait counters (presentEggs / awayEggs / broodyCents);
++ * no trait (BR-R12/R13/R14) is wired on this base, so they are 0 until the traits PR feeds them.
++ */
++import type { Balance } from '../config/balance';
++import { BREED_IDS, SLOT_IDX, isBreedId } from '../config/breeds';
++import { breedsFlagOn, breedsLoadout, breedsTel, type BreedsSave } from '../sim/breeds';
++import type { GameState } from '../sim/state';
++
++export interface SessionEndBreeds {
++  breed_hatches: number; breed_spend_cents: number; breed_present_eggs: number; breed_away_eggs: number; breed_broody_cents: number;
++  breeds_owned: number; breed_slots_used: number; breed_loadout_end: string; breed_family_s: { P: number; A: number; B: number };
++}
++const EMPTY: Pick<BreedsSave, 'slots' | 'settleMs' | 'owned'> = { owned: {}, slots: [null, null, null], settleMs: [0, 0, 0] };
++/** focus-free sim seconds, 0.1 s (ticks are 100 ms, so this only removes float noise). */
++const s01 = (ms: number) => Math.round(ms / 100) / 10;
++export function sessionEndBreedsFields(s: GameState, b: Balance): SessionEndBreeds | Record<string, never> {
++  if (!breedsFlagOn(b)) return {};
++  const x = s.breeds ?? EMPTY, t = breedsTel(s);
++  return {
++    breed_hatches: t.hatches, breed_spend_cents: t.spendCents,
++    breed_present_eggs: Math.floor(t.presentEggs ?? 0), breed_away_eggs: Math.floor(t.awayEggs ?? 0), breed_broody_cents: Math.floor(t.broodyCents ?? 0),
++    breeds_owned: BREED_IDS.filter(id => x.owned[id]).length,
++    breed_slots_used: SLOT_IDX.filter(i => isBreedId(x.slots[i])).length,
++    breed_loadout_end: breedsLoadout(x, true),
++    breed_family_s: { P: s01(t.familyMs.P), A: s01(t.familyMs.A), B: s01(t.familyMs.B) },
++  };
++}
+diff --git a/src/telemetry/telemetry.ts b/src/telemetry/telemetry.ts
+index 3cd0134..a63a555 100644
+--- a/src/telemetry/telemetry.ts
++++ b/src/telemetry/telemetry.ts
+@@ -13,7 +13,8 @@ export function installId(kv: KV, rnd: () => string = () => (globalThis.crypto?.
+ export const isPinned = (type: string) => type === 'session_start' || type === 'session_end' || type === 'upgrade' || type.startsWith('onboarding_')
+   || type === 'worker_hire' || type.startsWith('worker_manage') || type === 'save_reset'
+   || type === 'milestone_reached' || type === 'balanced_tier'
+-  || type === 'save_migrated' || type === 'save_migration_aborted'; // M4A-34 (only emitted with the M4 flag on); m4-design §3c migration events
++  || type === 'save_migrated' || type === 'save_migration_aborted' // M4A-34 (only emitted with the M4 flag on); m4-design §3c migration events
++  || type === 'hatch_started' || type === 'flock_complete'; // M5.1 breeds §8 L692/L695 (pinned; only emitted with m4.flags.breeds on)
+ export interface TEvent { type: string; ts: number; sessionMs: number; [k: string]: unknown; }
+ export interface TelemetryConfig { ring_size: number; flush_interval_s: number; tap_batch_ms: number; worker_summary_s?: number; }
+ /** Pre-0.6.2 rings are a bare array, or {events} with no v. Tag those events; never drop them (G8-13). */
+diff --git a/tests/v5-breeds-telemetry.test.ts b/tests/v5-breeds-telemetry.test.ts
+new file mode 100644
+index 0000000..0fe834a
+--- /dev/null
++++ b/tests/v5-breeds-telemetry.test.ts
+@@ -0,0 +1,228 @@
++// M5.1 breeds §8 telemetry emitters (HoE/breeds-telemetry-emitters, drift-audit row 34). Spec rev 3.8.9 ea922eb8 §8 L689-698;
++// telemetry errata rev 15 5e12a591 #15-18 (L74-77); schema rows src/telemetry/schema.ts hatch_started / breed_revealed /
++// breed_slotted / flock_complete + session_end breed_*. Every emitted event is checked with validateEvent (schema of record).
++// Excluded (Saves, saves/breeds-sim-prB-traits): session_end present_active_s / present_lost_count, offline_grant.away_bp.
++import { describe, it, expect } from 'vitest';
++import { balance as b } from '../src/config/balance';
++import { Game } from '../src/game';
++import { initialState, type GameState } from '../src/sim/state';
++import { step } from '../src/sim/tick';
++import { apply } from '../src/sim/actions';
++import { applyOffline } from '../src/sim/offline';
++import { serialize, SAVE_KEY } from '../src/save/save';
++import { m5Persist } from '../src/save/m5-fields';
++import { BREED_IDS, ROSTER, type BreedId } from '../src/config/breeds';
++import { breedsOffline, sanitizeBreedsOnLoad, revealHatch, breedsLoadout, type BreedsSave } from '../src/sim/breeds';
++import { startHatch, hatchCostCents, placeBreed, breedsTick } from '../src/sim/breeds-hatch';
++import { sessionEndBreedsFields } from '../src/telemetry/breeds-session';
++import { validateEvent, EVENT_SCHEMA, isPinned } from '../src/telemetry/schema';
++import { isPinned as legacyIsPinned } from '../src/telemetry/telemetry';
++import type { SimEvent } from '../src/sim/events';
++import { mem } from './helpers';
++
++const T0 = Date.UTC(2026, 10, 10, 12);
++const BR = { ...b, m4: { ...b.m4!, flags: { ...b.m4!.flags, breeds: 1 } } } as typeof b; // flag on (ships at 1; default 0 in this data)
++const OFF = b;
++const fresh = (o: Partial<BreedsSave> = {}): BreedsSave => ({ owned: {}, slots: [null, null, null], incubator: null, settleMs: [0, 0, 0], hatches: 0, pity: 0, rng: 0x9e3779b9,
++  freeHatchUsed: 0, flockCompleteLogged: 0, ...o });
++const st = (o: Partial<BreedsSave> = {}, F = 12, coins = 0): GameState => ({ ...initialState(b, 7), farmLevel: F, coinsCents: coins, tracksV7: 1 as const, v6BackupId: '0123456789abcdef', breeds: fresh(o) });
++const maxed = (ids: readonly string[]) => Object.fromEntries(ids.map(id => [id, { stars: 2 }]));
++const ENV = { ts: 1_762_772_400_000, sid: 'a1b2c3', fgMs: 0 };
++const valid = (e: object) => validateEvent({ ...ENV, ...(e as { type: string }) });
++const ticks = (s: GameState, n: number, ev?: SimEvent[], bb = BR) => { for (let i = 0; i < n; i++) s = step(s, 0.1, bb, ev); return s; };
++const BREEDS_TYPES = ['hatch_started', 'breed_revealed', 'breed_slotted', 'flock_complete'];
++const only = (ev: readonly { type: string }[], t: string) => ev.filter(e => e.type === t) as any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
++const boot = (bb: typeof b, kv: ReturnType<typeof mem>, t: number) => new Game(bb, kv, () => t, 7, 'dev', null, null, { newId: () => '0123456789abcdef' });
++const saved = (s: GameState, at: number) => { const kv = mem(); kv.setItem(SAVE_KEY, serialize(s, at, 5)); return kv; };
++const END = { reason: 'unload', fg_ms: 600_000, taps_total: 300, taps_moved_eggs: 280, eggs_collected_manual: 900, coop_full_ms: 12_000, eggs_lost_while_full: 33.5, managed: true, farm_level: 12, collection_level: 5 };
++
++describe('§8 hatch_started (errata #15): only a press that starts a hatch, cents, never track/cost_cents, not an upgrade', () => {
++  it('free first hatch via apply(hatch): exactly 1 event, every field per the schema, cost 0, free true', () => {
++    const s0 = st({}, 10, 12_345), ev: SimEvent[] = [], s = apply(s0, { type: 'hatch' }, BR, ev);
++    expect(ev).toEqual([{ type: 'hatch_started', breed_id: s.breeds!.incubator!.breed, rarity: 'Common', cost: 0, coinsBefore: 12_345, pity_before: 0, free: true, farm_level: 10 }]);
++    expect(valid(ev[0])).toEqual([]); expect('track' in ev[0] || 'cost_cents' in ev[0]).toBe(false);
++  });
++  it('paid hatch: cost = the charged cents (hatchCostCents), coinsBefore = coins before the charge, pity_before = pity before the roll', () => {
++    const s0 = st({ freeHatchUsed: 1, pity: 3 }, 16, 1e12), cost = hatchCostCents(s0, BR), ev: SimEvent[] = [], s = apply(s0, { type: 'hatch' }, BR, ev);
++    const id = s.breeds!.incubator!.breed as BreedId;
++    expect(ev).toEqual([{ type: 'hatch_started', breed_id: id, rarity: ({ C: 'Common', R: 'Rare', E: 'Epic', L: 'Legendary' } as const)[ROSTER[id][0]], cost, coinsBefore: 1e12, pity_before: 3, free: false, farm_level: 16 }]);
++    expect(s.coinsCents).toBe(1e12 - cost); expect(s.breeds!.incubator!.costCents).toBe(cost); expect(valid(ev[0])).toEqual([]);
++  });
++  it('a failed or unaffordable press emits nothing (BR-R7 / E1 / E4 / E5): poor, busy incubator, below unlock, flock complete, flag off', () => {
++    const paid = st({ freeHatchUsed: 1 }, 16, 0);
++    const cases: [GameState, typeof b][] = [[{ ...paid, coinsCents: hatchCostCents(paid, BR) - 1 }, BR], [st({ incubator: { breed: 'leghorn', remainingMs: 5_000, costCents: 0 } }, 12, 1e12), BR],
++      [st({}, 9, 1e12), BR], [st({ owned: maxed(BREED_IDS), freeHatchUsed: 1 }, 30, 1e12), BR], [st({}, 12, 1e12), OFF]];
++    for (const [s, bb] of cases) { const ev: SimEvent[] = []; expect(apply(s, { type: 'hatch' }, bb, ev)).toBe(s); expect(ev).toEqual([]); }
++  });
++  it('never an upgrade: Game.dispatch(hatch) logs hatch_started (pinned), no upgrade event; isUpgrade(hatch) stays false', () => {
++    const g = boot(BR, mem(), T0); g.state = st({}, 10, 0); g.dispatch({ type: 'hatch' });
++    const evs = g.telemetry.events(); expect(only(evs, 'hatch_started')).toHaveLength(1); expect(only(evs, 'upgrade')).toHaveLength(0);
++    expect(legacyIsPinned('hatch_started')).toBe(true); expect(legacyIsPinned('flock_complete')).toBe(true);
++    expect(isPinned({ type: 'hatch_started' })).toBe(true); expect(legacyIsPinned('breed_revealed') || legacyIsPinned('breed_slotted')).toBe(false);
++  });
++});
++
++describe('§8 breed_revealed (errata #16): exactly once per hatch, at completion inside revealHatch', () => {
++  it('tick path: one event on the completing tick (600 x 100 ms), wait_ms 60,000 sim ms, offline false; nothing before or after', () => {
++    let s = startHatch(st({}, 10), BR); const id = s.breeds!.incubator!.breed as BreedId, ev: SimEvent[] = [];
++    s = ticks(s, 599, ev); expect(only(ev, 'breed_revealed')).toEqual([]);
++    s = ticks(s, 1, ev); expect(only(ev, 'breed_revealed')).toEqual([{ type: 'breed_revealed', breed_id: id, rarity: 'Common', dupe: false, stars_after: 0, offline: false, wait_ms: 60_000 }]);
++    expect(valid(only(ev, 'breed_revealed')[0])).toEqual([]);
++    ticks(s, 50, ev); expect(only(ev, 'breed_revealed')).toHaveLength(1);
++  });
++  it('duplicate: dupe true, stars_after = the new star count (capped at bc_star_cap)', () => {
++    const ev: SimEvent[] = []; ticks(st({ owned: { sussex: { stars: 1 } }, incubator: { breed: 'sussex', remainingMs: 100, costCents: 1 } }, 12), 1, ev);
++    expect(only(ev, 'breed_revealed')).toEqual([{ type: 'breed_revealed', breed_id: 'sussex', rarity: 'Common', dupe: true, stars_after: 2, offline: false, wait_ms: 60_000 }]);
++  });
++  it('offline path (applyOffline): offline true, wait_ms = ticks so far + the offline decrement capped at what was left', () => {
++    const ev: SimEvent[] = [], r = applyOffline(st({ incubator: { breed: 'brahma', remainingMs: 40_000, costCents: 1 } }, 14), 600_000, BR, ev);
++    expect(r.reveal).toBe('brahma');
++    expect(only(ev, 'breed_revealed')).toEqual([{ type: 'breed_revealed', breed_id: 'brahma', rarity: 'Rare', dupe: false, stars_after: 0, offline: true, wait_ms: 60_000 }]);
++    expect(valid(only(ev, 'breed_revealed')[0])).toEqual([]);
++  });
++  it('Game reload: mid-incubation (gap < remaining) emits nothing; a reload past completion emits exactly one offline:true, a second reload none', () => {
++    // remainingMs is clamped to bc_hatch_time_s on load and any gap >= offlineMinSeconds (60 s) completes it, so "mid-incubation" = a < 60 s gap
++    const kv = saved(st({ incubator: { breed: 'brahma', remainingMs: 50_000, costCents: 1 } }, 14), T0);
++    const g1 = boot(BR, kv, T0 + 30_000); expect(only(g1.telemetry.events(), 'breed_revealed')).toEqual([]); expect(g1.state.breeds!.incubator!.remainingMs).toBe(50_000);
++    const g2 = boot(BR, kv, T0 + 30_000 + 1_000_000); expect(only(g2.telemetry.events(), 'breed_revealed').map(e => [e.breed_id, e.offline, e.wait_ms])).toEqual([['brahma', true, 60_000]]);
++    const g3 = boot(BR, kv, T0 + 30_000 + 1_000_000 + 5_000_000);
++    expect(only(g3.telemetry.events(), 'breed_revealed')).toHaveLength(1); // the stored ring still has g2's one; no new emit
++  });
++  it('hidden >= 60 s (provisional sim dropped, grant step pays it): exactly one breed_revealed, offline true', () => {
++    const g = boot(BR, mem(), T0); g.state = st({ incubator: { breed: 'brahma', remainingMs: 40_000, costCents: 1 } }, 14);
++    let t = T0; (g as any).now = () => t; g.onHidden(T0); t = T0 + 30_000; g.frame(); t = T0 + 120_000; g.onShown(t);
++    expect(only(g.telemetry.events(), 'breed_revealed').map(e => e.offline)).toEqual([true]);
++  });
++});
++
++describe('§8 breed_slotted (errata #17): 1 event per slot per 1,000 ms window; move = 1; no-op = 0; sanitise = 0', () => {
++  const owned = { leghorn: { stars: 0 }, sussex: { stars: 0 }, orpington: { stars: 1 } };
++  it('manual place: nothing until the window closes (10 ticks), then 1 event with the schema fields; loadout counts settling breeds', () => {
++    const ev: SimEvent[] = []; let s = placeBreed(st({ owned }, 20), BR, 0, 'leghorn');
++    s = ticks(s, 9, ev); expect(only(ev, 'breed_slotted')).toEqual([]);
++    s = ticks(s, 1, ev);
++    expect(only(ev, 'breed_slotted')).toEqual([{ type: 'breed_slotted', slot: 0, prev_slot: null, breed_id: 'leghorn', prev_breed_id: null, cause: 'manual', loadout: 'P1A0B0', settling: 1, count: 1 }]);
++    expect(valid(only(ev, 'breed_slotted')[0])).toEqual([]); ticks(s, 30, ev); expect(only(ev, 'breed_slotted')).toHaveLength(1);
++  });
++  it('a move between slots is ONE event, cause move, slot = destination, prev_slot = source; settle carried (settling 0)', () => {
++    const ev: SimEvent[] = []; const s = placeBreed(st({ owned, slots: ['leghorn', null, null] }, 20), BR, 2, 'leghorn'); ticks(s, 10, ev);
++    expect(only(ev, 'breed_slotted')).toEqual([{ type: 'breed_slotted', slot: 2, prev_slot: 0, breed_id: 'leghorn', prev_breed_id: null, cause: 'move', loadout: 'P1A0B0', settling: 0, count: 1 }]);
++  });
++  it('no-op: the same breed into the same slot, or empty over empty, emits 0 (and opens no window)', () => {
++    const s0 = st({ owned, slots: ['leghorn', null, null] }, 20), ev: SimEvent[] = [];
++    expect(placeBreed(s0, BR, 0, 'leghorn')).toBe(s0); const s1 = placeBreed(s0, BR, 1, null); expect(s1.breedsTel).toBeUndefined();
++    ticks(s1, 20, ev); expect(only(ev, 'breed_slotted')).toEqual([]);
++  });
++  it('coalesced: 3 changes to one slot inside 1,000 ms -> 1 event, count 3; prev_* from before the FIRST change, the rest from the last', () => {
++    const ev: SimEvent[] = []; let s = st({ owned, slots: ['orpington', null, null] }, 20);
++    s = placeBreed(s, BR, 0, 'leghorn'); s = ticks(s, 3, ev); s = placeBreed(s, BR, 0, null); s = ticks(s, 3, ev); s = placeBreed(s, BR, 0, 'sussex');
++    s = ticks(s, 3, ev); expect(only(ev, 'breed_slotted')).toEqual([]); // window opened at the first change: 9 ticks so far
++    s = ticks(s, 1, ev);
++    expect(only(ev, 'breed_slotted')).toEqual([{ type: 'breed_slotted', slot: 0, prev_slot: null, breed_id: 'sussex', prev_breed_id: 'orpington', cause: 'manual', loadout: 'P0A1B0', settling: 1, count: 3 }]);
++    s = placeBreed(s, BR, 0, 'leghorn'); ticks(s, 10, ev); // a change after the window closed opens a new one
++    expect(only(ev, 'breed_slotted').map(e => [e.count, e.breed_id, e.prev_breed_id])).toEqual([[3, 'sussex', 'orpington'], [1, 'leghorn', 'sussex']]);
++  });
++  it('windows are per slot: changes to two slots in the same second give 2 events (slot order on the same closing tick)', () => {
++    const ev: SimEvent[] = []; let s = st({ owned }, 20); s = placeBreed(placeBreed(s, BR, 1, 'sussex'), BR, 0, 'leghorn'); ticks(s, 10, ev);
++    expect(only(ev, 'breed_slotted').map(e => [e.slot, e.breed_id, e.loadout])).toEqual([[0, 'leghorn', 'P1A1B0'], [1, 'sussex', 'P0A1B0']]); // loadout = at that slot's last change
++  });
++  it('auto-slot on reveal: cause auto_reveal, emitted when its window closes (tick path)', () => {
++    const ev: SimEvent[] = []; let s = st({ incubator: { breed: 'leghorn', remainingMs: 100, costCents: 0 }, freeHatchUsed: 1, hatches: 1 }, 12);
++    s = ticks(s, 1, ev); expect(only(ev, 'breed_slotted')).toEqual([]); ticks(s, 10, ev);
++    expect(only(ev, 'breed_slotted')).toEqual([{ type: 'breed_slotted', slot: 0, prev_slot: null, breed_id: 'leghorn', prev_breed_id: null, cause: 'auto_reveal', loadout: 'P1A0B0', settling: 1, count: 1 }]);
++    expect(ev.map(e => e.type).filter(t => BREEDS_TYPES.includes(t))).toEqual(['breed_revealed', 'breed_slotted']);
++  });
++  it('auto-slot in the offline grant: breed_revealed{offline} then breed_slotted{auto_reveal} in the same step (the away ms closes the window)', () => {
++    const ev: SimEvent[] = []; breedsOffline(st({ incubator: { breed: 'brahma', remainingMs: 40_000, costCents: 1 } }, 14), 120_000, BR, ev);
++    expect(ev.map(e => e.type)).toEqual(['breed_revealed', 'breed_slotted']); expect((ev[1] as any).cause).toBe('auto_reveal'); expect(valid(ev[1])).toEqual([]);
++  });
++  it('sanitise-on-load emits 0 breed_slotted (save_migrated covers it)', () => {
++    const ev: SimEvent[] = []; sanitizeBreedsOnLoad(st({ owned, slots: ['leghorn', 'leghorn', 'sussex'] }, 12), BR, ev);
++    expect(ev.map(e => e.type)).toEqual(['save_migrated']);
++  });
++  it('session_end flushes an open window first (pagehide); the window state is session-only (never saved)', () => {
++    const kv = mem(), g = boot(BR, kv, T0); g.state = st({ owned }, 20); g.dispatch({ type: 'placeBreed', slot: 0, id: 'leghorn' });
++    expect(g.state.breedsTel!.win[0]).not.toBeNull(); expect('breedsTel' in (m5Persist(g.state) as GameState)).toBe(false);
++    g.endSession(); const types = g.telemetry.events().map(e => e.type);
++    expect(types.indexOf('breed_slotted')).toBeGreaterThan(-1); expect(types.indexOf('breed_slotted')).toBeLessThan(types.lastIndexOf('session_end'));
++    expect(JSON.parse(kv.getItem(SAVE_KEY)!).state.breedsTel).toBeUndefined();
++  });
++});
++
++describe('§8 flock_complete (errata #18): once per save via breeds.flockCompleteLogged', () => {
++  const almost = { ...maxed(BREED_IDS.filter(id => id !== 'cream_legbar')), cream_legbar: { stars: 1 } };
++  it('tick path: emitted on the completing reveal; flockCompleteLogged 0 -> 1; elapsed = floor(sinceUnlockMs / 1000); sinceUnlockMs frozen after', () => {
++    const ev: SimEvent[] = []; let s = st({ owned: almost, incubator: { breed: 'cream_legbar', remainingMs: 100, costCents: 1 }, hatches: 24, freeHatchUsed: 1, sinceUnlockMs: 123_456 }, 24);
++    s = ticks(s, 1, ev);
++    expect(only(ev, 'flock_complete')).toEqual([{ type: 'flock_complete', hatches: 24, farm_level: 24, elapsed_since_unlock_s: 123, backfilled: false }]);
++    expect(valid(only(ev, 'flock_complete')[0])).toEqual([]); expect(s.breeds!.flockCompleteLogged).toBe(1);
++    s = ticks(s, 100, ev); expect(s.breeds!.sinceUnlockMs).toBe(123_456); expect(only(ev, 'flock_complete')).toHaveLength(1);
++  });
++  it('backfilled = sinceUnlockBackfilled === 1 (HoQA N3)', () => {
++    const ev: SimEvent[] = []; ticks(st({ owned: almost, incubator: { breed: 'cream_legbar', remainingMs: 100, costCents: 1 }, hatches: 24, sinceUnlockBackfilled: 1 }, 24), 1, ev);
++    expect(only(ev, 'flock_complete').map(e => [e.backfilled, e.elapsed_since_unlock_s])).toEqual([[true, 0]]);
++  });
++  it('offline path: elapsed counts the away ms up to completion only, then freezes (no full-gap add)', () => {
++    const ev: SimEvent[] = [], r = breedsOffline(st({ owned: almost, incubator: { breed: 'cream_legbar', remainingMs: 40_000, costCents: 1 }, hatches: 24, sinceUnlockMs: 10_000 }, 24), 600_000, BR, ev);
++    expect(only(ev, 'flock_complete')).toEqual([{ type: 'flock_complete', hatches: 24, farm_level: 24, elapsed_since_unlock_s: 50, backfilled: false }]);
++    expect(r.state.breeds!.sinceUnlockMs).toBe(50_000); expect(r.state.breeds!.flockCompleteLogged).toBe(1);
++  });
++  it('never re-emits: an already-logged save reloads with 0 events; revealHatch on a logged flock emits breed_revealed only', () => {
++    const kv = saved(st({ owned: maxed(BREED_IDS), flockCompleteLogged: 1, hatches: 24, freeHatchUsed: 1 }, 24), T0);
++    expect(only(boot(BR, kv, T0 + 3_600_000).telemetry.events(), 'flock_complete')).toEqual([]);
++    const ev: SimEvent[] = []; revealHatch(fresh({ owned: almost, flockCompleteLogged: 1, incubator: { breed: 'cream_legbar', remainingMs: 0, costCents: 1 }, hatches: 24 }), BR, 3, { ev, farm: 24 });
++    expect(ev.map(e => e.type)).toEqual(['breed_revealed']);
++  });
++});
++
++describe('§8 session_end breeds fields (L698): flag on all present, flag off all absent; Saves-owned fields excluded', () => {
++  const OWN = ['breed_hatches', 'breed_spend_cents', 'breed_present_eggs', 'breed_away_eggs', 'breed_broody_cents', 'breeds_owned', 'breed_slots_used', 'breed_loadout_end', 'breed_family_s'];
++  it('Game session: hatches / spend (= Σ hatch_started.cost), owned, slots used, settled-only loadout, family seconds; schema-valid', () => {
++    const g = boot(BR, mem(), T0); let t = T0; (g as any).now = () => t;
++    g.state = st({ owned: { sussex: { stars: 0 }, orpington: { stars: 0 }, leghorn: { stars: 0 } }, slots: ['sussex', 'orpington', null], settleMs: [0, 150_000, 0], freeHatchUsed: 1 }, 20, 1e12);
++    const cost = hatchCostCents(g.state, BR); g.dispatch({ type: 'hatch' });
++    t += 2_000; g.frame(); t += 500; g.frame();
++    g.endSession(); const e = g.telemetry.events().filter(x => x.type === 'session_end').pop()!;
++    const hs = only(g.telemetry.events(), 'hatch_started'); expect(hs.map(x => x.cost)).toEqual([cost]);
++    expect(Object.fromEntries(OWN.map(k => [k, (e as any)[k]]))).toEqual({ breed_hatches: 1, breed_spend_cents: cost, breed_present_eggs: 0, breed_away_eggs: 0, breed_broody_cents: 0,
++      breeds_owned: 3, breed_slots_used: 2, breed_loadout_end: 'P0A1B0', breed_family_s: { P: 0, A: 2.5, B: 0 } });
++    const { type: _t, ts: _ts, sessionMs: _m, ...rest } = e as any;
++    expect(validateEvent({ ...ENV, type: 'session_end', ...END, ...rest })).toEqual([]);
++    for (const k of ['present_active_s', 'present_lost_count']) expect(k in e).toBe(false);
++    for (const x of only(g.telemetry.events(), 'offline_grant')) expect('away_bp' in x).toBe(false);
++  });
++  it('flag on, no breeds blob yet: zeros and P0A0B0 (present, not absent); every value matches its schema FieldSpec', () => {
++    const f = sessionEndBreedsFields(initialState(b, 7), BR); expect(Object.keys(f).sort()).toEqual([...OWN].sort());
++    expect(f).toMatchObject({ breed_hatches: 0, breed_loadout_end: 'P0A0B0', breed_family_s: { P: 0, A: 0, B: 0 } });
++    for (const k of OWN) expect(EVENT_SCHEMA.session_end.fields[k], k).toBeDefined();
++  });
++  it('per session: counters are session-only (a reload starts at 0)', () => {
++    const kv = mem(), g = boot(BR, kv, T0); g.state = st({}, 10, 0); g.dispatch({ type: 'hatch' }); g.save();
++    const g2 = boot(BR, kv, T0 + 1_000); expect(sessionEndBreedsFields(g2.state, BR)).toMatchObject({ breed_hatches: 0, breed_spend_cents: 0 });
++  });
++  it('flag off: session_end carries no breed field (absent, not 0) and the payload is exactly the pre-breeds one', () => {
++    const g = boot(OFF, mem(), T0); g.state = st({ owned: { leghorn: { stars: 0 } } }, 12, 1e12); g.dispatch({ type: 'hatch' }); g.endSession();
++    const e = g.telemetry.events().filter(x => x.type === 'session_end').pop()!; expect(Object.keys(e).sort()).toEqual(['sessionMs', 'ts', 'type']);
++    expect(sessionEndBreedsFields(g.state, OFF)).toEqual({});
++  });
++});
++
++describe('flag off / flag on with no hatch: nothing new', () => {
++  it('flag off: hatch, placeBreed, 2,000 ticks, an offline grant and endSession emit no breeds event and create no breedsTel', () => {
++    const g = boot(OFF, mem(), T0); let t = T0; (g as any).now = () => t;
++    g.state = st({ owned: { leghorn: { stars: 0 } }, incubator: { breed: 'brahma', remainingMs: 100, costCents: 1 } }, 20, 1e12);
++    g.dispatch({ type: 'hatch' }); g.dispatch({ type: 'placeBreed', slot: 0, id: 'leghorn' }); for (let i = 0; i < 20; i++) { t += 1_000; g.frame(); }
++    g.onHidden(t); t += 300_000; g.onShown(t); g.endSession();
++    expect(g.telemetry.events().filter(e => BREEDS_TYPES.includes(e.type))).toEqual([]); expect(g.state.breedsTel).toBeUndefined();
++    const ev: SimEvent[] = []; const s = st({ incubator: { breed: 'brahma', remainingMs: 100, costCents: 1 } }, 20);
++    expect(breedsTick(s, 0.1, OFF, undefined, ev)).toBe(s); expect(breedsOffline(s, 600_000, OFF, ev).state).toBe(s); expect(ev).toEqual([]);
++  });
++  it('flag on, no hatch: 1,000 ticks emit nothing and never create breedsTel (flag-on/no-hatch == flag-off, §7)', () => {
++    const ev: SimEvent[] = [], s = ticks({ ...initialState(b, 7), farmLevel: 12 }, 1000, ev);
++    expect(ev.filter(e => BREEDS_TYPES.includes(e.type))).toEqual([]); expect(s.breedsTel).toBeUndefined();
++  });
++  it('loadout helper: P/A/B family counts, settledOnly skips settling slots', () => {
++    expect(breedsLoadout({ slots: ['leghorn', 'brahma', 'cochin'], settleMs: [0, 5, 0] })).toBe('P1A1B1');
++    expect(breedsLoadout({ slots: ['leghorn', 'brahma', 'cochin'], settleMs: [0, 5, 0] }, true)).toBe('P1A0B1');
++  });
++});

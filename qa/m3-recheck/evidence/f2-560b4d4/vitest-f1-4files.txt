@@ -1,0 +1,46 @@
+LOCK+START 2026-11-05T23:39:06+01:00 loadavg=1.26 1.35 1.78 1/1654 1409292
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/f2-560b4d4/wt
+
+ ✓ tests/verify.test.ts (56 tests) 29892ms
+   ✓ verify: the run > m5x-casual is available and is tests/bot-m5.ts run() (casual, AssZ): same end state and Farm reach 509ms
+   ✓ verify: end-state save round-trip (QA-D-1027-GOALPILL) > 24 h seed 1: the loaded end state has nothing left to buy (pill = All upgrades done!) 2053ms
+   ✓ verify: goldens > the copy in scripts/verify/golden.ts reproduces both pinned GOLDEN1 hashes on this tree 704ms
+   ✓ verify: arguments and flags > [VER-1h N-4] CLI: usage errors exit 2 before building anything (no UNAVAILABLE path) 741ms
+   ✓ verify: save round-trip guard (VER-1a, CCR R1) > m5x-casual: the marked end state round-trips under the shipped balance (not migrated, no mismatches) 332ms
+   ✓ verify: save round-trip guard (VER-1a, CCR R1) > CLI: --profile m5x-casual runs (no exit 2) and records its profile and bot in verify.json 1127ms
+   ✓ verify: save round-trip guard (VER-1a, CCR R1) > CLI: with the marker skipped (VERIFY_TEST_SKIP_MARKER=1) verify exits 4, records saveRoundTrip FAIL, and leaves no PNG 1132ms
+   ✓ verify: save round-trip guard (VER-1a, CCR R1) > CLI: with the marker applied the same run passes the round-trip (exit 1 here only for the fake html / no shot) 1132ms
+   ✓ verify: VER-1b (CCR F1/N2 on #72) > F1: --flags m4.enabled=0 no longer gives a false PASS: exit 4, flagsDifferFromBuild, no screenshot, no PNG 1183ms
+   ✓ verify: VER-1b (CCR F1/N2 on #72) > F1: --flags equal to the shipped flags (m4.enabled=1) is not an override and passes the round-trip 1156ms
+   ✓ verify: VER-1c (CCR S1/N-a/N-b on #73) > S1: a usage error (exit 2) leaves no stale PASS verify.json and no verify.png in --out 1059ms
+   ✓ verify: VER-1c (CCR S1/N-a/N-b on #73) > S1: a build failure (exit 3) leaves no stale PASS verify.json and no verify.png in --out 371ms
+   ✓ verify: VER-1c (CCR S1/N-a/N-b on #73) > S1: an uncaught throw (exit 1) leaves no stale PASS verify.json and no verify.png in --out 402ms
+   ✓ verify: VER-1c (CCR S1/N-a/N-b on #73) > N-a: --flags m4.enabled=2 (round-trips under the shipped balance, but differs from the build) exits 4, no PNG 1154ms
+   ✓ verify: VER-1c (CCR S1/N-a/N-b on #73) > N-b: the CLI exits 2 with a clear message for both, and writes no PASS 706ms
+   ✓ verify: exit codes and the browser step (CCR n1/n3) > exit 3 when the html to verify is missing 368ms
+   ✓ verify: exit codes and the browser step (CCR n1/n3) > exit 1 on a failed check (wrong build id, no screenshot); verify.json says FAIL and names no PNG 1155ms
+   ✓ verify: VER-1d (CCR m1/N-c on #74) > m1 (M31): a real tsc break in a temp copy of the repo exits 3 (stage build), not 1, and leaves no stale PASS 4453ms
+   ✓ verify: VER-1d (CCR m1/N-c on #74) > m1 (M28/M29): without --out, a usage error clears the existing default dir verify-out/<HEAD id>/ and writes the FAIL report there 741ms
+   ✓ verify: VER-1d (CCR m1/N-c on #74) > m1 (M17/M18/M19): a run SIGKILLed mid-sim (no handler runs) leaves neither verify.json nor verify.png 340ms
+   ✓ verify: VER-1d (CCR m1/N-c on #74) > m1 (M33): --skip-build with an older html clears that html's default dir; a crash then writes the FAIL report there 446ms
+   ✓ verify: VER-1d (CCR m1/N-c on #74) > m1 (M27): a crash after the browser step wrote verify.png removes that PNG with the FAIL report 1133ms
+   ✓ verify: VER-1d (CCR m1/N-c on #74) > N-c: <out>/verify.json being a directory: the original error (rm EISDIR) is what fails the run; the writer failure is only logged 344ms
+   ✓ verify: VER-1d (CCR m1/N-c on #74) > N-c: an unwritable out dir keeps the original exit code (usage 2, not 1) and logs the writer failure 345ms
+   ✓ verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75) > N-1 (NC4): the writer-failure line is sanitised: an out dir under the home dir prints as ~ 345ms
+   ✓ verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75) > N-1: an out dir outside the repo and home prints <redacted>, never an absolute path 375ms
+   ✓ verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75) > N-4 (NC5): when the first of two claimed dirs cannot take the FAIL report, the second still gets it and loses its PNG 1160ms
+   ✓ verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75) > N-4 (H2): the after-shot hook really writes its stand-in verify.png before the crash (seen by a watcher), and the writer removes it 1441ms
+   ✓ verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75) > O-1: a hostile html build id (../../victim) cannot move the default out dir outside the out root 1149ms
+   ✓ verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75) > O-2: a read-only out dir on a run that fails the save round-trip keeps exit 4 (not an uncaught 1) and logs one line 1135ms
+ ✓ tests/k10-breeds-offset.test.ts (9 tests) 882ms
+   ✓ k10 harness > seed 1 equals the scratch harness of record (g1csv.ts -> g1tap/m5tap/breeds 76c07ecf, SEEDS=1, g1max @0.27) 869ms
+ ✓ tests/pacing-x1-ac7.test.ts (11 tests) 419ms
+ ✓ tests/telemetry-m3.test.ts (10 tests) 87ms
+
+ Test Files  4 passed (4)
+      Tests  86 passed (86)
+   Start at  23:39:07
+   Duration  32.40s (transform 369ms, setup 0ms, collect 552ms, tests 31.28s, environment 1ms, prepare 160ms)
+
+EXIT=0 END 2026-11-05T23:39:39+01:00 loadavg=1.79 1.46 1.80 1/1657 1411158

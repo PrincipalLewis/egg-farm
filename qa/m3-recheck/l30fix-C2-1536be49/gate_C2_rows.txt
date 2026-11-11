@@ -1,0 +1,43 @@
+== scenario standard [HARD] workers=True model=s15 T=9000s ==
+| gate | status | detail |
+| L35 cumulative median | PASS | 54.25 min (band <=64.8 min) |
+| L40 cumulative median | PASS | 66.75 min (band 48.0–86.4 min) |
+| L50 cumulative median | PASS | 101.25 min (band 80.0–120.0 min) |
+| per-level <=8 min (L30+, every seed) | PASS | worst 4.00 min at L41 seed 7; violations=0 |
+| step ratio L30–50 (HARD, prev>=60s) | PASS | QA P95 1.88x worst 2.00x | Economy(max30) P95 1.88x worst 2.00x |
+| purchase gap | WARN | P95 3.25 worst 3.25 (WARN P95>3; still HARD-pass <=4) |
+== scenario casual [HARD] workers=True model=casual T=12000s ==
+| gate | status | detail |
+| L35 cumulative median | PASS | 58.00 min (band <=64.8 min) |
+| L40 cumulative median | PASS | 70.67 min (band 48.0–86.4 min) |
+| L50 cumulative median | PASS | 105.33 min (band 80.0–120.0 min) |
+| per-level <=8 min (L30+, every seed) | PASS | worst 4.33 min at L41 seed 15; violations=0 |
+| EX-1 L30–40 step ratio (ACCEPTED EXCEPTION HoP 00:12) | PASS | QA P95 2.00x worst 2.20x | Economy(max30) P95 2.00x worst 2.20x (HARD ≤2.25/2.25; post-laun
+| step ratio L41–50 (HARD, L30–50 other) | PASS | QA P95 1.71x worst 2.17x | Economy(max30) P95 1.71x worst 2.17x |
+| purchase gap | WARN | P95 3.67 worst 3.67 (WARN P95>3; still HARD-pass <=4) |
+== scenario casual-no-workers [REPORT-ONLY] workers=False model=casual T=12000s ==
+| gate | status | detail |
+| L35 cumulative median | FAIL | median=n/a (not all seeds reached L35) |
+| L40 cumulative median | FAIL | median=n/a (not all seeds reached L40) |
+| L50 cumulative median | FAIL | median=n/a (not all seeds reached L50) |
+| per-level <=8 min (L30+, every seed) | FAIL | worst 18.33 min at L31 seed 4; violations=500 |
+| step ratio L30–50 (HARD, prev>=60s) | PASS | QA P95 1.15x worst 1.15x | Economy(max30) P95 1.15x worst 1.15x |
+| purchase gap | FAIL | P95 11.67 worst 12.00 (HARD P95<=4, worst<=4) |
+(REPORT-ONLY: 5 fail-shaped rows ignored for OVERALL)
+== scenario active [HARD] workers=True model=s15 T=9000s ==
+| gate | status | detail |
+| L35 cumulative median | PASS | 54.25 min (band <=64.8 min) |
+| L40 cumulative median | PASS | 66.75 min (band 48.0–86.4 min) |
+| L50 cumulative median | PASS | 101.25 min (band 80.0–120.0 min) |
+| per-level <=8 min (L30+, every seed) | PASS | worst 4.00 min at L41 seed 7; violations=0 |
+| step ratio L30–50 (HARD, prev>=60s) | PASS | QA P95 1.88x worst 2.00x | Economy(max30) P95 1.88x worst 2.00x |
+| purchase gap | WARN | P95 3.25 worst 3.25 (WARN P95>3; still HARD-pass <=4) |
+== L30-19a [HARD] casual-no-workers: nudge_f25_noworker → hire affordable ≤180s P95 ==
+| gate | status | detail |
+| L30-19a nudge→afford | PASS | P95 20.0s worst 20.0s; fired 100/100 (HARD P95≤180s) |
+== active/idle 2h @ L30/40/50 (canonical H=V=F, C=F-3) ==
+| L | P95 | worst | mean | status |
+| L30 | 1.756 | 1.829 | 1.664 | PASS |
+| L40 | 1.747 | 1.819 | 1.655 | PASS |
+| L50 | 1.823 | 1.899 | 1.729 | PASS |
+OVERALL: PASS (fail_gates=0) in 21s

@@ -1,0 +1,217 @@
+== 5573593
+
+diff --git a/src/game.ts b/src/game.ts
+remerge CONFLICT (content): Merge conflict in src/game.ts
+index f41c39f..1a5e001 100644
+--- a/src/game.ts
++++ b/src/game.ts
+@@ -9,11 +9,8 @@ import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
+ import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
+ import type { SimEvent } from './sim/events';
+ import { focusFrameMs } from './sim/clock';
+-<<<<<<< 504d279 (Merge origin/rc/v5 (b563c75, #77 F1a) into feat/saves-v5-streak-sim-2)
+ import { streakOn, streakPeak } from './sim/streak';
+-=======
+ import { anyM5FlagOn } from './sim/timers';
+->>>>>>> 2fa7318 (v5 F1b: evRng/brRng streams, focus clock in step(), wall-clock timers vs injected now (#79))
+ import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
+ import type { IdbBoot } from './save/idb-mirror';
+ import { TELEMETRY_KEY } from './telemetry/telemetry';
+@@ -393,14 +390,9 @@ export class Game {
+     const capS = this.b.offline.offlineCapSeconds;
+     return { mode: 'offline-grant', simulatedMs: 0, grantedMs: Math.min(gap, capS * 1000), eggs, coins: 0, capped: gap > capS * 1000 };
+   }
+-<<<<<<< 504d279 (Merge origin/rc/v5 (b563c75, #77 F1a) into feat/saves-v5-streak-sim-2)
+-  /** v5 F1b: is the player attending (no menu/sheet/modal/explainer/onboarding/coach)? Set by the UI (F6 dialogOpen(), row 17).
+-   *  Default false: no focus time, so the streak hold and decay stay frozen until the UI wires it. */
+-=======
+   /** v5 F1b: is the player attending (no menu/sheet/modal/explainer/onboarding/coach open)? Set by the UI (F6 dialogOpen()).
+    *  Default false: no focus time accrues, so M5 timers stay frozen until the UI wires it. Visibility is handled by frame()
+    *  itself (hidden frames never pass focus). Only read while an M5 flag is on (frame() skips it with every flag off). */
+->>>>>>> 2fa7318 (v5 F1b: evRng/brRng streams, focus clock in step(), wall-clock timers vs injected now (#79))
+   private attendedProbe: () => boolean = () => false;
+   setAttendedProbe(fn: () => boolean) { this.attendedProbe = fn; }
+   frame() {
+@@ -422,10 +414,6 @@ export class Game {
+       // v5 F1b: focus (attended) ms for this frame, min(gap, 1.0 s); 0 for a gap >= 60 s (§9.1a) or when not attended.
+       const focusMs = focusFrameMs(gap, !this.readOnly && anyM5FlagOn(this.b) && this.attendedProbe(), this.b.offline.offlineMinSeconds); // CCR N-1 #79: no probe read with every flag off
+       const ev: SimEvent[] = []; if (gap >= maxMs) this.state = m5Offline(this.state, this.b, ev); // v5 F2 §9.1a: M5 timed systems take the offline path
+-<<<<<<< 504d279 (Merge origin/rc/v5 (b563c75, #77 F1a) into feat/saves-v5-streak-sim-2)
+-      const focusMs = focusFrameMs(gap, !this.readOnly && this.attendedProbe(), this.b.offline.offlineMinSeconds); // F1b
+-=======
+->>>>>>> 2fa7318 (v5 F1b: evRng/brRng streams, focus clock in step(), wall-clock timers vs injected now (#79))
+       const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev, { focusMs, nowMs: t });
+       this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
+     }
+diff --git a/src/save/m5-fields.ts b/src/save/m5-fields.ts
+remerge CONFLICT (content): Merge conflict in src/save/m5-fields.ts
+index 803cbf6..40d4cf6 100644
+--- a/src/save/m5-fields.ts
++++ b/src/save/m5-fields.ts
+@@ -8,12 +8,8 @@
+  * visible gap) elapses with no subtraction here; a load clamps the stored value to [now, now + cd] (E2, clock tamper).
+  */
+ import type { Balance } from '../config/balance';
+-<<<<<<< 504d279 (Merge origin/rc/v5 (b563c75, #77 F1a) into feat/saves-v5-streak-sim-2)
+ import { tcNum } from '../config/formulas';
+-import { type GameState, mixSeed, nextRand } from '../sim/state';
+-=======
+ import { type GameState, nextRand } from '../sim/state';
+->>>>>>> 2fa7318 (v5 F1b: evRng/brRng streams, focus clock in step(), wall-clock timers vs injected now (#79))
+ import type { SimEvent } from '../sim/events';
+ import { WORKERS } from '../sim/workers';
+ import { type M5Flag, flagOn } from '../config/flags';
+@@ -24,16 +20,10 @@ export type { M5Flag }; // ONE flag-name type: config/flags.ts (CCR N-1 on #77)
+ /** D-C1: on only when m4.flags[k] === 1 and m4.enabled. The same function as config/flags.ts flagOn. */
+ export const m5Flag = (b: Balance, k: M5Flag): boolean => flagOn(b, k);
+ const anyFlag = (b: Balance) => (['golden', 'streak', 'tapCoins', 'broody', 'abilities'] as const).some(k => m5Flag(b, k));
+-<<<<<<< 504d279 (Merge origin/rc/v5 (b563c75, #77 F1a) into feat/saves-v5-streak-sim-2)
+ const tc = tcNum; // throws on a missing tc_* key (validateBalance rejects it at load while the flag is on)
+-/** D-C2 salt (ASCII "evRn"), as F1b sim/rng.ts. */
+-export const EV_RNG_SALT = 0x6576526e;
+-=======
+-const tc = (b: Balance, k: string): number => b.m4?.tc?.[k] ?? 0;
+ /** D-C2 salt + seeding: ONE code path, re-exported from F1b sim/rng.ts (identical formula and validity rule). */
+ import { EV_RNG_SALT, ensureEvRng } from '../sim/rng';
+ export { EV_RNG_SALT, ensureEvRng };
+->>>>>>> 2fa7318 (v5 F1b: evRng/brRng streams, focus clock in step(), wall-clock timers vs injected now (#79))
+ /** D-C5: the Broody nest clamp (fmtMoneyExact limit) and the yard slot range 0..11. */
+ export const BROODY_NEST_MAX_CENTS = 1e15; export const BROODY_SLOTS = 12;
+ /** Never saved (F1a M5_SESSION_FIELDS: golden R10a on-screen egg, streak R11 s, I_ref ring, Broody nestScaled/brRng). */
+diff --git a/src/sim/clock.ts b/src/sim/clock.ts
+remerge CONFLICT (add/add): Merge conflict in src/sim/clock.ts
+index bf556b8..1fd2bbe 100644
+--- a/src/sim/clock.ts
++++ b/src/sim/clock.ts
+@@ -1,17 +1,4 @@
+ /**
+-<<<<<<< 504d279 (Merge origin/rc/v5 (b563c75, #77 F1a) into feat/saves-v5-streak-sim-2)
+- * v5 F1b subset (feat/v5-f1b, not on rc/v5 yet): the attended ("focus") clock, the minimum the #2 streak needs. Names and
+- * bodies are F1b's sim/clock.ts verbatim; on merge take F1b's file (it adds the wall-clock helpers).
+- *  - Game passes the frame's focus ms into advance(): min(frame dt, FOCUS_DT_MAX_S), 0 for a gap >= offlineMinSeconds.
+- *  - The FIRST ceil(focusMs / tickMs) ticks of a frame carry focus; the rest run with M5 timed effects suspended (D-C3).
+- */
+-/** HoP ruling (sizing §13 GE-15): a code constant, not a CSV column. */
+-export const FOCUS_DT_MAX_S = 1.0;
+-/** Per-tick clock input to step(). `focus` = this tick carries focus time. */
+-export interface StepClock { focus: boolean; nowMs?: number; }
+-/** Per-frame clock input to advance(). `focusMs` = attended ms of this frame (already clamped by focusFrameMs). */
+-export interface FrameClock { focusMs: number; nowMs?: number; }
+-=======
+  * v5 F1b: the attended ("focus") clock and wall-clock timer checks (engineering/m5.0-sizing.md §1 F1(b), §12.1 D-C3, §13 GE-15).
+  *  - Game decides per frame whether the player is attending (tab visible, no menu/sheet/modal, game live) and passes the
+  *    frame's focus ms into advance(). focusDt = min(frame dt, FOCUS_DT_MAX_S); a gap >= offlineMinSeconds gives 0.
+@@ -28,7 +15,6 @@ export interface StepClock { focus: boolean; nowMs?: number; }
+ export interface FrameClock { focusMs: number; nowMs?: number; }
+ /** Focus seconds this tick contributes (0 when unfocused or no clock). */
+ export const tickFocusS = (dt: number, c?: StepClock) => (c?.focus ? dt : 0);
+->>>>>>> 2fa7318 (v5 F1b: evRng/brRng streams, focus clock in step(), wall-clock timers vs injected now (#79))
+ /** Focus ms for one frame: 0 if not attended, non-positive or >= the offline threshold (§9.1a); else min(gap, 1.0 s) (R5e). */
+ export function focusFrameMs(gapMs: number, attended: boolean, offlineMinS: number): number {
+   if (!attended || !(gapMs > 0) || gapMs >= offlineMinS * 1000) return 0;
+@@ -36,8 +22,6 @@ export function focusFrameMs(gapMs: number, attended: boolean, offlineMinS: numb
+ }
+ /** How many of a frame's ticks carry focus (D-C3): ceil(focusMs / tickMs), with a float guard. */
+ export const focusTicks = (focusMs: number, tickMs: number) => (focusMs > 0 ? Math.ceil(focusMs / tickMs - 1e-9) : 0);
+-<<<<<<< 504d279 (Merge origin/rc/v5 (b563c75, #77 F1a) into feat/saves-v5-streak-sim-2)
+-=======
+ /** Wall-clock timer: ms left until `atMs`, against injected `nowMs`, clamped to [0, capMs] on EVERY read
+  *  (abilities E2b: clock rollback can't show more than one cooldown). Non-finite input = ready (D-C5 sanitising). */
+ export function wallRemainingMs(atMs: number | undefined, nowMs: number, capMs: number): number {
+@@ -45,6 +29,5 @@ export function wallRemainingMs(atMs: number | undefined, nowMs: number, capMs:
+   return Math.max(0, Math.min(capMs, atMs - nowMs));
+ }
+ export const wallReady = (atMs: number | undefined, nowMs: number, capMs: number) => wallRemainingMs(atMs, nowMs, capMs) === 0;
+->>>>>>> 2fa7318 (v5 F1b: evRng/brRng streams, focus clock in step(), wall-clock timers vs injected now (#79))
+ /** The StepClock advance() hands to tick i of a frame whose first nFocus ticks carry focus (D-C3). */
+ export const tickClock = (i: number, nFocus: number, c: FrameClock): StepClock => ({ focus: i < nFocus, nowMs: c.nowMs });
+diff --git a/src/sim/tick.ts b/src/sim/tick.ts
+remerge CONFLICT (content): Merge conflict in src/sim/tick.ts
+index e105714..8327498 100644
+--- a/src/sim/tick.ts
++++ b/src/sim/tick.ts
+@@ -3,23 +3,14 @@ import { GameState, eggsPerTap, coopCapacity, customerIntervalS, demandRange, ne
+ import type { Sink } from './events';
+ import { sellTo } from './actions';
+ import { prodEggsPerSec, coopCap } from './tracks';
+-<<<<<<< 504d279 (Merge origin/rc/v5 (b563c75, #77 F1a) into feat/saves-v5-streak-sim-2)
+-import { focusTicks, tickClock, type FrameClock, type StepClock } from './clock';
+-import { streakTick } from './streak';
+-=======
+ import { anyM5FlagOn, stepTimers } from './timers';
+ import { focusTicks, tickClock, type FrameClock, type StepClock } from './clock';
+->>>>>>> 2fa7318 (v5 F1b: evRng/brRng streams, focus clock in step(), wall-clock timers vs injected now (#79))
+ import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge, resumeNeedCents } from './workers';
+ /** Pure: advance sim by dt seconds. Optional `ev` collects events.
+  *  Order within a tick: worker energy -> coop fill -> timeouts -> arrivals -> Coop Hand -> Market Hand.
+  *  AC3: timeouts are processed BEFORE arrivals, so a customer leaving on the same tick frees a queue slot for a new one. */
+-<<<<<<< 504d279 (Merge origin/rc/v5 (b563c75, #77 F1a) into feat/saves-v5-streak-sim-2)
+-/** v5 (F1b signature): `clock.focus` = this tick carries focus time. Without a clock every tick is unfocused. */
+-=======
+ /** v5 F1b: `clock` (optional) says whether this tick carries focus time and gives the injected wall clock. It only feeds
+  *  the M5 stepTimers() sub-calls, which run only while an m4.flags.* flag is on. */
+->>>>>>> 2fa7318 (v5 F1b: evRng/brRng streams, focus clock in step(), wall-clock timers vs injected now (#79))
+ export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: StepClock): GameState {
+   const L = s.farmLevel, E = b.workers.energy;
+   // Energy: Working and Tired workers drain 1% per drain_s_per_pct; Asleep stays at 0 until managed; Unpaid doesn't drain (ruling 1).
+@@ -61,14 +52,9 @@ export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: St
+     } else ev?.push({ type: 'customer_lost', reason: 'full_queue' }); // lost, no backlog
+   }
+   let out: GameState = { ...s, coop, coopFullS, customers, nextCustomerInS, nextCustomerId, rng, workers, manageCdS: Math.max(0, s.manageCdS - dt) };
+-<<<<<<< 504d279 (Merge origin/rc/v5 (b563c75, #77 F1a) into feat/saves-v5-streak-sim-2)
+-  if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev, !clock?.focus);
+-  return streakTick(out, dt, clock?.focus ? dt : 0, b, ev); // v5 #2: identity unless m4.flags.streak
+-=======
+-  if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev);
++  if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev, !clock?.focus); // v5 #2: no focus = suspended sale (R12)
+   if (anyM5FlagOn(b)) out = stepTimers(out, dt, b, clock, ev);
+   return out;
+->>>>>>> 2fa7318 (v5 F1b: evRng/brRng streams, focus clock in step(), wall-clock timers vs injected now (#79))
+ }
+ /** Coop Hand: collects eggs_per_tap every every_s (tired_every_s when Tired). Market Hand: serves the queue
+  *  (front first, like Sell all) every every_s / tired_every_s. Wage is charged per action interval. Asleep = nothing, no wage. */
+diff --git a/src/sim/timers.ts b/src/sim/timers.ts
+index c88548e..1dec683 100644
+--- a/src/sim/timers.ts
++++ b/src/sim/timers.ts
+@@ -9,6 +9,7 @@ import type { Sink } from './events';
+ import type { GameState } from './state';
+ import { tickFocusS, type StepClock } from './clock';
+ import { ensureEvRng } from './rng';
++import { streakTick } from './streak';
+ /** dt = sim seconds of this tick; focusS = focus seconds of this tick (dt or 0). */
+ export type TimerSystem = (s: GameState, dt: number, focusS: number, b: Balance, clock: StepClock | undefined, ev?: Sink) => GameState;
+ /** Seeds evRngState once on the first tick golden or broody is on (D-C2, Q4 ruling). Never touches state.rng.
+@@ -16,7 +17,9 @@ export type TimerSystem = (s: GameState, dt: number, focusS: number, b: Balance,
+  *  that tick's customer draws on state.rng; for initialState that equals GE-AC33's mixSeed(mixSeed(seed) ^ salt). This is the
+  *  only seeding path (save/m5-fields.ts re-exports ensureEvRng from sim/rng.ts). */
+ const seedEvRng: TimerSystem = (s, _dt, _f, b) => (evRngFlagOn(b) ? ensureEvRng(s) : s);
+-export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng];
++/** #2 streak (R6/R7/R12): hold, then decay on focus seconds; K18 cap clamp. Identity unless m4.flags.streak. */
++const streak: TimerSystem = (s, dt, f, b, _c, ev) => streakTick(s, dt, f, b, ev);
++export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak];
+ export const anyM5FlagOn = (b: Balance) => M5_FLAGS.some(f => flagOn(b, f));
+ export function stepTimers(s: GameState, dt: number, b: Balance, clock?: StepClock, ev?: Sink, systems: readonly TimerSystem[] = TIMER_SYSTEMS): GameState {
+   const f = tickFocusS(dt, clock);
+diff --git a/tests/v5-f1b-clock-rng.test.ts b/tests/v5-f1b-clock-rng.test.ts
+index e17461b..7dd89ff 100644
+--- a/tests/v5-f1b-clock-rng.test.ts
++++ b/tests/v5-f1b-clock-rng.test.ts
+@@ -9,6 +9,7 @@ import { apply } from '../src/sim/actions';
+ import { EV_RNG_SALT, BR_RNG_SALT, deriveEvRngState, ensureEvRng, evDraw, brDraw, isRngState, pickIndex } from '../src/sim/rng';
+ import { FOCUS_DT_MAX_S, focusFrameMs, focusTicks, tickClock, wallRemainingMs, wallReady, tickFocusS } from '../src/sim/clock';
+ import { stepTimers, type TimerSystem } from '../src/sim/timers';
++import { G3 } from './v5-f2-helpers';
+ 
+ const B = (flags?: Partial<Record<M5Flag, number>>, enabled = 1) => ({ ...balance, m4: { ...balance.m4!, enabled, ...(flags ? { flags } : {}) } });
+ /** 10 min of 10 Hz play with collects/sells/buys; returns the customer-facing trace + final state. */
+@@ -75,7 +76,8 @@ describe('F1b evRng / brRng', () => {
+   });
+   it('[D-C2] flags off (or only non-RNG flags on): no evRngState is ever created', () => {
+     expect('evRngState' in play(B(), 5).s).toBe(false);
+-    expect('evRngState' in play(B({ streak: 1, abilities: 1 }), 5).s).toBe(false);
++    const SA = B({ streak: 1, abilities: 1 }); // #87: the streak flag needs its tc columns (validateBalance/tcNum), G3 until the CSV PR
++    expect('evRngState' in play({ ...SA, m4: { ...SA.m4, tc: { ...SA.m4.tc!, ...G3 } } } as typeof SA, 5).s).toBe(false);
+     expect('evRngState' in play(B({ golden: 1 }, 0), 5).s).toBe(false); // m4.enabled off wins
+   });
+   it('[F1(a)] pickIndex stays in range', () => { expect(pickIndex(0, 8)).toBe(0); expect(pickIndex(0.999999999, 8)).toBe(7); expect(pickIndex(0.5, 6)).toBe(3); });

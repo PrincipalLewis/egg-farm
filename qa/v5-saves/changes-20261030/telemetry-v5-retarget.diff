@@ -1,0 +1,236 @@
+# Telemetry v5 re-target (HoQ 2026-10-30). Backup ../scratch/telemetry-v5-retarget-1327. G1 pin untouched; gate unchanged.
+--- a/qa/v5-saves/scripts/telemetry-check.mjs
++++ b/qa/v5-saves/scripts/telemetry-check.mjs
+@@ -9,15 +9,25 @@
+ // Flags: conditional fields/events are required ONLY for flags named in --flags and must be ABSENT otherwise.
+ import { serve, serveDir, launch, watch, seedLS, ids, start, skipOnb, play, writeJSON, readText, sha256, dismissWelcome } from './lib.mjs';
+ import { parseArgs } from 'node:util'; import path from 'node:path'; import { readFileSync } from 'node:fs';
+-const { values: A } = parseArgs({ options: { html: { type: 'string' }, port: { type: 'string', default: '5961' }, out: { type: 'string' }, engine: { type: 'string', default: 'chromium' }, flags: { type: 'string', default: '' }, 'expect-build': { type: 'string' }, 'hidden-hard': { type: 'boolean', default: false }, only: { type: 'string' }, 'milestone-ids': { type: 'string' }, 'ring-size': { type: 'string', default: '5000' }, 'selftest-only': { type: 'boolean', default: false }, 'qa-dir': { type: 'string' }, schema: { type: 'string', default: 'shipped' } } });
++const { values: A } = parseArgs({ options: { html: { type: 'string' }, port: { type: 'string', default: '5961' }, out: { type: 'string' }, engine: { type: 'string', default: 'chromium' }, flags: { type: 'string', default: '' }, balance: { type: 'string' }, 'expect-build': { type: 'string' }, 'hidden-hard': { type: 'boolean', default: false }, only: { type: 'string' }, 'milestone-ids': { type: 'string' }, 'ring-size': { type: 'string', default: '5000' }, 'selftest-only': { type: 'boolean', default: false }, 'qa-dir': { type: 'string' }, schema: { type: 'string', default: 'shipped' } } });
+ if (!['shipped', 'v062'].includes(A.schema)) { console.error('--schema shipped|v062'); process.exit(2); } const V062 = A.schema === 'v062';
+-const NA_V062 = 'N/A-by-scope: telemetry v0.6.2 (manifest rows 11/24) moved to 5.1 by HoE ruling 11:08 Oct 30, confirmed D-CEO-20261030-04; not a waiver';
++// v5 RE-TARGET (2026-10-30 13:2x, HoQ): telemetry v0.6.2 ships in v5, always on, no flag (D-CEO-20261030-09; ship-set product/v5-ship-set.md c3aba321 "Not flags";
++// manifest rows 11/24 = v5, D-HOE-20261030-18). src/telemetry/schema.ts is NOT in rc/v5 3f582db/e77fc5c (G-8, row 11 open), so --schema shipped
++// is a REHEARSAL mode for a pre-row-11 build; the v5 RC gate is to run --schema v062 once row 11 lands (open question to HoE/HoQ).
++const NA_V062 = 'NOT-YET-IN-BUILD: telemetry v0.6.2 is v5 always-on (D-CEO-20261030-09, ship-set c3aba321, manifest rows 11/24), but this build predates row 11 (no src/telemetry/schema.ts); recorded, not counted, under --schema shipped (rehearsal only)';
+ if (!A.html || !A.out) { console.error('need --html --out'); process.exit(2); }
+ const HERE = path.dirname(new URL(import.meta.url).pathname); const SCH = JSON.parse(readFileSync(path.join(HERE, '../spec/telemetry-v062.schema.json'), 'utf8'));
+ const FX = path.join(HERE, '../fixtures'); const P1B = readText(path.join(FX, 'p1-30b29d3/p1-B-workers-F10.save.json'));
+ const want = id => !A.only || A.only.split(',').includes(id);
+-const FLAGS = new Set(A.flags.split(',').filter(Boolean)); const OUT = path.resolve(A.out);
+-const res = { html_sha256: sha256(readFileSync(A.html)), schema_sha256: sha256(readFileSync(path.join(HERE, '../spec/telemetry-v062.schema.json'))), flags: [...FLAGS], checks: [], scenarios: {} };
++// Flags: from the BUILD's committed balance.json when --balance is given (m4.enabled === 1 && m4.flags.<k> === 1, config/flags.ts flagOn);
++// --flags, if also given, must name exactly that set (else exit 2). Ship-set c3aba321: 13 flags on, bestBuyV2 off.
++let FL = A.flags.split(',').filter(Boolean), FLAGS_SRC = A.flags ? '--flags' : 'none (all off)';
++if (A.balance) { let bj; try { bj = JSON.parse(readFileSync(A.balance, 'utf8')); } catch (e) { console.error(`--balance ${A.balance} unreadable`); process.exit(2); }
++  const m = (bj && bj.m4) || {}, f = (m.flags && typeof m.flags === 'object') ? m.flags : {}, on = m.enabled === 1 ? Object.keys(f).filter(k => f[k] === 1).sort() : [];
++  if (A.flags && [...new Set(FL)].sort().join(',') !== on.join(',')) { console.error(`--flags '${A.flags}' != balance.json flags-on '${on.join(',')}'`); process.exit(2); }
++  FL = on; FLAGS_SRC = `balance.json ${sha256(readFileSync(A.balance))}`; }
++const FLAGS = new Set(FL); const OUT = path.resolve(A.out);
++const res = { html_sha256: sha256(readFileSync(A.html)), schema_sha256: sha256(readFileSync(path.join(HERE, '../spec/telemetry-v062.schema.json'))), flags: [...FLAGS], flags_source: FLAGS_SRC, checks: [], scenarios: {} };
+ // D-HOP-2026-10-29-04 (spec addendum 20:20, telemetry-spec.md sha256 6d504570): G-TEL-1/2 events are ALLOWED with CLOSED payloads, HARD in T-AC9.
+ // Any field outside the list, any non-enum string, or an id that does not match its track/level FAILS. Unverified M5 fields/flags stay TRIAGE-ON-RC (logged, never fail).
+ // Milestone ids = balance-data enum (src/sim/tracks.ts reachedMilestones: hens:<level>, grade:<level>, balanced:<tier>); default = 30b29d3/22eac98 balance.json m4.milestones; the gate passes the RC's.
+@@ -81,7 +91,7 @@
+   onboarding_abandon: { f: { atStep: 'i', reason: ['reload'] }, src: 'ui/app.ts:693' },
+   ios_home_tip_shown: { f: { browser: 's' }, src: 'ui/app.ts:723' },
+   ios_home_tip_dismissed: { f: {}, src: 'ui/app.ts:728' },
+-  // M5.0 sim events (sim/events.ts:29-40): allowed ONLY with their m4.flags.* on; any of them with the flag off FAILS (flags-off RC).
++  // M5.0 sim events (sim/events.ts:29-40): allowed ONLY with their m4.flags.* on (FLAGS = the build's balance.json, see --balance); any of them with its flag off FAILS.
+   collectible_spawned: { flag: 'golden+broody', f: { skin: SKIN, farm_level: 'i', collection_level: 'i', slot_id: 's', interval_s: 'n', deferred_ms: 'n' }, src: 'sim/events.ts:30' },
+   collectible_collected: { flag: 'golden+broody', f: { skin: SKIN, reaction_ms: 'n', in_warning: 'b', reward_type: ['cash', 'frenzy', 'eggs', 'eggs_cash', 'broody_cash'], reward_value: 'n', reward_duration_s: 'n', farm_level: 'i', 'nest_fill_share?': 'n' }, src: 'sim/events.ts:31' },
+   collectible_expired: { flag: 'golden+broody', f: { skin: SKIN, reason: ['timeout', 'offline', 'reload', 'takeover', 'reset'], farm_level: 'i' }, src: 'sim/events.ts:32' },
+@@ -93,7 +103,9 @@
+   ability_used: { flag: 'abilities', f: { worker: WID, farm: 'i', energy_pct: 'n', mood: MOOD, via_all: 'b', t_since_ready_s: 'n', in_sheet: 'b' }, src: 'sim/events.ts:38' },
+   ability_blocked: { flag: 'abilities', f: { worker: WID, reason: ['cooldown', 'asleep', 'unpaid', 'paused', 'lockout'], count: 'i' }, src: 'sim/events.ts:39' },
+   ability_ended: { flag: 'abilities', f: { worker: WID, cause: ['expired', 'paused', 'offline', 'asleep', 'unpaid'], effect_s: 'n' }, src: 'sim/events.ts:40' } };
+-const ENV_S = ['type', 'ts', 'sessionMs'], V062_ENV = ['sid', 'fgMs'];   // telemetry.ts:40/:58/:62; v0.6.2 envelope fields must be ABSENT in the shipped build
++const ENV_S = ['type', 'ts', 'sessionMs'], V062_ENV = ['sid', 'fgMs'];   // telemetry.ts:40/:58/:62 (3f582db). --schema shipped (pre-row-11 rehearsal): sid/fgMs ABSENT.
++// v5 target: --schema v062 REQUIRES sid (^[0-9a-z]{6}$) + fgMs and forbids sessionMs (qa spec telemetry-v062.schema.json envelope). No schema.ts in rc/v5
++// to cite yet (G-8): presence/shape stay on the spec until HoE lands row 11 and names the file:line (open question).
+ const tOk = (t, v) => Array.isArray(t) ? t.includes(v) : t === 'i' ? Number.isInteger(v) : t === 'n' ? typeof v === 'number' && Number.isFinite(v) : t === 'b' ? typeof v === 'boolean' : t === 's' ? typeof v === 'string' : t === 'a' ? Array.isArray(v) : t === 'T' ? v === true : false;
+ const LONG_OK = { session_start: ['install_id', 'build'], save_corrupt: ['build'], save_newer_version: ['build'], save_migration_aborted: ['path'], save_backup_idb_unavailable: ['path'], save_migrated: ['migration'] };
+ /** Shipped-schema problems for one STORED event (LS eggfarm.telemetry). */
+@@ -109,7 +121,7 @@
+   if (!Number.isInteger(e.ts)) P.push(`${e.type}: envelope ts ${JSON.stringify(e.ts)} not integer`);
+   if (!(Number.isInteger(e.sessionMs) && e.sessionMs >= 0)) P.push(`${e.type}: envelope sessionMs ${JSON.stringify(e.sessionMs)} not integer >= 0`);
+   for (const f of V062_ENV) if (f in e) P.push(`${e.type}: ${f} present (v0.6.2 envelope is not in the shipped build: drift)`);
+-  if (s.flag && !s.flag.split('+').some(fl => FLAGS.has(fl))) P.push(`${e.type}: fired with flag ${s.flag} off (flags-off RC)`);
++  if (s.flag && !s.flag.split('+').some(fl => FLAGS.has(fl))) P.push(`${e.type}: fired with flag ${s.flag} off (build balance.json)`);
+   if (s.closed) { const C = CLOSED[e.type]; const allowed = new Set([...ENV_S, ...C.req, ...C.opt]); for (const f of C.req) if (!(f in e)) P.push(`${e.type}: required ${f} missing`);
+     for (const f of Object.keys(e)) if (!allowed.has(f)) P.push(`${e.type}: field ${f} outside the closed list`); const bad = C.v(e); if (bad) P.push(`${e.type}: ${bad}`); }
+   else { const allowed = new Set(ENV_S);
+@@ -126,8 +138,10 @@
+ /** Shipped session identity: every event of one page load has the same anchor ts - sessionMs (telemetry.ts:40/:58/:62). */
+ const anchor = e => e.ts - e.sessionMs;
+ // sales_stall (sales-stopped-spec 2c2c323b §8; allowed only with m4.flags.salesStopped on, SS-23). Closed list per §8; no reuse_count.
++// resolved_by = the 14 values of product/market/sales-stopped-spec.md L249 (chip_manage added 2026-10-30; conversion L270-273). No schema.ts enum in rc/v5 to cross-check (G-8).
++const RESOLVED_BY_SPEC_L249 = ['chip_refill', 'chip_sell_all', 'chip_collect', 'chip_manage', 'refill_elsewhere', 'sell_elsewhere', 'collect_elsewhere', 'auto_resume', 'queue_empty', 'basket_empty', 'paused', 'focus_lost', 'cause_changed', 'none'];
+ const STALL = { phase: ['shown', 'resolved'], cause: ['mh_asleep', 'mh_paused', 'mh_unpaid', 'no_mh', 'ch_asleep', 'ch_unpaid', 'other'], st: ['working', 'tired', 'asleep', 'unpaid', 'paused', 'none'],
+-  resolved_by: ['chip_refill', 'chip_sell_all', 'chip_collect', 'refill_elsewhere', 'sell_elsewhere', 'collect_elsewhere', 'auto_resume', 'queue_empty', 'basket_empty', 'paused', 'focus_lost', 'cause_changed', 'none'] };
++  resolved_by: ['chip_refill', 'chip_sell_all', 'chip_collect', 'chip_manage', 'refill_elsewhere', 'sell_elsewhere', 'collect_elsewhere', 'auto_resume', 'queue_empty', 'basket_empty', 'paused', 'focus_lost', 'cause_changed', 'none'] };
+ if (FLAGS.has('salesStopped')) CLOSED.sales_stall = { req: ['phase', 'stall_id', 'cause', 'farm_level', 'queue_len', 'sellable_eggs', 'coop_eggs', 'mh_state', 'ch_state', 'focus_s_since_last_sale', 'session_s'], opt: ['prev_stall_id', 'resolved_by', 'time_to_resolve_s', 'chip_tapped'],
+   v: e => [!STALL.phase.includes(e.phase) && `phase ${e.phase}`, !STALL.cause.includes(e.cause) && `cause ${e.cause}`, !STALL.st.includes(e.mh_state) && `mh_state ${e.mh_state}`, !STALL.st.includes(e.ch_state) && `ch_state ${e.ch_state}`,
+     e.phase === 'resolved' && !(STALL.resolved_by.includes(e.resolved_by) && typeof e.time_to_resolve_s === 'number' && typeof e.chip_tapped === 'boolean') && 'resolved needs resolved_by enum + time_to_resolve_s + chip_tapped',
+@@ -219,7 +233,9 @@
+       ['S negative: v0.6.2 sid in envelope FAILS (drift)', { type: 'session_end', sid: 'abc123' }, /sid present/],
+       ['S negative: sessionMs missing FAILS', { type: 'session_end', sessionMs: undefined }, /sessionMs/],
+       ['S negative: ts non-integer FAILS', { type: 'session_end', ts: 1.5 }, /ts 1.5 not integer/],
+-      ['S negative: M5 event with flag off FAILS', { type: 'streak_started', farm_level: 3, collection_level: 2 }, /flag streak off/],
++      FLAGS.has('streak') ? ['S positive: M5 event with its flag on (build balance.json) passes', { type: 'streak_started', farm_level: 3, collection_level: 2 }, null]
++        : ['S negative: M5 event with flag off FAILS', { type: 'streak_started', farm_level: 3, collection_level: 2 }, /flag streak off/],
++      ...(FLAGS.has('golden') ? [] : [['S negative: golden event with golden off FAILS', { type: 'frenzy_started', mult: 2, duration_s: 30, farm_level: 9, grader_tier: 0 }, /flag golden off/]]),
+       ['S negative: worker_summary unknown key FAILS', { type: 'worker_summary', windowMs: 1, wage_boss_cents: 2 }, /outside the closed list/],
+       ['S negative: offline_grant awayS FAILS (G-TEL-3)', { type: 'offline_grant', secondsAway: 1, eggs: 1, awayS: 1 }, /awayS/],
+       ['S negative: save_corrupt bad tried entry FAILS', { type: 'save_corrupt', reason: 'parse', had_backup: true, restored_from_backup: true, build: 'b', recovered_from: 'bak', store: 'ls', tried: [{ source: 'cloud', result: 'valid' }], migrated: false }, /tried entry/],
+@@ -228,6 +244,10 @@
+       ['S negative: PII-like string FAILS', { type: 'save_failed', reason: 'a@b.co' }, /PII-like/],
+       ['S negative: free text > 64 FAILS', { type: 'goal_tap', target: 'x'.repeat(65), state: 'ready' }, /free text/] ];
+     for (const [name, ev, re] of sc) { const p = S(ev); R[name] = p; ck(`SELFTEST ${name}`, re ? p.some(x => re.test(x)) : p.length === 0, { short: p }); }
++    ck('SELFTEST sales_stall resolved_by enum == sales-stopped-spec L249 (14, incl. chip_manage)', JSON.stringify(STALL.resolved_by) === JSON.stringify(RESOLVED_BY_SPEC_L249), { short: STALL.resolved_by });
++    if (FLAGS.has('salesStopped')) { const SS = { type: 'sales_stall', phase: 'resolved', stall_id: 3, cause: 'mh_asleep', farm_level: 6, queue_len: 2, sellable_eggs: 0, coop_eggs: 10, mh_state: 'asleep', ch_state: 'working', focus_s_since_last_sale: 12, session_s: 300, resolved_by: 'chip_manage', time_to_resolve_s: 4, chip_tapped: true };
++      // the sales_stall closed validator itself (used by --schema v062; sales_stall is not in the shipped 3f582db allowlist)
++      for (const [name, ev, re] of [['V positive: sales_stall resolved_by chip_manage (spec L249)', SS, null], ['V negative: sales_stall resolved_by not in enum FAILS', { ...SS, resolved_by: 'chip_boss' }, /resolved needs resolved_by enum/]]) { const v = CLOSED.sales_stall.v(ev); const p = v ? [v] : []; R[name] = p; ck(`SELFTEST ${name}`, re ? p.some(x => re.test(x)) : p.length === 0, { short: p }); } }
+     const U = (n, c) => ({ type: 'upgrade', upgrade: 'hens', newLevel: n, cost: 100, coinsBefore: c });
+     const s5 = [['S-AC5 positive: 1 purchase, 1 upgrade event', 1, [U(13, 150)], null], ['S-AC5 positive: 2 purchases, 2 upgrade events', 2, [U(13, 150), U(14, 120)], null],
+       ['S-AC5 negative: 2 purchases, 1 upgrade event FAILS (counts differ)', 2, [U(13, 150)], /upgrade events 1 != harness purchases 2/],
+--- a/qa/v5-saves/v5-saves-cases.md
++++ b/qa/v5-saves/v5-saves-cases.md
+@@ -60,7 +60,13 @@
+ These were written for M4.1, so they may need small adapting to M5 APIs. Triage any FAIL before calling it a defect.
+ 
+ ## Telemetry v0.6.2: `scripts/telemetry-check.mjs` (Chromium)
+-**v5 RC re-target (D-CEO-20261030-04; schema APPROVED QA-D-1030-SAVES-RC-2):** telemetry v0.6.2 (manifest rows 11/24) moved to 5.1. The gate runs `--schema shipped`: the shipped rc/v5 schema in `changes-20261030/rc1-DRAFT-SCHEMA-3f582db.md` (sha256 083fcc11…, every field with src file:line at 3f582db), same depth, HARD on all 3 engines. The v0.6.2 checks below stay in the script, reported `N/A-BY-SCOPE` (never counted, not a waiver). S-AC5 (RC-2 amendment): the number of `upgrade` events must EQUAL the purchases the harness made (>= 1), with 6 self-tests incl. 2 count-mismatch negatives.
++**v5 RE-TARGET (2026-10-30 ~13:3x CET, HoQ; supersedes the -04 note below):** telemetry v0.6.2 ships IN v5, always on, with no flag (D-CEO-20261030-09; ship-set of record `product/v5-ship-set.md` sha256 c3aba321…, section "Not flags (ship always-on)": "gated by schema version and save-migration tests"). Manifest rows 11 (v0.6.2 M5.0 subset: sid/fgMs, session_end, schema.ts; lane S) and 24 (full migration) are `v5, in build` (D-CEO-20261030-09/-10, D-HOE-20261030-18) but NOT YET LANDED: rc/v5 3f582db and the tip e77fc5c have no `src/telemetry/schema.ts` and the envelope is still {type, ts, sessionMs} (telemetry.ts:40/:58/:62).
++- **v5 RC gate target:** T steps run `--schema v062` (sid ^[0-9a-z]{6}$ + fgMs required, sessionMs forbidden: `spec/telemetry-v062.schema.json` envelope) with flags read from the build's committed balance.json (`--balance`, new; must equal the ship-set flags-on set, which G1 already enforces). Switching the gate's T steps from `--schema shipped` to `v062 --balance` is a gate change NOT made here (G1 pin untouched): it waits for row 11 to land and for HoE's answer on Q-TEL-1..3 (READINESS).
++- **Until row 11 lands:** `--schema shipped` = rehearsal only on a pre-row-11 build; v0.6.2 checks recorded `NOT-YET-IN-BUILD` (not counted, not a waiver).
++- **sales_stall `resolved_by`** = the 14 values of `product/market/sales-stopped-spec.md` L249, now including `chip_manage` (conversion metric L270-273). No schema.ts enum to cross-check yet (G-8).
++- **Row 11 / G-8 (Saves, this lane):** case **TEL-G8** below. **Row 24 (Features):** v0.6.2 save-path rules (quota_headroom uses telemetry's real bytes, telemetry yields first before any save/.bak refusal, T-AC15; m5.0-sizing §10.2) become v5 Saves cases once row 24 lands: TEL-R24-1 telemetry shrinks before a save or .bak write is refused; TEL-R24-2 quota_headroom bytes == stored eggfarm.telemetry length; TEL-R24-3 a v0.6.1-format eggfarm.telemetry ring (no sid/fgMs) loads, is migrated or dropped per the F-6 schema-version rule, and never blocks the save (spec needed: F-6).
++- **TEL-G8 (row 11, G-8):** `src/telemetry/schema.ts` exists at the RC SHA and names every event type of the frozen v0.6.2+addendum spec (61 types), the envelope fields sid + fgMs, and all 14 sales_stall resolved_by values. Probe `probes/telemetry/g8-schema-ts.mjs` (read-only `git show`); self-test `probes/telemetry/g8-selftest.sh` 6/6 (4 fixture + 2 real). Today FAILS on 3f582db and e77fc5c (G8-1: file absent), which is the expected red until row 11 lands. Export-shape checks (TEL-AC11 "every emitted type is in schema.ts") wait for HoE to fix the module's API (Q-TEL-2).
++- Superseded (kept for history): **v5 RC re-target (D-CEO-20261030-04; schema APPROVED QA-D-1030-SAVES-RC-2):** telemetry v0.6.2 (manifest rows 11/24) moved to 5.1. The gate runs `--schema shipped`: the shipped rc/v5 schema in `changes-20261030/rc1-DRAFT-SCHEMA-3f582db.md` (sha256 083fcc11…, every field with src file:line at 3f582db), same depth, HARD on all 3 engines. The v0.6.2 checks below stay in the script, reported `N/A-BY-SCOPE` (never counted, not a waiver). S-AC5 (RC-2 amendment): the number of `upgrade` events must EQUAL the purchases the harness made (>= 1), with 6 self-tests incl. 2 count-mismatch negatives.
+ - Spec frozen: `spec/telemetry-spec.v0.6.2.b7a85e53.md`, sha256 b7a85e533f8738598eb93dfab1d2361167b39deaf8cd6d8fc874abc2a0767f23.
+ - Machine schema: `spec/telemetry-v062.schema.json`, hand-transcribed (61 events).
+ 
+--- a/qa/v5-saves/scripts/SCRIPTS.sha256
++++ b/qa/v5-saves/scripts/SCRIPTS.sha256
+@@ -5,7 +5,7 @@
+ 968e2b9070a22fc5edc024893e52dbc10626b8654cc5919073f6a4bfce86b76a  runtime-smoke.mjs
+ c36c83d0c6b653f995f9b76e05e91aa9b57c0bda40f9250dbe6c56a0f25aa32a  saves-browser.mjs
+ c8565122bfde45afa7a784308c51cdeea7fe9f7ef1873b2070c5c682a2c77112  ss15-share-guard.mjs
+-fbd82199f47c844d0c21cbdbf80eef88d3a2d5cd17a67f46a47a9d23b9a3bf36  telemetry-check.mjs
++906bd385350292d4be69a093a4149fbde2174a4eed82a429a474739e329fb3e0  telemetry-check.mjs
+ d634dfc847be6783d01432ba9e24a3fcef977394371f6b4a0470a36d23e793b4  publish-verify.sh
+ a24d8e473ebb69c30d88cad863a66af2ca59e6c7acdfcabfc60fea85870cfd58  v5-saves-gate.sh
+ c1e2b05c1db046f3d1211db5b4ad1438a05a6aef61ae8fc75892ae591554725c  g1-ship-set.cjs
+--- a/qa/v5-saves/READINESS.md
++++ b/qa/v5-saves/READINESS.md
+@@ -95,11 +95,11 @@
+    - SS-15 step.
+ 3. telemetry-check.mjs: (b), (c) and (d) above.
+ 
+-**SCRIPTS.sha256 = 7aba4b65…** (G1 RE-PIN 2026-10-30 ~13:2x CET, HoQ request: ship-set pin SHIPSET_SHA 0d53b45b… -> c3aba321… (product/v5-ship-set.md + "Not in v5" section, D-HOP-2026-10-30-36: first-hire nudge deferred, first_worker_hired via_nudge=false); 16 keys, tc_streak_cap 0.27, CSV path/sha placeholders unchanged (diff vs rev 2 copy = 3 added lines only). Pin change only: gate 861a6e71 -> a24d8e47; checker unchanged (c1e2b05c); self-test +4 checks (Not in v5 never parsed as a key) 41/41. Real file still fails closed on the CSV placeholder, not on the sha. Diff changes-20261030/g1-shipset-REPIN-c3aba321.diff. Previous: 760687f2… (G1 AMENDMENT 2026-10-30 ~13:2x CET, HoQ ruling relaying HoE, G1 only: (1) tc_streak_cap moves INFO -> HARD FAIL: value of record parsed from ship-set rev 2 (0.27, D-HOP-27, breeds=1), checked in balance.json m4.tc.streak_cap AND in every row of the committed data/economy.csv column tc_streak_cap; both values logged in status.log (TUNABLE line). (2) economy CSV PATH comes from the ship-set (recorded by HoE next to the sha) and must be data/economy.csv (only source, scripts/sync-economy.ts; economy.f1.csv test-only); ECONOMY_CSV/--economy-csv is only an override that must equal it; path or sha missing/placeholder = FAIL closed. checker c92ad47b -> c1e2b05c, gate 518164f2 -> 861a6e71 (comments, log line, TUNABLE grep). Self-test 37/37 (changes-20261030/g1-shipset-selftest.sh/.out.txt). Reference e77fc5c: data/economy.csv sha256 a8c4e268… (matches HoQ), cap 0.28 in CSV and balance -> G1 FAIL as expected (changes-20261030/g1-amend-e77fc5c-reference.txt). Diff changes-20261030/g1-shipset-AMEND.diff. Previous: 2baa6669… (re-pinned 2026-10-30 ~13:1x CET, G1 ONLY: G1-flags-ship-set now checks the ship-set of record product/v5-ship-set.md rev 2 (D-HOP-2026-10-30-30, sha256 0d53b45b… pinned in the gate, HoQ verified 13:07) via new scripts/g1-ship-set.cjs (c92ad47b): exact keys m4.enabled=1, 13 m4.flags=1, m4.flags.bestBuyV2=0, m4.zeroGain.confirm=0, every balance m4.flags key listed; tc_streak_cap INFO only; telemetry/post-L10 not flags (excluded if listed). FAIL closed while: ship-set missing/unparseable/sha≠pin, expected balance.json sha256 not supplied (EXPECTED_BALANCE_SHA / --expected-balance-sha / v5-saves/expected-balance.sha256, HoE pins at RC cut) or ≠, economy CSV sha placeholder, ECONOMY_CSV unset (no default) or CSV≠committed file at run SHA. balance.json, ship-set.md and ship-set.derived.json sha256s in status.log + STATUS.sha256. Self-test 25/25 (changes-20261030/g1-shipset-selftest.out.txt). gate 4ba2dda1 -> 518164f2; diff changes-20261030/g1-shipset-PIN.diff. Current real state = G1 FAIL (CSV sha placeholder, no expected sha). Previous: a78c572f… (re-pinned 2026-10-30 ~12:2x CET, ONE change set, HoQ OK QA-D-1030-SAVES-RC-2 + D-CEO-20261030-06 flags-0 package; diff `changes-20261030/repin-flags0-20261030.diff`). Changes: S-BAK-p1-B race fix (saves-browser a019e3eb -> c36c83d0; 10/10 Firefox + negative FAIL); telemetry re-targeted to the shipped rc/v5 schema 083fcc11 with `--schema shipped`, v0.6.2 rows N/A-by-scope, S-AC5 upgrade events == harness purchases (telemetry-check 7c6b2621 -> fbd82199; selftest 34 PASS shipped / 25 PASS v062; T-chromium/T2-firefox/T2-webkit PASS on 3f582db); gate 542683b2 -> 4ba2dda1: NOT RUN = hard fail in both modes, cited N/A registry gate-na.txt (new, 49b6f43c; U-ss15-share-guard N/A per QA-D-1030-SS15-NA / D-CEO-20261030-04), port preflight (refuses if :5961 busy), lock log (holder via /proc, 30 s re-log, acquired/released, LOCK handover line), G1-flags-ship-set (committed balance.json sha256 in status.log + STATUS.sha256; any m4.flags != 0 = HARD FAIL flags≠ship-set). Previous: bcc54543… (re-pinned 2026-10-30 after the HoQ-approved rule-21 timer fix: v5-saves-gate 1e1d63cf -> 542683b2, lock-window timer now started via ops/tools/lane-run.sh saves-qa and stopped via lane-kill.sh on its recorded PID, `pkill -P` removed, gate stops with "ask HoO" if the timer group survives; new selftest-gate-timer 2cc81b65, 10/10 PASS; gate-sums 9/9, telemetry 25/25, `-c` 12/12 OK; evidence changes-20261030/. Before: a045b620… (status.log signing fix: v5-saves-gate 1e1d63cf, new selftest-gate-sums e2c14c0c; status.log now excluded from SHA256SUMS and signed last in STATUS.sha256; self-test 9/9 PASS incl. negatives, evidence changes-20261030/; before: 72977983… (V5E-SCOPE lock-window timer, v5-saves-gate aabf3614), f20f17d0…, 6b5cf63f…)), covering:
++**SCRIPTS.sha256 = 14a935e4…** (TELEMETRY v5 RE-TARGET 2026-10-30 ~13:4x CET, HoQ: telemetry v0.6.2 = v5 always-on, no flag (D-CEO-20261030-09, ship-set c3aba321 "Not flags", manifest rows 11/24). telemetry-check fbd82199 -> 906bd385: new `--balance` (flags from the build balance.json, m4.enabled && ==1; `--flags` must match or exit 2), sales_stall resolved_by + chip_manage (= the 14 of sales-stopped-spec L249, enum self-test), NA text -> NOT-YET-IN-BUILD, comments re-targeted; envelope assertions UNCHANGED pending Q-TEL-1 (no schema.ts in rc/v5). Self-test: shipped flags0 36/36, flags-on 37/37, real 3f582db balance 36/36, v062 25/25, v062 flags-on 25/25, --flags/--balance mismatch exit 2 (changes-20261030/telemetry-v5-selftest.out.txt). Gate unchanged (G1 pin untouched); switching T steps to --schema v062 --balance waits for row 11. Case doc v5-saves-cases.md -> b5652097 (L63 v5 re-target, TEL-G8, rows 11/24). Diff changes-20261030/telemetry-v5-retarget.diff. Open: Q-TEL-1..4. Previous: 7aba4b65… (G1 RE-PIN 2026-10-30 ~13:2x CET, HoQ request: ship-set pin SHIPSET_SHA 0d53b45b… -> c3aba321… (product/v5-ship-set.md + "Not in v5" section, D-HOP-2026-10-30-36: first-hire nudge deferred, first_worker_hired via_nudge=false); 16 keys, tc_streak_cap 0.27, CSV path/sha placeholders unchanged (diff vs rev 2 copy = 3 added lines only). Pin change only: gate 861a6e71 -> a24d8e47; checker unchanged (c1e2b05c); self-test +4 checks (Not in v5 never parsed as a key) 41/41. Real file still fails closed on the CSV placeholder, not on the sha. Diff changes-20261030/g1-shipset-REPIN-c3aba321.diff. Previous: 760687f2… (G1 AMENDMENT 2026-10-30 ~13:2x CET, HoQ ruling relaying HoE, G1 only: (1) tc_streak_cap moves INFO -> HARD FAIL: value of record parsed from ship-set rev 2 (0.27, D-HOP-27, breeds=1), checked in balance.json m4.tc.streak_cap AND in every row of the committed data/economy.csv column tc_streak_cap; both values logged in status.log (TUNABLE line). (2) economy CSV PATH comes from the ship-set (recorded by HoE next to the sha) and must be data/economy.csv (only source, scripts/sync-economy.ts; economy.f1.csv test-only); ECONOMY_CSV/--economy-csv is only an override that must equal it; path or sha missing/placeholder = FAIL closed. checker c92ad47b -> c1e2b05c, gate 518164f2 -> 861a6e71 (comments, log line, TUNABLE grep). Self-test 37/37 (changes-20261030/g1-shipset-selftest.sh/.out.txt). Reference e77fc5c: data/economy.csv sha256 a8c4e268… (matches HoQ), cap 0.28 in CSV and balance -> G1 FAIL as expected (changes-20261030/g1-amend-e77fc5c-reference.txt). Diff changes-20261030/g1-shipset-AMEND.diff. Previous: 2baa6669… (re-pinned 2026-10-30 ~13:1x CET, G1 ONLY: G1-flags-ship-set now checks the ship-set of record product/v5-ship-set.md rev 2 (D-HOP-2026-10-30-30, sha256 0d53b45b… pinned in the gate, HoQ verified 13:07) via new scripts/g1-ship-set.cjs (c92ad47b): exact keys m4.enabled=1, 13 m4.flags=1, m4.flags.bestBuyV2=0, m4.zeroGain.confirm=0, every balance m4.flags key listed; tc_streak_cap INFO only; telemetry/post-L10 not flags (excluded if listed). FAIL closed while: ship-set missing/unparseable/sha≠pin, expected balance.json sha256 not supplied (EXPECTED_BALANCE_SHA / --expected-balance-sha / v5-saves/expected-balance.sha256, HoE pins at RC cut) or ≠, economy CSV sha placeholder, ECONOMY_CSV unset (no default) or CSV≠committed file at run SHA. balance.json, ship-set.md and ship-set.derived.json sha256s in status.log + STATUS.sha256. Self-test 25/25 (changes-20261030/g1-shipset-selftest.out.txt). gate 4ba2dda1 -> 518164f2; diff changes-20261030/g1-shipset-PIN.diff. Current real state = G1 FAIL (CSV sha placeholder, no expected sha). Previous: a78c572f… (re-pinned 2026-10-30 ~12:2x CET, ONE change set, HoQ OK QA-D-1030-SAVES-RC-2 + D-CEO-20261030-06 flags-0 package; diff `changes-20261030/repin-flags0-20261030.diff`). Changes: S-BAK-p1-B race fix (saves-browser a019e3eb -> c36c83d0; 10/10 Firefox + negative FAIL); telemetry re-targeted to the shipped rc/v5 schema 083fcc11 with `--schema shipped`, v0.6.2 rows N/A-by-scope, S-AC5 upgrade events == harness purchases (telemetry-check 7c6b2621 -> fbd82199; selftest 34 PASS shipped / 25 PASS v062; T-chromium/T2-firefox/T2-webkit PASS on 3f582db); gate 542683b2 -> 4ba2dda1: NOT RUN = hard fail in both modes, cited N/A registry gate-na.txt (new, 49b6f43c; U-ss15-share-guard N/A per QA-D-1030-SS15-NA / D-CEO-20261030-04), port preflight (refuses if :5961 busy), lock log (holder via /proc, 30 s re-log, acquired/released, LOCK handover line), G1-flags-ship-set (committed balance.json sha256 in status.log + STATUS.sha256; any m4.flags != 0 = HARD FAIL flags≠ship-set). Previous: bcc54543… (re-pinned 2026-10-30 after the HoQ-approved rule-21 timer fix: v5-saves-gate 1e1d63cf -> 542683b2, lock-window timer now started via ops/tools/lane-run.sh saves-qa and stopped via lane-kill.sh on its recorded PID, `pkill -P` removed, gate stops with "ask HoO" if the timer group survives; new selftest-gate-timer 2cc81b65, 10/10 PASS; gate-sums 9/9, telemetry 25/25, `-c` 12/12 OK; evidence changes-20261030/. Before: a045b620… (status.log signing fix: v5-saves-gate 1e1d63cf, new selftest-gate-sums e2c14c0c; status.log now excluded from SHA256SUMS and signed last in STATUS.sha256; self-test 9/9 PASS incl. negatives, evidence changes-20261030/; before: 72977983… (V5E-SCOPE lock-window timer, v5-saves-gate aabf3614), f20f17d0…, 6b5cf63f…)), covering:
+ 
+ | script | sha256 (prefix) |
+ |---|---|
+-| telemetry-check | fbd82199 |
++| telemetry-check | 906bd385 |
+ | lib | dc7ccbac |
+ | v5-saves-gate | a24d8e47 |
+ | g1-ship-set | c1e2b05c |
+@@ -114,7 +114,7 @@
+ | selftest-gate-timer | 2cc81b65 |
+ | gate-na.txt | 49b6f43c |
+ 
+-SPEC.sha256 cd39288f…, FIXTURES.sha256 25e4e603…, case doc v5-saves-cases.md 386c4716… (re-pinned 2026-10-30 with the SCRIPTS change set: FO-1..FO-10 pinned under D-CEO-20261030-06 flags-0, L23 FIXTURES cite fixed, FO one-save note, TS7 not covered (5.1), SS-15 live path note, lock order Saves first / ui no lock from 13:50; was e8435e4f, 9ff71cbf, 70968c18, ef87eb96). Telemetry schema 083fcc11 (changes-20261030/rc1-DRAFT-SCHEMA-3f582db.md, APPROVED QA-D-1030-SAVES-RC-2). balance.json@3f582db 9a73bd8a… (all 14 m4.flags 0).
++SPEC.sha256 cd39288f…, FIXTURES.sha256 25e4e603…, case doc v5-saves-cases.md b5652097… (v5 telemetry re-target 2026-10-30 ~13:4x; before: 386c4716… re-pinned 2026-10-30 with the SCRIPTS change set: FO-1..FO-10 pinned under D-CEO-20261030-06 flags-0, L23 FIXTURES cite fixed, FO one-save note, TS7 not covered (5.1), SS-15 live path note, lock order Saves first / ui no lock from 13:50; was e8435e4f, 9ff71cbf, 70968c18, ef87eb96). Telemetry schema 083fcc11 (changes-20261030/rc1-DRAFT-SCHEMA-3f582db.md, APPROVED QA-D-1030-SAVES-RC-2). balance.json@3f582db 9a73bd8a… (all 14 m4.flags 0).
+ 
+ ## Q13 fit verdict (historical, 21:45; current ownership at the top)
+ - **217 rows extracted.** 6 are role summaries, leaving **211 case rows**: 28 Pause (N/A if cut) and **183 certain**.
+@@ -133,3 +133,9 @@
+    - ship flags.
+ 4. Something on the box deleted node_modules under qa/ at ~21:59. The driver now self-heals `tools/`, and the gate worktree runs its own npm ci.
+ 5. Export/import UI is still absent (S-RT detects it if added). The legacy suites may need small M5 adapting.
++
++### Open telemetry questions (v5 re-target, 2026-10-30, Saves QA -> HoE / HoQ)
++- Q-TEL-1 (HoE): `src/telemetry/schema.ts` does not exist at rc/v5 3f582db or e77fc5c (nor on feat/saves-v5-telemetry-schema, = e77fc5c). "Cite schema.ts file:line" and "assert sid/fgMs presence per schema.ts" cannot be done; telemetry-check keeps sid/fgMs ABSENT under --schema shipped and REQUIRED under --schema v062 (frozen spec). Which commit lands row 11, and is the gate to run --schema v062 on the final RC?
++- Q-TEL-2 (HoE): the export shape of schema.ts (allowlist object? per-event field schemas? enums?) so TEL-AC11 / TEL-G8 can assert "emitted types ⊆ schema.ts" instead of name presence.
++- Q-TEL-3 (HoQ): sales_stall is not in the shipped (3f582db) allowlist; with salesStopped=1 a flags-on pre-row-11 build that fires it FAILS --schema shipped. Intended, or should shipped mode allow it?
++- Q-TEL-4 (HoE/HoQ): v5-saves-cases.md L89 (TS7 INFO, "salesStopped = 0 ... 5.1") is stale under the ship-set (salesStopped=1); needs a ruling before re-pinning TS7 as HARD.
+--- /dev/null
++++ b/qa/v5-saves/probes/telemetry/g8-schema-ts.mjs
+@@ -0,0 +1,22 @@
++#!/usr/bin/env node
++// G-8 probe (manifest row 11, lane S; m5-gate-acs.md L763 "src/telemetry/schema.ts doesn't exist yet (QA TEL-2; errata G-8). TEL-AC11 needs it").
++// Static, read-only: `git show <rc>:<path>`, no checkout, no browser. Asserts only what the frozen spec fixes, NOT the export shape of
++// schema.ts (undefined until HoE lands row 11 -> open question). usage: node g8-schema-ts.mjs --git <repo> --rc <sha> [--path src/telemetry/schema.ts]
++// exit 0 = all G8 checks pass, 1 = FAIL (expected today: the file does not exist at rc/v5 3f582db / e77fc5c).
++import { execFileSync } from 'node:child_process'; import { readFileSync } from 'node:fs'; import path from 'node:path'; import { parseArgs } from 'node:util';
++const { values: A } = parseArgs({ options: { git: { type: 'string' }, rc: { type: 'string' }, path: { type: 'string', default: 'src/telemetry/schema.ts' }, spec: { type: 'string' } } });
++const HERE = path.dirname(new URL(import.meta.url).pathname);
++const SPEC = A.spec || path.join(HERE, '../../spec/telemetry-v062.schema.json');   // frozen v0.6.2 + addendum events (qa/v5-saves/spec, SPEC.sha256)
++const RESOLVED_BY_L249 = ['chip_refill', 'chip_sell_all', 'chip_collect', 'chip_manage', 'refill_elsewhere', 'sell_elsewhere', 'collect_elsewhere', 'auto_resume', 'queue_empty', 'basket_empty', 'paused', 'focus_lost', 'cause_changed', 'none']; // product/market/sales-stopped-spec.md L249
++if (!A.git || !A.rc) { console.error('need --git --rc'); process.exit(2); }
++const sch = JSON.parse(readFileSync(SPEC, 'utf8')), names = Object.keys(sch.events || {}).sort();
++const P = [], out = (id, ok, why) => { console.log(`${ok ? 'PASS' : 'FAIL'} ${id}${why ? ': ' + why : ''}`); if (!ok) P.push(id); };
++let src = null; try { src = execFileSync('git', ['-C', A.git, 'show', `${A.rc}:${A.path}`], { stdio: ['ignore', 'pipe', 'ignore'] }).toString('utf8'); } catch {}
++out('G8-1 schema.ts exists at the RC SHA', !!src, src ? `${A.path} @ ${A.rc}` : `${A.path} not in ${A.rc} (G-8 open, row 11 not landed)`);
++const lit = new Set(src ? [...src.matchAll(/['"`]([A-Za-z0-9_:]+)['"`]/g)].map(m => m[1]) : []);
++const miss = names.filter(n => !lit.has(n));
++out(`G8-2 every v0.6.2 event type of the frozen spec (${names.length}) is named in schema.ts`, !!src && miss.length === 0, src ? (miss.length ? 'missing: ' + miss.join(',') : '') : 'no file');
++out('G8-3 envelope fields sid + fgMs named in schema.ts (spec envelope.required)', !!src && ['sid', 'fgMs'].every(f => lit.has(f)), src ? '' : 'no file');
++const rb = RESOLVED_BY_L249.filter(v => !lit.has(v));
++out('G8-4 sales_stall resolved_by: all 14 values of sales-stopped-spec L249 named (incl. chip_manage)', !!src && rb.length === 0, src ? (rb.length ? 'missing: ' + rb.join(',') : '') : 'no file');
++console.log(P.length ? `G8: FAIL (${P.length}) ${P.join(' ')}` : 'G8: PASS'); process.exit(P.length ? 1 : 0);
+--- /dev/null
++++ b/qa/v5-saves/probes/telemetry/g8-selftest.sh
+@@ -0,0 +1,18 @@
++#!/usr/bin/env bash
++# Self-test of g8-schema-ts.mjs on a throw-away git fixture (/tmp) + the real rc/v5 SHAs (read-only git show).
++set -u; D=$(cd "$(dirname "$0")" && pwd); G=/workspace/egg-farm-studio/game; T=$(mktemp -d /tmp/g8.XXXX); P=0; F=0
++ck(){ local n=$1 want=$2; shift 2; out=$(node $D/g8-schema-ts.mjs "$@" 2>&1); rc=$?; if [ $rc = $want ]; then P=$((P+1)); echo "ok   $n (rc=$rc) $(echo "$out" | tail -1)"; else F=$((F+1)); echo "FAIL $n (rc=$rc want $want) $out"; fi; }
++git -C $T init -q r; mkdir -p $T/r/src/telemetry
++names=$(node -e 'console.log(Object.keys(require(process.argv[1]).events).join(" "))' $D/../../spec/telemetry-v062.schema.json)
++{ echo "// fixture"; for n in $names sid fgMs chip_refill chip_sell_all chip_collect chip_manage refill_elsewhere sell_elsewhere collect_elsewhere auto_resume queue_empty basket_empty paused focus_lost cause_changed none; do echo "'$n',"; done; } > $T/r/src/telemetry/schema.ts
++git -C $T/r add -A; git -C $T/r -c user.email=q@x -c user.name=q commit -qm ok; OK=$(git -C $T/r rev-parse HEAD)
++grep -v "'chip_manage'" $T/r/src/telemetry/schema.ts > $T/x && mv $T/x $T/r/src/telemetry/schema.ts; git -C $T/r -c user.email=q@x -c user.name=q commit -qam nocm; NOCM=$(git -C $T/r rev-parse HEAD)
++first=${names%% *}; grep -v "'$first'" $T/r/src/telemetry/schema.ts > $T/x && mv $T/x $T/r/src/telemetry/schema.ts; git -C $T/r -c user.email=q@x -c user.name=q commit -qam noev; NOEV=$(git -C $T/r rev-parse HEAD)
++git -C $T/r rm -q src/telemetry/schema.ts; git -C $T/r -c user.email=q@x -c user.name=q commit -qm rm; RM=$(git -C $T/r rev-parse HEAD)
++ck "positive: fixture names every spec event + envelope + 14 resolved_by" 0 --git $T/r --rc $OK
++ck "negative: chip_manage missing FAILS" 1 --git $T/r --rc $NOCM
++ck "negative: one spec event missing FAILS" 1 --git $T/r --rc $NOEV
++ck "negative: schema.ts absent FAILS" 1 --git $T/r --rc $RM
++ck "real rc/v5 3f582db: FAIL expected (G-8 open)" 1 --git $G --rc 3f582dbfe31a9d309e6b1d0e96a4f77711b333ec
++ck "real rc/v5 e77fc5c (tip): FAIL expected (G-8 open)" 1 --git $G --rc e77fc5c
++echo "RESULT pass=$P fail=$F"; rm -rf $T; [ $F = 0 ]
+--- /dev/null
++++ b/qa/v5-saves/changes-20261030/f6-schema-version-PROPOSAL.md
+@@ -0,0 +1,28 @@
++# F-6 PROPOSAL: what "schema version" means for v5 telemetry (Saves QA -> HoE; co-owned; NOT final) — 2026-10-30 ~13:4x CET
++**SUPERSEDED-RISK NOTE (13:30 CET):** product/v5-ship-set.md changed on disk at 13:25:52 (sha256 05da2130…, D-HOP-2026-10-30-40): telemetry is now "gated by the #T card and save-migration tests (no separate schema version)", spec = telemetry-spec.md d170eb09 + telemetry-spec-errata-v5.md. Point 1-3 below (a TELEMETRY_SCHEMA constant) CONFLICT with that ruling; HoE should either drop them (keep only rule 4's legacy-ring handling, keyed on the envelope shape instead of a number) or take them to HoP. Not re-written here pending HoE.
++Why then: ship-set c3aba321 ("Not flags"): telemetry v0.6.2 ships always-on, "gated by schema version and save-migration tests". No code or spec defines a telemetry schema version yet.
++
++## What exists today (rc/v5 3f582db, read-only git show; e77fc5c identical for these files)
++- SAVE_VERSION = 6 (src/save/save.ts:7) is the version of the PROGRESS SAVE only: written into the save envelope `{"version":6,"savedAt",["saveSeq"],"sum","state"}` (save.ts:145-147),
++  upgraded by `migrations[n]` 1->6 (save.ts:74-84), a higher version = newer build -> read-only, never overwritten (save.ts:88-94, NewerSaveError :186). It does NOT bump for M5 (F2, m5-fields.ts header).
++- Telemetry has NO version anywhere: `eggfarm.telemetry` (telemetry.ts:2) is a bare JSON array of events (load telemetry.ts:29, any non-array -> []; write :68); each event is
++  `{...data, type, ts, sessionMs}` (:40/:58/:62); export is `{exportedAt, events}` (:83). Reset keeps eggfarm.telemetry (save.ts:112). No `src/telemetry/schema.ts` (G-8).
++- Frozen spec `qa/v5-saves/spec/telemetry-spec.v0.6.2+addendum` names no schema-version field; the addendum says "no version bump" (L254/L260), i.e. the spec has a version (v0.6.2) but the data does not.
++
++## Proposal
++1. **Two independent versions, never coupled.** SAVE_VERSION stays the save-file format (6 in v5). A new **TELEMETRY_SCHEMA = 62** (integer for spec v0.6.2) versions the telemetry EVENT
++   format. A telemetry change never bumps SAVE_VERSION and vice versa (so the F2 "no bump" rule and the newer-save read-only path are untouched).
++2. **Where it lives:** one exported constant in `src/telemetry/schema.ts` (row 11, the same module that holds the allowlist; closes G-8 + TEL-AC11 together); stored ONCE per ring,
++   not per event: `eggfarm.telemetry` becomes `{"schema":62,"events":[...]}` (an array = legacy, schema 0); export adds `"schema":62` next to `exportedAt`; `session_start` carries
++   `schema` so a ring mixing builds is attributable. (Alternative for HoE: per-event `sv` field. Costs bytes on every event, so not preferred under ring_size 5000.)
++3. **When it bumps:** any change to the envelope (e.g. sessionMs -> sid/fgMs), an event added/removed/renamed in the allowlist, a payload field added/removed/renamed, or an enum
++   value removed/renamed. Adding an enum value (e.g. resolved_by chip_manage) = bump too, since T-AC9 closed payloads make old checkers reject it. Spec text-only errata = no bump.
++4. **Load rule (the "migration" the ship-set refers to):** schema < current -> legacy events are DROPPED (not converted: sessionMs cannot become sid/fgMs), except pinned types
++   (session_start/end, upgrade, onboarding_*, milestone_reached, balanced_tier; telemetry.ts:12 isPinned) which are kept and marked `legacy:true`? -> HoE/PM decide; QA
++   default proposal = drop all, emit one `telemetry_reset{from_schema}`. schema > current (newer build) -> do not write the ring (mirror of the save read-only rule), keep events
++   in memory only. Never block or delay a progress save (T-AC15 "telemetry yields first").
++5. **Tests this enables (Saves lane):** TEL-F6-1 v0.6.1 bare-array ring -> loads as schema 0 -> handled per rule 4, save unaffected; TEL-F6-2 schema 63 ring in a 62 build -> not
++   overwritten; TEL-F6-3 every exported/stored event validates against `schema.ts` of the same TELEMETRY_SCHEMA; TEL-F6-4 SAVE_VERSION still 6 with telemetry on.
++
++## Needs HoE decision
++D1 name/value of the constant (62 vs "0.6.2"); D2 ring envelope object vs per-event field; D3 legacy handling (drop all vs keep pinned); D4 whether adding an enum value bumps.

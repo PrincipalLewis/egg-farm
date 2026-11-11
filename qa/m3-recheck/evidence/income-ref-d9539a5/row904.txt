@@ -1,0 +1,10 @@
+=== row 904 attribution (RC-only, expected FAIL) ===
+Source: pacing-x1-stack run 42114562232 aggregate job 127572997956
+Headline: pacing-x1-stack: **FAIL**
+Rows summary: 45 PASS, 0 FAIL, 1 WARN, 20 INFO, 0 PENDING-REPRED, 3 N/A (row 903), 12 NOT-WIRED (3 blocking), 24 EXCLUDED
+Named failing lines (only FAIL lines in verdict):
+  FAIL: blocking row 904 optimal NOT-WIRED
+  FAIL: blocking row 904 seller15 NOT-WIRED
+  FAIL: blocking row 904 casual NOT-WIRED
+Note: row 904 is RC-only (not run in CI / --require-ac7). No pacing grant. Aggregate FAIL attributed solely to these three named lines.
+Also present (non-FAIL): WARN L897 optimal N / H: worst 191 > 180 s (pre-existing L0–30 dead zone, known risk)

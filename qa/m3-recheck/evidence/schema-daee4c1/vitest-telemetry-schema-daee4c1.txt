@@ -1,0 +1,29 @@
+LOCK+START 2026-11-05T22:18:02+01:00 loadavg=2.84 2.89 3.70 1/2045 1211772
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/schema-daee-2216/gitc
+
+stdout | tests/telemetry-schema.test.ts > [G-8] worst-case pinned size <= 200 KB (D-HOE-19 G-1, D-HOE-31, D-HOE-32 M-2) > [G-8] worst-case 1 h session: every event valid and pinned; serialized <= 200 KB
+G-8 pinned bytes (base): 155374
+
+stdout | tests/telemetry-schema.test.ts > [G-8] worst-case pinned size <= 200 KB (D-HOE-19 G-1, D-HOE-31, D-HOE-32 M-2) > [G-8] worst-case 1 h session + buy-spam fixture: every event valid and pinned; serialized <= 200 KB
+G-8 pinned bytes (buy-spam): 175905
+
+ ✓ tests/telemetry-schema.test.ts (50 tests) 46ms
+stderr | tests/telemetry.test.ts > telemetry > events carry ts + sessionMs
+[telemetry] unknown event type: x
+
+stderr | tests/telemetry.test.ts > telemetry > ring buffer capped at ring_size
+[telemetry] unknown event type: e
+
+stderr | tests/telemetry.test.ts > telemetry > flush writes only when dirty; persisted buffer reloads
+[telemetry] unknown event type: a
+
+ ✓ tests/telemetry.test.ts (6 tests) 120ms
+ ✓ tests/export-global.test.ts (1 test) 5ms
+
+ Test Files  3 passed (3)
+      Tests  57 passed (57)
+   Start at  22:18:02
+   Duration  1.01s (transform 246ms, setup 0ms, collect 389ms, tests 171ms, environment 0ms, prepare 131ms)
+
+EXIT=0 END 2026-11-05T22:18:03+01:00 loadavg=2.77 2.87 3.69 1/2045 1211886

@@ -1,0 +1,6 @@
+TR-5 M4 AC7 check | table economy.f1.csv | Hens/Value costs from formula params Hens 36x1.3^H, Value 48x1.33^V | caps F+3/F+3
+scenario standard | taps 1.0/s | 30 min | seeds 0-29 | bot: Collection-aware greedy best-ROI (m4_sim.best_roi), no workers | in band = median in band AND >= 24/30 seeds
+[PASS] F18 time 17.8-21.7 min: median 20.75, in band 30/30 (min 20.50, max 21.00)
+[PASS] Farm level at 30:00 in L18-L22: median L21, in band 30/30 (min L21, max L21)
+[PASS] gap between purchases <= 3.0 min over 30:00: median 1.50, ok 30/30, worst 1.50 min at F20 (27.0 min)
+RESULT: PASS

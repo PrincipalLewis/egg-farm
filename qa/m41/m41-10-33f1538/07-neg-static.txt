@@ -1,0 +1,8 @@
+e0b709d6c2c33c872a251768bb503e07bd584792c3c375662a2acc75ebf1cc43  dist-html/egg-farm.html
+<meta name="build-id" content="m4.1+33f1538+dirty">
+data-build-id="m4.1+33f1538+dirty"
+      3 m4.1+33f1538+dirty
+dist-html/egg-farm.html: ["m4.1+33f1538+dirty"]
+FAIL build-id ["m4.1+33f1538+dirty"] want m4.1+33f1538 [BUILD_PREFIX='m4.1' from scripts/build-id.ts@33f1538; no suffix allowed] :: m4.1+33f1538+dirty: suffix '+dirty' present (dirty/unknown build not allowed)
+helper exit=0 (want 1)
+NOTE (QA): the 'helper exit=0' line above is tee's exit status (pipeline), not the helper's; the helper printed FAIL. Runtime probe exit=1 is in 09-runtime-neg-chromium.log.

@@ -1,0 +1,25 @@
+{
+ "id": "CSR9a-level-equal-falls-to-age",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-9a"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-L12-badsum.json"
+  },
+  "eggfarm.save.v6_backup": {
+   "ref": "raw/V6B-valid-unmarked-F12-T-3h.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "notice": "M2",
+  "variant": "age",
+  "prevLevel": 12,
+  "body": "We restored a save from about 3 hours ago."
+ }
+}

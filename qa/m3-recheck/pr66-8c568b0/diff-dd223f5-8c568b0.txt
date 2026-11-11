@@ -1,0 +1,281 @@
+diff --git a/scripts/rc0-browser.mjs b/scripts/rc0-browser.mjs
+index 7e501c0..9903e51 100644
+--- a/scripts/rc0-browser.mjs
++++ b/scripts/rc0-browser.mjs
+@@ -1,14 +1,25 @@
+ // rc0 browser checks + screenshots. Needs a QA build (?ios= flag): npm run build:qa && node scripts/rc0-browser.mjs
++// Usage (also: node scripts/rc0-browser.mjs --help):
++//   PORT=<n>       pin the preview port (default: a free port). Non-numeric = exit 2.
++//   The served dist-qa must be THIS checkout: build-id hash = HEAD and the same dirty state, else exit 2.
++//   ALLOW_DIRTY=1  admit a +dirty build while the tree is dirty (a deliberate flag-off run). ALLOW_NO_GIT=1 skips the check
++//                  when git is unavailable. A clean build on a dirty tree (incl. untracked files) is always refused.
++//   Flag-off rc0:  set m4.enabled=0 in src/config/balance.json, npm run build:qa, ALLOW_DIRTY=1 node scripts/rc0-browser.mjs;
++//                  then revert balance.json and npm run build:qa again (a +dirty build on a clean tree is refused).
+ // Engine: CLI arg `node scripts/rc0-browser.mjs webkit` or ENGINE=chromium|webkit|firefox (default chromium; CLI wins). HEADED=1.
+ import { chromium, webkit, firefox } from 'playwright-core';
+-import { spawn } from 'node:child_process';
++import { serveForRun } from './serve-own.mjs';
+ import { readFileSync, mkdirSync } from 'node:fs';
++if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(readFileSync(new URL(import.meta.url), 'utf8').split('\n').slice(0, 9).map(l => l.replace(/^\/\/ ?/, '')).join('\n')); process.exit(0); }
+ const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium';
+ if (!['chromium', 'webkit', 'firefox'].includes(ENGINE)) { console.error(`rc0-browser: unknown engine ${ENGINE}`); process.exit(2); }
+ const headless = !process.env.HEADED;
+-const port = +(process.env.PORT ?? 4181); const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
+-const killSrv = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch { } };
+-await new Promise(r => setTimeout(r, 1500));
++// CCR n-d: no fixed default port (4181 once served a stale foreign build). PORT unset = a free port from the OS; an explicit PORT
++// is honoured as-is. serveOwn checks the page on that port is THIS dist-qa (own entry chunk), and expectHeadBuild that its
++// build-id is this checkout's HEAD with the same dirty state (ALLOW_DIRTY=1 admits a +dirty build); any mismatch, or a
++// non-numeric PORT, exits 2 before any check runs. The server is stopped on every exit path.
++const srv = await serveForRun('dist-qa', 'rc0-browser'), port = srv.port; // exits 2 on a bad PORT / foreign or stale build
++const killSrv = () => srv.stop();
+ const SHOTS = process.env.SHOTS ?? '../engineering/screenshots'; mkdirSync(SHOTS, { recursive: true });
+ const shot = ENGINE === 'chromium' && headless; // screenshots once, from headless Chromium
+ const browser = ENGINE === 'webkit' ? await webkit.launch({ headless }) : ENGINE === 'firefox' ? await firefox.launch({ headless }) : await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', headless, args: ['--no-sandbox'] });
+diff --git a/scripts/release-globals-browser.mjs b/scripts/release-globals-browser.mjs
+index a07d93a..b18bede 100644
+--- a/scripts/release-globals-browser.mjs
++++ b/scripts/release-globals-browser.mjs
+@@ -1,10 +1,10 @@
+ // Release window-globals allowlist in a real engine: own properties of window on the booted release game (after some
+ // play, Settings open, ?debug=1&perf=1&ios=1) minus those of a blank page on the same origin in the same engine.
+ // Fails if anything other than ALLOWED appears. Usage: npm run build && node scripts/release-globals-browser.mjs [chromium|firefox|webkit]
+-import pw from 'playwright-core'; import { serveOwn } from './serve-own.mjs';
+-const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium', port = +(process.env.PORT ?? 0); // 0 = free port (serveOwn prints it)
++import pw from 'playwright-core'; import { serveForRun } from './serve-own.mjs';
++const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium'; // PORT: unset = free port; non-numeric = exit 2 (serveForRun)
+ const ALLOWED = ['eggfarmExportTelemetry'];
+-const srv = await serveOwn('dist', port);
++const srv = await serveForRun('dist', 'check-globals'); // CCR n-d/m1/n2: HEAD's own build (incl. dirty state), else exit 2 with one line
+ const br = ENGINE === 'chromium' ? await pw.chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] }) : await pw[ENGINE].launch();
+ const ctx = await br.newContext({ viewport: { width: 390, height: 844 } });
+ await ctx.route('**/__blank', r => r.fulfill({ contentType: 'text/html', body: '<!doctype html><title>blank</title>' }));
+diff --git a/scripts/serve-own.mjs b/scripts/serve-own.mjs
+index 8a767b9..1a75aff 100644
+--- a/scripts/serve-own.mjs
++++ b/scripts/serve-own.mjs
+@@ -3,20 +3,30 @@
+ // from another worktree on the same port once made a run test the wrong build.)
+ // port 0 / undefined (the default for callers without PORT set): probe a free port from the OS, so parallel worktrees don't
+ // collide on a fixed default; the chosen port is printed to stderr and returned. An explicit port is used as-is.
+-import { spawn } from 'node:child_process'; import fs from 'node:fs'; import path from 'node:path'; import net from 'node:net';
++import { spawn, execSync } from 'node:child_process'; import fs from 'node:fs'; import path from 'node:path'; import net from 'node:net';
+ export const freePort = () => new Promise((res, rej) => { const s = net.createServer(); s.unref(); s.on('error', rej);
+   s.listen(0, '127.0.0.1', () => { const { port } = s.address(); s.close(() => res(port)); }); });
++const FETCH_MS = 10000; // CCR n4: no fetch may hang a run
++/** CCR delta m1: every vite child this process spawned, recorded right after spawn, so a signal during startup (before
++ *  serveOwn resolves) still kills it. Only these process groups are ever killed. */
++const children = new Set();
++export const liveChildren = () => children.size;
++export function stopAllChildren() { for (const c of children) { try { process.kill(-c.pid); } catch {} } children.clear(); }
+ async function serveOnce(outDir, port, cwd) {
+   const srv = spawn('npx', ['vite', 'preview', '--outDir', outDir, '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true, cwd });
+-  let html = '';
+-  for (let i = 0; i < 80 && srv.exitCode === null; i++) { try { html = await (await fetch(`http://127.0.0.1:${port}/`)).text(); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
+-  await new Promise(r => setTimeout(r, 300));
+-  const own = fs.readdirSync(path.join(cwd, outDir, 'assets')).filter(f => /^index-.*\.js$/.test(f));
+-  if (srv.exitCode !== null || !own.length || !own.every(f => html.includes(f))) {
+-    try { process.kill(-srv.pid); } catch {}
+-    throw new Error(`serveOwn: port ${port} is not serving ${outDir} from ${cwd} (vite exit ${srv.exitCode}; expected ${own.join(',')}). Pick another PORT.`);
+-  }
+-  return { port, url: `http://127.0.0.1:${port}/`, stop: () => { try { process.kill(-srv.pid); } catch {} } };
++  let spawnErr = null; srv.on('error', e => { spawnErr = e; }); // CCR delta n5: e.g. npx missing -> one-line error, not a crash
++  if (srv.pid) children.add(srv);
++  const stop = () => { try { if (srv.pid) process.kill(-srv.pid); } catch {} children.delete(srv); };
++  try { // CCR n4: vite is stopped on ANY failure here, not only on a mismatch
++    let html = '';
++    for (let i = 0; i < 80 && srv.exitCode === null && !spawnErr; i++) { try { html = await (await fetch(`http://127.0.0.1:${port}/`, { signal: AbortSignal.timeout(FETCH_MS) })).text(); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
++    await new Promise(r => setTimeout(r, 300));
++    if (spawnErr) throw new Error(`serveOwn: cannot start vite preview (${spawnErr.code ?? ''} ${spawnErr.message}).`);
++    const own = fs.readdirSync(path.join(cwd, outDir, 'assets')).filter(f => /^index-.*\.js$/.test(f));
++    if (srv.exitCode !== null || !own.length || !own.every(f => html.includes(f)))
++      throw new Error(`serveOwn: port ${port} is not serving ${outDir} from ${cwd} (vite exit ${srv.exitCode}; expected ${own.join(',')}). Pick another PORT.`);
++  } catch (e) { stop(); throw e; }
++  return { port, cwd, outDir, url: `http://127.0.0.1:${port}/`, stop };
+ }
+ export async function serveOwn(outDir, port = 0, cwd = process.cwd()) {
+   if (+port) return serveOnce(outDir, +port, cwd);
+@@ -26,3 +36,60 @@ export async function serveOwn(outDir, port = 0, cwd = process.cwd()) {
+     catch (e) { if (attempt >= 3) throw e; }
+   }
+ }
++/** CCR n3: PORT unset or empty = 0 (free port); otherwise an integer 1..65535, else an error (callers exit 2). */
++export function parsePort(v = process.env.PORT) {
++  if (v === undefined || v === '') return 0;
++  if (!/^\d+$/.test(v) || +v < 1 || +v > 65535) throw new Error(`serveOwn: PORT=${JSON.stringify(v)} is not a port number (1..65535); unset it for a free port.`);
++  return +v;
++}
++/** Same rule as scripts/build-id.ts isDirty (PT1-9: Vite's temp config bundle never counts); tests/serve-own.test.ts pins
++ *  the two together. Kept in JS because the browser scripts run under plain node. */
++export const IGNORED_DIRTY = /(^|\/)vite\.config\.[cm]?[jt]s\.timestamp-[^/]*$/;
++export const isDirty = porcelain => porcelain.split('\n').map(l => l.slice(3).trim().replace(/^"|"$/g, '')).filter(f => f && !IGNORED_DIRTY.test(f)).length > 0;
++/** Pure verdict for expectHeadBuild. `id` = served build-id, `head` = full HEAD sha, `dirty` = the tree is dirty.
++ *  Returns null when OK, else the reason. The hash must be HEAD's AND the dirty state must match the tree:
++ *  - '+dirty' build, clean tree: always refused (CCR delta n1: a dirty build is never current on a clean tree, e.g. a stale
++ *    flag-off bundle left after reverting balance.json);
++ *  - '+dirty' build, dirty tree: refused unless allowDirty (ALLOW_DIRTY=1, a deliberate flag-off run);
++ *  - clean build-id, dirty tree: refused (the build predates the uncommitted or untracked changes). */
++const CLEAN_HINT = 'commit, stash or remove the uncommitted AND untracked files (see git status), then rebuild';
++export function buildIdProblem(id, head, dirty, allowDirty = false) {
++  const m = /\+([0-9a-f]{7,40})(\+dirty)?$/.exec(id ?? '');
++  if (!m || !head.startsWith(m[1])) return `is not HEAD ${head.slice(0, 7)} (stale build or foreign server)`;
++  if (m[2] && !dirty) return `is a +dirty build but the tree at HEAD ${head.slice(0, 7)} is clean (a stale dirty build, e.g. flag-off left after a revert); rebuild`;
++  if (m[2] && !allowDirty) return `is a +dirty build (uncommitted or untracked changes, e.g. a flag-off balance.json); ${CLEAN_HINT}, or for a deliberate dirty run set ALLOW_DIRTY=1`;
++  if (!m[2] && dirty) return `is clean but the tree at HEAD ${head.slice(0, 7)} is dirty (the build predates the uncommitted or untracked changes); ${CLEAN_HINT}; for a deliberate dirty run rebuild and set ALLOW_DIRTY=1`;
++  return null;
++}
++/** CCR n-d + m1/n5 (reviews/pr66-f8ba53c.md, pr66-delta-a8ff301.md): fail loudly when the served build is not exactly this
++ *  checkout (HEAD + dirty state, see buildIdProblem). Reads <meta name="build-id"> (m3-rc1-pre+<short>[+dirty]) from the
++ *  served page; git runs in the cwd serveOwn got. Opt-outs (env): ALLOW_DIRTY=1 admits a +dirty build on a dirty tree (a
++ *  deliberate flag-off run; warns with m4.enabled); ALLOW_NO_GIT=1 skips the check when git is unavailable (warns). */
++export async function expectHeadBuild(srv, { allowDirty = process.env.ALLOW_DIRTY === '1', allowNoGit = process.env.ALLOW_NO_GIT === '1' } = {}) {
++  const cwd = srv.cwd ?? process.cwd();
++  const html = await (await fetch(srv.url, { signal: AbortSignal.timeout(FETCH_MS) })).text(), id = /<meta name="build-id" content="([^"]*)"/.exec(html)?.[1] ?? '';
++  let head = '', porcelain = '';
++  try { const o = { encoding: 'utf8', cwd, stdio: ['ignore', 'pipe', 'pipe'] }; head = execSync('git rev-parse HEAD', o).trim(); porcelain = execSync('git status --porcelain', o); }
++  catch (e) { // CCR delta n1: its own opt-out; ALLOW_DIRTY no longer skips this
++    if (allowNoGit) { console.error(`serveOwn: WARNING git unavailable in ${cwd}; ALLOW_NO_GIT=1, served build ${id || '(none)'} NOT checked`); return id; }
++    throw new Error(`serveOwn: git unavailable in ${cwd} (${String(e?.stderr ?? e?.message ?? e).trim().split('\n')[0]}); cannot check served build-id "${id}". Set ALLOW_NO_GIT=1 to skip the check.`); }
++  const why = buildIdProblem(id, head, isDirty(porcelain), allowDirty);
++  if (why) throw new Error(`serveOwn: served build-id "${id}" at ${srv.url} ${why}.`);
++  if (/\+dirty$/.test(id)) { let m4 = '?'; try { m4 = String(JSON.parse(fs.readFileSync(path.join(cwd, 'src/config/balance.json'), 'utf8')).m4?.enabled ?? '?'); } catch {}
++    console.error(`serveOwn: WARNING ALLOW_DIRTY=1: testing a +dirty build (working-tree balance.json m4.enabled=${m4}); not a release build`); }
++  return id;
++}
++/** One call for the browser gates: PORT (parsePort) -> serveOwn -> expectHeadBuild. Any failure prints one line and exits 2
++ *  (CCR n2/n3: no stack traces). The server is stopped on every exit path afterwards (normal end, process.exit, an uncaught
++ *  error, SIGINT/SIGTERM from `timeout`) - CCR n4. */
++export async function serveForRun(outDir, tag) {
++  let srv = null; const stop = () => { srv?.stop(); stopAllChildren(); }; // CCR delta m1: also vite children not yet returned
++  process.on('exit', stop);
++  for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => { stop(); process.exit(sig === 'SIGINT' ? 130 : 143); });
++  try {
++    srv = await serveOwn(outDir, parsePort());
++    const id = await expectHeadBuild(srv);
++    console.error(`${tag}: ${outDir} ${id} on port ${srv.port}`);
++    return { ...srv, buildId: id };
++  } catch (e) { console.error(`${tag}: ${String(e?.message ?? e)}`); stop(); process.exit(2); }
++}
+diff --git a/tests/serve-own.test.ts b/tests/serve-own.test.ts
+index 6ba51b2..19a1540 100644
+--- a/tests/serve-own.test.ts
++++ b/tests/serve-own.test.ts
+@@ -1,18 +1,110 @@
+-// serve-own: no fixed default port (CCR #13 nit: 5108 collided across parallel worktrees).
+-import { it, expect } from 'vitest';
++// CCR #66 (reviews/pr66-f8ba53c.md) m1/n3: the browser-gate server guard. Pure parts only (no vite, no browser).
++import { describe, it, expect } from 'vitest';
++// @ts-expect-error plain .mjs helper without types
++import { buildIdProblem, parsePort, isDirty as isDirtyJs } from '../scripts/serve-own.mjs';
++import { isDirty as isDirtyTs } from '../scripts/build-id';
++const HEAD = 'f8ba53c5d3766a1674e90c88a70721fc6fe179cd';
++
++describe('m1: expectHeadBuild checks hash AND dirty state', () => {
++  it('clean build on a clean tree at HEAD: ok', () => expect(buildIdProblem('m3-rc1-pre+f8ba53c', HEAD, false)).toBeNull());
++  it("CCR R4: '+f8ba53c+dirty' served on a clean tree is refused (and on a dirty tree too) unless ALLOW_DIRTY", () => {
++    expect(buildIdProblem('m3-rc1-pre+f8ba53c+dirty', HEAD, false)).toMatch(/\+dirty build/);
++    expect(buildIdProblem('m3-rc1-pre+f8ba53c+dirty', HEAD, true)).toMatch(/\+dirty build/);
++    expect(buildIdProblem('m3-rc1-pre+f8ba53c+dirty', HEAD, true, true)).toBeNull();
++    expect(buildIdProblem('m3-rc1-pre+f8ba53c+dirty', HEAD, false, true)).toMatch(/tree .* is clean/); // delta n1: never current on a clean tree
++  });
++  it('a clean build-id on a dirty tree is refused (the build predates the edits), even with ALLOW_DIRTY', () => {
++    expect(buildIdProblem('m3-rc1-pre+f8ba53c', HEAD, true)).toMatch(/tree .* is dirty/);
++    expect(buildIdProblem('m3-rc1-pre+f8ba53c', HEAD, true, true)).toMatch(/tree .* is dirty/);
++  });
++  it('another commit, unknown or missing id: refused', () => {
++    for (const id of ['m3-rc1-pre+dd223f5', 'm3-rc1-pre+dd223f5+dirty', 'm3-rc1-pre+unknown', '', undefined]) expect(buildIdProblem(id as any, HEAD, false, true)).toMatch(/is not HEAD f8ba53c/);
++  });
++  it('the JS isDirty used by the scripts equals scripts/build-id.ts isDirty', () => {
++    for (const p of ['', ' M src/a.ts\n', '?? x.txt\n', '?? vite.config.ts.timestamp-123.mjs\n', ' M vite.config.ts\n', '?? "a b.txt"\n?? vite.config.mjs.timestamp-9-x.mjs\n'])
++      expect(isDirtyJs(p)).toBe(isDirtyTs(p));
++  });
++});
++
++describe('n3: PORT parsing', () => {
++  it('unset or empty = 0 (free port); an integer 1..65535 as-is', () => {
++    expect(parsePort(undefined)).toBe(0); expect(parsePort('')).toBe(0); expect(parsePort('4331')).toBe(4331); expect(parsePort('65535')).toBe(65535);
++  });
++  it('non-numeric or out of range: an error (callers exit 2)', () => {
++    for (const v of ['abc', '43a', '-1', '0', '65536', '4.5', ' 4331']) expect(() => parsePort(v)).toThrow(/not a port number/);
++  });
++});
++
++// ---- restored from main (CCR delta n3): no fixed default port ----
+ import net from 'node:net';
++import { readFileSync, existsSync, mkdtempSync, writeFileSync, symlinkSync } from 'node:fs';
++import { tmpdir } from 'node:os'; import { join } from 'node:path';
++import { spawnSync, spawn, execSync } from 'node:child_process';
++import http from 'node:http';
+ // @ts-expect-error plain .mjs helper without types
+-import { freePort } from '../scripts/serve-own.mjs';
+-import { readFileSync } from 'node:fs';
++import { freePort, expectHeadBuild } from '../scripts/serve-own.mjs';
+ it('freePort returns distinct bindable ports', async () => {
+   const a = await freePort(), b = await freePort();
+   expect(a).toBeGreaterThan(0);
+   const s = net.createServer(); await new Promise<void>(r => s.listen(a, '127.0.0.1', () => r())); // still bindable
+   const c = await freePort(); expect(c).not.toBe(a); s.close(); expect(typeof b).toBe('number');
+ });
+-it('check-globals defaults to a probed port, PORT still overrides', () => {
+-  const src = readFileSync(new URL('../scripts/release-globals-browser.mjs', import.meta.url), 'utf8');
+-  expect(src).not.toMatch(/5100/); expect(src).toMatch(/process\.env\.PORT \?\? 0/);
++it('an unset PORT gets a probed free port (rc0 and check-globals); an explicit PORT still overrides', () => {
++  expect(parsePort(undefined)).toBe(0);
++  for (const f of ['release-globals-browser.mjs', 'rc0-browser.mjs']) {
++    const src = readFileSync(new URL(`../scripts/${f}`, import.meta.url), 'utf8');
++    expect(src).not.toMatch(/\?\? *(4181|5100)|--port', String/); expect(src).toMatch(/serveForRun\('dist(-qa)?'/);
++  }
+   const so = readFileSync(new URL('../scripts/serve-own.mjs', import.meta.url), 'utf8');
+-  expect(so).toMatch(/if \(\+port\) return serveOnce/); expect(so).toMatch(/on port \$\{p\}/);
++  expect(so).toMatch(/if \(\+port\) return serveOnce/); expect(so).toMatch(/on port \$\{p\}/); expect(so).toMatch(/serveOwn\(outDir, parsePort\(\)\)/);
++});
++
++// ---- CCR delta n3: wiring (kills M11 dirty=false, M12 git failure passes, M13 exit 0 on failure) ----
++const git = (cwd: string, a: string) => execSync(`git ${a}`, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
++async function served(id: string) {
++  const s = http.createServer((_q, r) => { r.writeHead(200, { 'content-type': 'text/html' }); r.end(`<meta name="build-id" content="${id}"><title>t</title>`); });
++  await new Promise<void>(r => s.listen(0, '127.0.0.1', () => r()));
++  return { s, url: `http://127.0.0.1:${(s.address() as net.AddressInfo).port}/` };
++}
++describe('expectHeadBuild wiring (a real git tree + a served page)', () => {
++  it('uses the tree\'s REAL dirty state: clean id passes on a clean tree, is refused once an untracked file appears', async () => {
++    const d = mkdtempSync(join(tmpdir(), 'so-git-'));
++    git(d, 'init -q'); writeFileSync(join(d, 'a.txt'), 'a'); git(d, 'add a.txt'); git(d, '-c user.name=t -c user.email=t@t commit -qm a');
++    const h = git(d, 'rev-parse HEAD'), { s, url } = await served(`m3-rc1-pre+${h.slice(0, 7)}`);
++    try {
++      await expect(expectHeadBuild({ url, cwd: d }, { allowDirty: false, allowNoGit: false })).resolves.toBe(`m3-rc1-pre+${h.slice(0, 7)}`);
++      writeFileSync(join(d, 'untracked.txt'), 'x');
++      await expect(expectHeadBuild({ url, cwd: d }, { allowDirty: true, allowNoGit: false })).rejects.toThrow(/is clean but the tree .* is dirty .*untracked/);
++    } finally { s.close(); }
++  });
++  it('git unavailable (not a repo) is an error, also with ALLOW_DIRTY; only ALLOW_NO_GIT skips it', async () => {
++    const d = mkdtempSync(join(tmpdir(), 'so-nogit-')), { s, url } = await served('m3-rc1-pre+abcdef1');
++    try {
++      await expect(expectHeadBuild({ url, cwd: d }, { allowDirty: true, allowNoGit: false })).rejects.toThrow(/git unavailable .*ALLOW_NO_GIT=1/);
++      await expect(expectHeadBuild({ url, cwd: d }, { allowDirty: false, allowNoGit: true })).resolves.toBe('m3-rc1-pre+abcdef1');
++    } finally { s.close(); }
++  });
++});
++describe('serveForRun wiring: one line, exit 2', () => {
++  const run = (script: string, env: Record<string, string>) => spawnSync(process.execPath, [`scripts/${script}`, 'chromium'], { encoding: 'utf8', env: { ...process.env, ...env }, timeout: 60000 });
++  it.each(['rc0-browser.mjs', 'release-globals-browser.mjs'])('%s: PORT=abc -> exit 2, one stderr line, no stack', script => {
++    const r = run(script, { PORT: 'abc' });
++    expect(r.status).toBe(2); const err = r.stderr.trim().split('\n'); expect(err).toHaveLength(1); expect(err[0]).toMatch(/PORT="abc" is not a port number/); expect(r.stderr).not.toMatch(/\n\s+at /);
++  });
++  it('n5: vite cannot be spawned (no npx on PATH) -> exit 2, one line', () => {
++    const bin = mkdtempSync(join(tmpdir(), 'so-path-')); symlinkSync(process.execPath, join(bin, 'node'));
++    const r = run('release-globals-browser.mjs', { PATH: bin, PORT: '' });
++    expect(r.status).toBe(2); expect(r.stderr).toMatch(/cannot start vite preview \(ENOENT/); expect(r.stderr).not.toMatch(/\n\s+at /);
++  });
++});
++describe('CCR delta m1: SIGTERM during server startup leaves nothing listening', () => {
++  it.skipIf(!existsSync('dist-qa/assets'))('rc0 on an explicit free port, TERM as soon as vite listens (serveOwn not resolved yet): port free afterwards', async () => {
++    const port = await freePort(), up = () => new Promise<boolean>(r => { const c = net.connect(port, '127.0.0.1', () => { c.destroy(); r(true); }); c.on('error', () => r(false)); });
++    const p = spawn(process.execPath, ['scripts/rc0-browser.mjs', 'chromium'], { env: { ...process.env, PORT: String(port) }, stdio: 'ignore' });
++    const exited = new Promise<number | null>(r => p.on('exit', (c, sig) => r(c ?? (sig ? 128 + 15 : null))));
++    for (let i = 0; i < 200 && !(await up()); i++) await new Promise(r => setTimeout(r, 25));
++    p.kill('SIGTERM'); expect(await exited).toBe(143);
++    let open = true; for (let i = 0; i < 40 && open; i++) { await new Promise(r => setTimeout(r, 100)); open = await up(); }
++    expect(open).toBe(false);
++  }, 60000);
+ });

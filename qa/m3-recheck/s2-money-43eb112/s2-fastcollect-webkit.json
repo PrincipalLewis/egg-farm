@@ -1,0 +1,102 @@
+[
+ {
+  "n": "Fast Collect: touch-action manipulation on #app/.scene/.queue",
+  "pass": true,
+  "i": [
+   [
+    "#app",
+    "manipulation"
+   ],
+   [
+    ".scene",
+    "manipulation"
+   ],
+   [
+    ".queue",
+    "manipulation"
+   ],
+   [
+    "#collect",
+    "manipulation"
+   ]
+  ]
+ },
+ {
+  "n": "Fast Collect button 10x@50ms: every tap registers, squash+pop <= 100 ms",
+  "pass": true,
+  "i": {
+   "taps": 10,
+   "collects": 10,
+   "sq100": 10,
+   "pop100": 10,
+   "lostCount": 0,
+   "coopLeft": 209,
+   "class": "OK"
+  }
+ },
+ {
+  "n": "Fast Collect scene 10x@50ms: every tap registers, squash+pop <= 100 ms",
+  "pass": true,
+  "i": {
+   "taps": 10,
+   "collects": 10,
+   "sq100": 10,
+   "pop100": 10,
+   "lostCount": 0,
+   "coopLeft": 209,
+   "class": "OK"
+  }
+ },
+ {
+  "n": "Fast Collect button 45x@15/s: every tap registers, squash+pop <= 100 ms",
+  "pass": true,
+  "i": {
+   "taps": 45,
+   "collects": 45,
+   "sq100": 45,
+   "pop100": 45,
+   "lostCount": 0,
+   "coopLeft": 5,
+   "class": "OK"
+  }
+ },
+ {
+  "n": "Fast Collect button 45x@15/s #2: every tap registers, squash+pop <= 100 ms",
+  "pass": true,
+  "i": {
+   "taps": 45,
+   "collects": 45,
+   "sq100": 45,
+   "pop100": 45,
+   "lostCount": 0,
+   "coopLeft": 5,
+   "class": "OK"
+  }
+ },
+ {
+  "n": "Fast Collect button 45x@15/s #3: every tap registers, squash+pop <= 100 ms",
+  "pass": true,
+  "i": {
+   "taps": 45,
+   "collects": 45,
+   "sq100": 45,
+   "pop100": 45,
+   "lostCount": 0,
+   "coopLeft": 4,
+   "class": "OK"
+  }
+ },
+ {
+  "n": "Fast Collect scene 45x@15/s: every tap registers, squash+pop <= 100 ms",
+  "pass": true,
+  "i": {
+   "taps": 45,
+   "collects": 45,
+   "sq100": 45,
+   "pop100": 45,
+   "lostCount": 0,
+   "coopLeft": 3,
+   "class": "OK"
+  }
+ }
+]

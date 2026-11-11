@@ -1,0 +1,14 @@
+check-globals exit=0
+rc0 chromium exit=0 249/249 passed FAIL=0
+rc0 firefox exit=1 Node.js v20.19.2 FAIL=0
+rc0 webkit exit=1 Node.js v20.19.2 FAIL=0
+RC0DONE
+rc0 firefox rerun exit=0 249/249 passed FAIL=0
+rc0 webkit rerun exit=1 Node.js v20.19.2 FAIL=0
+ALLDONE
+rc0 webkit rerun2 exit=0 249/249 passed FAIL=0
+webkit shots exit=0
+WKDONE
+chromium shots rerun exit=0
+firefox shots rerun exit=0
+CFDONE

@@ -1,0 +1,36 @@
+{
+ "id": "F5-preM4",
+ "desc": "pre-M4 control: acdbedc shipped flag-off save, no tracksV7",
+ "build": "acdbedc QA M4-on (balance clone m4.enabled=1)",
+ "ls": {
+  "eggfarm.install_id": "2f3e3a94-1a9f-4220-aa8b-8afdc33991c2",
+  "eggfarm.save": "{\"version\":6,\"savedAt\":1792227600000,\"sum\":\"88fbf04b\",\"state\":{\"coinsCents\":1234567,\"coop\":88,\"basket\":321,\"collectionLevel\":9,\"farmLevel\":14,\"customers\":[],\"nextCustomerInS\":10,\"nextCustomerId\":1,\"rng\":1478832577,\"pendingOfflineEggs\":0,\"celebratedTier\":0,\"workers\":{\"market_hand\":1,\"coop_hand\":1},\"graderTier\":2,\"manageCdS\":0,\"coopFullS\":0,\"wageFracCents\":{}}}",
+  "eggfarm.telemetry": "[{\"install_id\":\"2f3e3a94-1a9f-4220-aa8b-8afdc33991c2\",\"build\":\"qa-acdbedc-m4on\",\"type\":\"session_start\",\"ts\":1792227000000,\"sessionMs\":0}]",
+  "eggfarm.save.bak": "{\"version\":6,\"savedAt\":1792227000000,\"sum\":\"7999766c\",\"state\":{\"coinsCents\":0,\"coop\":0,\"basket\":0,\"collectionLevel\":0,\"farmLevel\":0,\"customers\":[],\"nextCustomerInS\":10,\"nextCustomerId\":1,\"rng\":1478832577,\"pendingOfflineEggs\":0,\"celebratedTier\":0,\"workers\":{},\"graderTier\":0,\"manageCdS\":0,\"coopFullS\":0,\"wageFracCents\":{}}}",
+  "eggfarm.ui": "{\"seenSlots\":5,\"onboardingDone\":true,\"workersIntroA\":true,\"workersIntroB\":true,\"sfx\":false}"
+ },
+ "idb": "{\"version\":6,\"savedAt\":1792227600000,\"sum\":\"88fbf04b\",\"state\":{\"coinsCents\":1234567,\"coop\":88,\"basket\":321,\"collectionLevel\":9,\"farmLevel\":14,\"customers\":[],\"nextCustomerInS\":10,\"nextCustomerId\":1,\"rng\":1478832577,\"pendingOfflineEggs\":0,\"celebratedTier\":0,\"workers\":{\"market_hand\":1,\"coop_hand\":1},\"graderTier\":2,\"manageCdS\":0,\"coopFullS\":0,\"wageFracCents\":{}}}",
+ "savedAt": 1792227600000,
+ "saveSeq": 0,
+ "state": {
+  "coinsCents": 1234567,
+  "coop": 88,
+  "basket": 321,
+  "collectionLevel": 9,
+  "farmLevel": 14,
+  "customers": [],
+  "nextCustomerInS": 10,
+  "nextCustomerId": 1,
+  "rng": 1478832577,
+  "pendingOfflineEggs": 0,
+  "celebratedTier": 0,
+  "workers": {
+   "market_hand": 1,
+   "coop_hand": 1
+  },
+  "graderTier": 2,
+  "manageCdS": 0,
+  "coopFullS": 0,
+  "wageFracCents": {}
+ }
+}

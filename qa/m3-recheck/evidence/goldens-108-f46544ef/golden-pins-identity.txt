@@ -1,0 +1,16 @@
+# golden pins identity tip vs origin/rc/v5 eed62687
+engineering/golden/flagoff-golden.a01faea.test.ts rc=3584795c42b509f61799260323e46ee37c210bc2 tip=3584795c42b509f61799260323e46ee37c210bc2 SAME
+engineering/golden/m4on-golden.90a9c84.test.ts rc=dd9c637fc3d28acc013bc72fce90889b9863175a tip=dd9c637fc3d28acc013bc72fce90889b9863175a SAME
+tests/m4a-flag-off.test.ts rc=2c9130528d7b9ab5a770133df6b00b6c86d34b3c tip=2c9130528d7b9ab5a770133df6b00b6c86d34b3c SAME
+tests/zg-flagoff-dom.test.ts rc=e4045bc6f68fdd9ed32c241f6a9ea28bd4ada5c6 tip=e4045bc6f68fdd9ed32c241f6a9ea28bd4ada5c6 SAME
+src/config/balance.json rc=ccf51e9e68c3af89745f5b9b0fdaa69afb5f4e78 tip=ccf51e9e68c3af89745f5b9b0fdaa69afb5f4e78 SAME
+data/economy.csv rc=bbee87609d00de2cb560c88eb7982b7a24fa1488 tip=bbee87609d00de2cb560c88eb7982b7a24fa1488 SAME
+src/config/flags.ts rc=991a4c2ae3131a23ede22590a76c222ea95aaf79 tip=991a4c2ae3131a23ede22590a76c222ea95aaf79 SAME
+--- sha256 shipping data at tip:
+ddd02fbaea437e14c55f1df3251c2331b60e33697512a4e5107b69cd5f34b41a  src/config/balance.json
+a8c4e26836bf7af98cb51f8e3e8a646750e82a4cdc18be450afe2f86eeeeb07f  data/economy.csv
+854f869e0eee23ba92423392776a28978c6f6f2fd3a8fe4b516c69d55d169643  src/config/flags.ts
+--- git diff --stat rc..tip -- data public src/config/balance.json src/config/flags.ts engineering/golden:
+(end)
+--- shipping m4 flags:
+{"enabled":1,"flags":{"golden":0,"streak":0,"tapCoins":0,"abilities":0,"broody":0,"salesStopped":0,"fatigueCue":0,"pause":0,"rc2Refill":0,"autoRefill":0,"clockWage":0,"breeds":0,"zeroGainUi":0,"bestBuyV2":0}}

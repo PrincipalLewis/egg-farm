@@ -1,0 +1,552 @@
+[
+ {
+  "n": "layout farm 360: no clipped/ellipsised text, no button overlap, no h-scroll",
+  "p": true,
+  "info": {
+   "clip": [],
+   "ov": [],
+   "hscroll": false
+  }
+ },
+ {
+  "n": "layout market 360: no clipped/ellipsised text, no button overlap, no h-scroll",
+  "p": true,
+  "info": {
+   "clip": [],
+   "ov": [],
+   "hscroll": false
+  }
+ },
+ {
+  "n": "layout collection 360: no clipped/ellipsised text, no button overlap, no h-scroll",
+  "p": true,
+  "info": {
+   "clip": [],
+   "ov": [],
+   "hscroll": false
+  }
+ },
+ {
+  "n": "C-AC26 collection 360: every \"/tap\" surface leads with price, none bare",
+  "p": true,
+  "info": [
+   {
+    "t": "+12% egg price · +5/tap",
+    "ct": " L5 Collect per tap +12% egg price · +5/tap Egg price +60% → +72%Eggs per tap 30 → 35 +7% incomePays back in ~43 s★ Best buy Level 5 / 30 $104.00 ",
+    "bare": false,
+    "priceFirst": true
+   }
+  ]
+ },
+ {
+  "n": "layout upgfarm 360: no clipped/ellipsised text, no button overlap, no h-scroll",
+  "p": true,
+  "info": {
+   "clip": [],
+   "ov": [],
+   "hscroll": false
+  }
+ },
+ {
+  "n": "layout workers 360: no clipped/ellipsised text, no button overlap, no h-scroll",
+  "p": true,
+  "info": {
+   "clip": [],
+   "ov": [],
+   "hscroll": false
+  }
+ },
+ {
+  "n": "page errors 360",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "C-AC26 L25 strip 360: price/income effect present, no bare +5/tap",
+  "p": true,
+  "info": "★ Collection L25 · +3% income"
+ },
+ {
+  "n": "C-AC26b L25 strip 360: % gain not cut, track not shortened/ellipsised",
+  "p": true,
+  "info": {
+   "t": "★ Collection L25 · +3% income",
+   "starShown": true,
+   "track": "Collection L25",
+   "trackClipped": false,
+   "gain": " · +3% income",
+   "gainClipped": false,
+   "labelW": 209.765625,
+   "labelCW": 210,
+   "natural": 190.859375
+  }
+ },
+ {
+  "n": "L25 strip 360: ★ kept",
+  "p": true,
+  "info": {
+   "t": "★ Collection L25 · +3% income",
+   "starShown": true,
+   "track": "Collection L25",
+   "trackClipped": false,
+   "gain": " · +3% income",
+   "gainClipped": false,
+   "labelW": 209.765625,
+   "labelCW": 210,
+   "natural": 190.859375
+  }
+ },
+ {
+  "n": "AC-R9 N=2 360: \"Refill 2 tired workers\" present",
+  "p": true,
+  "info": [
+   "Refill 2 tired workers",
+   "Refill 2 tired workers"
+  ]
+ },
+ {
+  "n": "AC-R9 N=1 360: \"Refill 1 tired worker\", never \"1 tired workers\"",
+  "p": true,
+  "info": [
+   "Refill 1 tired worker",
+   "Refill 1 tired worker"
+  ]
+ },
+ {
+  "n": "AC-R8 360: rested worker (>40%) shows \"Rested, refill below 40%\"",
+  "p": true,
+  "info": [
+   "Rested, refill below 40%",
+   "Rested, refill below 40%"
+  ]
+ },
+ {
+  "n": "T6 360: HUD rate text and aria carry the same number",
+  "p": true,
+  "info": [
+   {
+    "t": "+$39.71/s",
+    "a": "Net income plus $39.71 per second"
+   },
+   {
+    "t": "+$39.71/s",
+    "a": "Net income plus $39.71 per second"
+   },
+   {
+    "t": "+$39.71/s",
+    "a": "Net income plus $39.71 per second"
+   },
+   {
+    "t": "+$39.71/s",
+    "a": "Net income plus $39.71 per second"
+   },
+   {
+    "t": "+$39.71/s",
+    "a": "Net income plus $39.71 per second"
+   },
+   {
+    "t": "+$39.71/s",
+    "a": "Net income plus $39.71 per second"
+   }
+  ]
+ },
+ {
+  "n": "Claude-G1 360: coop full + no sales — top bar is not positive while money falls",
+  "p": false,
+  "info": {
+   "t0": {
+    "coins": 1473,
+    "coop": 700,
+    "fullShown": true,
+    "collect": "Collect +35",
+    "cls": "btn xl",
+    "dis": "false",
+    "op": "1",
+    "bg": "rgb(255, 201, 60)",
+    "rate": "+$39.71/s",
+    "goal": "★ Collection L7 · +7% income~0:04›"
+   },
+   "t20": {
+    "coins": 1365,
+    "coop": 700,
+    "rate": "+$39.71/s",
+    "goal": "★ Collection L7 · +7% income~0:04›",
+    "hint": [
+     "+$39.71/s"
+    ]
+   }
+  }
+ },
+ {
+  "n": "Claude-G1 360: coop full — Collect does not look like a normal +N action / full state is explained",
+  "p": false,
+  "info": {
+   "t0": {
+    "coins": 1473,
+    "coop": 700,
+    "fullShown": true,
+    "collect": "Collect +35",
+    "cls": "btn xl",
+    "dis": "false",
+    "op": "1",
+    "bg": "rgb(255, 201, 60)",
+    "rate": "+$39.71/s",
+    "goal": "★ Collection L7 · +7% income~0:04›"
+   },
+   "t20": {
+    "coins": 1365,
+    "coop": 700,
+    "rate": "+$39.71/s",
+    "goal": "★ Collection L7 · +7% income~0:04›",
+    "hint": [
+     "+$39.71/s"
+    ]
+   }
+  }
+ },
+ {
+  "n": "Claude-G1 360: goal ETA not frozen while money falls",
+  "p": false,
+  "info": {
+   "t0": {
+    "coins": 1473,
+    "coop": 700,
+    "fullShown": true,
+    "collect": "Collect +35",
+    "cls": "btn xl",
+    "dis": "false",
+    "op": "1",
+    "bg": "rgb(255, 201, 60)",
+    "rate": "+$39.71/s",
+    "goal": "★ Collection L7 · +7% income~0:04›"
+   },
+   "t20": {
+    "coins": 1365,
+    "coop": 700,
+    "rate": "+$39.71/s",
+    "goal": "★ Collection L7 · +7% income~0:04›",
+    "hint": [
+     "+$39.71/s"
+    ]
+   }
+  }
+ },
+ {
+  "n": "Claude-G3 360: \"Workers get tired\" tip does not cover tabs",
+  "p": true,
+  "info": {
+   "r": [
+    42,
+    320,
+    276,
+    68
+   ],
+   "hits": []
+  }
+ },
+ {
+  "n": "Claude-G6 360: Farm card <= 4 text lines (info)",
+  "p": false,
+  "info": {
+   "h": 345,
+   "w": 328,
+   "lines": 12,
+   "t": "L6 | Farm level | Coop upgrade at L10 | Hens 35 → 40 | Coop capacity 350 → 400 | Egg price $2.08 → $2.16 | Customers every 3.68s → 3.49s | Customer demand 21–42 → 23–45 | +19% income | Pays back in ~3 min 43 s | Level 6 / 30 | $605.00 | Limited by collecting ›"
+  }
+ },
+ {
+  "n": "layout farm 1280: no clipped/ellipsised text, no button overlap, no h-scroll",
+  "p": true,
+  "info": {
+   "clip": [],
+   "ov": [],
+   "hscroll": false
+  }
+ },
+ {
+  "n": "C-AC26 farm 1280: every \"/tap\" surface leads with price, none bare",
+  "p": true,
+  "info": [
+   {
+    "t": "+12% egg price · +5/tap",
+    "ct": " L5 Collect per tap +12% egg price · +5/tap Egg price +60% → +72%Eggs per tap 30 → 35 +7% incomePays back in ~43 s★ Best buy Level 5 / 30 $104.00 ",
+    "bare": false,
+    "priceFirst": true
+   }
+  ]
+ },
+ {
+  "n": "layout market 1280: no clipped/ellipsised text, no button overlap, no h-scroll",
+  "p": true,
+  "info": {
+   "clip": [],
+   "ov": [],
+   "hscroll": false
+  }
+ },
+ {
+  "n": "C-AC26 market 1280: every \"/tap\" surface leads with price, none bare",
+  "p": true,
+  "info": [
+   {
+    "t": "+12% egg price · +5/tap",
+    "ct": " L5 Collect per tap +12% egg price · +5/tap Egg price +60% → +72%Eggs per tap 30 → 35 +7% incomePays back in ~43 s★ Best buy Level 5 / 30 $104.00 ",
+    "bare": false,
+    "priceFirst": true
+   }
+  ]
+ },
+ {
+  "n": "layout collection 1280: no clipped/ellipsised text, no button overlap, no h-scroll",
+  "p": true,
+  "info": {
+   "clip": [],
+   "ov": [],
+   "hscroll": false
+  }
+ },
+ {
+  "n": "C-AC26 collection 1280: every \"/tap\" surface leads with price, none bare",
+  "p": true,
+  "info": [
+   {
+    "t": "+12% egg price · +5/tap",
+    "ct": " L5 Collect per tap +12% egg price · +5/tap Egg price +60% → +72%Eggs per tap 30 → 35 +7% incomePays back in ~43 s★ Best buy Level 5 / 30 $104.00 ",
+    "bare": false,
+    "priceFirst": true
+   }
+  ]
+ },
+ {
+  "n": "layout upgfarm 1280: no clipped/ellipsised text, no button overlap, no h-scroll",
+  "p": true,
+  "info": {
+   "clip": [],
+   "ov": [],
+   "hscroll": false
+  }
+ },
+ {
+  "n": "layout workers 1280: no clipped/ellipsised text, no button overlap, no h-scroll",
+  "p": true,
+  "info": {
+   "clip": [],
+   "ov": [],
+   "hscroll": false
+  }
+ },
+ {
+  "n": "page errors 1280",
+  "p": true,
+  "info": []
+ },
+ {
+  "n": "C-AC26 L25 strip 1280: price/income effect present, no bare +5/tap",
+  "p": true,
+  "info": "★ Collection L25 · +3% income"
+ },
+ {
+  "n": "C-AC26b L25 strip 1280: % gain not cut, track not shortened/ellipsised",
+  "p": true,
+  "info": {
+   "t": "★ Collection L25 · +3% income",
+   "starShown": true,
+   "track": "Collection L25",
+   "trackClipped": false,
+   "gain": " · +3% income",
+   "gainClipped": false,
+   "labelW": 422.515625,
+   "labelCW": 423,
+   "natural": 217.546875
+  }
+ },
+ {
+  "n": "L25 strip 1280: ★ kept",
+  "p": true,
+  "info": {
+   "t": "★ Collection L25 · +3% income",
+   "starShown": true,
+   "track": "Collection L25",
+   "trackClipped": false,
+   "gain": " · +3% income",
+   "gainClipped": false,
+   "labelW": 422.515625,
+   "labelCW": 423,
+   "natural": 217.546875
+  }
+ },
+ {
+  "n": "AC-R9 N=2 1280: \"Refill 2 tired workers\" present",
+  "p": true,
+  "info": [
+   "Refill 2 tired workers",
+   "Refill 2 tired workers"
+  ]
+ },
+ {
+  "n": "AC-R9 N=1 1280: \"Refill 1 tired worker\", never \"1 tired workers\"",
+  "p": true,
+  "info": [
+   "Refill 1 tired worker",
+   "Refill 1 tired worker"
+  ]
+ },
+ {
+  "n": "AC-R8 1280: rested worker (>40%) shows \"Rested, refill below 40%\"",
+  "p": true,
+  "info": [
+   "Rested, refill below 40%",
+   "Rested, refill below 40%"
+  ]
+ },
+ {
+  "n": "T6 1280: HUD rate text and aria carry the same number",
+  "p": true,
+  "info": [
+   {
+    "t": "+$39.71/s",
+    "a": "Net income plus $39.71 per second"
+   },
+   {
+    "t": "+$39.71/s",
+    "a": "Net income plus $39.71 per second"
+   },
+   {
+    "t": "+$39.71/s",
+    "a": "Net income plus $39.71 per second"
+   },
+   {
+    "t": "+$39.71/s",
+    "a": "Net income plus $39.71 per second"
+   },
+   {
+    "t": "+$39.71/s",
+    "a": "Net income plus $39.71 per second"
+   },
+   {
+    "t": "+$39.71/s",
+    "a": "Net income plus $39.71 per second"
+   }
+  ]
+ },
+ {
+  "n": "Claude-G1 1280: coop full + no sales — top bar is not positive while money falls",
+  "p": false,
+  "info": {
+   "t0": {
+    "coins": 1473,
+    "coop": 700,
+    "fullShown": true,
+    "collect": "Collect +35",
+    "cls": "btn xl",
+    "dis": "false",
+    "op": "1",
+    "bg": "rgb(255, 201, 60)",
+    "rate": "+$39.71/s",
+    "goal": "★ Collection L7 · +7% income~0:04›"
+   },
+   "t20": {
+    "coins": 1365,
+    "coop": 700,
+    "rate": "+$39.71/s",
+    "goal": "★ Collection L7 · +7% income~0:04›",
+    "hint": [
+     "+$39.71/s",
+     "Affordable in a moment"
+    ]
+   }
+  }
+ },
+ {
+  "n": "Claude-G1 1280: coop full — Collect does not look like a normal +N action / full state is explained",
+  "p": false,
+  "info": {
+   "t0": {
+    "coins": 1473,
+    "coop": 700,
+    "fullShown": true,
+    "collect": "Collect +35",
+    "cls": "btn xl",
+    "dis": "false",
+    "op": "1",
+    "bg": "rgb(255, 201, 60)",
+    "rate": "+$39.71/s",
+    "goal": "★ Collection L7 · +7% income~0:04›"
+   },
+   "t20": {
+    "coins": 1365,
+    "coop": 700,
+    "rate": "+$39.71/s",
+    "goal": "★ Collection L7 · +7% income~0:04›",
+    "hint": [
+     "+$39.71/s",
+     "Affordable in a moment"
+    ]
+   }
+  }
+ },
+ {
+  "n": "Claude-G1 1280: goal ETA not frozen while money falls",
+  "p": false,
+  "info": {
+   "t0": {
+    "coins": 1473,
+    "coop": 700,
+    "fullShown": true,
+    "collect": "Collect +35",
+    "cls": "btn xl",
+    "dis": "false",
+    "op": "1",
+    "bg": "rgb(255, 201, 60)",
+    "rate": "+$39.71/s",
+    "goal": "★ Collection L7 · +7% income~0:04›"
+   },
+   "t20": {
+    "coins": 1365,
+    "coop": 700,
+    "rate": "+$39.71/s",
+    "goal": "★ Collection L7 · +7% income~0:04›",
+    "hint": [
+     "+$39.71/s",
+     "Affordable in a moment"
+    ]
+   }
+  }
+ },
+ {
+  "n": "Claude-G3 1280: \"Workers get tired\" tip does not cover tabs",
+  "p": false,
+  "info": {
+   "r": [
+    943,
+    514,
+    276,
+    68
+   ],
+   "hits": [
+    {
+     "t": "Collection",
+     "ov": 2510.5
+    },
+    {
+     "t": "Farm",
+     "ov": 3819
+    },
+    {
+     "t": "Workers0",
+     "ov": 2510.5
+    }
+   ]
+  }
+ },
+ {
+  "n": "Claude-G6 1280: Farm card <= 4 text lines (info)",
+  "p": false,
+  "info": {
+   "h": 345,
+   "w": 366,
+   "lines": 13,
+   "t": "L6 | Farm level | Coop upgrade at L10 | Hens 35 → 40 | Coop capacity 350 → 400 | Egg price $2.08 → $2.16 | Customers every 3.68s → 3.49s | Customer demand 21–42 → 23–45 | +19% income | Pays back in ~3 min 43 s | Level 6 / 30 | $605.00 | Limited by collecting ›"
+  }
+ }
+]

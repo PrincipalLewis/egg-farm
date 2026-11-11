@@ -1,0 +1,46 @@
+{
+ "engine": "chromium",
+ "cases": {
+  "fresh-coreloop": {
+   "errors": [],
+   "modal": [
+    null
+   ],
+   "buildIdSurfaces": {
+    "meta": [
+     "m3-rc1-pre+246de09"
+    ],
+    "dataBuildId": "m3-rc1-pre+246de09",
+    "telemetrySessionStart": [
+     "m3-rc1-pre+246de09"
+    ],
+    "scanned": [
+     "m3-rc1-pre+246de09"
+    ]
+   },
+   "buildIds": [
+    "m3-rc1-pre+246de09"
+   ],
+   "buildIdSurfacesEnd": {
+    "meta": [
+     "m3-rc1-pre+246de09"
+    ],
+    "dataBuildId": "m3-rc1-pre+246de09",
+    "telemetrySessionStart": [
+     "m3-rc1-pre+246de09"
+    ],
+    "scanned": [
+     "m3-rc1-pre+246de09"
+    ]
+   }
+  }
+ },
+ "buildIdCheck": {
+  "ok": true,
+  "want": "m3-rc1-pre+246de09 [BUILD_PREFIX='m3-rc1-pre' from scripts/build-id.ts@246de09; no suffix allowed]",
+  "ids": [
+   "m3-rc1-pre+246de09"
+  ],
+  "reason": "ok"
+ }
+}

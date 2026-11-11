@@ -1,0 +1,4807 @@
+{
+ "sha7": "8694222",
+ "results": {
+  "fixture-validate": {
+   "got": {
+    "TRIG-empty.txt": "empty",
+    "TRIG-whitespace.txt": "empty",
+    "TRIG-parse-truncated.raw": "parse",
+    "TRIG-wrong_type-array.json": "wrong_type",
+    "TRIG-wrong_type-version-string.raw": "wrong_type",
+    "TRIG-wrong_type-savedAt-string.json": "wrong_type",
+    "TRIG-version-0.json": "version",
+    "TRIG-version-1.5.json": "version",
+    "TRIG-missing_state.json": "missing_state",
+    "TRIG-checksum.json": "checksum",
+    "TRIG-invalid_state-coins-neg.json": "invalid_state",
+    "MAIN-OQ1-abc.json": "invalid_state",
+    "BAK-invalid-neg1.json": "invalid_state",
+    "IDB-invalid-truncated.raw": "parse",
+    "BAK-L15-badsum.json": "checksum",
+    "MAIN-L17-badsum.json": "checksum",
+    "BAK-valid-F20-seq4-older.json": "ok",
+    "BAK-valid-F20-seq6.json": "ok",
+    "IDB-valid-F17-seq4-T-10m.json": "ok",
+    "IDB-valid-F19-tie-with-BAK-F20-seq4.json": "ok",
+    "MIG-v1-coins-float.json": "ok",
+    "MIG-v2-customers-nofilled.json": "ok",
+    "MIG-v3-no-celebratedTier.json": "ok"
+   },
+   "v6": {
+    "V6B-invalid-raw-abc.json": "invalid_state",
+    "V6B-invalid-raw-version7.json": "version",
+    "V6B-invalid-short-id.json": "undecodable",
+    "V6B-invalid-undecodable.txt": "undecodable",
+    "V6B-valid-unmarked-F12-T-3h.json": "ok",
+    "V6B-valid-unmarked-F12-savedAt-pre2020.json": "ok",
+    "V6B-valid-unmarked-F14-T-1d.json": "ok"
+   }
+  },
+  "CSR1-checksum-TRIG-checksum": {
+   "csr": [
+    "CSR-1",
+    "CSR-6",
+    "CSR-15"
+   ],
+   "pass": true,
+   "checks": 8,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-control-valid-C1-farmLevel-999-oversized-valid": {
+   "csr": [
+    "CSR-1",
+    "control"
+   ],
+   "pass": true,
+   "checks": 2,
+   "fails": [],
+   "observed": {
+    "case": null,
+    "outcome": null,
+    "newGame": false,
+    "F": 999,
+    "save_corrupt": 0,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-control-valid-C2-farmLevel-12.9-float-valid": {
+   "csr": [
+    "CSR-1",
+    "control"
+   ],
+   "pass": true,
+   "checks": 2,
+   "fails": [],
+   "observed": {
+    "case": null,
+    "outcome": null,
+    "newGame": false,
+    "F": 12,
+    "save_corrupt": 0,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-control-valid-C3-farmLevel-str12-valid": {
+   "csr": [
+    "CSR-1",
+    "control"
+   ],
+   "pass": true,
+   "checks": 2,
+   "fails": [],
+   "observed": {
+    "case": null,
+    "outcome": null,
+    "newGame": false,
+    "F": 12,
+    "save_corrupt": 0,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-control-valid-N5-workers-array": {
+   "csr": [
+    "CSR-1",
+    "control"
+   ],
+   "pass": true,
+   "checks": 2,
+   "fails": [],
+   "observed": {
+    "case": null,
+    "outcome": null,
+    "newGame": false,
+    "F": 18,
+    "save_corrupt": 0,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-empty-TRIG-empty": {
+   "csr": [
+    "CSR-1",
+    "CSR-6",
+    "CSR-15"
+   ],
+   "pass": true,
+   "checks": 8,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-empty-TRIG-whitespace": {
+   "csr": [
+    "CSR-1",
+    "CSR-6",
+    "CSR-15"
+   ],
+   "pass": true,
+   "checks": 8,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-invalid_state-MAIN-OQ1-abc": {
+   "csr": [
+    "CSR-1",
+    "CSR-6",
+    "CSR-15"
+   ],
+   "pass": true,
+   "checks": 8,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-invalid_state-TRIG-invalid_state-coins-neg": {
+   "csr": [
+    "CSR-1",
+    "CSR-6",
+    "CSR-15"
+   ],
+   "pass": true,
+   "checks": 8,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-missing-main-invalid-bak": {
+   "csr": [
+    "CSR-1",
+    "CSR-6"
+   ],
+   "pass": true,
+   "checks": 7,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-missing-main-no-sources": {
+   "csr": [
+    "CSR-1"
+   ],
+   "pass": true,
+   "checks": 3,
+   "fails": [],
+   "observed": {
+    "case": null,
+    "outcome": null,
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 0,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-missing_state-TRIG-missing_state": {
+   "csr": [
+    "CSR-1",
+    "CSR-6",
+    "CSR-15"
+   ],
+   "pass": true,
+   "checks": 8,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-newer-main-refused": {
+   "csr": [
+    "CSR-1"
+   ],
+   "pass": true,
+   "checks": 3,
+   "fails": [],
+   "observed": {
+    "case": null,
+    "outcome": null,
+    "save_corrupt": 0,
+    "lsCorrupt": 0,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR1-parse-TRIG-parse-truncated": {
+   "csr": [
+    "CSR-1",
+    "CSR-6",
+    "CSR-15"
+   ],
+   "pass": true,
+   "checks": 8,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-sanitize-L1-farmLevel-null": {
+   "csr": [
+    "CSR-1",
+    "CSR-15"
+   ],
+   "pass": true,
+   "checks": 7,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-sanitize-L2-farmLevel-neg1": {
+   "csr": [
+    "CSR-1",
+    "CSR-15"
+   ],
+   "pass": true,
+   "checks": 7,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-sanitize-L3-farmLevel-inf-1e309": {
+   "csr": [
+    "CSR-1",
+    "CSR-15"
+   ],
+   "pass": true,
+   "checks": 7,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-sanitize-L4-hensLevel-str2.5": {
+   "csr": [
+    "CSR-1",
+    "CSR-15"
+   ],
+   "pass": true,
+   "checks": 7,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-sanitize-L5-eggValueLevel-bool": {
+   "csr": [
+    "CSR-1",
+    "CSR-15"
+   ],
+   "pass": true,
+   "checks": 7,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-sanitize-L6-collectionLevel-obj": {
+   "csr": [
+    "CSR-1",
+    "CSR-15"
+   ],
+   "pass": true,
+   "checks": 7,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-v6b-version7-is-invalid-not-newer": {
+   "csr": [
+    "CSR-1",
+    "CSR-4"
+   ],
+   "pass": true,
+   "checks": 7,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-version-TRIG-version-0": {
+   "csr": [
+    "CSR-1",
+    "CSR-6",
+    "CSR-15"
+   ],
+   "pass": true,
+   "checks": 8,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-version-TRIG-version-1.5": {
+   "csr": [
+    "CSR-1",
+    "CSR-6",
+    "CSR-15"
+   ],
+   "pass": true,
+   "checks": 8,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-wrong_type-TRIG-wrong_type-array": {
+   "csr": [
+    "CSR-1",
+    "CSR-6",
+    "CSR-15"
+   ],
+   "pass": true,
+   "checks": 8,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-wrong_type-TRIG-wrong_type-savedAt-string": {
+   "csr": [
+    "CSR-1",
+    "CSR-6",
+    "CSR-15"
+   ],
+   "pass": true,
+   "checks": 8,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR1-wrong_type-TRIG-wrong_type-version-string": {
+   "csr": [
+    "CSR-1",
+    "CSR-6",
+    "CSR-15"
+   ],
+   "pass": true,
+   "checks": 8,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR11-all-sources-invalid": {
+   "csr": [
+    "CSR-11",
+    "CSR-7",
+    "CSR-10"
+   ],
+   "pass": true,
+   "checks": 10,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR12-idb-absent-skipped": {
+   "csr": [
+    "CSR-12"
+   ],
+   "pass": true,
+   "checks": 5,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 14,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": null,
+    "idbMainOverwritten": null
+   }
+  },
+  "CSR12-ls-throws-securityerror": {
+   "csr": [
+    "CSR-12"
+   ],
+   "pass": false,
+   "checks": 1,
+   "fails": [
+    "boot without exception (got \"SecurityError: SecurityError\")"
+   ],
+   "observed": {
+    "case": null,
+    "outcome": null,
+    "save_corrupt": 0,
+    "lsCorrupt": 0,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR13-defer": {
+   "csr": [
+    "CSR-13",
+    "CSR-5"
+   ],
+   "pass": true,
+   "checks": 7,
+   "fails": [],
+   "observed": {
+    "case": "D",
+    "outcome": "deferred",
+    "newGame": false,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR13a-idb-unknown-bak-valid": {
+   "csr": [
+    "CSR-13",
+    "CSR-13a"
+   ],
+   "pass": true,
+   "checks": 7,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR13b-defer-quota": {
+   "csr": [
+    "CSR-13b"
+   ],
+   "pass": true,
+   "checks": 4,
+   "fails": [],
+   "observed": {
+    "case": "D",
+    "outcome": "deferred",
+    "newGame": false,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 0,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR14-preserve-quota-case-Q": {
+   "csr": [
+    "CSR-14"
+   ],
+   "pass": true,
+   "checks": 2,
+   "fails": [],
+   "observed": {
+    "case": "Q",
+    "outcome": "storage",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR14-restore-write-fails-continue": {
+   "csr": [
+    "CSR-14"
+   ],
+   "pass": true,
+   "checks": 1,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR14-restored-storageBlocked-M5": {
+   "csr": [
+    "CSR-14",
+    "CSR-9"
+   ],
+   "pass": true,
+   "checks": 1,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR16-fresh-no-rotation-until-progress": {
+   "csr": [
+    "CSR-16"
+   ],
+   "pass": true,
+   "checks": 0,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR16-restore-rotates": {
+   "csr": [
+    "CSR-16"
+   ],
+   "pass": true,
+   "checks": 0,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR3-B1-corrupt-ls-valid-idb": {
+   "csr": [
+    "CSR-3",
+    "CSR-7",
+    "CSR-10"
+   ],
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 17,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR3-idb-identical-to-corrupt-main": {
+   "csr": [
+    "CSR-3",
+    "CSR-7"
+   ],
+   "pass": true,
+   "checks": 8,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR4-v6b-restore-pending-migration": {
+   "csr": [
+    "CSR-4",
+    "CSR-5",
+    "CSR-9a",
+    "CSR-9c"
+   ],
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 14,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR7-cap3-evicts-oldest": {
+   "csr": [
+    "CSR-7"
+   ],
+   "pass": true,
+   "checks": 4,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 3,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR7-v6b-never-copied": {
+   "csr": [
+    "CSR-7",
+    "CSR-5",
+    "CSR-11"
+   ],
+   "pass": true,
+   "checks": 6,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR9a-1-level-17-to-12": {
+   "csr": [
+    "CSR-9a"
+   ],
+   "pass": true,
+   "checks": 6,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 12,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR9a-2-prev-from-bak-15": {
+   "csr": [
+    "CSR-9a"
+   ],
+   "pass": true,
+   "checks": 6,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 12,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR9a-3-age-3h": {
+   "csr": [
+    "CSR-9a",
+    "CSR-9b"
+   ],
+   "pass": true,
+   "checks": 6,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 12,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR9a-3-fallback-savedAt-invalid": {
+   "csr": [
+    "CSR-9a"
+   ],
+   "pass": true,
+   "checks": 5,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 12,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR9a-4-L31-above-max-accepted": {
+   "csr": [
+    "CSR-9a"
+   ],
+   "pass": true,
+   "checks": 3,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 12,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR9a-4-MAIN-L12.5-badsum-falls-to-bak15": {
+   "csr": [
+    "CSR-9a"
+   ],
+   "pass": true,
+   "checks": 3,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 12,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR9a-4-MAIN-L12.5-badsum-no-bak-unset": {
+   "csr": [
+    "CSR-9a"
+   ],
+   "pass": true,
+   "checks": 3,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 12,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR9a-4-MAIN-Lneg1-badsum-falls-to-bak15": {
+   "csr": [
+    "CSR-9a"
+   ],
+   "pass": true,
+   "checks": 3,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 12,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR9a-4-MAIN-Lneg1-badsum-no-bak-unset": {
+   "csr": [
+    "CSR-9a"
+   ],
+   "pass": true,
+   "checks": 3,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 12,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR9a-4-MAIN-Lnull-badsum-falls-to-bak15": {
+   "csr": [
+    "CSR-9a"
+   ],
+   "pass": true,
+   "checks": 3,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 12,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR9a-4-MAIN-Lnull-badsum-no-bak-unset": {
+   "csr": [
+    "CSR-9a"
+   ],
+   "pass": true,
+   "checks": 3,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 12,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR9a-4-MAIN-Lstr17-badsum-falls-to-bak15": {
+   "csr": [
+    "CSR-9a"
+   ],
+   "pass": true,
+   "checks": 3,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 12,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR9a-4-MAIN-Lstr17-badsum-no-bak-unset": {
+   "csr": [
+    "CSR-9a"
+   ],
+   "pass": true,
+   "checks": 3,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 12,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR9a-level-equal-falls-to-age": {
+   "csr": [
+    "CSR-9a"
+   ],
+   "pass": true,
+   "checks": 3,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 12,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "IDB1-1-cap3-parsed-order": {
+   "csr": [
+    "IDB1-1"
+   ],
+   "pass": true,
+   "checks": 1,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "corrupt.1792378700000-10",
+     "corrupt.1792378750000",
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "IDB1-6-ls-trigger-store-ls": {
+   "csr": [
+    "IDB1-6",
+    "CSR-10"
+   ],
+   "pass": true,
+   "checks": 1,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "IDB1-7-valid-idb-ls-missing-save_restore": {
+   "csr": [
+    "IDB1-7",
+    "CSR-10"
+   ],
+   "pass": true,
+   "checks": 4,
+   "fails": [],
+   "observed": {
+    "case": null,
+    "outcome": null,
+    "newGame": false,
+    "F": 17,
+    "save_corrupt": 0,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "IDB1-abc": {
+   "csr": [
+    "CSR-AC-IDB1",
+    "IDB1-1",
+    "IDB1-2",
+    "IDB1-5",
+    "IDB1-6",
+    "IDB1-8",
+    "KF-IDB-ONLY"
+   ],
+   "pass": true,
+   "checks": 10,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "IDB1-nonstring-object": {
+   "csr": [
+    "CSR-AC-IDB1",
+    "IDB1-1",
+    "IDB1-2",
+    "IDB1-5",
+    "IDB1-6",
+    "IDB1-8",
+    "KF-IDB-ONLY"
+   ],
+   "pass": true,
+   "checks": 10,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "IDB1-truncated": {
+   "csr": [
+    "CSR-AC-IDB1",
+    "IDB1-1",
+    "IDB1-2",
+    "IDB1-5",
+    "IDB1-6",
+    "IDB1-8",
+    "KF-IDB-ONLY"
+   ],
+   "pass": true,
+   "checks": 10,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "IDB1-wrongtype-version-string": {
+   "csr": [
+    "CSR-AC-IDB1",
+    "IDB1-1",
+    "IDB1-2",
+    "IDB1-5",
+    "IDB1-6",
+    "IDB1-8",
+    "KF-IDB-ONLY"
+   ],
+   "pass": true,
+   "checks": 10,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "RUL-a-fail-DataCloneError": {
+   "csr": [
+    "D-HOP-2026-10-22-01(a)",
+    "IDB1-3"
+   ],
+   "pass": true,
+   "checks": 7,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": false
+   }
+  },
+  "RUL-a-fail-QuotaExceededError": {
+   "csr": [
+    "D-HOP-2026-10-22-01(a)",
+    "IDB1-3"
+   ],
+   "pass": true,
+   "checks": 7,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": false
+   }
+  },
+  "RUL-a-ok-IDB1-abc": {
+   "csr": [
+    "D-HOP-2026-10-22-01(a)",
+    "IDB1-1",
+    "IDB1-5"
+   ],
+   "pass": true,
+   "checks": 2,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "RUL-a-ok-IDB1-nonstring-object": {
+   "csr": [
+    "D-HOP-2026-10-22-01(a)",
+    "IDB1-1",
+    "IDB1-5"
+   ],
+   "pass": true,
+   "checks": 2,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "RUL-a-ok-IDB1-truncated": {
+   "csr": [
+    "D-HOP-2026-10-22-01(a)",
+    "IDB1-1",
+    "IDB1-5"
+   ],
+   "pass": true,
+   "checks": 2,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "RUL-a-ok-IDB1-wrongtype-version-string": {
+   "csr": [
+    "D-HOP-2026-10-22-01(a)",
+    "IDB1-1",
+    "IDB1-5"
+   ],
+   "pass": true,
+   "checks": 2,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "RUL-b-cap3": {
+   "csr": [
+    "D-HOP-2026-10-22-01(b)",
+    "IDB1-1"
+   ],
+   "pass": true,
+   "checks": 4,
+   "fails": [],
+   "observed": {
+    "case": null,
+    "outcome": null,
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 0,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "corrupt.1792378700000-10",
+     "corrupt.1792378750000",
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "RUL-b-dedupe-two-boots": {
+   "csr": [
+    "D-HOP-2026-10-22-01(b)",
+    "IDB1-4"
+   ],
+   "pass": true,
+   "checks": 3,
+   "fails": [],
+   "observed": {
+    "case": null,
+    "outcome": null,
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 0,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "RUL-b-valid-ls-invalid-idb": {
+   "csr": [
+    "D-HOP-2026-10-22-01(b)"
+   ],
+   "pass": true,
+   "checks": 6,
+   "fails": [],
+   "observed": {
+    "case": null,
+    "outcome": null,
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 0,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "RUL-c-idb-unknown-nothing-else": {
+   "csr": [
+    "D-HOP-2026-10-22-01(c)",
+    "CSR-1",
+    "CSR-13"
+   ],
+   "pass": true,
+   "checks": 5,
+   "fails": [],
+   "observed": {
+    "case": null,
+    "outcome": null,
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 0,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": false
+   }
+  },
+  "RUL-d-bak-newer": {
+   "csr": [
+    "D-HOP-2026-10-22-04",
+    "D-HOP-2026-10-22-03(4)",
+    "CSR-2"
+   ],
+   "pass": true,
+   "checks": 7,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": false
+   }
+  },
+  "RUL-d-bak-only": {
+   "csr": [
+    "D-HOP-2026-10-22-04",
+    "D-HOP-2026-10-22-03(4)",
+    "CSR-2"
+   ],
+   "pass": true,
+   "checks": 7,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "RUL-d-idb-newer": {
+   "csr": [
+    "D-HOP-2026-10-22-04",
+    "D-HOP-2026-10-22-03(4)",
+    "CSR-2"
+   ],
+   "pass": true,
+   "checks": 6,
+   "fails": [],
+   "observed": {
+    "case": null,
+    "outcome": null,
+    "newGame": false,
+    "F": 17,
+    "save_corrupt": 0,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "RUL-d-tie": {
+   "csr": [
+    "D-HOP-2026-10-22-04",
+    "D-HOP-2026-10-22-03(4)",
+    "CSR-2"
+   ],
+   "pass": true,
+   "checks": 7,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 0,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR2-bak_valid-idb_valid-v6b_valid-idb-newer": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 17,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_valid-idb_valid-v6b_valid-bak-newer": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_valid-idb_valid-v6b_valid-tie": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_valid-idb_valid-v6b_invalid-idb-newer": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 17,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_valid-idb_valid-v6b_invalid-bak-newer": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_valid-idb_valid-v6b_invalid-tie": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_valid-idb_valid-v6b_absent-idb-newer": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 17,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_valid-idb_valid-v6b_absent-bak-newer": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_valid-idb_valid-v6b_absent-tie": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_valid-idb_invalid-v6b_valid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_valid-idb_invalid-v6b_invalid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_valid-idb_invalid-v6b_absent": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_valid-idb_missing-v6b_valid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_valid-idb_missing-v6b_invalid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_valid-idb_missing-v6b_absent": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_valid-idb_unavailable-v6b_valid": {
+   "pass": true,
+   "checks": 10,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR2-bak_valid-idb_unavailable-v6b_invalid": {
+   "pass": true,
+   "checks": 10,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR2-bak_valid-idb_unavailable-v6b_absent": {
+   "pass": true,
+   "checks": 10,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR2-bak_valid-idb_absent-v6b_valid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": null,
+    "idbMainOverwritten": null
+   }
+  },
+  "CSR2-bak_valid-idb_absent-v6b_invalid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": null,
+    "idbMainOverwritten": null
+   }
+  },
+  "CSR2-bak_valid-idb_absent-v6b_absent": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 20,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": null,
+    "idbMainOverwritten": null
+   }
+  },
+  "CSR2-bak_invalid-idb_valid-v6b_valid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 17,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_invalid-idb_valid-v6b_invalid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 17,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_invalid-idb_valid-v6b_absent": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 17,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_invalid-idb_invalid-v6b_valid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 14,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [
+     "corrupt.1792378840000"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_invalid-idb_invalid-v6b_invalid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_invalid-idb_invalid-v6b_absent": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_invalid-idb_missing-v6b_valid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 14,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR2-bak_invalid-idb_missing-v6b_invalid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_invalid-idb_missing-v6b_absent": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_invalid-idb_unavailable-v6b_valid": {
+   "pass": true,
+   "checks": 11,
+   "fails": [],
+   "observed": {
+    "case": "D",
+    "outcome": "deferred",
+    "newGame": false,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR2-bak_invalid-idb_unavailable-v6b_invalid": {
+   "pass": true,
+   "checks": 11,
+   "fails": [],
+   "observed": {
+    "case": "D",
+    "outcome": "deferred",
+    "newGame": false,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR2-bak_invalid-idb_unavailable-v6b_absent": {
+   "pass": true,
+   "checks": 11,
+   "fails": [],
+   "observed": {
+    "case": "D",
+    "outcome": "deferred",
+    "newGame": false,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR2-bak_invalid-idb_absent-v6b_valid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 14,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": null,
+    "idbMainOverwritten": null
+   }
+  },
+  "CSR2-bak_invalid-idb_absent-v6b_invalid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": null,
+    "idbMainOverwritten": null
+   }
+  },
+  "CSR2-bak_invalid-idb_absent-v6b_absent": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 2,
+    "idbKeys": null,
+    "idbMainOverwritten": null
+   }
+  },
+  "CSR2-bak_absent-idb_valid-v6b_valid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 17,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_absent-idb_valid-v6b_invalid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 17,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_absent-idb_valid-v6b_absent": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 17,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_absent-idb_invalid-v6b_valid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 14,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "corrupt.1792378840000"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_absent-idb_invalid-v6b_invalid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_absent-idb_invalid-v6b_absent": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "corrupt.1792378840000",
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_absent-idb_missing-v6b_valid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 14,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR2-bak_absent-idb_missing-v6b_invalid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_absent-idb_missing-v6b_absent": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": true
+   }
+  },
+  "CSR2-bak_absent-idb_unavailable-v6b_valid": {
+   "pass": true,
+   "checks": 11,
+   "fails": [],
+   "observed": {
+    "case": "D",
+    "outcome": "deferred",
+    "newGame": false,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR2-bak_absent-idb_unavailable-v6b_invalid": {
+   "pass": true,
+   "checks": 11,
+   "fails": [],
+   "observed": {
+    "case": "D",
+    "outcome": "deferred",
+    "newGame": false,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR2-bak_absent-idb_unavailable-v6b_absent": {
+   "pass": true,
+   "checks": 11,
+   "fails": [],
+   "observed": {
+    "case": "D",
+    "outcome": "deferred",
+    "newGame": false,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": [
+     "main"
+    ],
+    "idbMainOverwritten": false
+   }
+  },
+  "CSR2-bak_absent-idb_absent-v6b_valid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "R",
+    "outcome": "restored",
+    "newGame": false,
+    "F": 14,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": null,
+    "idbMainOverwritten": null
+   }
+  },
+  "CSR2-bak_absent-idb_absent-v6b_invalid": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": null,
+    "idbMainOverwritten": null
+   }
+  },
+  "CSR2-bak_absent-idb_absent-v6b_absent": {
+   "pass": true,
+   "checks": 9,
+   "fails": [],
+   "observed": {
+    "case": "F",
+    "outcome": "fresh",
+    "newGame": true,
+    "F": 0,
+    "save_corrupt": 1,
+    "lsCorrupt": 1,
+    "idbKeys": null,
+    "idbMainOverwritten": null
+   }
+  },
+  "CSR10-store-ls-bak": {
+   "pass": true,
+   "got": "ls",
+   "payload": {
+    "notice": "M1",
+    "source": "bak",
+    "store": "ls"
+   }
+  },
+  "CSR10-store-ls-none": {
+   "pass": true,
+   "got": "ls",
+   "payload": {
+    "notice": "M3",
+    "source": "none",
+    "store": "ls"
+   }
+  },
+  "CSR10-store-ls-v6_backup": {
+   "pass": true,
+   "got": "ls",
+   "payload": {
+    "notice": "M2",
+    "source": "v6_backup",
+    "variant": "age",
+    "store": "ls"
+   }
+  },
+  "CSR10-store-idb-bak": {
+   "pass": true,
+   "got": "idb",
+   "payload": {
+    "notice": "M1",
+    "source": "bak",
+    "store": "idb"
+   }
+  },
+  "CSR10-store-idb-none": {
+   "pass": true,
+   "got": "idb",
+   "payload": {
+    "notice": "M3",
+    "source": "none",
+    "store": "idb"
+   }
+  },
+  "CSR10-store-idb-v6_backup": {
+   "pass": true,
+   "got": "idb",
+   "payload": {
+    "notice": "M2",
+    "source": "v6_backup",
+    "variant": "age",
+    "store": "idb"
+   }
+  },
+  "CSR10-store-unset-bak": {
+   "pass": true,
+   "got": null,
+   "payload": {
+    "notice": "M1",
+    "source": "bak",
+    "store": null
+   }
+  },
+  "CSR10-store-unset-none": {
+   "pass": true,
+   "got": null,
+   "payload": {
+    "notice": "M3",
+    "source": "none",
+    "store": null
+   }
+  },
+  "CSR10-store-unset-v6_backup": {
+   "pass": true,
+   "got": null,
+   "payload": {
+    "notice": "M2",
+    "source": "v6_backup",
+    "variant": "age",
+    "store": null
+   }
+  },
+  "CSR9-copy-M1": {
+   "pass": true,
+   "got": {
+    "id": "M1",
+    "title": "Your farm is back!",
+    "body": "We fixed a hiccup and restored your latest save.",
+    "button": "Continue",
+    "link": null,
+    "aria": "Export save file, downloads a copy of your old save file"
+   }
+  },
+  "CSR9-copy-M3": {
+   "pass": true,
+   "got": {
+    "id": "M3",
+    "title": "A fresh start",
+    "body": "We couldn't recover your save, so we started a new farm for you.",
+    "button": "Start farming",
+    "link": "Export old save file",
+    "aria": "Export old save file, downloads a copy of your old save file"
+   }
+  },
+  "CSR9-copy-M4": {
+   "pass": true,
+   "got": {
+    "id": "M4",
+    "title": "Couldn't load your farm",
+    "body": "Your save is safe. Let's try that again.",
+    "button": "Try again",
+    "link": "Export save file",
+    "aria": "Export save file, downloads a copy of your old save file"
+   }
+  },
+  "CSR9-copy-M5": {
+   "pass": true,
+   "got": {
+    "id": "M5",
+    "title": "Your farm is back!",
+    "body": "Saving is paused on this device right now, so progress may not be kept.",
+    "button": "Continue",
+    "link": "Export save file",
+    "aria": "Export save file, downloads a copy of your current farm"
+   }
+  },
+  "csr9b-exported": {
+   "pass": true,
+   "names": [
+    "oldSaveForSession",
+    "FAIL_MSG",
+    "OK_MSG",
+    "exportOldSave",
+    "RECOVERY_CLOSED",
+    "EXPORT_ARIA",
+    "CANTSAVE_ARIA",
+    "recoveryCopy",
+    "CSR_COPY",
+    "formatAge",
+    "formatMinutes",
+    "formatDays",
+    "recoveryNotice",
+    "noticePayload",
+    "csrCopyActive",
+    "csrCopy",
+    "exportBytes",
+    "exportName",
+    "showRecoveryDialog",
+    "TABGUARD_STRINGS",
+    "showTabGuardDialog",
+    "NEWER_SAVE_STRINGS",
+    "showNewerSaveDialog"
+   ]
+  },
+  "csr9b-299000": {
+   "pass": true,
+   "got": "a few minutes"
+  },
+  "csr9b-300000": {
+   "pass": true,
+   "got": "5 minutes"
+  },
+  "csr9b-3599000": {
+   "pass": true,
+   "got": "59 minutes"
+  },
+  "csr9b-3600000": {
+   "pass": true,
+   "got": "about 1 hour"
+  },
+  "csr9b-7199000": {
+   "pass": true,
+   "got": "about 1 hour"
+  },
+  "csr9b-172740000": {
+   "pass": true,
+   "got": "about 47 hours"
+  },
+  "csr9b-172800000": {
+   "pass": true,
+   "got": "2 days"
+  },
+  "csr9b-86400000": {
+   "pass": true,
+   "got": "about 24 hours"
+  },
+  "csr9b--5000": {
+   "pass": true,
+   "got": "a few minutes"
+  },
+  "CSR15-property": {
+   "pass": true,
+   "invalid": 130,
+   "silent": 0,
+   "sample": []
+  },
+  "KF-IDB-ONLY": {
+   "reproduces": false,
+   "silent": false,
+   "overwritten": true,
+   "idbKeys": [
+    "corrupt.1792378840000",
+    "main"
+   ]
+  },
+  "RESET_AT-RS-pre": {
+   "pass": true,
+   "surfaced": [
+    "corrupt.1792371640000"
+   ],
+   "keys": [
+    "corrupt.1792371640000"
+   ],
+   "idbMain": false,
+   "lsMain": false,
+   "bak": false,
+   "lsResetAt": null,
+   "ls": 1,
+   "oneTx": true,
+   "log": [
+    "tx2:delete:main",
+    "tx1:complete",
+    "tx2:put:reset.surfaced",
+    "tx2:complete"
+   ]
+  },
+  "RESET_AT-RS-AC1-pre-reset-ls+idb": {
+   "pass": true,
+   "surfacedAtReset": [
+    "corrupt.1792371640000"
+   ],
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RS-AC1-pre-reset-ls+idb-tab-dies-before-1st-save": {
+   "pass": true,
+   "surfacedAtReset": [
+    "corrupt.1792371640000"
+   ],
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RS-AC1-pre-reset-idb": {
+   "pass": true,
+   "surfacedAtReset": [
+    "corrupt.1792371640000"
+   ],
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RS-AC1-pre-reset-idb-tab-dies-before-1st-save": {
+   "pass": true,
+   "surfacedAtReset": [
+    "corrupt.1792371640000"
+   ],
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RS-AC1-pre-reset-ls": {
+   "pass": true,
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": null,
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": null,
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": null,
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RS-AC1-pre-reset-ls-tab-dies-before-1st-save": {
+   "pass": true,
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": null,
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": null,
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": null,
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RS-AC1-pre-reset-idb-cap3": {
+   "pass": true,
+   "surfacedAtReset": [
+    "corrupt.1792364440000",
+    "corrupt.1792368040000",
+    "corrupt.1792371640000"
+   ],
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792364440000",
+      "corrupt.1792368040000",
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792364440000",
+      "corrupt.1792368040000",
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792364440000",
+      "corrupt.1792368040000",
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RS-AC1-pre-reset-idb-cap3-tab-dies-before-1st-save": {
+   "pass": true,
+   "surfacedAtReset": [
+    "corrupt.1792364440000",
+    "corrupt.1792368040000",
+    "corrupt.1792371640000"
+   ],
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792364440000",
+      "corrupt.1792368040000",
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792364440000",
+      "corrupt.1792368040000",
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792364440000",
+      "corrupt.1792368040000",
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RS-AC2-post-reset-main-corrupt-bak-valid-M1": {
+   "pass": true,
+   "obs": {
+    "case": "R",
+    "source": "bak",
+    "store": "ls",
+    "save_corrupt": 1,
+    "notice": "M1",
+    "newGame": false,
+    "F": 20,
+    "coins": 1000000,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792371640000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "boot2": {
+    "case": null,
+    "source": null,
+    "store": "ls",
+    "save_corrupt": 1,
+    "notice": null,
+    "newGame": false,
+    "F": 20,
+    "coins": 1000000,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792371640000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "fails": [],
+   "kept": {
+    "ls": true,
+    "idb": true
+   }
+  },
+  "RESET_AT-RS-AC2-post-reset-main-corrupt-bak-invalid-idb-valid-M1": {
+   "pass": true,
+   "obs": {
+    "case": "R",
+    "source": "idb",
+    "store": "ls",
+    "save_corrupt": 1,
+    "notice": "M1",
+    "newGame": false,
+    "F": 17,
+    "coins": 5000000,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792371640000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "boot2": {
+    "case": null,
+    "source": null,
+    "store": "ls",
+    "save_corrupt": 1,
+    "notice": null,
+    "newGame": false,
+    "F": 17,
+    "coins": 5000000,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792371640000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "fails": [],
+   "kept": {
+    "ls": true,
+    "idb": true
+   }
+  },
+  "RESET_AT-RS-AC2-post-reset-main-corrupt-nothing-valid-M3": {
+   "pass": true,
+   "obs": {
+    "case": "F",
+    "source": "none",
+    "store": "ls",
+    "save_corrupt": 1,
+    "notice": "M3",
+    "newGame": true,
+    "F": 0,
+    "coins": 0,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792371640000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "boot2": {
+    "case": null,
+    "source": null,
+    "store": "ls",
+    "save_corrupt": 1,
+    "notice": null,
+    "newGame": false,
+    "F": 0,
+    "coins": 0,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792371640000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "fails": [],
+   "kept": {
+    "ls": true,
+    "idb": true
+   }
+  },
+  "RESET_AT-RS-AC2-post-reset-idb-main-corrupt-IDB1-M3": {
+   "pass": true,
+   "obs": {
+    "case": "F",
+    "source": "none",
+    "store": "idb",
+    "save_corrupt": 1,
+    "notice": "M3",
+    "newGame": true,
+    "F": 0,
+    "coins": 0,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792371640000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "boot2": {
+    "case": null,
+    "source": null,
+    "store": "idb",
+    "save_corrupt": 1,
+    "notice": null,
+    "newGame": false,
+    "F": 0,
+    "coins": 0,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792371640000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "fails": [],
+   "kept": {
+    "ls": true,
+    "idb": true
+   }
+  },
+  "RESET_AT-RS-AC2-post-reset-idb-main-same-bytes-as-surfaced-copy-M3": {
+   "pass": true,
+   "obs": {
+    "case": "F",
+    "source": "none",
+    "store": "idb",
+    "save_corrupt": 1,
+    "notice": "M3",
+    "newGame": true,
+    "F": 0,
+    "coins": 0,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792371640000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "boot2": {
+    "case": null,
+    "source": null,
+    "store": "idb",
+    "save_corrupt": 1,
+    "notice": null,
+    "newGame": false,
+    "F": 0,
+    "coins": 0,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792371640000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "fails": [],
+   "kept": {
+    "ls": true,
+    "idb": true
+   }
+  },
+  "RESET_AT-RS-AC2-post-reset-idb-orphan-copy-8b-M3": {
+   "pass": true,
+   "obs": {
+    "case": "F",
+    "source": "none",
+    "store": "idb",
+    "save_corrupt": 1,
+    "notice": "M3",
+    "newGame": true,
+    "F": 0,
+    "coins": 0,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792371640000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "boot2": {
+    "case": null,
+    "source": null,
+    "store": "idb",
+    "save_corrupt": 1,
+    "notice": null,
+    "newGame": false,
+    "F": 0,
+    "coins": 0,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792371640000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "fails": [],
+   "kept": {
+    "ls": true,
+    "idb": true
+   }
+  },
+  "RESET_AT-RS-AC2-post-reset-idb-orphan-stamped-1d-BEFORE-the-surfaced-copy-M3": {
+   "pass": true,
+   "obs": {
+    "case": "F",
+    "source": "none",
+    "store": "idb",
+    "save_corrupt": 1,
+    "notice": "M3",
+    "newGame": true,
+    "F": 0,
+    "coins": 0,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792371640000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "boot2": {
+    "case": null,
+    "source": null,
+    "store": "idb",
+    "save_corrupt": 1,
+    "notice": null,
+    "newGame": false,
+    "F": 0,
+    "coins": 0,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792371640000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "fails": [],
+   "kept": {
+    "ls": true,
+    "idb": true
+   }
+  },
+  "RESET_AT-RS-AC3-rollback-1d": {
+   "pass": true,
+   "pre": {
+    "copyPresentAtReset": true,
+    "rollbackVsCopyMs": 79200000,
+    "rollbackVsResetMs": 86400000
+   },
+   "resetT": 1792715125243,
+   "now0": 1792292440000,
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RS-AC3-rollback-1d+1min": {
+   "pass": true,
+   "pre": {
+    "copyPresentAtReset": true,
+    "rollbackVsCopyMs": 79260000,
+    "rollbackVsResetMs": 86460000
+   },
+   "resetT": 1792715125358,
+   "now0": 1792292380000,
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RS-AC3-rollback-30d": {
+   "pass": true,
+   "pre": {
+    "copyPresentAtReset": true,
+    "rollbackVsCopyMs": 2584800000,
+    "rollbackVsResetMs": 2592000000
+   },
+   "resetT": 1792715125471,
+   "now0": 1789786840000,
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792371640000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RS-AC3-future-stamped-copy-clock-ahead-1d-at-copy+reset-then-back-1d": {
+   "pass": true,
+   "pre": {
+    "copyPresentAtReset": true,
+    "rollbackVsCopyMs": 172800000,
+    "rollbackVsResetMs": 172805000
+   },
+   "resetT": 1792465245000,
+   "now0": 1792292440000,
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792465240000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792465240000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792465240000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RS-AC3-rollback-1d-before-the-copy-stamp": {
+   "pass": true,
+   "pre": {
+    "copyPresentAtReset": true,
+    "rollbackVsCopyMs": 86400000,
+    "rollbackVsResetMs": 86460000
+   },
+   "resetT": 1792378900000,
+   "now0": 1792292440000,
+   "per": [
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": true,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792378840000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792378840000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      "corrupt.1792378840000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [],
+     "kept": {
+      "ls": true,
+      "idb": true
+     }
+    }
+   ]
+  },
+  "RESET_AT-RS-CLK-ahead2h-at-reset-then-back-idb-main-corrupt-copied-at-T-older-than-surfaced-key": {
+   "pass": true,
+   "obs": {
+    "case": "F",
+    "source": "none",
+    "store": "idb",
+    "save_corrupt": 1,
+    "notice": "M3",
+    "newGame": true,
+    "F": 0,
+    "coins": 0,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792386045000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "boot2": {
+    "case": null,
+    "source": null,
+    "store": "idb",
+    "save_corrupt": 1,
+    "notice": null,
+    "newGame": false,
+    "F": 0,
+    "coins": 0,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792386045000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "surfacedAtReset": [
+    "corrupt.1792386045000"
+   ],
+   "fails": []
+  },
+  "RESET_AT-RS-CLK-ahead2h-at-reset-then-back-idb-orphan-8b-stamped-T+1h-before-reset-time": {
+   "pass": true,
+   "obs": {
+    "case": "F",
+    "source": "none",
+    "store": "idb",
+    "save_corrupt": 1,
+    "notice": "M3",
+    "newGame": true,
+    "F": 0,
+    "coins": 0,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792386045000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "boot2": {
+    "case": null,
+    "source": null,
+    "store": "idb",
+    "save_corrupt": 1,
+    "notice": null,
+    "newGame": false,
+    "F": 0,
+    "coins": 0,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792386045000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "surfacedAtReset": [
+    "corrupt.1792386045000"
+   ],
+   "fails": []
+  },
+  "RESET_AT-RS-CLK-ahead2h-at-reset-then-back-ls-main-corrupt-bak-valid-M1": {
+   "pass": true,
+   "obs": {
+    "case": "R",
+    "source": "bak",
+    "store": "ls",
+    "save_corrupt": 1,
+    "notice": "M1",
+    "newGame": false,
+    "F": 20,
+    "coins": 1000000,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792386045000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "boot2": {
+    "case": null,
+    "source": null,
+    "store": "ls",
+    "save_corrupt": 1,
+    "notice": null,
+    "newGame": false,
+    "F": 20,
+    "coins": 1000000,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792386045000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "surfacedAtReset": [
+    "corrupt.1792386045000"
+   ],
+   "fails": []
+  },
+  "RESET_AT-RS-CLK-ahead2h-at-reset-then-back-ls-main-corrupt-nothing-valid-M3": {
+   "pass": true,
+   "obs": {
+    "case": "F",
+    "source": "none",
+    "store": "ls",
+    "save_corrupt": 1,
+    "notice": "M3",
+    "newGame": true,
+    "F": 0,
+    "coins": 0,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792386045000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "boot2": {
+    "case": null,
+    "source": null,
+    "store": "ls",
+    "save_corrupt": 1,
+    "notice": null,
+    "newGame": false,
+    "F": 0,
+    "coins": 0,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792386045000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": [
+     "save_corrupt"
+    ]
+   },
+   "surfacedAtReset": [
+    "corrupt.1792386045000"
+   ],
+   "fails": []
+  },
+  "RESET_AT-RS-AC4-throw-inside-reset-tx-at-reset.surfaced-put": {
+   "pass": true,
+   "part1": {
+    "clearResolved": true,
+    "clearThrew": null,
+    "faultFired": true,
+    "txAborted": true,
+    "idbIdentical": true,
+    "mainSame": true,
+    "surfacedSame": true
+   },
+   "part1Pass": true,
+   "part2": {
+    "base": {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 20,
+     "coins": 1000000,
+     "err": null,
+     "surfaced": [
+      "corrupt.1700000000000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": []
+    },
+    "nextIdbIso": {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 20,
+     "coins": 1000000,
+     "err": null,
+     "surfaced": [
+      "corrupt.1700000000000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": []
+    },
+    "nextFullCReset": {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 20,
+     "coins": 1000000,
+     "err": null,
+     "surfaced": [
+      "corrupt.1700000000000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 1,
+     "ev": [
+      "save_restore"
+     ]
+    },
+    "isoSameDialog": true,
+    "isoSameState": true,
+    "isoSameEvents": true,
+    "fullSameDialog": true,
+    "fullSameState": true,
+    "fullEvents": [
+     "save_restore"
+    ],
+    "lsAfterReset": [
+     "eggfarm.save.corrupt.1792371640000",
+     "eggfarm.save.corrupt.index"
+    ]
+   },
+   "part2Pass": true,
+   "log": [
+    "tx2:delete:main",
+    "tx1:complete",
+    "tx2:put-threw:reset.surfaced",
+    "tx2:handler-threw",
+    "tx2:abort"
+   ]
+  },
+  "RESET_AT-RS-AC4-throw-inside-reset-tx-no-prior-record": {
+   "pass": true,
+   "part1": {
+    "clearResolved": true,
+    "clearThrew": null,
+    "faultFired": true,
+    "txAborted": true,
+    "idbIdentical": true,
+    "mainSame": true,
+    "surfacedSame": true
+   },
+   "part1Pass": true,
+   "part2": {
+    "base": {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 20,
+     "coins": 1000000,
+     "err": null,
+     "surfaced": null,
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": []
+    },
+    "nextIdbIso": {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 20,
+     "coins": 1000000,
+     "err": null,
+     "surfaced": null,
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": []
+    },
+    "nextFullCReset": {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 20,
+     "coins": 1000000,
+     "err": null,
+     "surfaced": null,
+     "lsResetAt": null,
+     "saveRestore": 1,
+     "ev": [
+      "save_restore"
+     ]
+    },
+    "isoSameDialog": true,
+    "isoSameState": true,
+    "isoSameEvents": true,
+    "fullSameDialog": true,
+    "fullSameState": true,
+    "fullEvents": [
+     "save_restore"
+    ],
+    "lsAfterReset": [
+     "eggfarm.save.corrupt.1792371640000",
+     "eggfarm.save.corrupt.index"
+    ]
+   },
+   "part2Pass": true,
+   "log": [
+    "tx2:delete:main",
+    "tx1:complete",
+    "tx2:put-threw:reset.surfaced",
+    "tx2:handler-threw",
+    "tx2:abort"
+   ]
+  },
+  "RESET_AT-RS-AC4-abort()-quota-stub-at-reset.surfaced-put": {
+   "pass": true,
+   "part1": {
+    "clearResolved": true,
+    "clearThrew": null,
+    "faultFired": true,
+    "txAborted": true,
+    "idbIdentical": true,
+    "mainSame": true,
+    "surfacedSame": true
+   },
+   "part1Pass": true,
+   "part2": {
+    "base": {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 20,
+     "coins": 1000000,
+     "err": null,
+     "surfaced": [
+      "corrupt.1700000000000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": []
+    },
+    "nextIdbIso": {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 20,
+     "coins": 1000000,
+     "err": null,
+     "surfaced": [
+      "corrupt.1700000000000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": []
+    },
+    "nextFullCReset": {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 20,
+     "coins": 1000000,
+     "err": null,
+     "surfaced": [
+      "corrupt.1700000000000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 1,
+     "ev": [
+      "save_restore"
+     ]
+    },
+    "isoSameDialog": true,
+    "isoSameState": true,
+    "isoSameEvents": true,
+    "fullSameDialog": true,
+    "fullSameState": true,
+    "fullEvents": [
+     "save_restore"
+    ],
+    "lsAfterReset": [
+     "eggfarm.save.corrupt.1792371640000",
+     "eggfarm.save.corrupt.index"
+    ]
+   },
+   "part2Pass": true,
+   "log": [
+    "tx2:delete:main",
+    "tx1:complete",
+    "tx2:abort-at-put:reset.surfaced",
+    "tx2:put:reset.surfaced",
+    "tx2:abort"
+   ]
+  },
+  "RESET_AT-RS-AC4-throw-inside-reset-tx-delete-path-no-idb-copies": {
+   "pass": true,
+   "part1": {
+    "clearResolved": true,
+    "clearThrew": null,
+    "faultFired": true,
+    "txAborted": true,
+    "idbIdentical": true,
+    "mainSame": true,
+    "surfacedSame": true
+   },
+   "part1Pass": true,
+   "part2": {
+    "base": {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 20,
+     "coins": 1000000,
+     "err": null,
+     "surfaced": [
+      "corrupt.1700000000000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": []
+    },
+    "nextIdbIso": {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 20,
+     "coins": 1000000,
+     "err": null,
+     "surfaced": [
+      "corrupt.1700000000000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": []
+    },
+    "nextFullCReset": {
+     "case": null,
+     "source": null,
+     "store": null,
+     "save_corrupt": 0,
+     "notice": null,
+     "newGame": false,
+     "F": 20,
+     "coins": 1000000,
+     "err": null,
+     "surfaced": [
+      "corrupt.1700000000000"
+     ],
+     "lsResetAt": null,
+     "saveRestore": 1,
+     "ev": [
+      "save_restore"
+     ]
+    },
+    "isoSameDialog": true,
+    "isoSameState": true,
+    "isoSameEvents": true,
+    "fullSameDialog": true,
+    "fullSameState": true,
+    "fullEvents": [
+     "save_restore"
+    ],
+    "lsAfterReset": [
+     "eggfarm.save.corrupt.1792371640000",
+     "eggfarm.save.corrupt.index"
+    ]
+   },
+   "part2Pass": true,
+   "log": [
+    "tx2:delete:main",
+    "tx1:complete",
+    "tx2:delete-threw:reset.surfaced",
+    "tx2:handler-threw",
+    "tx2:abort"
+   ]
+  },
+  "RESET_AT-RS-AC4-control-no-fault": {
+   "pass": true,
+   "idbMain": false,
+   "surfaced": [
+    "corrupt.1792371640000"
+   ],
+   "keys": [
+    "corrupt.1792371640000"
+   ]
+  },
+  "RESET_AT-RS4-survives": {
+   "pass": true,
+   "vals": [
+    "[\"corrupt.1792371640000\"]",
+    "[\"corrupt.1792371640000\"]",
+    "[\"corrupt.1792371640000\"]"
+   ],
+   "afterCap": "[\"corrupt.1792371640000\"]",
+   "s0": "[\"corrupt.1792371640000\"]",
+   "corruptKeysAfterCap": [
+    "corrupt.1792378240000",
+    "corrupt.1792378240001",
+    "corrupt.1792378240002"
+   ]
+  },
+  "RESET_AT-RS4-export": {
+   "pass": true,
+   "notice": "M3",
+   "bytesLen": 450,
+   "unchanged": true
+  },
+  "RESET_AT-RS4-static": {
+   "pass": true,
+   "resetAt": [],
+   "rsRefs": [
+    "src/save/idb-mirror.ts:18: export const IDB_RESET_KEY = 'reset.surfaced';",
+    "src/save/idb-mirror.ts:122: try { const g = req(this.tx('readonly').objectStore(IDB_STORE).get(IDB_RESET_KEY)); const v = await (ms === undefined ? g : timeout(g, ms)); return Array.isArray(v) ? v.filter((k): k is string => typeof k === 'string') : []; }",
+    "src/save/idb-mirror.ts:162: *  record the corrupt.* keys that exist now as IDB_RESET_KEY (they were surfaced before this Reset; none -> the record is",
+    "src/save/idb-mirror.ts:166: try { const kr = os.getAllKeys(corruptRange()); kr.onsuccess = () => { const keys = (kr.result as IDBValidKey[]).filter((k): k is string => typeof k === 'string' && k.startsWith(IDB_CORRUPT_PREFIX)); if (keys.length) os.put(keys, IDB_RESET_KEY); else os.delete(IDB_RESET_KEY); }; }",
+    "src/save/idb-mirror.ts:193: *  localStorage main and no .bak, and an invalid corrupt.* copy whose key was not recorded by the last Reset (IDB_RESET_KEY,",
+    "src/save/save.ts:113: *  here: IdbMirror.clear() writes it as IDB_RESET_KEY ('reset.surfaced') in the IndexedDB store, in the same transaction that"
+   ],
+   "importPath": [],
+   "writers": [
+    "src/save/idb-mirror.ts:166: try { const kr = os.getAllKeys(corruptRange()); kr.onsuccess = () => { const keys = (kr.result as IDBValidKey[]).filter((k): k is string => typeof k === 'string' && k.startsWith(IDB_CORRUPT_PREFIX)); if (keys.length) os.put(keys, IDB_RESET_KEY); else os.delete(IDB_RESET_KEY); }; }"
+   ],
+   "keysListIt": false,
+   "importNote": "no import path in this build (N/A)"
+  },
+  "RESET_AT-INFO-RS5-dedupe-race": {
+   "pass": null,
+   "corruptKeys": [
+    "corrupt.1792371640000"
+   ],
+   "surfaced": [
+    "corrupt.1792371640000"
+   ],
+   "obs": {
+    "case": null,
+    "source": null,
+    "store": null,
+    "save_corrupt": 0,
+    "notice": null,
+    "newGame": true,
+    "F": 0,
+    "coins": 0,
+    "err": null,
+    "surfaced": [
+     "corrupt.1792371640000"
+    ],
+    "lsResetAt": null,
+    "saveRestore": 0,
+    "ev": []
+   },
+   "silentNewGame": true
+  },
+  "RESET_AT-INFO-RS6-malformed-string": {
+   "pass": null,
+   "per": [
+    {
+     "case": "F",
+     "source": "none",
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": "M3",
+     "newGame": true,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": "corrupt.1",
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [
+      "save_corrupt"
+     ]
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": "corrupt.1",
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [
+      "save_corrupt"
+     ]
+    }
+   ]
+  },
+  "RESET_AT-INFO-RS6-malformed-object": {
+   "pass": null,
+   "per": [
+    {
+     "case": "F",
+     "source": "none",
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": "M3",
+     "newGame": true,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": {
+      "a": 1
+     },
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [
+      "save_corrupt"
+     ]
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": {
+      "a": 1
+     },
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [
+      "save_corrupt"
+     ]
+    }
+   ]
+  },
+  "RESET_AT-INFO-RS6-malformed-number": {
+   "pass": null,
+   "per": [
+    {
+     "case": "F",
+     "source": "none",
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": "M3",
+     "newGame": true,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": 5,
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [
+      "save_corrupt"
+     ]
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": 5,
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [
+      "save_corrupt"
+     ]
+    }
+   ]
+  },
+  "RESET_AT-INFO-RS6-malformed-null": {
+   "pass": null,
+   "per": [
+    {
+     "case": "F",
+     "source": "none",
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": "M3",
+     "newGame": true,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": null,
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [
+      "save_corrupt"
+     ]
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": null,
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [
+      "save_corrupt"
+     ]
+    }
+   ]
+  },
+  "RESET_AT-INFO-RS6-malformed-array-with-nonstring": {
+   "pass": null,
+   "per": [
+    {
+     "case": "F",
+     "source": "none",
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": "M3",
+     "newGame": true,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      5,
+      null
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [
+      "save_corrupt"
+     ]
+    },
+    {
+     "case": null,
+     "source": null,
+     "store": "idb",
+     "save_corrupt": 1,
+     "notice": null,
+     "newGame": false,
+     "F": 0,
+     "coins": 0,
+     "err": null,
+     "surfaced": [
+      5,
+      null
+     ],
+     "lsResetAt": null,
+     "saveRestore": 0,
+     "ev": [
+      "save_corrupt"
+     ]
+    }
+   ]
+  }
+ }
+}

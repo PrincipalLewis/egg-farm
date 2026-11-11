@@ -1,0 +1,10 @@
+PR #12 recheck at 7e70a2e76d034362ea23d3b095804e55e9b191d7 (origin refs/pull/12/head, verified 02:18 CEST)
+Builds: dist-m4 (QA build, m4.enabled=1 edited locally in balance.json then restored) => m3-rc1-pre+7e70a2e+dirty; dist-qa flag off => m3-rc1-pre+7e70a2e; main dfd53b9 dist-qa => m3-rc1-pre+dfd53b9
+Worktrees: /tmp/qa-pr12r-7e70a2e, /tmp/qa-pr12r-main (and /tmp/qa-pr12r-b6cbeb5 superseded). Ports 4291-4293. Main lock, one engine at a time.
+02:36 chromium  recap(v1) 20/2 (harness: tabs scrolled out of view)  func 18/0  off 8/0
+02:56 firefox   recap(v1) 17/5 (harness)                              func 18/0  off 8/0
+03:06 webkit    recap 22/0  func 18/0  off 8/0
+03:07 chromium  recap v2 22/0
+03:11 firefox   recap v2 21/0 + 1 NOTE (1280 pill scrollWidth 120 vs clientWidth 119, overflow visible, text+dot inside pill)
+Unit: b6cbeb5 full suite 667 pass / 2 skip / 1 env fail (cost-segments reads ../../product from /tmp worktree); that test passes 8/8 at 7e70a2e with product/ reachable. 7e70a2e vs b6cbeb5 = CSS only (3 lines).
+Servers stopped; no listeners on 4291-4295.

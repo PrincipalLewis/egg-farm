@@ -1,0 +1,17 @@
+2026-10-16 23:47:01 CEST smoke chromium exit=1 Node.js v20.19.2
+2026-10-17 00:14:03 CEST guard chromium release=0 qa=0 BUILD OK 572864a chromium
+2026-10-17 00:26:15 CEST smoke chromium exit=1 Node.js v20.19.2
+2026-10-17 00:26:32 CEST guard chromium release=0 qa=0 BUILD OK 572864a chromium
+2026-10-17 00:27:46 CEST b2 chromium exit=0 DONE pr chromium pass=8/9
+2026-10-17 00:29:01 CEST base-b2 chromium exit=0 DONE base chromium pass=8/9
+2026-10-17 00:29:34 CEST layout chromium exit=0 chromium need 1280 card aria null / Order 4 of 17 eggs chromium
+2026-10-17 00:32:13 CEST rc0 chromium exit=0 200/200 passed
+2026-10-17 00:32:13 CEST WARN listener left
+2026-10-17 01:01:18 CEST base-b2 chromium (2 modes, lane2) exit=0 DONE base chromium pass=5/9
+2026-10-17 01:15:04 CEST guard firefox release=0 qa=0 BUILD OK 572864a firefox
+2026-10-17 01:44:18 CEST b2 firefox exit=1 Node.js v20.19.2
+2026-10-17 01:49:27 CEST NOTE b2 firefox crash = harness race (window.eggfarm undefined 800ms after start under load 13); patched qa-b2tip.mjs with waitForFunction; firefox b2 to rerun
+2026-10-17 02:06:28 CEST base-b2 firefox exit=0 DONE base firefox pass=2/6
+2026-10-17 02:14:48 CEST STOPPED: retargeted to 902f924; 572864a kept as baseline (FF b2/base/layout/rc0 + WebKit not run)
+2026-10-17 02:28:33 CEST b2 firefox exit=0 DONE pr firefox pass=10/6
+2026-10-17 02:28:33 CEST WARN listener left

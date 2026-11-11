@@ -1,0 +1,174 @@
+diff --git a/engineering/ci-gates.md b/engineering/ci-gates.md
+index b7bdd61..7c70b05 100644
+--- a/engineering/ci-gates.md
++++ b/engineering/ci-gates.md
+@@ -56,7 +56,12 @@ the in-repo `product/economy/csv-column-allowlist.md` (Head of Product owns it).
+   is fetched. `in` checks and `Object.keys` do not count.
+ - The allowlist is the first markdown table with `column | feature | owner | expires` headers, parsed at runtime (no other copy).
+   `name*` is a prefix entry (`tc_*`). `owner` and `expires` (YYYY-MM-DD) are required; a malformed row fails the sync.
+-- Expired entries (today, UTC, after `expires`) print a WARNING; with `--strict-allowlist` or `ECONOMY_ALLOWLIST_STRICT=1` they fail.
++- Expired entries (today, UTC, after `expires`) only print a WARNING in every build/CI/release path (`npm test`, `npm run build`,
++  `build:html`, `build:qa`, `.github/workflows/*`), so a build never depends on the date. They fail only in the explicit triage
++  script `npm run economy:allowlist-triage` (`--check --strict-allowlist`), run at the Oct 22 M4.2 triage. There is no
++  environment switch: `ECONOMY_ALLOWLIST_STRICT` is ignored (it prints a warning), so a stray CI variable can't turn strict on.
++  `tests/csv-columns.test.ts` asserts that no npm script except the triage one and no workflow passes `--strict-allowlist`.
++- Allowlist entries that match no economy.csv column (e.g. `start_coop_eggs` before PR #37) print a WARNING, never fail.
+ - Tests: `tests/csv-columns.test.ts`.
+ 
+ ## No reads outside the repo
+diff --git a/engineering/status.md b/engineering/status.md
+index 629491e..b9e5839 100644
+--- a/engineering/status.md
++++ b/engineering/status.md
+@@ -131,3 +131,4 @@
+ - done: data/economy.csv drops guard_heartbeat_s/guard_stale_s (the only 2 of the 8 D-HOP-25 columns on main; farm_ms_price_mult, feed_mill_price_mult, auto_collect_every_s, contracts_manual_bonus, farm_max_level, hv_extra_second_markup are b.csv-only). New CSV sha256 c7bb783fe890928f747c142411503261f0711388e73fe1cdadbfd76cc8d68b44 (123 cols, 31 rows, LF) = product/economy.csv. balance.json byte-identical (2e7f0f3e). economy_sim.json fixture byte-identical (7b3ed73b); seller_variance.json differs only in its economy_csv_sha256 provenance field. Goldens unchanged (2 runs). CSV-sha switches pin c7bb783f next to T3 b48be8a4 (no threshold change).
+ - done: G10 unread-column gate in sync-economy (scripts/csv-columns.ts, Proxy read tracking; allowlist parsed from product/economy/csv-column-allowlist.md, prefix tc_*, owner + expiry, expired = warn / fail under --strict-allowlist). 16 unread on main, all allowlisted. Tests tests/csv-columns.test.ts.
+ - next: HoP confirms Product's csv-column-allowlist.md matches the repo copy (per-row expiry added); Economy rebases the L30+ reshape CSV on c7bb783f; #45 branch picks this up. DO NOT MERGE until CI is back (local gates only).
++- 2026-10-19 10:25 (UTC+2) done (M41-5 follow-up, HoE after HoQA intake PASS on #57 b901e84): expiry can't fail a build. Strict only via `npm run economy:allowlist-triage` (`--strict-allowlist`), ECONOMY_ALLOWLIST_STRICT env removed (ignored + warning), test with clock 2026-10-23; allowlist entries matching no CSV column warn (start_coop_eggs on main). next: Oct 22 triage runs economy:allowlist-triage.
+diff --git a/package.json b/package.json
+index 49b08e4..59cc422 100644
+--- a/package.json
++++ b/package.json
+@@ -10,6 +10,7 @@
+     "test": "vite-node scripts/sync-economy-cli.ts -- --check && vitest run",
+     "test:slow": "node scripts/check-vendor-pins.mjs && vitest run --config vitest.slow.config.ts --poolOptions.forks.maxForks=2 --poolOptions.forks.minForks=1",
+     "sync-economy": "vite-node scripts/sync-economy-cli.ts",
++    "economy:allowlist-triage": "vite-node scripts/sync-economy-cli.ts -- --check --strict-allowlist",
+     "gen-fixtures": "python3 scripts/gen-sim-fixtures.py",
+     "screenshot": "node scripts/screenshot.mjs",
+     "smoke": "node scripts/smoke.mjs",
+diff --git a/product/economy/csv-column-allowlist.md b/product/economy/csv-column-allowlist.md
+index b0c7abd..83ffa6e 100644
+--- a/product/economy/csv-column-allowlist.md
++++ b/product/economy/csv-column-allowlist.md
+@@ -7,9 +7,10 @@ with an explicit per-row `expires` date. Source: scratch/unread-cols/classificat
+ Rules:
+ - One row per feature. `column` holds one or more column names separated by commas; a trailing `*` is a prefix entry
+   (`tc_*` matches every column starting with `tc_`).
+-- `owner` and `expires` (YYYY-MM-DD) are required. An entry is expired once the date has passed; expired entries warn on
+-  every sync and fail under `--strict-allowlist` (or `ECONOMY_ALLOWLIST_STRICT=1`). On expiry, an entry not slotted into a
++- `owner` and `expires` (YYYY-MM-DD) are required. An entry is expired once the date has passed; expired entries only warn
++  in builds/CI and fail only in the triage script `npm run economy:allowlist-triage`. On expiry, an entry not slotted into a
+   milestone is DROPPED (column removed from the CSV).
++- An entry that matches no CSV column (e.g. `start_coop_eggs` until PR #37 adds it) warns, never fails.
+ - Columns the sync already reads never need an entry.
+ 
+ ## Documentation-only allowlist (expires at the M4.2 triage, Oct 22)
+diff --git a/scripts/csv-columns.ts b/scripts/csv-columns.ts
+index 67a1a07..fa50bff 100644
+--- a/scripts/csv-columns.ts
++++ b/scripts/csv-columns.ts
+@@ -40,18 +40,26 @@ export function trackReads(rows: Row[], prev: unknown, cfg: EconomyConfig = {}):
+   buildBalance(rows.map(wrap), structuredClone(prev), cfg);
+   return read;
+ }
+-export interface ColumnReport { unread: string[]; allowed: { col: string; entry: AllowEntry }[]; violations: string[]; expired: AllowEntry[]; unusedEntries: AllowEntry[]; errors: string[]; warnings: string[] }
+-/** today: YYYY-MM-DD. An entry is expired when today > expires. strict: expired entries that still cover a column are errors. */
++export interface ColumnReport { unread: string[]; allowed: { col: string; entry: AllowEntry }[]; violations: string[]; expired: AllowEntry[]; unusedEntries: AllowEntry[]; noMatchEntries: AllowEntry[]; errors: string[]; warnings: string[] }
++/** today: YYYY-MM-DD. An entry is expired when today > expires. strict: expired entries that still cover a column are errors.
++ *  strict is ONLY for the Oct 22 triage script (npm run economy:allowlist-triage); build/CI/release paths never pass it, so
++ *  expiry can only warn there and a build never depends on the date. Entries matching no CSV column at all warn (never fail). */
+ export function checkColumns(rows: Row[], prev: unknown, cfg: EconomyConfig, allow: AllowEntry[], today: string, strict = false): ColumnReport {
+   const header = Object.keys(rows[0] ?? {}), read = trackReads(rows, prev, cfg);
+   const unread = header.filter(c => !read.has(c)), allowed: ColumnReport['allowed'] = [], violations: string[] = [];
+   for (const col of unread) { const entry = allow.find(e => allowMatch(e, col)); if (entry) allowed.push({ col, entry }); else violations.push(col); }
+   const expired = allow.filter(e => today > e.expires && allowed.some(a => a.entry === e));
+   const unusedEntries = allow.filter(e => !allowed.some(a => a.entry === e));
++  const noMatchEntries = allow.filter(e => !header.some(c => allowMatch(e, c)));
+   const errors = violations.map(c => `economy.csv column ${c} is not read by scripts/sync-economy.ts and is not in product/economy/csv-column-allowlist.md (wire it, drop it, or allowlist it with owner + expiry)`);
+   const warnings: string[] = [];
+   for (const e of expired) (strict ? errors : warnings).push(`csv-column-allowlist entry ${e.name}${e.prefix ? '*' : ''} (owner ${e.owner}) expired ${e.expires}: slot it into a milestone or drop the column`);
+-  return { unread, allowed, violations, expired, unusedEntries, errors, warnings };
++  for (const e of noMatchEntries) warnings.push(`csv-column-allowlist entry ${e.name}${e.prefix ? '*' : ''} (owner ${e.owner}, line ${e.line}) matches no economy.csv column: remove it or add the column`);
++  return { unread, allowed, violations, expired, unusedEntries, noMatchEntries, errors, warnings };
+ }
+ export const todayUtc = () => new Date().toISOString().slice(0, 10);
+ export const readAllowlist = (path = ALLOWLIST_PATH) => parseAllowlist(readFileSync(path, 'utf8'));
++/** Strict expiry only via the explicit --strict-allowlist flag (economy:allowlist-triage). There is deliberately no
++ *  environment switch: a stray env var on a CI runner must never make a build depend on the date. */
++export const STRICT_FLAG = '--strict-allowlist';
++export const isStrict = (argv: readonly string[]) => argv.includes(STRICT_FLAG);
+diff --git a/scripts/sync-economy-cli.ts b/scripts/sync-economy-cli.ts
+index 4673548..caecf44 100644
+--- a/scripts/sync-economy-cli.ts
++++ b/scripts/sync-economy-cli.ts
+@@ -1,15 +1,17 @@
+ import { readFileSync, writeFileSync } from 'node:fs';
+ import { CSV_PATH, OUT_PATH, buildBalance, parseEconomyCsv, readEconomyConfig } from './sync-economy';
+-import { checkColumns, readAllowlist, todayUtc } from './csv-columns';
++import { checkColumns, isStrict, readAllowlist, todayUtc } from './csv-columns';
+ export function main(argv: string[]) {
+   const prevText = readFileSync(OUT_PATH, 'utf8');
+   const rows = parseEconomyCsv(readFileSync(CSV_PATH, 'utf8')), cfg = readEconomyConfig(), prev = JSON.parse(prevText);
+   // M41-5 (D-HOP-25, G10): unread CSV columns must be allowlisted in product/economy/csv-column-allowlist.md.
+-  const strict = argv.includes('--strict-allowlist') || process.env.ECONOMY_ALLOWLIST_STRICT === '1';
++  // Strict expiry only via --strict-allowlist (npm run economy:allowlist-triage); never in build/CI/release (no env switch).
++  const strict = isStrict(argv);
++  if (process.env.ECONOMY_ALLOWLIST_STRICT) console.warn('WARNING ECONOMY_ALLOWLIST_STRICT is ignored (removed): strict expiry is only npm run economy:allowlist-triage');
+   const cols = checkColumns(rows, prev, cfg, readAllowlist(), todayUtc(), strict);
+   for (const w of cols.warnings) console.warn(`WARNING ${w}`);
+   if (cols.errors.length) { for (const e of cols.errors) console.error(`ERROR ${e}`); process.exit(1); }
+-  console.log(`economy.csv columns: ${Object.keys(rows[0]).length - cols.unread.length} read by sync, ${cols.allowed.length} unread + allowlisted, 0 unknown`);
++  console.log(`economy.csv columns: ${Object.keys(rows[0]).length - cols.unread.length} read by sync, ${cols.allowed.length} unread + allowlisted, 0 unknown${strict ? ' (strict allowlist triage: no expired entries)' : ''}`);
+   const next = JSON.stringify(buildBalance(rows, prev, cfg), null, 2) + '\n';
+   if (argv.includes('--check')) {
+     if (next !== prevText) { console.error('balance.json is out of date vs data/economy.csv: run npm run sync-economy'); process.exit(1); }
+diff --git a/tests/csv-columns.test.ts b/tests/csv-columns.test.ts
+index 6b07cac..0043832 100644
+--- a/tests/csv-columns.test.ts
++++ b/tests/csv-columns.test.ts
+@@ -1,9 +1,10 @@
+ // M41-5 (D-HOP-25, gates.md G10): unread economy.csv columns fail sync-economy --check unless allowlisted
+ // in product/economy/csv-column-allowlist.md (parsed at runtime). Reads are tracked through a Proxy, not grepped.
+-import { describe, it, expect } from 'vitest';
++import { describe, it, expect, vi, afterEach } from 'vitest';
+ import { readFileSync } from 'node:fs';
+ import { parseEconomyCsv, readEconomyConfig } from '../scripts/sync-economy';
+-import { parseAllowlist, readAllowlist, checkColumns, trackReads, allowMatch } from '../scripts/csv-columns';
++import { parseAllowlist, readAllowlist, checkColumns, trackReads, allowMatch, isStrict, todayUtc } from '../scripts/csv-columns';
++import { readdirSync } from 'node:fs';
+ const csvText = readFileSync(new URL('../data/economy.csv', import.meta.url), 'utf8');
+ const prev = JSON.parse(readFileSync(new URL('../src/config/balance.json', import.meta.url), 'utf8'));
+ const cfg = readEconomyConfig(), allow = readAllowlist(), TODAY = '2026-10-19';
+@@ -39,7 +40,7 @@ describe('csv-column allowlist (product/economy/csv-column-allowlist.md)', () =>
+   it('expired entries warn by default and fail under strict', () => {
+     const r = checkColumns(parseEconomyCsv(csvText), prev, cfg, allow, '2026-10-23');
+     expect(r.errors).toEqual([]); expect(r.warnings.length).toBeGreaterThan(0); expect(r.warnings[0]).toMatch(/expired 2026-10-22/);
+-    expect(checkColumns(parseEconomyCsv(csvText), prev, cfg, allow, '2026-10-22').warnings).toEqual([]); // valid through the triage day
++    expect(checkColumns(parseEconomyCsv(csvText), prev, cfg, allow, '2026-10-22').warnings.filter(w => /expired/.test(w))).toEqual([]); // valid through the triage day
+     expect(checkColumns(parseEconomyCsv(csvText), prev, cfg, allow, '2026-10-23', true).errors.join('\n')).toMatch(/expired/);
+   });
+   it('the allowlist is parsed from the markdown file: owner and expiry required, malformed rows fail', () => {
+@@ -53,4 +54,32 @@ describe('csv-column allowlist (product/economy/csv-column-allowlist.md)', () =>
+     const read = trackReads(withCols({ zz_new_knob: 1 }), prev, cfg);
+     expect(read.has('farm_cost')).toBe(true); expect(read.has('tc_focus_premium')).toBe(true); expect(read.has('zz_new_knob')).toBe(false);
+   });
++  // M41-5 follow-up (HoE): builds never depend on the date; strict expiry only in npm run economy:allowlist-triage.
++  afterEach(() => { vi.useRealTimers(); });
++  it('clock past expiry (2026-10-23): the build path (--check, no strict flag) passes with warnings only', () => {
++    vi.useFakeTimers(); vi.setSystemTime(new Date('2026-10-23T09:00:00Z'));
++    expect(todayUtc()).toBe('2026-10-23');
++    const build = checkColumns(parseEconomyCsv(csvText), prev, cfg, allow, todayUtc(), isStrict(['--check']));
++    expect(build.errors).toEqual([]); expect(build.expired.length).toBeGreaterThan(0);
++    expect(build.warnings.filter(w => /expired 2026-10-22/.test(w))).toHaveLength(build.expired.length);
++    const triage = checkColumns(parseEconomyCsv(csvText), prev, cfg, allow, todayUtc(), isStrict(['--check', '--strict-allowlist']));
++    expect(triage.errors.length).toBe(build.expired.length); expect(triage.errors.join('\n')).toMatch(/expired/);
++  });
++  it('strict is only the explicit flag: no npm script but economy:allowlist-triage and no workflow passes it; no env switch', () => {
++    const scripts: Record<string, string> = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).scripts;
++    expect(Object.keys(scripts).filter(k => scripts[k].includes('--strict-allowlist'))).toEqual(['economy:allowlist-triage']);
++    expect(scripts['economy:allowlist-triage']).toMatch(/sync-economy-cli\.ts -- --check --strict-allowlist$/);
++    const wf = new URL('../.github/workflows/', import.meta.url);
++    for (const f of readdirSync(wf)) expect(readFileSync(new URL(f, wf), 'utf8'), f).not.toMatch(/strict-allowlist|ALLOWLIST_STRICT|allowlist-triage/);
++    const prevEnv = process.env.ECONOMY_ALLOWLIST_STRICT; process.env.ECONOMY_ALLOWLIST_STRICT = '1';
++    try { expect(isStrict(['--check'])).toBe(false); } finally { if (prevEnv === undefined) delete process.env.ECONOMY_ALLOWLIST_STRICT; else process.env.ECONOMY_ALLOWLIST_STRICT = prevEnv; }
++  });
++  it('entries matching no CSV column warn, never fail (start_coop_eggs on main; a prefix with no match)', () => {
++    const a = [...allow, ...parseAllowlist(md('| zz_none_* | test | QA | 2026-10-22 |'))];
++    const r = checkColumns(parseEconomyCsv(csvText), prev, cfg, a, TODAY);
++    expect(r.errors).toEqual([]);
++    expect(r.noMatchEntries.map(e => e.name + (e.prefix ? '*' : ''))).toEqual(['start_coop_eggs', 'zz_none_*']);
++    expect(r.warnings.filter(w => /matches no economy\.csv column/.test(w))).toHaveLength(2);
++    expect(r.noMatchEntries.some(e => e.name === 'tc_')).toBe(false); // tc_* matches (read) columns: no warning
++  });
+ });

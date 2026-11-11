@@ -1,0 +1,6 @@
+save 1277
+ui 206
+money 6
+f1 34
+market 14
+release 36

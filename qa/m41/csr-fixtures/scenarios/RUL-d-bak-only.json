@@ -1,0 +1,26 @@
+{
+ "id": "RUL-d-bak-only",
+ "now": 1792378840000,
+ "csr": [
+  "D-HOP-2026-10-22-04",
+  "D-HOP-2026-10-22-03(4)",
+  "CSR-2"
+ ],
+ "ls": {
+  "eggfarm.save.bak": {
+   "ref": "raw/BAK-valid-F20-seq4-older.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "recovery": true,
+  "recoveryCase": "R",
+  "notice": "M1",
+  "farmLevel": 20,
+  "saveRestoreIdbCount": 0,
+  "saveRestoredCount": 0
+ }
+}

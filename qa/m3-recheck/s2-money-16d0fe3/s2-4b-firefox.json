@@ -1,0 +1,131 @@
+[
+ {
+  "n": "(1) baseline (rAF running): header follows each sim tick within 250 ms",
+  "pass": true,
+  "i": {
+   "maxLag": 0,
+   "lags": [
+    0,
+    0
+   ],
+   "simTicks": 2,
+   "gap": {
+    "coins": 1001,
+    "hint": 1576,
+    "goal": 1508,
+    "buy": 2001
+   },
+   "n": {
+    "coins": 2,
+    "hint": 1,
+    "goal": 1,
+    "buy": 0
+   },
+   "dCoins": 25242,
+   "rafRan": 120,
+   "hdr": "$2,952.20"
+  }
+ },
+ {
+  "n": "(1) rAF stalled 8 s: header, Upgrades hint/ETA and buy button keep updating, header lag <= ~250 ms (300 ms allowed for 20 ms polling)",
+  "pass": true,
+  "i": {
+   "maxLag": 0,
+   "lags": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "simTicks": 10,
+   "gap": {
+    "coins": 1017,
+    "hint": 4173,
+    "goal": 3018,
+    "buy": 5327
+   },
+   "n": {
+    "coins": 10,
+    "hint": 3,
+    "goal": 4,
+    "buy": 1
+   },
+   "dCoins": 126210,
+   "rafRan": 0,
+   "hdr": "$4,214.30",
+   "live": {
+    "cs": 421430,
+    "hdr": "$4,214.30"
+   },
+   "errs": []
+  }
+ },
+ {
+  "n": "(1b) rAF stalled 6 s: goal chip ETA/progress keeps updating",
+  "pass": true,
+  "i": {
+   "maxLag": 0,
+   "lags": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "simTicks": 6,
+   "gap": {
+    "coins": 1143,
+    "hint": 6001,
+    "goal": 2275,
+    "buy": 6001
+   },
+   "n": {
+    "coins": 6,
+    "hint": 0,
+    "goal": 3,
+    "buy": 0
+   },
+   "dCoins": 120828,
+   "rafRan": 0,
+   "hdr": "$1,218.20"
+  }
+ },
+ {
+  "n": "(2b-i) button drawn grey but money now enough: tap buys from live money",
+  "pass": true,
+  "i": {
+   "drawn": "true",
+   "set": 371400,
+   "f0": 12,
+   "f1": 13,
+   "c1": 5000
+  }
+ },
+ {
+  "n": "(2b-ii) money drops below cost after draw: tap rejected, no spend, save unchanged",
+  "pass": true,
+  "i": {
+   "B": {
+    "drawn": "true",
+    "f0": 13,
+    "f1": 13,
+    "c1": 1000
+   },
+   "saved": {
+    "coins": 1000,
+    "farm": 13,
+    "coll": 17,
+    "workers": "{}",
+    "grader": 2
+   },
+   "prevFarm": 13
+  }
+ }
+]

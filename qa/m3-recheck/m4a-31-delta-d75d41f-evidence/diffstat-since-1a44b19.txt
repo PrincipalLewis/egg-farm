@@ -1,0 +1,19 @@
+ data/economy.csv                              |   2 +-
+ data/staging/economy.f1-m4cols.csv            |   2 +-
+ engineering/status.md                         |   2 +
+ src/config/balance.json                       |   4 +-
+ tests/ac7-worst-seed.slow.test.ts             |   8 +-
+ tests/cost-segments.test.ts                   |   6 +-
+ tests/economy.test.ts                         |   3 +-
+ tests/fixtures/economy_sim.json               |   6 +-
+ tests/fixtures/seller_variance.json           | 736 +++++++++++++-------------
+ tests/m4a-sync.test.ts                        |   2 +-
+ tests/pacing-acw1.test.ts                     |   2 +-
+ tests/seller-variance.slow.test.ts            |   4 +-
+ tests/staging-f1-m4cols.test.ts               |   4 +-
+ vendor/economy-sim/README.md                  |   5 +-
+ vendor/economy-sim/SHA256SUMS                 |   4 +-
+ vendor/economy-sim/SOURCE                     |   4 +-
+ vendor/economy-sim/economy.f1-m4cols.csv      |   2 +-
+ vendor/economy-sim/sim/seller_variance_sim.py |   3 +-
+ 18 files changed, 401 insertions(+), 398 deletions(-)

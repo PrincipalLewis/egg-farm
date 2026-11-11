@@ -1,0 +1,40 @@
+{
+ "mobile": {
+  "s0": {
+   "c": 100000000,
+   "cl": 0,
+   "fl": 0
+  },
+  "afterBuyHidden": {
+   "c": 100000000,
+   "cl": 0,
+   "fl": 0
+  },
+  "hud1": "Egg Farm\n$999.9K\n0\n$1M, 0 eggs\n12 / 50\nC",
+  "afterShow": {
+   "c": 100000000,
+   "cl": 0,
+   "fl": 0
+  },
+  "hud2": "Egg Farm\n$1M\n0\n$1M, 0 eggs\n12 / 50\nCollection L1: +5/tap\nReady!\n›\nCollect +5\nMarket\nUpgrades\nFarm\nUpgrades\nCollection\nFarm\nWorkers\nL0\nCollect per tap\nEggs per tap 5 → 10\nEgg price $1.00 → $1.12\nLevel 0 / 30\n$10.00\nWelcome back!\nYou were away 1m\n+24 eggs\nCollect"
+ },
+ "desktop": {
+  "s0": {
+   "c": 100000000,
+   "cl": 0,
+   "fl": 0
+  },
+  "afterBuyHidden": {
+   "c": 100000000,
+   "cl": 0,
+   "fl": 0
+  },
+  "hud1": "Egg Farm\n$999.9K\n0\n$1M, 0 eggs\n12 / 50\nC",
+  "afterShow": {
+   "c": 100000000,
+   "cl": 0,
+   "fl": 0
+  },
+  "hud2": "Egg Farm\n$1M\n0\n$1M, 0 eggs\n12 / 50\nCollection L1: +5/tap\nReady!\n›\nCollect +5\nMarket\n\nNext customer soon… (3s)\n\nNo eggs to sell\nUpgrades\nCollection\nFarm\nWorkers\nL0\nCollect per tap\nEggs per tap 5 → 10\nEgg price $1.00 → $1.12\nLevel 0 / 30\n$10.00\nWelcome back!\nYou were away 1m\n+24 eggs\nCollect"
+ }
+}

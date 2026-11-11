@@ -1,0 +1,23 @@
+{
+ "id": "CSR13b-defer-quota",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-13b"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-OQ1-abc.json"
+  }
+ },
+ "lsQuota": "all-setItem",
+ "idb": {
+  "status": "unknown",
+  "reason": "idb_timeout",
+  "records": []
+ },
+ "expect": {
+  "recovered_from": "deferred",
+  "notice": "M4",
+  "noKeyChanged": true
+ }
+}

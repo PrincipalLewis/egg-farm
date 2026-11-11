@@ -1,0 +1,84 @@
+{
+  "id": "p1-A-fresh-F0",
+  "source": "m4.1-p1-30b29d3 release asset",
+  "html_sha256": "dd919d616fe0138a89c362b1db269458558a0a2c85827b3e4fc104d36b22979b",
+  "build": {
+    "meta": "m4.1+30b29d3",
+    "app": "m4.1+30b29d3",
+    "dirty": false
+  },
+  "seededFrom": null,
+  "loadTimeWrite": {
+    "preTapPresent": false,
+    "postTapDiffersFromSeed": true
+  },
+  "ui0": {
+    "coins": "$0.00",
+    "basket": "0",
+    "recovery": false,
+    "recoveryOutcome": null,
+    "welcome": false,
+    "welcomeText": null,
+    "newer": false,
+    "guardBlocked": false
+  },
+  "play": {
+    "sellLabel": "Sell all (7 eggs · $7.00)",
+    "bought": 0
+  },
+  "ui1": {
+    "coins": "$7.00",
+    "basket": "13",
+    "recovery": false,
+    "recoveryOutcome": null,
+    "welcome": false,
+    "welcomeText": null,
+    "newer": false,
+    "guardBlocked": false
+  },
+  "summary": {
+    "version": 6,
+    "savedAt": 1793299368520,
+    "saveSeq": 5,
+    "coinsCents": 700,
+    "basket": 13,
+    "coop": 10.000000000000012,
+    "pendingOfflineEggs": 0,
+    "eggsTotal": 23.000000000000014,
+    "farmLevel": 0,
+    "collectionLevel": 0,
+    "hensLevel": 0,
+    "eggValueLevel": 0,
+    "graderTier": 0,
+    "tracksV7": 1,
+    "workers": [],
+    "workersPaused": {},
+    "m5": {},
+    "stateKeys": [
+      "basket",
+      "celebratedMilestones",
+      "celebratedTier",
+      "coinsCents",
+      "collectionLevel",
+      "coop",
+      "coopFullS",
+      "customers",
+      "eggValueLevel",
+      "farmLevel",
+      "graderTier",
+      "hensLevel",
+      "manageCdS",
+      "nextCustomerId",
+      "nextCustomerInS",
+      "pendingOfflineEggs",
+      "rng",
+      "tracksV7",
+      "v6BackupId",
+      "wageFracCents",
+      "workers"
+    ]
+  },
+  "errors": [],
+  "save_sha256": "72fd7f41f2657fbdd83f880520af94bc1db63173b59a2e23b1c1223c2eff18bb",
+  "generatedAt": "2026-10-29T18:42:48.708Z"
+}

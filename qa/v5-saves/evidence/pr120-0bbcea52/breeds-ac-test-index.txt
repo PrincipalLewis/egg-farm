@@ -1,0 +1,13 @@
+55:  it('[BR-AC1] flag off with breeds data: loaded, 10-min offline, re-saved byte-identical breeds; remainingMs not decremented (E11)', () => {
+116:  it('[BR-AC26] stars 5, duplicate slot, unknown "silkie": stars 2, slots [leghorn, null, null], silkie kept, one save_migrated', () => {
+122:  it('[BR-AC26 E12] duplicate slot with every slot open (F20): the second copy is nulled, the first kept', () => {
+125:  it('[BR-AC26 E12] unknown incubator breed is dropped and its costCents refunded; remainingMs clamped to [0, 60,000]', () => {
+130:  it('[BR-AC26 E12] slot past the unlocked count is nulled; bad flockCompleteLogged / sinceUnlockBackfilled / sinceUnlockMs repaired', () => {
+135:  it('[BR-AC26 E10] F14 unknown slot id: null at runtime, save-roundtrip keeps raw "silkie", no save_migrated', () => {
+141:  it('[BR-AC26 E10 / PMC Q5] a real slot change overwrites the raw id (auto-slot of an offline reveal into the runtime-empty slot)', () => {
+146:  it.each([['NaN', NaN], ['Infinity', Infinity], ['-Infinity', -Infinity], ['null', null], ['a string', 'x']])('[BR-AC26 E12 / PMC Q6] non-finite remainingMs (%s) becomes 60,000, one save_migrated', (_n, v) => {
+159:  it('[BR-AC26 E10] owned-only unknown id (clean slots): kept ignored, no save_migrated', () => {
+166:  it.each([['undefined', undefined], ['object', { x: 1 }]])('[BR-AC26 Q6] remainingMs %s -> 60,000 (non-number), one save_migrated', (_n, v) => {
+170:  it('[BR-AC26 Q6] finite fractional remainingMs is rounded then clamped', () => {
+174:  it('[BR-AC26 E12 OQ-4] non-string slot entry becomes null, one save_migrated', () => {
+178:  it('[BR-AC1 / E11] flag off: the same corrupt save is left untouched (no sanitise, no event)', () => {

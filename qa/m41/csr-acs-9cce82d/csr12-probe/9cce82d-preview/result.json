@@ -1,0 +1,172 @@
+{
+ "mode": "preview",
+ "port": "5961",
+ "runs": {
+  "SecurityError-idb-valid-save": {
+   "buildId": "m3-rc1-pre+9cce82d",
+   "startScreenShown": true,
+   "render": {
+    "gameHandle": false,
+    "recoveryLayer": null,
+    "startScreenStill": false,
+    "collectBtn": false,
+    "farmLevel": null,
+    "coins": null,
+    "isNewGame": null,
+    "bodyText": ""
+   },
+   "writes": {
+    "ls": [
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.install_id:36B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B"
+    ],
+    "idb": [],
+    "lsReads": 12,
+    "rejections": [
+     "SecurityError: qa: localStorage read blocked"
+    ],
+    "errors": []
+   },
+   "idbMainAfter": {
+    "len": 447,
+    "farmLevel": 20
+   },
+   "classify": "CRASH/BLANK (no game; start screen or empty)",
+   "freshFarmWrites": {
+    "lsSaveWrites": 0,
+    "idbMainPuts": 0
+   },
+   "console": [
+    "[pageerror] "
+   ]
+  },
+  "SecurityError-no-save": {
+   "buildId": "m3-rc1-pre+9cce82d",
+   "startScreenShown": true,
+   "render": {
+    "gameHandle": false,
+    "recoveryLayer": null,
+    "startScreenStill": false,
+    "collectBtn": false,
+    "farmLevel": null,
+    "coins": null,
+    "isNewGame": null,
+    "bodyText": ""
+   },
+   "writes": {
+    "ls": [
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.install_id:36B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B"
+    ],
+    "idb": [],
+    "lsReads": 12,
+    "rejections": [
+     "SecurityError: qa: localStorage read blocked"
+    ],
+    "errors": []
+   },
+   "idbMainAfter": null,
+   "classify": "CRASH/BLANK (no game; start screen or empty)",
+   "freshFarmWrites": {
+    "lsSaveWrites": 0,
+    "idbMainPuts": 0
+   },
+   "console": [
+    "[pageerror] "
+   ]
+  },
+  "InvalidStateError-idb-valid-save": {
+   "buildId": "m3-rc1-pre+9cce82d",
+   "startScreenShown": true,
+   "render": {
+    "gameHandle": false,
+    "recoveryLayer": null,
+    "startScreenStill": false,
+    "collectBtn": false,
+    "farmLevel": null,
+    "coins": null,
+    "isNewGame": null,
+    "bodyText": ""
+   },
+   "writes": {
+    "ls": [
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.install_id:36B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B"
+    ],
+    "idb": [],
+    "lsReads": 12,
+    "rejections": [
+     "InvalidStateError: qa: localStorage read blocked"
+    ],
+    "errors": []
+   },
+   "idbMainAfter": {
+    "len": 447,
+    "farmLevel": 20
+   },
+   "classify": "CRASH/BLANK (no game; start screen or empty)",
+   "freshFarmWrites": {
+    "lsSaveWrites": 0,
+    "idbMainPuts": 0
+   },
+   "console": [
+    "[pageerror] "
+   ]
+  },
+  "InvalidStateError-no-save": {
+   "buildId": "m3-rc1-pre+9cce82d",
+   "startScreenShown": true,
+   "render": {
+    "gameHandle": false,
+    "recoveryLayer": null,
+    "startScreenStill": false,
+    "collectBtn": false,
+    "farmLevel": null,
+    "coins": null,
+    "isNewGame": null,
+    "bodyText": ""
+   },
+   "writes": {
+    "ls": [
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.install_id:36B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B",
+     "set:eggfarm.lease:47B"
+    ],
+    "idb": [],
+    "lsReads": 12,
+    "rejections": [
+     "InvalidStateError: qa: localStorage read blocked"
+    ],
+    "errors": []
+   },
+   "idbMainAfter": null,
+   "classify": "CRASH/BLANK (no game; start screen or empty)",
+   "freshFarmWrites": {
+    "lsSaveWrites": 0,
+    "idbMainPuts": 0
+   },
+   "console": [
+    "[pageerror] "
+   ]
+  }
+ }
+}

@@ -1,0 +1,11 @@
+A	src/sim/abilities.ts
+M	src/sim/effects.ts
+M	src/sim/events.ts
+M	src/sim/m5-state.ts
+M	src/sim/payout.ts
+M	src/sim/timers.ts
+M	src/sim/workers.ts
+A	tests/v5-abilities-sim.test.ts
+M	tests/v5-f1a-fields.test.ts
+
+exit_code=0

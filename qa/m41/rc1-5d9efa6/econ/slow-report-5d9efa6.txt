@@ -1,0 +1,6 @@
+variance t18 P5/P50/P95 TS 20.03/20.61/22.07 PY 20.04/20.63/22.05; spread TS 7.1% PY 6.8%; L@30 P5/P95 20/20
+variance t18 P5/P50/P95 TS 20.63/21.11/22.61 PY 20.56/21.06/22.39; spread TS 7.1% PY 6.3%; L@30 P5/P95 20/21
+D-CEO-04 1-200 L10 nw P95 12.02 fastest 7.87 | w P95 12.08 fastest 8.32
+D-CEO-04 201-300 L10 nw P95 11.81 fastest 8.13 | w P95 11.81 fastest 8.76; L@30 nw P5/P95 19/20 w 21/22
+variance L18-25 slowest level P95 236.4s (<= 390) worst 255.9s (<= 480); t20 P5/P50/P95/worst 1413/1476/1555/1583s (warn P95 > 1740)
+fixed L18-25 slowest level P95 180.0s worst 180.0s (<= 360)

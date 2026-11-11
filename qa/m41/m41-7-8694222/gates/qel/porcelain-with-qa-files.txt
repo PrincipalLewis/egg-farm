@@ -1,0 +1,3 @@
+?? tests/gate4-explainer.qa.test.ts
+?? tests/oq2-offline-grant-once.qa.test.ts
+?? tests/qel7-save-bytes.qa.test.ts

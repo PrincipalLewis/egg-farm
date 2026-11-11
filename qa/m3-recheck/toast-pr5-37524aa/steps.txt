@@ -1,0 +1,7 @@
+unit=0
+tsc=0
+build=0
+buildqa=0
+checkglobals=n/a (no scripts/check-globals.mjs at 37524aa; covered by check-release-build "window globals" + release-globals-browser per engine)
+CHAIN-DONE
+MIDFADE-CHROMIUM-DONE

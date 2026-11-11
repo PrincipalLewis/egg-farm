@@ -1,0 +1,167 @@
+{
+ "ftue_complete": {
+  "hidden_step1": true,
+  "hidden_step2": true,
+  "hidden_step3": true,
+  "hidden_after_complete": false,
+  "events": [
+   "onboarding_step:1:collect:",
+   "onboarding_step:2:sell:",
+   "onboarding_step:3:upgrade:",
+   "onboarding_step:4:complete:",
+   "onboarding_step:5:next_goal_intro:"
+  ],
+  "overlay_after_reload": 0,
+  "errs": []
+ },
+ "ftue_skip": {
+  "hidden_step1": true,
+  "hidden_after_skip": false,
+  "events": [
+   "onboarding_step:1:collect:",
+   "onboarding_skip:1::"
+  ]
+ },
+ "introA": {
+  "poor_shown": 0,
+  "affordable_shown": 1,
+  "workers_tab_open": true,
+  "introB": 2,
+  "events": [
+   "onboarding_step:6:workers_hire_tip:shown",
+   "onboarding_step:6:workers_hire_tip:open",
+   "onboarding_step:7:workers_coach:shown"
+  ],
+  "reshown_after_reload_unhired": 0,
+  "errs": []
+ },
+ "pt14": {
+  "farm": 0,
+  "isNew": false,
+  "overlay": false,
+  "ui": {
+   "sfx": true,
+   "reducedMotion": false,
+   "seenSlots": 3,
+   "onboardingDone": true,
+   "workersIntroA": true,
+   "workersIntroB": true
+  }
+ },
+ "axe_390_farm": [
+  {
+   "id": "aria-prohibited-attr",
+   "impact": "serious",
+   "n": 1,
+   "sample": "#queue"
+  },
+  {
+   "id": "label-content-name-mismatch",
+   "impact": "serious",
+   "n": 2,
+   "sample": "#scene"
+  },
+  {
+   "id": "page-has-heading-one",
+   "impact": "moderate",
+   "n": 1,
+   "sample": "html"
+  }
+ ],
+ "axe_390_workers": [
+  {
+   "id": "aria-prohibited-attr",
+   "impact": "serious",
+   "n": 1,
+   "sample": "#queue"
+  },
+  {
+   "id": "label-content-name-mismatch",
+   "impact": "serious",
+   "n": 2,
+   "sample": "#scene"
+  }
+ ],
+ "axe_390_settings": [
+  {
+   "id": "aria-prohibited-attr",
+   "impact": "serious",
+   "n": 1,
+   "sample": "#queue"
+  },
+  {
+   "id": "label-content-name-mismatch",
+   "impact": "serious",
+   "n": 2,
+   "sample": "#scene"
+  }
+ ],
+ "axe_1280_farm": [
+  {
+   "id": "aria-prohibited-attr",
+   "impact": "serious",
+   "n": 1,
+   "sample": "#queue"
+  },
+  {
+   "id": "label-content-name-mismatch",
+   "impact": "serious",
+   "n": 2,
+   "sample": "#scene"
+  },
+  {
+   "id": "page-has-heading-one",
+   "impact": "moderate",
+   "n": 1,
+   "sample": "html"
+  }
+ ],
+ "axe_1280_workers": [
+  {
+   "id": "aria-prohibited-attr",
+   "impact": "serious",
+   "n": 1,
+   "sample": "#queue"
+  },
+  {
+   "id": "label-content-name-mismatch",
+   "impact": "serious",
+   "n": 2,
+   "sample": "#scene"
+  },
+  {
+   "id": "page-has-heading-one",
+   "impact": "moderate",
+   "n": 1,
+   "sample": "html"
+  }
+ ],
+ "axe_1280_settings": [
+  {
+   "id": "aria-prohibited-attr",
+   "impact": "serious",
+   "n": 1,
+   "sample": "#queue"
+  },
+  {
+   "id": "label-content-name-mismatch",
+   "impact": "serious",
+   "n": 2,
+   "sample": "#scene"
+  }
+ ],
+ "axe_390_onboarding": [
+  {
+   "id": "aria-dialog-name",
+   "impact": "serious",
+   "n": 1,
+   "sample": ".onb-cap"
+  },
+  {
+   "id": "aria-prohibited-attr",
+   "impact": "serious",
+   "n": 1,
+   "sample": "#queue"
+  }
+ ]
+}

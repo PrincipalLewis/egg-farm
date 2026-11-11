@@ -1,0 +1,79 @@
+diff --cc src/game.ts
+index 292d132,fb51f7b..0000000
+--- a/src/game.ts
++++ b/src/game.ts
+@@@ -151,9 -140,9 +154,15 @@@ export class Game 
+    /**
+     * Wall-clock driven (robust to rAF/timer throttling). Hidden/background tabs use the same rule on the next frame:
+     *  - gap < offlineMinSeconds (60 s): simulate the whole gap online (coop cap applies, customers arrive/leave).
+++<<<<<<< HEAD
+ +   *  - gap >= 60 s (throttled tab): simulate the FIRST 60 s online (coop cap applies, customers arrive/leave),
+ +   *    then freeze for the rest. A HIDDEN tab never gets here (offline popup v2, C-AC36): suspendForHidden freezes it and
+ +   *    resumeFromHidden routes a hide >= 60 s through the offline grant, exactly like close-and-reload.
+++=======
++    *  - gap >= 60 s (hidden/throttled tab): simulate the FIRST 60 s online (coop cap applies, customers arrive/leave),
++    *    then freeze for the rest (visible but throttled). A HIDDEN page (onHidden/onShown) instead gets a cumulative
++    *    budget of offline.hiddenSimMaxSeconds, and a hide >= offlineMinSeconds is paid on return via the offline grant.
+++>>>>>>> b3341bd
+     *  - negative gap: nothing.
+     *  Closed/unloaded game: last save -> next load >= 60 s goes through the offline grant (AC11), in the constructor.
+     * See engineering/sim-rules.md.
+@@@ -170,11 -159,56 +179,57 @@@
+    /** Progress made after a fresh start: the next save (main is valid by then) may rotate into `.bak`. */
+    private allowBackup() { this.bakAllowed = true; }
+    get backupAllowed() { return this.bakAllowed; }
++   /** S2 hidden tab: state + accMs at the hide, online ms simulated since, and the events of that provisional sim. */
++   private hidden: { at: number; state: GameState; accMs: number; simMs: number; ev: SimEvent[] } | null = null;
++   get isHidden() { return this.hidden !== null; }
++   /** Page hidden (platform/visibility). Frames keep coming at the throttled rate but simulate at most
++    *  offline.hiddenSimMaxSeconds in TOTAL, then the sim freezes until onShown. */
++   onHidden(at = this.now()) {
++     if (this.hidden) return;
++     this.frame(); // bring the sim up to the hide
++     this.hidden = { at, state: this.state, accMs: this.accMs, simMs: 0, ev: [] };
++   }
++   /** Page shown again after `span`. Hidden >= offlineMinSeconds: drop the provisional hidden sim and pay the whole
++    *  absence through the normal offline grant, exactly as a close at the hide + reload now would (C-AC36): pending
++    *  settled first, same applyOffline clamp/cap, same validSavedAt clock-tamper rule. Shorter (or clock went back):
++    *  keep the <= 60 s of online sim. Returns the eggs granted (caller shows the welcome popup). */
++   onShown(at = this.now()): number {
++     const h = this.hidden; if (!h) return 0;
++     return accountHiddenPeriod(this, { startAt: h.at, endAt: at })?.eggsGranted ?? 0;
++   }
++   /** Start of the open hidden period, or null when visible. */
++   get hiddenSince(): number | null { return this.hidden?.at ?? null; }
++   /** @internal Only save/hidden-time.ts calls this (via accountHiddenPeriod, which guarantees once per period). */
++   settleHiddenPeriod(at: number): HiddenSettlement {
++     const h = this.hidden; if (!h) return { mode: 'none', simulatedMs: 0, grantedMs: 0, eggs: 0, coins: 0, capped: false };
++     this.hidden = null; this.lastFrameAt = at;
++     const gap = at - h.at, budgetMs = this.b.offline.hiddenSimMaxSeconds * 1000;
++     if (this.inactive || this.readOnly || !validSavedAt(h.at, at)) {
++       this.emit(h.ev); this.checkCoopFull(); return { mode: 'none', simulatedMs: h.simMs, grantedMs: 0, eggs: 0, coins: this.state.coinsCents - h.state.coinsCents, capped: false };
++     }
++     if (gap < this.b.offline.offlineMinSeconds * 1000) {
++       this.emit(h.ev); this.checkCoopFull();
++       return { mode: 'online', simulatedMs: h.simMs, grantedMs: h.simMs, eggs: 0, coins: this.state.coinsCents - h.state.coinsCents, capped: h.simMs >= budgetMs && gap > budgetMs };
++     }
++     this.state = h.state; this.accMs = 0;
++     if (this.state.pendingOfflineEggs > 0) this.state = { ...this.state, basket: this.state.basket + this.state.pendingOfflineEggs, pendingOfflineEggs: 0 };
++     const eggs = this.grantOffline(gap);
++     if (eggs > 0) this.notify({ type: 'offline_grant', eggs, awayS: this.offline.awayS });
++     this.checkCoopFull(); this.save();
++     const capS = this.b.offline.offlineCapSeconds;
++     return { mode: 'offline-grant', simulatedMs: 0, grantedMs: Math.min(gap, capS * 1000), eggs, coins: 0, capped: gap > capS * 1000 };
++   }
+    frame() {
+ +    if (this.hiddenSince !== null) return; // hidden (C-AC36): frozen; lastFrameAt kept so a < 60 s hide simulates online
+      if (this.inactive || this.held()) { this.lastFrameAt = this.now(); return; }
+-     const t = this.now(), gap = t - this.lastFrameAt; this.lastFrameAt = t;
++     const t = this.now(); let gap = t - this.lastFrameAt; this.lastFrameAt = t;
+      const maxMs = this.b.offline.offlineMinSeconds * 1000;
++     const h = this.hidden;
++     if (h) { // S2: cumulative hidden budget, then freeze; events held until we know the sim is kept (onShown)
++       const step = Math.max(0, Math.min(gap, maxMs, this.b.offline.hiddenSimMaxSeconds * 1000 - h.simMs));
++       if (step > 0) { h.simMs += step; const r = advance(this.state, step, gap >= maxMs ? 0 : this.accMs, this.b, h.ev); this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs; }
++       this.telemetry.poll(); return;
++     }
+      if (gap > 0) {
+        if (!this.bakAllowed) { this.playedMs += Math.min(gap, maxMs); if (this.playedMs >= 60_000) this.allowBackup(); }
+        const ev: SimEvent[] = []; const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev);

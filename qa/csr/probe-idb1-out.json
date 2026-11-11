@@ -1,0 +1,95 @@
+{
+ "names": {
+  "IDB_NAME": "eggfarm",
+  "IDB_STORE": "save",
+  "IDB_KEY": "main"
+ },
+ "IDB1-abc": {
+  "bootStatus": "ok",
+  "bootRawIsString": true,
+  "validate": "invalid_state",
+  "newer": null,
+  "reconcile": "ls",
+  "recovery": null,
+  "recoveryOutcome": null,
+  "isNewGame": true,
+  "coinsCents": 0,
+  "farmLevel": 0,
+  "lsCorruptIndex": null,
+  "lsMainWritten": true,
+  "idbKeys": [
+   "main"
+  ],
+  "idbPutsAttempted": 0,
+  "idbMainUnchanged": true,
+  "telemetryEventsSeen": [
+   "\"session_start\""
+  ]
+ },
+ "IDB1-nonstring-object": {
+  "bootStatus": "ok",
+  "bootRawIsString": false,
+  "validate": "not read",
+  "newer": null,
+  "reconcile": "ls",
+  "recovery": null,
+  "recoveryOutcome": null,
+  "isNewGame": true,
+  "coinsCents": 0,
+  "farmLevel": 0,
+  "lsCorruptIndex": null,
+  "lsMainWritten": true,
+  "idbKeys": [
+   "main"
+  ],
+  "idbPutsAttempted": 1,
+  "idbMainUnchanged": false,
+  "telemetryEventsSeen": [
+   "\"session_start\""
+  ]
+ },
+ "IDB1-truncated": {
+  "bootStatus": "ok",
+  "bootRawIsString": true,
+  "validate": "parse",
+  "newer": null,
+  "reconcile": "ls",
+  "recovery": null,
+  "recoveryOutcome": null,
+  "isNewGame": true,
+  "coinsCents": 0,
+  "farmLevel": 0,
+  "lsCorruptIndex": null,
+  "lsMainWritten": true,
+  "idbKeys": [
+   "main"
+  ],
+  "idbPutsAttempted": 1,
+  "idbMainUnchanged": false,
+  "telemetryEventsSeen": [
+   "\"session_start\""
+  ]
+ },
+ "IDB1-wrongtype-version-string": {
+  "bootStatus": "ok",
+  "bootRawIsString": true,
+  "validate": "wrong_type",
+  "newer": null,
+  "reconcile": "ls",
+  "recovery": null,
+  "recoveryOutcome": null,
+  "isNewGame": true,
+  "coinsCents": 0,
+  "farmLevel": 0,
+  "lsCorruptIndex": null,
+  "lsMainWritten": true,
+  "idbKeys": [
+   "main"
+  ],
+  "idbPutsAttempted": 1,
+  "idbMainUnchanged": false,
+  "telemetryEventsSeen": [
+   "\"session_start\""
+  ]
+ }
+}

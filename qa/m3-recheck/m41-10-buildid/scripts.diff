@@ -1,0 +1,386 @@
+--- scratch/m41-10-orig/smoke-release.mjs	2026-10-19 09:07:50.668310517 +0200
++++ m3-scripts/smoke-release.mjs	2026-10-19 10:04:11.688310517 +0200
+@@ -1,7 +1,11 @@
+-// Post-publish smoke of the released single-file egg-farm.html over file://. usage: node smoke-release.mjs <playwright-core dir> <engine> <html> <outdir>
++// Post-publish smoke of the released single-file egg-farm.html over file://. usage: BUILD_SHA=<sha the asset claims> node smoke-release.mjs <playwright-core dir> <engine> <html> <outdir>
++// M41-10: build-id verdict via build-id-expect.mjs (BUILD_PREFIX at BUILD_SHA in BUILD_REPO, default game/); surfaces meta, #app[data-build-id],
++// telemetry session_start.build + full scan. ONLY=buildid runs just the fresh-session build-id check (no core loop / saves). Exit 1 on build-id FAIL.
+ const [PWD, E, HTML, OUT] = process.argv.slice(2);
+-const pw = await import(PWD + '/index.mjs'); import { readFileSync, writeFileSync } from 'node:fs';
+-const URL0 = 'file://' + HTML; const R = { engine: E, cases: {} }; const G4 = '/workspace/egg-farm-studio/qa/m3-recheck/gate4-fixtures';
++const pw = await import(PWD + '/index.mjs'); import { readFileSync, writeFileSync } from 'node:fs'; import { expectFromEnv, collectSurfaces, surfaceIds } from '/workspace/egg-farm-studio/qa/m3-scripts/build-id-expect.mjs';
++if (!process.env.BUILD_SHA) { console.error('smoke-release: set BUILD_SHA=<sha under test> (M41-10)'); process.exit(2); }
++const BX = expectFromEnv({ BUILD_REPO: '/workspace/egg-farm-studio/game', ...process.env }); const ONLY = process.env.ONLY ?? '';
++const URL0 = /^https?:\/\//.test(HTML) ? HTML : 'file://' + HTML; /* M41-10: http(s) URL accepted for a served check (own port 5961-5964) */ const R = { engine: E, cases: {} }; const G4 = '/workspace/egg-farm-studio/qa/m3-recheck/gate4-fixtures';
+ const M1 = JSON.parse(readFileSync(`${G4}/M1-midgame-L18-dd52bfd.json`, 'utf8')).ls;
+ const V6 = { 'eggfarm.save': readFileSync(`${G4}/pre-v7-F30-C30-732e70e.json`, 'utf8').trim() };
+ const NC = { 'eggfarm.save': readFileSync('/workspace/egg-farm-studio/qa/scratch/relchk/nearcap-F29-prev7-246de09.json', 'utf8').trim() };
+@@ -20,7 +24,8 @@
+   await page.screenshot({ path: `${OUT}/${E}-${name}.png` }); R.cases[name] = out; await ctx.close(); }
+ // 1 + build-id, 3a fresh: no card; 2 core loop
+ await session('fresh-coreloop', {}, async (page, out) => {
+-  out.buildIds = await page.evaluate(() => [...new Set([...document.documentElement.outerHTML.matchAll(/m3-rc1-pre\+[0-9a-f]+(\+dirty)?/g)].map(m => m[0]).concat([...Object.values(localStorage).join(' ').matchAll(/m3-rc1-pre\+[0-9a-f]+(\+dirty)?/g)].map(m => m[0])))]);
++  out.buildIdSurfaces = await page.evaluate(collectSurfaces, BX.scan); out.buildIds = [...new Set(surfaceIds(out.buildIdSurfaces))];
++  if (ONLY === 'buildid') { await page.waitForTimeout(4000); out.buildIdSurfacesEnd = await page.evaluate(collectSurfaces, BX.scan); return; }
+   out.start = await page.evaluate(snap); const t0 = Date.now(); const steps = [];
+   while (Date.now() - t0 < 90000) {
+     for (let k = 0; k < 6; k++) { await page.locator('#collect').click({ force: true, timeout: 1500 }).catch(() => {}); await page.waitForTimeout(80); }
+@@ -31,7 +36,10 @@
+     await page.locator('[data-nav=farm]').click({ timeout: 1500 }).catch(() => {}); await page.waitForTimeout(100);
+     const e = await page.evaluate(snap); if ((e.F + e.C + (e.H ?? 0) + (e.V ?? 0)) > 0) { out.boughtAtMs = Date.now() - t0; break; }
+   }
+-  out.end = await page.evaluate(snap); out.steps = steps.join(','); out.cards = out.end.card; });
++  out.end = await page.evaluate(snap); out.steps = steps.join(','); out.cards = out.end.card; out.buildIdSurfacesEnd = await page.evaluate(collectSurfaces, BX.scan); });
++{ const c = R.cases['fresh-coreloop'], all = [...surfaceIds(c.buildIdSurfaces ?? {}), ...surfaceIds(c.buildIdSurfacesEnd ?? {}, { requireTelemetry: true })], k = BX.check(all);
++  R.buildIdCheck = { ok: k.ok, want: BX.label, ids: [...new Set(all)], reason: k.reason }; console.log(`${k.ok ? 'PASS' : 'FAIL'} build-id ${E} ${JSON.stringify(R.buildIdCheck)}`); }
++if (ONLY !== 'buildid') {
+ // 3b/4 migrated pre-v7 saves: exactly one card, then 0 after reload; no loss; backups
+ for (const [name, ls] of [['M1-L18-dd52bfd', M1], ['v6-F30-732e70e', V6]]) await session(name, { ...ls, 'eggfarm.ui': UI }, async (page, out, boot) => {
+   out.pre = await page.evaluate(o => { const s = JSON.parse(o).state; return { coins: s.coinsCents, F: s.farmLevel, C: s.collectionLevel }; }, ls['eggfarm.save']);
+@@ -47,4 +55,5 @@
+   out.clicks = []; for (let i = 0; i < 4; i++) { await page.locator('#uRow .btn.buy[data-kind=farm]').click({ force: true, timeout: 3000 }).catch(e => out.clicks.push('err')); await page.waitForTimeout(400);
+     out.clicks.push(await page.evaluate(() => ({ lsF: JSON.parse(localStorage.getItem('eggfarm.save')).state.farmLevel, lv: document.querySelector('#uRow [data-track=farm] .lv')?.textContent ?? null, dis: document.querySelector('#uRow .btn.buy[data-kind=farm]')?.getAttribute('aria-disabled') ?? null, btn: document.querySelector('#uRow .btn.buy[data-kind=farm]')?.textContent?.trim() ?? null }))); }
+   await boot(); out.s2 = await page.evaluate(snap); });
+-await br.close(); writeFileSync(`${OUT}/${E}.json`, JSON.stringify(R, null, 1)); console.log('SMOKE ' + JSON.stringify(R));
++}
++await br.close(); writeFileSync(`${OUT}/${E}.json`, JSON.stringify(R, null, 1)); console.log('SMOKE ' + JSON.stringify(R)); process.exitCode = R.buildIdCheck.ok ? 0 : 1;
+--- scratch/m41-10-orig/gate4-run.sh	2026-10-19 05:46:38.297813645 +0200
++++ m3-scripts/gate4-run.sh	2026-10-19 09:45:49.080310517 +0200
+@@ -7,7 +7,9 @@
+ SHA=${1:?full sha}; STEPS=${2:-pre unit saves marker release browser}; PROFILE=${PROFILE:-full};  # PROFILE=full (L30+) | capped (farm max 30, D-CEO-09)
+  ENGINES=${ENGINES:-firefox webkit chromium}; BASE=${BASE:-dd52bfd}
+ R=/workspace/egg-farm-studio; G=$R/game; L=$R/.browser-test.lock; Q=$R/qa/m3-recheck; SC=$R/qa/m3-scripts
+-git -C $G fetch -q origin || exit 1; FULL=$(git -C $G rev-parse --verify "$SHA^{commit}") || exit 1; S7=${FULL:0:7}; EXPECT=m3-rc1-pre+$S7
++git -C $G fetch -q origin || exit 1; FULL=$(git -C $G rev-parse --verify "$SHA^{commit}") || exit 1; S7=${FULL:0:7}
++BX="node $SC/build-id-expect.mjs"  # M41-10: expected prefix = BUILD_PREFIX in scripts/build-id.ts AT $FULL (fallback ^(m3-rc1-pre|m4\.1)\+[0-9a-f]{7}); hash==sha7; no suffix
++EXPECT=$($BX expect $G $FULL) || exit 1
+ EV=$Q/gate4-$S7-evidence; W=${WT:-/tmp/qa-rc/$S7}; mkdir -p $EV; log(){ echo "$(date '+%F %T %Z') $*" | tee -a $EV/summary.txt; }
+ has(){ case " $STEPS " in *" $1 "*) return 0;; esac; return 1; }
+ reap(){ for pid in $(ss -ltnp | grep -E ":$1 " | grep -o 'pid=[0-9]*' | cut -d= -f2); do case "$(readlink /proc/$pid/cwd)" in $W*) kill $pid && log "reaped own server $pid :$1";; esac; done; }
+@@ -21,7 +23,7 @@
+   log "m4.enabled at SHA: $(git show $FULL:src/config/balance.json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s).m4.enabled))') (want 1)"
+   if [ -n "${ALLOW_DIFF:-}" ]; then bad=$(git diff --name-only $BASE $FULL | rg -v "$ALLOW_DIFF"); [ -n "$bad" ] && { log "STOP: unexpected paths vs $BASE: $bad"; exit 4; }; fi
+   ( npm run build && npm run build:qa && npm run build:html ) > $EV/build.log 2>&1; log "build exit=$?"
+-  log "static build-id: $(rg -o 'm3-rc1-pre\+[0-9a-f]+(\+dirty)?' dist/index.html dist-qa/index.html dist-html/egg-farm.html | sort -u | tr '\n' ' ') (want $EXPECT, no +dirty)"
++  log "static build-id: $($BX scan $G $FULL dist/index.html dist-qa/index.html dist-html/egg-farm.html | tr '\n' ' ')"
+ fi
+ if has unit; then t0=$(date +%s)
+   npx tsc --noEmit > $EV/tsc.log 2>&1; log "tsc exit=$?"; npx vite-node scripts/sync-economy-cli.ts -- --check > $EV/sync.log 2>&1; log "sync --check exit=$?"
+@@ -41,13 +43,13 @@
+ if has release; then node scripts/check-release-build.mjs dist-html/egg-farm.html > $EV/check-release-build.log 2>&1; log "check-release-build exit=$?"; fi
+ if has browser; then cp $SC/m4-hidden.mjs qa-hidden.mjs; cp $SC/gate4-m4on-clock.mjs qa-clock.mjs; cp $SC/m4on-browser-v6load.mjs qa-v6load.mjs
+   for e in $ENGINES; do log "--- $e"
+-    p=5961; reap $p; lk node $Q/../scratch/m4a-31-delta/buildid-probe.mjs $W $e $p > $EV/buildid-$e.log 2>&1; log "runtime build-id $e exit=$? $(rg -o 'runtime build ids.*' $EV/buildid-$e.log)"; reap $p
++    p=5961; reap $p; lk env BUILD_SHA=$FULL node $Q/../scratch/m4a-31-delta/buildid-probe.mjs $W $e $p > $EV/buildid-$e.log 2>&1; log "runtime build-id $e exit=$? $(rg -o 'runtime build ids.*' $EV/buildid-$e.log)"; reap $p
+     p=5962; reap $p; lk env PORT=$p node scripts/release-globals-browser.mjs $e > $EV/check-globals-$e.log 2>&1; log "check-globals $e exit=$? $(rg -o '(PASS|FAIL).*' $EV/check-globals-$e.log | tail -1 | cut -c1-160)"; reap $p
+     p=5963; reap $p; mkdir -p $EV/rc0-$e; lk env PORT=$p SHOTS=$EV/rc0-$e node scripts/rc0-browser.mjs $e > $EV/rc0-$e.log 2>&1; log "rc0 $e exit=$? $(rg -o '[0-9]+/[0-9]+ passed' $EV/rc0-$e.log | tail -1)"; reap $p
+-    lk node $SC/rc-html-open.mjs $W $e $EV/shots-html $EXPECT > $EV/html-open-$e.log 2>&1; log "dist-html file:// $e exit=$?"
+-    p=5964; reap $p; o=$EV/hidden-$e; mkdir -p $o; lk env PORT=$p DIST=dist-qa EXPECT_BUILD=$EXPECT OUT=$o node qa-hidden.mjs $e > $o/run.log 2>&1; log "hidden-tab M4 $e exit=$? $(rg -o '[0-9]+/[0-9]+ \(' $o/run.log | tail -1)"; reap $p
+-    p=5962; reap $p; o=$EV/clock-$e; mkdir -p $o; lk env PORT=$p OUT=$o EXPECT_BUILD=$EXPECT node qa-clock.mjs $e > $o/run.log 2>&1; log "offline/clock/reload M4 $e exit=$? $(rg -o '[0-9]+/[0-9]+ \(' $o/run.log | tail -1)"; reap $p
+-    p=5961; reap $p; o=$EV/v6load; mkdir -p $o; lk env PORT=$p OUT=$o EXPECT_BUILD=$EXPECT node qa-v6load.mjs $e > $o/run-$e.log 2>&1; log "browser v6 load F1-F5+M1 $e exit=$? $(tail -1 $o/run-$e.log)"; reap $p
++    lk node $SC/rc-html-open.mjs $W $e $EV/shots-html $FULL > $EV/html-open-$e.log 2>&1; log "dist-html file:// $e exit=$?"
++    p=5964; reap $p; o=$EV/hidden-$e; mkdir -p $o; lk env PORT=$p DIST=dist-qa BUILD_SHA=$FULL OUT=$o node qa-hidden.mjs $e > $o/run.log 2>&1; log "hidden-tab M4 $e exit=$? $(rg -o '[0-9]+/[0-9]+ \(' $o/run.log | tail -1)"; reap $p
++    p=5962; reap $p; o=$EV/clock-$e; mkdir -p $o; lk env PORT=$p OUT=$o BUILD_SHA=$FULL node qa-clock.mjs $e > $o/run.log 2>&1; log "offline/clock/reload M4 $e exit=$? $(rg -o '[0-9]+/[0-9]+ \(' $o/run.log | tail -1)"; reap $p
++    p=5961; reap $p; o=$EV/v6load; mkdir -p $o; lk env PORT=$p OUT=$o BUILD_SHA=$FULL node qa-v6load.mjs $e > $o/run-$e.log 2>&1; log "browser v6 load F1-F5+M1 $e exit=$? $(tail -1 $o/run-$e.log)"; reap $p
+   done; rm -f qa-hidden.mjs qa-clock.mjs qa-v6load.mjs
+ fi
+ log "ALL_DONE $(( $(date +%s)-T0 ))s"
+--- scratch/m41-10-orig/rc-pass.sh	2026-10-19 01:54:39.939935311 +0200
++++ m3-scripts/rc-pass.sh	2026-10-19 09:45:49.080310517 +0200
+@@ -17,7 +17,8 @@
+ T0=$(date +%s); log "=== RC pass $FULL steps=[$STEPS] engines=[$ENGINES] DRY=$DRY"
+ [ -d $W ] || git -C $G worktree add --detach $W $FULL >/dev/null 2>&1 || exit 1
+ cd $W; [ "$(git rev-parse HEAD)" = "$FULL" ] || { log "worktree HEAD mismatch"; exit 1; }
+-EXPECT=m3-rc1-pre+$S7
++BX="node $SC/build-id-expect.mjs"  # M41-10: expected prefix = BUILD_PREFIX in scripts/build-id.ts AT $FULL (fallback ^(m3-rc1-pre|m4\.1)\+[0-9a-f]{7}); hash==sha7; no suffix
++EXPECT=$($BX expect $G $FULL) || exit 1
+ if has pre; then t0=$(date +%s)
+   pushed=$(git -C $G branch -r --contains $FULL | tr -d ' ' | tr '\n' ' '); main=$(git -C $G rev-parse origin/main)
+   log "pushed on: ${pushed:-NONE}; origin/main=$main; main==RC: $([ "$main" = "$FULL" ] && echo YES || echo NO)"
+@@ -26,7 +27,7 @@
+   git diff --name-only $CSV_BASE $FULL -- '*.csv' > $EV/csv-changed.txt; log "csv changed vs $CSV_BASE: $(wc -l < $EV/csv-changed.txt) ($(tr '\n' ' ' < $EV/csv-changed.txt))"
+   sha256sum data/*.csv data/staging/*.csv > $EV/csv-sha256.txt
+   ( npm ci --no-audit --no-fund && npm run build && npm run build:qa && npm run build:html ) > $EV/build.log 2>&1; log "build (dist, dist-qa, dist-html + check-release-build) exit=$? $(( $(date +%s)-t0 ))s"
+-  log "static build-id: $(rg -o 'm3-rc1-pre\+[0-9a-f]+(\+dirty)?' dist/index.html dist-qa/index.html dist-html/egg-farm.html | sort -u | tr '\n' ' ') (want $EXPECT, no +dirty)"
++  log "static build-id: $($BX scan $G $FULL dist/index.html dist-qa/index.html dist-html/egg-farm.html | tr '\n' ' ')"
+   node scripts/check-release-build.mjs dist-html/egg-farm.html > $EV/check-release-html.log 2>&1; log "check-release-build dist-html exit=$?"
+   git status --porcelain | rg -v '^\?\?' > $EV/dirty.txt; log "tracked changes after build: $(wc -l < $EV/dirty.txt)"
+ fi
+@@ -59,12 +60,12 @@
+ fi
+ if has browser; then cp $SC/pr25-fwd-hidden.mjs $W/qa-hidden.mjs   # must run from the worktree (qa/ playwright lacks webkit; module resolution)
+   for e in $ENGINES; do log "--- engine $e"
+-    p=5961; reap $p; t0=$(date +%s); lock node $Q/../scratch/m4a-31-delta/buildid-probe.mjs $W $e $p > $EV/buildid-$e.log 2>&1; log "runtime build-id $e exit=$? $(( $(date +%s)-t0 ))s $(rg -o 'runtime build ids.*' $EV/buildid-$e.log) (want [\"$EXPECT\"])"; reap $p
++    p=5961; reap $p; t0=$(date +%s); lock env BUILD_SHA=$FULL node $Q/../scratch/m4a-31-delta/buildid-probe.mjs $W $e $p > $EV/buildid-$e.log 2>&1; log "runtime build-id $e exit=$? $(( $(date +%s)-t0 ))s $(rg -o 'runtime build ids.*' $EV/buildid-$e.log) (want [\"$EXPECT\"])"; reap $p
+     p=5962; reap $p; t0=$(date +%s); lock env PORT=$p node scripts/release-globals-browser.mjs $e > $EV/globals-$e.log 2>&1; log "runtime globals $e exit=$? $(( $(date +%s)-t0 ))s $(rg -o '(PASS|FAIL).*' $EV/globals-$e.log | tail -1 | cut -c1-200)"; reap $p
+     p=5963; reap $p; mkdir -p $EV/shots-rc0-$e; t0=$(date +%s); lock env PORT=$p SHOTS=$EV/shots-rc0-$e node scripts/rc0-browser.mjs $e > $EV/rc0-$e.log 2>&1; ec=$?; log "rc0 $e exit=$ec $(( $(date +%s)-t0 ))s $(rg -o '[0-9]+/[0-9]+ passed' $EV/rc0-$e.log | tail -1)"; [ $ec = 124 ] && log "rc0 $e TIMEOUT 600 -> rerun chunked with ONLY= (see checklist)"; reap $p
+-    t0=$(date +%s); lock node $SC/rc-html-open.mjs $W $e $EV/shots-html $EXPECT > $EV/html-open-$e.log 2>&1; log "dist-html file:// $e exit=$? $(( $(date +%s)-t0 ))s $(rg -o '(PASS|FAIL).*' $EV/html-open-$e.log | cut -c1-200)"
+-    case " ${HIDDEN_ENGINES:-firefox} " in *" $e "*) for d in dist-qa dist-qa-m4; do p=5964; reap $p; o=$EV/hidden-$e-$d; mkdir -p $o; t0=$(date +%s); x=$EXPECT; [ $d = dist-qa-m4 ] && x=$EXPECT+dirty
+-      lock env PORT=$p DIST=$d EXPECT_BUILD=$x OUT=$o node qa-hidden.mjs $e > $o/run.log 2>&1; log "hidden-tab ACs $e $d exit=$? $(( $(date +%s)-t0 ))s $(rg -o '[0-9]+/[0-9]+' $o/run.log | tail -1) (flag-off want 32/32; M4-on: invariants only, 20/32 baseline)"; reap $p; done;; esac
++    t0=$(date +%s); lock node $SC/rc-html-open.mjs $W $e $EV/shots-html $FULL > $EV/html-open-$e.log 2>&1; log "dist-html file:// $e exit=$? $(( $(date +%s)-t0 ))s $(rg -o '(PASS|FAIL).*' $EV/html-open-$e.log | cut -c1-200)"
++    case " ${HIDDEN_ENGINES:-firefox} " in *" $e "*) for d in dist-qa dist-qa-m4; do p=5964; reap $p; o=$EV/hidden-$e-$d; mkdir -p $o; t0=$(date +%s); x=forbid; [ $d = dist-qa-m4 ] && x=require
++      lock env PORT=$p DIST=$d BUILD_SHA=$FULL BUILD_DIRTY=$x OUT=$o node qa-hidden.mjs $e > $o/run.log 2>&1; log "hidden-tab ACs $e $d exit=$? $(( $(date +%s)-t0 ))s $(rg -o '[0-9]+/[0-9]+' $o/run.log | tail -1) (flag-off want 32/32; M4-on: invariants only, 20/32 baseline)"; reap $p; done;; esac
+   done; rm -f $W/qa-hidden.mjs
+ fi
+ log "ALL_DONE $(( $(date +%s)-T0 ))s  expect: build-id $EXPECT; globals only eggfarmExportTelemetry; rc0 >=234/234; hidden ff 32/32; AC7 RESULT PASS; t20 <=1740"
+--- scratch/m41-10-orig/rc-pass-m4on.sh	2026-10-19 01:54:40.511935311 +0200
++++ m3-scripts/rc-pass-m4on.sh	2026-10-19 09:45:49.080310517 +0200
+@@ -18,7 +18,8 @@
+ T0=$(date +%s); log "=== RC pass $FULL steps=[$STEPS] engines=[$ENGINES] DRY=$DRY"
+ [ -d $W ] || git -C $G worktree add --detach $W $FULL >/dev/null 2>&1 || exit 1
+ cd $W; [ "$(git rev-parse HEAD)" = "$FULL" ] || { log "worktree HEAD mismatch"; exit 1; }
+-EXPECT=m3-rc1-pre+$S7
++BX="node $SC/build-id-expect.mjs"  # M41-10: expected prefix = BUILD_PREFIX in scripts/build-id.ts AT $FULL (fallback ^(m3-rc1-pre|m4\.1)\+[0-9a-f]{7}); hash==sha7; no suffix
++EXPECT=$($BX expect $G $FULL) || exit 1
+ if has pre; then t0=$(date +%s)
+   pushed=$(git -C $G branch -r --contains $FULL | tr -d ' ' | tr '\n' ' '); main=$(git -C $G rev-parse origin/main)
+   log "pushed on: ${pushed:-NONE}; origin/main=$main; main==RC: $([ "$main" = "$FULL" ] && echo YES || echo NO)"
+@@ -30,7 +31,7 @@
+   git diff --name-only $CSV_BASE $FULL -- '*.csv' > $EV/csv-changed.txt; log "csv changed vs $CSV_BASE: $(wc -l < $EV/csv-changed.txt) ($(tr '\n' ' ' < $EV/csv-changed.txt))"
+   sha256sum data/*.csv data/staging/*.csv > $EV/csv-sha256.txt
+   ( npm ci --no-audit --no-fund && npm run build && npm run build:qa && npm run build:html ) > $EV/build.log 2>&1; log "build (dist, dist-qa, dist-html + check-release-build) exit=$? $(( $(date +%s)-t0 ))s"
+-  log "static build-id: $(rg -o 'm3-rc1-pre\+[0-9a-f]+(\+dirty)?' dist/index.html dist-qa/index.html dist-html/egg-farm.html | sort -u | tr '\n' ' ') (want $EXPECT, no +dirty)"
++  log "static build-id: $($BX scan $G $FULL dist/index.html dist-qa/index.html dist-html/egg-farm.html | tr '\n' ' ')"
+   node scripts/check-release-build.mjs dist-html/egg-farm.html > $EV/check-release-html.log 2>&1; log "check-release-build dist-html exit=$?"
+   git status --porcelain | rg -v '^\?\?' > $EV/dirty.txt; log "tracked changes after build: $(wc -l < $EV/dirty.txt)"
+ fi
+@@ -62,12 +63,12 @@
+ fi
+ if has browser; then cp $SC/m4-hidden.mjs $W/qa-hidden.mjs   # must run from the worktree (qa/ playwright lacks webkit; module resolution)
+   for e in $ENGINES; do log "--- engine $e"
+-    p=5961; reap $p; t0=$(date +%s); lock node $Q/../scratch/m4a-31-delta/buildid-probe.mjs $W $e $p > $EV/buildid-$e.log 2>&1; log "runtime build-id $e exit=$? $(( $(date +%s)-t0 ))s $(rg -o 'runtime build ids.*' $EV/buildid-$e.log) (want [\"$EXPECT\"])"; reap $p
++    p=5961; reap $p; t0=$(date +%s); lock env BUILD_SHA=$FULL node $Q/../scratch/m4a-31-delta/buildid-probe.mjs $W $e $p > $EV/buildid-$e.log 2>&1; log "runtime build-id $e exit=$? $(( $(date +%s)-t0 ))s $(rg -o 'runtime build ids.*' $EV/buildid-$e.log) (want [\"$EXPECT\"])"; reap $p
+     p=5962; reap $p; t0=$(date +%s); lock env PORT=$p node scripts/release-globals-browser.mjs $e > $EV/globals-$e.log 2>&1; log "runtime globals $e exit=$? $(( $(date +%s)-t0 ))s $(rg -o '(PASS|FAIL).*' $EV/globals-$e.log | tail -1 | cut -c1-200)"; reap $p
+     p=5963; reap $p; mkdir -p $EV/shots-rc0-$e; t0=$(date +%s); lock env PORT=$p SHOTS=$EV/shots-rc0-$e node scripts/rc0-browser.mjs $e > $EV/rc0-$e.log 2>&1; ec=$?; log "rc0 $e exit=$ec $(( $(date +%s)-t0 ))s $(rg -o '[0-9]+/[0-9]+ passed' $EV/rc0-$e.log | tail -1)"; [ $ec = 124 ] && log "rc0 $e TIMEOUT 600 -> rerun chunked with ONLY= (see checklist)"; reap $p
+-    t0=$(date +%s); lock node $SC/rc-html-open.mjs $W $e $EV/shots-html $EXPECT > $EV/html-open-$e.log 2>&1; log "dist-html file:// $e exit=$? $(( $(date +%s)-t0 ))s $(rg -o '(PASS|FAIL).*' $EV/html-open-$e.log | cut -c1-200)"
+-    case " ${HIDDEN_ENGINES:-chromium firefox webkit} " in *" $e "*) for d in dist-qa; do p=5964; reap $p; o=$EV/hidden-$e-$d; mkdir -p $o; t0=$(date +%s); x=$EXPECT; [ $d = dist-qa-m4 ] && x=$EXPECT+dirty
+-      lock env PORT=$p DIST=$d EXPECT_BUILD=$x OUT=$o node qa-hidden.mjs $e > $o/run.log 2>&1; log "hidden-tab ACs $e $d exit=$? $(( $(date +%s)-t0 ))s $(rg -o '[0-9]+/[0-9]+' $o/run.log | tail -1) (M4-on: want all PASS; per-row table in run.log)"; reap $p; done;; esac
++    t0=$(date +%s); lock node $SC/rc-html-open.mjs $W $e $EV/shots-html $FULL > $EV/html-open-$e.log 2>&1; log "dist-html file:// $e exit=$? $(( $(date +%s)-t0 ))s $(rg -o '(PASS|FAIL).*' $EV/html-open-$e.log | cut -c1-200)"
++    case " ${HIDDEN_ENGINES:-chromium firefox webkit} " in *" $e "*) for d in dist-qa; do p=5964; reap $p; o=$EV/hidden-$e-$d; mkdir -p $o; t0=$(date +%s); x=forbid; [ $d = dist-qa-m4 ] && x=require
++      lock env PORT=$p DIST=$d BUILD_SHA=$FULL BUILD_DIRTY=$x OUT=$o node qa-hidden.mjs $e > $o/run.log 2>&1; log "hidden-tab ACs $e $d exit=$? $(( $(date +%s)-t0 ))s $(rg -o '[0-9]+/[0-9]+' $o/run.log | tail -1) (M4-on: want all PASS; per-row table in run.log)"; reap $p; done;; esac
+   done; rm -f $W/qa-hidden.mjs
+ fi
+ log "ALL_DONE $(( $(date +%s)-T0 ))s  expect: build-id $EXPECT; globals only eggfarmExportTelemetry; rc0 >=234/234; hidden M4 all PASS x3 engines; AC7 RESULT PASS; t20 <=1740"
+--- scratch/m41-10-orig/m4on-browser-v6load.mjs	2026-10-19 01:54:41.459935311 +0200
++++ m3-scripts/m4on-browser-v6load.mjs	2026-10-19 09:44:55.028310517 +0200
+@@ -1,7 +1,8 @@
+ // Browser v6 load: acdbedc fixtures F1-F5 -> 90a9c84 dist-qa (M4 on) in Chromium. cwd = 90a9c84 worktree. PORT, OUT env.
+ import { chromium, webkit, firefox } from 'playwright-core';
+ import { spawn } from 'node:child_process'; import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+-const OUT = process.env.OUT, port = +process.env.PORT, base = `http://127.0.0.1:${port}/`, EXPECT = process.env.EXPECT_BUILD ?? 'm3-rc1-pre+90a9c84', ENG = process.argv[2] ?? 'chromium';
++import { expectFromEnv, collectBundleIds } from '/workspace/egg-farm-studio/qa/m3-scripts/build-id-expect.mjs'; const BX = expectFromEnv(); // M41-10: BUILD_SHA (default worktree HEAD), BUILD_DIRTY=require, legacy EXPECT_BUILD
++const OUT = process.env.OUT, port = +process.env.PORT, base = `http://127.0.0.1:${port}/`, EXPECT = BX.label, ENG = process.argv[2] ?? 'chromium';
+ const D = '/workspace/egg-farm-studio/qa/m3-recheck/m4-downgrade-fixtures', D2 = '/workspace/egg-farm-studio/qa/m3-recheck/gate4-fixtures'; mkdirSync(OUT, { recursive: true });
+ const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
+ const kill = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch {} }; process.on('exit', kill);
+@@ -19,8 +20,8 @@
+   const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+   await p.goto(base); const t = p.getByText('Tap to start'); if (await t.count()) await t.first().click().catch(() => {});
+   await p.waitForFunction(() => window.eggfarm); await p.waitForTimeout(1200);
+-  const bid = await p.evaluate(async () => { for (const sc of document.querySelectorAll('script[src]')) { const m = (await (await fetch(sc.src)).text()).match(/m3-rc1-pre\+[0-9a-f]{7,}(\+dirty)?/); if (m) return m[0]; } return null; });
+-  ok(id, 'runtime build-id', bid === EXPECT, bid);
++  const bids = await p.evaluate(collectBundleIds, BX.scan), bc = BX.check(bids), bid = bids.join(','); // M41-10: all bundle ids, helper check
++  ok(id, 'runtime build-id', bc.ok, { bid, want: EXPECT, reason: bc.reason });
+   const a = await read(p); await p.screenshot({ path: `${OUT}/${ENG}-${id}-load.png` });
+   ok(id, 'no recovery', a.recovery === null && !/recover|corrupt|restore/i.test(a.dialog ?? ''), { r: a.recovery, dialog: a.dialog });
+   for (const k of CORE) ok(id, `kept ${k}`, JSON.stringify(a.live[k]) === JSON.stringify(s0[k]), [s0[k], a.live[k]]);
+--- scratch/m41-10-orig/m4-hidden.mjs	2026-10-19 01:54:40.519935311 +0200
++++ m3-scripts/m4-hidden.mjs	2026-10-19 09:44:55.028310517 +0200
+@@ -3,7 +3,8 @@
+ // QA hidden-tab offline @ BUILD. node qa-hidden.mjs <engine>  (cwd = worktree with dist-qa; PORT, EXPECT_BUILD, OUT env)
+ import { chromium, webkit, firefox } from 'playwright-core';
+ import { spawn } from 'node:child_process'; import { writeFileSync, mkdirSync } from 'node:fs';
+-const ENG = process.argv[2] ?? 'chromium', EXPECT = process.env.EXPECT_BUILD, OUT = process.env.OUT; mkdirSync(`${OUT}/shots`, { recursive: true });
++import { expectFromEnv, collectBundleIds } from '/workspace/egg-farm-studio/qa/m3-scripts/build-id-expect.mjs'; const BX = expectFromEnv(); // M41-10: BUILD_SHA (default worktree HEAD), BUILD_DIRTY=require, legacy EXPECT_BUILD
++const ENG = process.argv[2] ?? 'chromium', EXPECT = BX.label, OUT = process.env.OUT; mkdirSync(`${OUT}/shots`, { recursive: true });
+ const port = +(process.env.PORT ?? 4311), base = `http://127.0.0.1:${port}/`;
+ const srv = spawn('npx', ['vite', 'preview', '--outDir', process.env.DIST ?? 'dist-qa', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
+ const kill = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch {} }; process.on('exit', kill);
+@@ -12,8 +13,8 @@
+ const R = []; const ok = (t, name, pass, info = '') => R.push({ t, name, pass: !!pass, info: typeof info === 'string' ? info : JSON.stringify(info) });
+ let SAVE = null;
+ async function getSave() { const c = await browser.newContext(); const p = await c.newPage(); await p.goto(base); const t = p.getByText('Tap to start'); if (await t.count()) await t.first().click(); await p.waitForTimeout(600);
+-  const bid = await p.evaluate(async () => { for (const sc of document.querySelectorAll('script[src]')) { const m = (await (await fetch(sc.src)).text()).match(/m3-rc1-pre\+[0-9a-f]{7,}(\+dirty)?/); if (m) return m[0]; } return null; });
+-  if (bid !== EXPECT) { console.error('BUILD MISMATCH', bid, EXPECT); process.exit(2); }
++  const bids = await p.evaluate(collectBundleIds, BX.scan), bc = BX.check(bids), bid = bids.join(','); // M41-10: all bundle ids, helper check
++  if (!bc.ok) { console.error('BUILD MISMATCH', bid, EXPECT, bc.reason); process.exit(2); }
+   await p.waitForFunction(() => localStorage.getItem('eggfarm.save'), null, { timeout: 15000 }); const raw = JSON.parse(await p.evaluate(() => localStorage.getItem('eggfarm.save'))); await c.close(); delete raw.sum;
+   raw.state = { ...raw.state, hensLevel: +(process.env.HENS ?? 15), farmLevel: 15, collectionLevel: 4, coinsCents: 12345, basket: 40, coop: 100, customers: [], pendingOfflineEggs: 0 }; return { raw, bid }; }
+ // page with controllable clock + visibility. awayS = savedAt age at load (0 = fresh).
+--- scratch/m41-10-orig/gate4-m4on-clock.mjs	2026-10-19 04:23:46.593813645 +0200
++++ m3-scripts/gate4-m4on-clock.mjs	2026-10-19 09:44:55.028310517 +0200
+@@ -1,9 +1,10 @@
+ // GATE 4 browser: M4-on closed-tab offline (caps/floor/60 s min), clock forward/back, mid-session reload. Expected values
+ // come from the game's LIVE balance (m4.offline eggsPerSec/maxEggs2h x Hens offlineMult). Run from the RC worktree (dist-qa):
+-//   flock .browser-test.lock timeout 600 env PORT=5962 OUT=<dir> EXPECT_BUILD=m3-rc1-pre+<sha7> HENS=15 node qa-clock.mjs <engine>
++//   flock .browser-test.lock timeout 600 env PORT=5962 OUT=<dir> BUILD_SHA=<full sha> HENS=15 node qa-clock.mjs <engine>
+ import { chromium, webkit, firefox } from 'playwright-core';
+ import { spawn } from 'node:child_process'; import { writeFileSync, mkdirSync } from 'node:fs';
+-const ENG = process.argv[2] ?? 'chromium', EXPECT = process.env.EXPECT_BUILD, OUT = process.env.OUT, port = +(process.env.PORT ?? 5962), base = `http://127.0.0.1:${port}/`;
++import { expectFromEnv, collectBundleIds } from '/workspace/egg-farm-studio/qa/m3-scripts/build-id-expect.mjs'; const BX = expectFromEnv(); // M41-10: BUILD_SHA (default worktree HEAD), BUILD_DIRTY=require, legacy EXPECT_BUILD
++const ENG = process.argv[2] ?? 'chromium', EXPECT = BX.label, OUT = process.env.OUT, port = +(process.env.PORT ?? 5962), base = `http://127.0.0.1:${port}/`;
+ mkdirSync(`${OUT}/shots`, { recursive: true });
+ const srv = spawn('npx', ['vite', 'preview', '--outDir', process.env.DIST ?? 'dist-qa', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
+ const kill = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch {} }; process.on('exit', kill);
+@@ -14,12 +15,12 @@
+ // fresh M4 save from the build itself, then patched to a mid-game farm
+ async function seed() { const c = await browser.newContext(); const p = await c.newPage(); await p.goto(base); const t = p.getByText('Tap to start'); if (await t.count()) await t.first().click();
+   await p.waitForFunction(() => window.eggfarm && localStorage.getItem('eggfarm.save'), null, { timeout: 20000 });
+-  const bid = await p.evaluate(async () => { for (const sc of document.querySelectorAll('script[src]')) { const m = (await (await fetch(sc.src)).text()).match(/m3-rc1-pre\+[0-9a-f]{7,}(\+dirty)?/); if (m) return m[0]; } return null; });
++  const bids = await p.evaluate(collectBundleIds, BX.scan), bc = BX.check(bids), bid = bids.join(','); // M41-10: all bundle ids, helper check
+   const bal = await p.evaluate(() => window.eggfarm.balance); const raw = JSON.parse(await p.evaluate(() => localStorage.getItem('eggfarm.save'))); await c.close(); delete raw.sum;
+   raw.state = { ...raw.state, farmLevel: 15, hensLevel: HENS, eggValueLevel: 8, collectionLevel: 4, coinsCents: 12345, basket: 40, coop: 100, customers: [], pendingOfflineEggs: 0 };
+-  return { bid, bal, raw }; }
+-const S = await seed(); ok('pre', 'runtime build-id', S.bid === EXPECT, [S.bid, EXPECT]); ok('pre', 'live M4 on', !!S.bal.m4?.enabled, S.bal.m4?.enabled);
+-if (S.bid !== EXPECT) { console.error('BUILD MISMATCH'); process.exit(2); }
++  return { bid, bc, bal, raw }; }
++const S = await seed(); ok('pre', 'runtime build-id', S.bc.ok, [S.bid, EXPECT, S.bc.reason]); ok('pre', 'live M4 on', !!S.bal.m4?.enabled, S.bal.m4?.enabled);
++if (!S.bc.ok) { console.error('BUILD MISMATCH', S.bid, EXPECT, S.bc.reason); process.exit(2); }
+ const B = S.bal, L = Math.max(0, Math.min(HENS, B.maxLevel)); let mult = 1; for (const x of B.m4.milestones.hens) if (HENS >= x.level) mult = x.offlineMult;
+ const exp = s => !(s >= B.offline.offlineMinSeconds) ? 0 : Math.floor(Math.min(Math.min(s, B.offline.offlineCapSeconds) * B.m4.offline.eggsPerSec[L], B.m4.offline.maxEggs2h[L]) * mult);
+ // open with savedAt = deviceNow - awayS; clockShiftS shifts the page clock relative to real time (forward > 0, back < 0)
+--- scratch/m41-10-orig/pr25-fwd-hidden.mjs	2026-10-19 01:54:36.491935311 +0200
++++ m3-scripts/pr25-fwd-hidden.mjs	2026-10-19 09:44:55.028310517 +0200
+@@ -2,7 +2,8 @@
+ // QA hidden-tab offline @ BUILD. node qa-hidden.mjs <engine>  (cwd = worktree with dist-qa; PORT, EXPECT_BUILD, OUT env)
+ import { chromium, webkit, firefox } from 'playwright-core';
+ import { spawn } from 'node:child_process'; import { writeFileSync, mkdirSync } from 'node:fs';
+-const ENG = process.argv[2] ?? 'chromium', EXPECT = process.env.EXPECT_BUILD, OUT = process.env.OUT; mkdirSync(`${OUT}/shots`, { recursive: true });
++import { expectFromEnv, collectBundleIds } from '/workspace/egg-farm-studio/qa/m3-scripts/build-id-expect.mjs'; const BX = expectFromEnv(); // M41-10: BUILD_SHA (default worktree HEAD), BUILD_DIRTY=require, legacy EXPECT_BUILD
++const ENG = process.argv[2] ?? 'chromium', EXPECT = BX.label, OUT = process.env.OUT; mkdirSync(`${OUT}/shots`, { recursive: true });
+ const port = +(process.env.PORT ?? 4311), base = `http://127.0.0.1:${port}/`;
+ const srv = spawn('npx', ['vite', 'preview', '--outDir', process.env.DIST ?? 'dist-qa', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
+ const kill = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch {} }; process.on('exit', kill);
+@@ -11,8 +12,8 @@
+ const R = []; const ok = (t, name, pass, info = '') => R.push({ t, name, pass: !!pass, info: typeof info === 'string' ? info : JSON.stringify(info) });
+ let SAVE = null;
+ async function getSave() { const c = await browser.newContext(); const p = await c.newPage(); await p.goto(base); const t = p.getByText('Tap to start'); if (await t.count()) await t.first().click(); await p.waitForTimeout(600);
+-  const bid = await p.evaluate(async () => { for (const sc of document.querySelectorAll('script[src]')) { const m = (await (await fetch(sc.src)).text()).match(/m3-rc1-pre\+[0-9a-f]{7,}(\+dirty)?/); if (m) return m[0]; } return null; });
+-  if (bid !== EXPECT) { console.error('BUILD MISMATCH', bid, EXPECT); process.exit(2); }
++  const bids = await p.evaluate(collectBundleIds, BX.scan), bc = BX.check(bids), bid = bids.join(','); // M41-10: all bundle ids, helper check
++  if (!bc.ok) { console.error('BUILD MISMATCH', bid, EXPECT, bc.reason); process.exit(2); }
+   await p.waitForFunction(() => localStorage.getItem('eggfarm.save'), null, { timeout: 15000 }); const raw = JSON.parse(await p.evaluate(() => localStorage.getItem('eggfarm.save'))); await c.close(); delete raw.sum;
+   raw.state = { ...raw.state, farmLevel: 15, collectionLevel: 4, coinsCents: 12345, basket: 40, coop: 100, customers: [], pendingOfflineEggs: 0 }; return { raw, bid }; }
+ // page with controllable clock + visibility. awayS = savedAt age at load (0 = fresh).
+--- scratch/m41-10-orig/pr25-fwd-delta.sh	2026-10-19 01:54:36.491935311 +0200
++++ m3-scripts/pr25-fwd-delta.sh	2026-10-19 09:45:49.080310517 +0200
+@@ -4,7 +4,8 @@
+ set -u
+ SHA=${1:?sha}; STEPS=${2:-1 2 3 4 5 6 7}; DRY=${DRY:-0}
+ R=/workspace/egg-farm-studio; G=$R/game; L=$R/.browser-test.lock; Q=$R/qa/m3-recheck; SC=$R/qa/m3-scripts
+-git -C $G fetch -q origin; S7=$(git -C $G rev-parse --short=7 $SHA) || exit 1
++git -C $G fetch -q origin; S7=$(git -C $G rev-parse --short=7 $SHA) || exit 1; FULL=$(git -C $G rev-parse --verify "$SHA^{commit}") || exit 1
++BX="node $SC/build-id-expect.mjs"  # M41-10: BUILD_PREFIX at $FULL (fallback regex); hash==sha7; no suffix
+ EV=$Q/pr25-fwd-$S7-evidence; W=/tmp/qa-pr25fwd/$S7; mkdir -p $EV
+ log(){ echo "$(date '+%F %T %Z') $*" | tee -a $EV/summary.txt; }
+ reap(){ for pid in $(ss -ltnp | grep -E ":$1 " | grep -o 'pid=[0-9]*' | cut -d= -f2); do case "$(readlink /proc/$pid/cwd)" in $W*) kill $pid && log "reaped own server $pid :$1";; esac; done; }
+@@ -31,7 +32,7 @@
+ fi
+ if has 2; then t0=$(date +%s)
+   ( npm ci --no-audit --no-fund && npm run build && npm run build:qa && npm run build:html ) > $EV/build.log 2>&1; log "build exit=$? $(( $(date +%s)-t0 ))s"
+-  log "static build-id: $(rg -o 'm3-rc1-pre\+[0-9a-f]+(\+dirty)?' dist/index.html dist-qa/index.html dist-html/egg-farm.html 2>/dev/null | sort -u | tr '\n' ' ') (want m3-rc1-pre+$S7, no +dirty)"
++  log "static build-id: $($BX scan $G $FULL dist/index.html dist-qa/index.html dist-html/egg-farm.html 2>/dev/null | tr '\n' ' ')"
+   npx vite-node scripts/sync-economy-cli.ts -- --check > $EV/sync-check.log 2>&1; log "sync-economy --check exit=$?"
+   t0=$(date +%s); npx vitest run --maxWorkers=2 --minWorkers=1 > $EV/unit.log 2>&1; log "unit exit=$? $(( $(date +%s)-t0 ))s $(rg 'Tests ' $EV/unit.log | tail -1)"
+   # M4-on QA build for step 4 (worktree-local edit, reverted)
+@@ -47,7 +48,7 @@
+   else flock $L timeout 600 env PORT=5863 SHOTS=$EV/shots-rc0-webkit node scripts/rc0-browser.mjs webkit > $EV/rc0-webkit.log 2>&1; ec=$?; log "rc0 webkit exit=$ec $(( $(date +%s)-t0 ))s $(rg -o '[0-9]+/[0-9]+ passed' $EV/rc0-webkit.log | tail -1)"; [ $ec = 124 ] && log "rc0 webkit TIMEOUT 600s -> rerun with RC0_CHUNKS (see PLAN)"; reap 5863; fi
+ fi
+ if has 4; then for e in ${HIDDEN_ENGINES:-webkit chromium}; do for d in dist-qa dist-qa-m4; do p=5864; reap $p; o=$EV/hidden-$e-$d; mkdir -p $o; t0=$(date +%s)
+-  flock $L timeout 600 env PORT=$p DIST=$d EXPECT_BUILD=m3-rc1-pre+$S7 OUT=$o node $SC/pr25-fwd-hidden.mjs $e > $o/run.log 2>&1; ec=$?; reap $p
++  flock $L timeout 600 env PORT=$p DIST=$d BUILD_SHA=$FULL OUT=$o node $SC/pr25-fwd-hidden.mjs $e > $o/run.log 2>&1; ec=$?; reap $p
+   log "hidden $e $d exit=$ec $(( $(date +%s)-t0 ))s $(rg -o '[0-9]+/[0-9]+' $o/run.log | tail -1)"; done; done
+ fi
+ if has 5; then ( npx vitest run --maxWorkers=2 --minWorkers=1 $(ls tests | rg -i 'save|mirror|quota|saveseq|newer|bug6|hidden' | sed 's#^#tests/#') ) > $EV/save-unit.log 2>&1; log "save() unit subset exit=$? $(rg 'Tests ' $EV/save-unit.log | tail -1)"
+--- scratch/m41-10-orig/m4a-31-delta.sh	2026-10-19 01:54:34.739935311 +0200
++++ m3-scripts/m4a-31-delta.sh	2026-10-19 09:45:49.080310517 +0200
+@@ -5,7 +5,8 @@
+ set -u
+ SHA=${1:?sha}; ENGS=${2:-chromium firefox webkit}
+ R=/workspace/egg-farm-studio; L=$R/.browser-test.lock; Q=$R/qa/m3-recheck
+-S7=$(git -C $R/game rev-parse --short=7 $SHA) || exit 1
++S7=$(git -C $R/game rev-parse --short=7 $SHA) || exit 1; FULL=$(git -C $R/game rev-parse --verify "$SHA^{commit}") || exit 1
++BX="node $R/qa/m3-scripts/build-id-expect.mjs"  # M41-10: BUILD_PREFIX at $FULL (fallback regex); hash==sha7; no suffix
+ EV=$Q/m4a-31-delta-$S7-evidence; W=/tmp/qa-m4a31/$S7; mkdir -p $EV
+ log(){ echo "$(date '+%F %T %Z') $*" | tee -a $EV/summary.txt; }
+ reap(){ for pid in $(ss -ltnp | grep -E ":$1 " | grep -o 'pid=[0-9]*' | cut -d= -f2); do [ "$(readlink /proc/$pid/cwd)" = "$W" ] && kill $pid && log "reaped own server $pid :$1"; done; }
+@@ -16,7 +17,7 @@
+ [ -d $W ] || { git -C $R/game worktree add --detach $W $SHA >/dev/null 2>&1 || git clone -q $R/game $W && git -C $W checkout -q $SHA; }
+ cd $W
+ ( npm ci --no-audit --no-fund && npm run build && npm run build:qa ) > $EV/build.log 2>&1; log "build exit=$?"
+-log "static build-id: $(rg -o 'm3-rc1-pre\+[0-9a-f]+(\+dirty)?' dist/index.html | sort -u | tr '\n' ' ')"
++log "static build-id: $($BX scan $R/game $FULL dist/index.html | tr '\n' ' ')"
+ npx vitest run --maxWorkers=2 --minWorkers=1 > $EV/unit.log 2>&1; log "unit exit=$? $(rg 'Tests ' $EV/unit.log | tail -1)"
+ cp $R/qa/scratch/m4a-31-delta/buildid-probe.mjs $EV/
+ for e in $ENGS; do
+@@ -25,12 +26,12 @@
+     reap $p; ss -ltn | grep -q ":$p " && { log "$k $e SKIP port $p busy"; continue; }
+     lg=$EV/$k-$e.log; t0=$(date +%s)
+     case $k in
+-      buildid) flock $L timeout 600 node $EV/buildid-probe.mjs $W $e $p ;;
++      buildid) flock $L timeout 600 env BUILD_SHA=$FULL node $EV/buildid-probe.mjs $W $e $p ;;
+       globals) flock $L timeout 600 env PORT=$p node scripts/release-globals-browser.mjs $e ;;
+       rc0) mkdir -p $EV/shots-$e; flock $L timeout 600 env PORT=$p SHOTS=$EV/shots-$e node scripts/rc0-browser.mjs $e ;;
+       fileopen) flock $L timeout 600 node $R/qa/m3-scripts/m4a-31-fileopen.mjs $W $e $p $EV/shots-$e ;;
+     esac > $lg 2>&1; ec=$?; reap $p
+-    log "$k $e exit=$ec $(( $(date +%s)-t0 ))s $(rg -o '[0-9]+/[0-9]+ passed|runtime build ids.*|FAIL.*|OK.*' $lg | tail -1)"
++    log "$k $e exit=$ec $(( $(date +%s)-t0 ))s $(rg -o '[0-9]+/[0-9]+ passed|runtime build ids.*|PASS runtime.*|FAIL.*|OK.*' $lg | tail -1)"
+   done
+ done
+-log "ALL_DONE (expect build-id m3-rc1-pre+$S7, globals only eggfarmExportTelemetry, rc0 209/209 unless merge adds tests)"
++log "ALL_DONE (expect build-id $($BX expect $R/game $FULL), globals only eggfarmExportTelemetry, rc0 209/209 unless merge adds tests)"
+--- scratch/m41-10-orig/rc-html-open.mjs	2026-10-19 01:54:39.943935311 +0200
++++ m3-scripts/rc-html-open.mjs	2026-10-19 09:45:25.624310517 +0200
+@@ -1,8 +1,11 @@
+-// RC release-artifact open check: node rc-html-open.mjs <worktree> <engine> <shotsdir> <expect-build-id>
++// RC release-artifact open check: node rc-html-open.mjs <worktree> <engine> <shotsdir> <sha-under-test | legacy exact build id>
++// M41-10: expectation via build-id-expect.mjs (BUILD_PREFIX at that SHA, fallback regex; hash==sha7; no suffix). A legacy exact id
++// (contains '+') is still honoured as an extra exact match, with the SHA = <worktree> HEAD.
+ // Opens dist-html/egg-farm.html via file:// (no server, no port). Checks: runtime build-id == expect (DOM dataset/meta), 0 page/console errors,
+ // game renders (text > 50), no eggfarmPerf/debug globals. Exit 0 PASS / 1 FAIL.
+-import { mkdirSync } from 'node:fs';
+-const [w, engine, shots, expect] = process.argv.slice(2); mkdirSync(shots, { recursive: true });
++import { mkdirSync } from 'node:fs'; import { expectFromEnv, collectSurfaces, surfaceIds } from '/workspace/egg-farm-studio/qa/m3-scripts/build-id-expect.mjs';
++const [w, engine, shots, arg4] = process.argv.slice(2); mkdirSync(shots, { recursive: true });
++const BX = expectFromEnv({ ...process.env, ...(arg4?.includes('+') ? { EXPECT_BUILD: arg4 } : arg4 ? { BUILD_SHA: arg4 } : {}) }, w), expect = BX.label;
+ const pw = await import(w + '/node_modules/playwright-core/index.mjs');
+ const b = await (engine === 'chromium' ? pw.chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] }) : pw[engine].launch());
+ const p = await (await b.newContext()).newPage(); const errs = [];
+@@ -12,7 +15,9 @@
+ await p.waitForTimeout(2000);
+ const r = await p.evaluate(() => ({ ds: document.getElementById("app")?.dataset.buildId ?? null, meta: document.head.querySelector('meta[name="build-id"]')?.content ?? null,
+   txt: document.body.innerText.length, perf: 'eggfarmPerf' in window, eggfarm: 'eggfarm' in window }));
++const sf = await p.evaluate(collectSurfaces, BX.scan); // M41-10: + telemetry session_start.build when present
++const bidIds = [r.ds, ...(r.meta === null ? [] : [r.meta]), ...(sf.telemetrySessionStart ?? [])], bc = BX.check(bidIds); r.telemetry = sf.telemetrySessionStart; r.bidCheck = bc.reason;
+ await p.screenshot({ path: `${shots}/html-open-${engine}.png` }); await b.close();
+-const ok = r.txt > 50 && errs.length === 0 && r.ds === expect && (r.meta === null || r.meta === expect) && !r.perf && !r.eggfarm;
++const ok = r.txt > 50 && errs.length === 0 && r.ds !== null && bc.ok && !r.perf && !r.eggfarm; // meta may be absent (as before); if present it must pass
+ console.log(`${ok ? 'PASS' : 'FAIL'} html-open ${engine} ${JSON.stringify({ ...r, expect, errors: errs.slice(0, 3) })}`);
+ process.exit(ok ? 0 : 1);
+--- scratch/m41-10-orig/scratch-m4a-31-delta/buildid-probe.mjs	2026-10-19 01:54:23.115935311 +0200
++++ scratch/m4a-31-delta/buildid-probe.mjs	2026-10-19 09:45:25.492310517 +0200
+@@ -1,12 +1,21 @@
+ // Runtime build-id probe: node buildid-probe.mjs <clone> <engine> <port>
++// M41-10: expectation from qa/m3-scripts/build-id-expect.mjs (BUILD_PREFIX at the SHA under test; BUILD_SHA env, default = <clone> HEAD;
++// BUILD_DIRTY=require for a deliberate +dirty build). Surfaces: meta build-id, #app[data-build-id], telemetry session_start.build,
++// and a scan of outerHTML + body text + localStorage (as before). Prints "runtime build ids [...]" as before, then PASS/FAIL; exit 1 on FAIL.
+ import { spawn } from 'node:child_process';
+-const [clone, engine, port] = process.argv.slice(2);
++import { expectFromEnv, collectSurfaces, surfaceIds } from '/workspace/egg-farm-studio/qa/m3-scripts/build-id-expect.mjs';
++const [clone, engine, port] = process.argv.slice(2); if (port === '4173') process.exit(2);
++const BX = expectFromEnv(process.env, clone); let pass = false;
+ const pw = await import(clone + '/node_modules/playwright-core/index.mjs');
+ const srv = spawn('npx', ['vite','preview','--outDir','dist','--port',port,'--strictPort','--host','127.0.0.1'], { cwd: clone, stdio: 'ignore', detached: true });
+ try {
+   for (let i=0;i<60;i++){ try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r=>setTimeout(r,250)); } }
+   const b = await (engine==='chromium' ? pw.chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] }) : pw[engine].launch()); const p = await (await b.newContext()).newPage();
+   await p.goto(`http://127.0.0.1:${port}/`); await p.waitForTimeout(1500); try { await p.getByText('Tap to start').click({timeout:5000}); } catch {} await p.waitForTimeout(2500); await p.evaluate(() => { try { window.eggfarm?.save?.(); } catch {} }); await p.waitForTimeout(500);
+-  const ids = await p.evaluate(() => { const re=/m3-rc1-pre\+[0-9a-f]+(\+dirty)?/g; const s=new Set(); for (const t of [document.documentElement.outerHTML, document.body.innerText, ...Object.keys(localStorage).map(k=>localStorage.getItem(k))]) for (const m of (t||'').matchAll(re)) s.add(m[0]); return [...s]; });
+-  console.log(`runtime build ids [${engine}]: ${JSON.stringify(ids)}`); await b.close();
++  const r = await p.evaluate(collectSurfaces, BX.scan); const all = surfaceIds(r); const ids = [...new Set(all)];
++  const c = BX.check(all); pass = c.ok;
++  console.log(`runtime build ids [${engine}]: ${JSON.stringify(ids)}`);
++  console.log(`surfaces [${engine}]: ${JSON.stringify(r)}`);
++  console.log(`${c.ok ? 'PASS' : 'FAIL'} runtime build-id [${engine}] want ${BX.label}${c.ok ? '' : ' :: ' + c.reason}`); await b.close();
+ } finally { process.kill(-srv.pid); }
++process.exit(pass ? 0 : 1);

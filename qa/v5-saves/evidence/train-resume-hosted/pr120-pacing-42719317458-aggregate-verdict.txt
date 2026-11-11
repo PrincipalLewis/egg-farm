@@ -1,0 +1,8 @@
+## pacing-x1-stack: **FAIL**
+- rows: 45 PASS, 0 FAIL, 1 WARN, 20 INFO, 0 PENDING-REPRED (not judged until HoP signs the re-prediction), 3 N/A (row 903, D-CEO-20261030-04), 12 NOT-WIRED (3 blocking), 24 EXCLUDED (G5-P pause rows)
+- **FAIL: blocking row 904 optimal NOT-WIRED**
+- **FAIL: blocking row 904 seller15 NOT-WIRED**
+WARN L897 optimal N / H: worst 191 > 180 s (pre-existing L0–30 dead zone, known risk)
+FAIL: blocking row 904 optimal NOT-WIRED
+FAIL: blocking row 904 seller15 NOT-WIRED
+FAIL: blocking row 904 casual NOT-WIRED

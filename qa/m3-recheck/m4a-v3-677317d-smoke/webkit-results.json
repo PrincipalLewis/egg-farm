@@ -1,0 +1,313 @@
+{
+ "1.buildId": "m3-rc1-pre+677317d+m4on",
+ "1.globals": [
+  "eggfarmExportTelemetry"
+ ],
+ "2.basketAfterCollect": "16",
+ "2.customerCard": "8/8 eggs |  · $8.00 | Sell",
+ "2.tutorialHintBeforeSell": "Tap Sell to earn coins.",
+ "2.sell": {
+  "before": "$0.00",
+  "after": "$8.00",
+  "cardPrice": "$8.00"
+ },
+ "2.tutorialAfterSell": "tes 30 seconds. | Collect +5 · 4 ready | Market | Upgrades | Farm | Market | Next customer soon… (2s) | No eggs to sell | Thanks! | +$8.00 | Sell a few more eggs to afford it · $2 to go | ○ ○ ● | Skip",
+ "1.consoleFresh": [],
+ "2.farmTabText": "Balanced farm 2/5 · next +20% at all ≥ 15 | L19 | Hens | Eggs/s 20 → 21 | Next at L20: bigger coop · offline ×1.5 | Level 19 / 30 | $5,262.00 | L13 | Egg value | Egg price $6.07 → $6.55 | Level 13 / 30 | $1,955.00 | L19 | Farm level | Coop upgrade at L20 | +1 customer slot (9 → 10) | Hens & Egg value up to L22 → L23 | Coop capacity 1,250 → 1,312 | Level 19 / 30 | $18.2K",
+ "2.buys": [
+  {
+   "t": "farm",
+   "rowTxt": "L19 | Farm level | Coop upgrade at L20 | +1 customer slot (9 → 10) | Hens & Egg value up to L22 → L23 | Coop capacity 1,250 → 1,312 | Level 19 / 30 | $18.2K",
+   "hdrA": "$50.3K",
+   "hdrB": "$32.5K",
+   "before": {
+    "version": 6,
+    "coins": 5000000,
+    "F": 19,
+    "C": 17,
+    "H": 19,
+    "V": 13,
+    "tracksV7": 1,
+    "workers": "{\"market_hand\":{\"energy\":100,\"cdS\":0.10000000000000014},\"coop_hand\":{\"energy\":100,\"cdS\":1.0999999999999992},\"hawker\":{\"energy\":100,\"cdS\":0},\"grader\":{\"energy\":100,\"cdS\":0}}",
+    "grader": 2,
+    "keys": 20
+   },
+   "after": {
+    "version": 6,
+    "coins": 3206554,
+    "F": 20,
+    "C": 17,
+    "H": 19,
+    "V": 13,
+    "tracksV7": 1,
+    "workers": "{\"market_hand\":{\"energy\":99.71111111111125,\"cdS\":0.5000000000000001},\"coop_hand\":{\"energy\":99.71111111111125,\"cdS\":0.49999999999999933},\"hawker\":{\"energy\":99.71111111111125,\"cdS\":0},\"grader\":{\"energy\":99.71111111111125,\"cdS\":0}}",
+    "grader": 2,
+    "keys": 20
+   },
+   "spentCents": 1793446
+  },
+  {
+   "t": "hens",
+   "rowTxt": "L19 | Hens | Eggs/s 20 → 21 | Next at L20: bigger coop · offline ×1.5 | Level 19 / 30 | $5,262.00",
+   "hdrA": "$32.5K",
+   "hdrB": "$27.3K",
+   "before": {
+    "version": 6,
+    "coins": 3206554,
+    "F": 20,
+    "C": 17,
+    "H": 19,
+    "V": 13,
+    "tracksV7": 1,
+    "workers": "{\"market_hand\":{\"energy\":99.71111111111125,\"cdS\":0.5000000000000001},\"coop_hand\":{\"energy\":99.71111111111125,\"cdS\":0.49999999999999933},\"hawker\":{\"energy\":99.71111111111125,\"cdS\":0},\"grader\":{\"energy\":99.71111111111125,\"cdS\":0}}",
+    "grader": 2,
+    "keys": 20
+   },
+   "after": {
+    "version": 6,
+    "coins": 2728871,
+    "F": 20,
+    "C": 17,
+    "H": 20,
+    "V": 13,
+    "tracksV7": 1,
+    "workers": "{\"market_hand\":{\"energy\":99.63333333333351,\"cdS\":0.8},\"coop_hand\":{\"energy\":99.63333333333351,\"cdS\":1.7999999999999998},\"hawker\":{\"energy\":99.63333333333351,\"cdS\":0},\"grader\":{\"energy\":99.63333333333351,\"cdS\":0}}",
+    "grader": 2,
+    "keys": 20
+   },
+   "spentCents": 477683
+  },
+  {
+   "t": "eggValue",
+   "rowTxt": "L13 | Egg value | Egg price $6.07 → $6.55 | Level 13 / 30 | $1,955.00",
+   "hdrA": "$27.3K",
+   "hdrB": "$25.3K",
+   "before": {
+    "version": 6,
+    "coins": 2728871,
+    "F": 20,
+    "C": 17,
+    "H": 20,
+    "V": 13,
+    "tracksV7": 1,
+    "workers": "{\"market_hand\":{\"energy\":99.63333333333351,\"cdS\":0.8},\"coop_hand\":{\"energy\":99.63333333333351,\"cdS\":1.7999999999999998},\"hawker\":{\"energy\":99.63333333333351,\"cdS\":0},\"grader\":{\"energy\":99.63333333333351,\"cdS\":0}}",
+    "grader": 2,
+    "keys": 20
+   },
+   "after": {
+    "version": 6,
+    "coins": 2533371,
+    "F": 20,
+    "C": 17,
+    "H": 20,
+    "V": 14,
+    "tracksV7": 1,
+    "workers": "{\"market_hand\":{\"energy\":99.55555555555577,\"cdS\":0.10000000000000014},\"coop_hand\":{\"energy\":99.55555555555577,\"cdS\":1.0999999999999992},\"hawker\":{\"energy\":99.55555555555577,\"cdS\":0},\"grader\":{\"energy\":99.55555555555577,\"cdS\":0}}",
+    "grader": 2,
+    "keys": 20
+   },
+   "spentCents": 195500
+  }
+ ],
+ "5.highlightTransitions": [
+  [
+   0,
+   "eggValue:"
+  ]
+ ],
+ "2b.console": [],
+ "3.migration": {
+  "v4": {
+   "pre": {
+    "version": 4,
+    "coins": 141585,
+    "F": 10,
+    "C": 11
+   },
+   "afterLoad1": {
+    "version": 6,
+    "coins": 141585,
+    "F": 10,
+    "C": 11,
+    "H": 10,
+    "V": 9,
+    "tracksV7": 1,
+    "workers": "{}",
+    "grader": 0,
+    "keys": 20
+   },
+   "afterReload2": {
+    "version": 6,
+    "coins": 141585,
+    "F": 10,
+    "C": 11,
+    "H": 10,
+    "V": 9,
+    "tracksV7": 1,
+    "workers": "{}",
+    "grader": 0,
+    "keys": 20
+   },
+   "lsKeys": [
+    "eggfarm.save.bak",
+    "eggfarm.save",
+    "eggfarm.lease",
+    "eggfarm.telemetry",
+    "eggfarm.ui",
+    "eggfarm.install_id",
+    "eggfarm.save.v6_backup"
+   ],
+   "bakVersion": 6,
+   "anyV7Key": [],
+   "idb": "[{\"name\":\"eggfarm\",\"version\":1}]",
+   "console": [],
+   "v6backup": {
+    "present1": true,
+    "equalsInjected": true,
+    "unchangedAfterReload": true,
+    "backupVersion": 4,
+    "hasMarker": false
+   }
+  },
+  "v5": {
+   "pre": {
+    "version": 5,
+    "coins": 1291591,
+    "F": 19,
+    "C": 17,
+    "workers": "{\"market_hand\":{\"energy\":100,\"cdS\":0.10000000000000014},\"coop_hand\":{\"energy\":100,\"cdS\":1.0999999999999992},\"hawker\":{\"energy\":100,\"cdS\":0},\"grader\":{\"energy\":100,\"cdS\":0}}",
+    "grader": 2
+   },
+   "afterLoad1": {
+    "version": 6,
+    "coins": 1318253,
+    "F": 19,
+    "C": 17,
+    "H": 19,
+    "V": 13,
+    "tracksV7": 1,
+    "workers": "{\"market_hand\":{\"energy\":99.87777777777784,\"cdS\":1},\"coop_hand\":{\"energy\":99.87777777777784,\"cdS\":2},\"hawker\":{\"energy\":99.87777777777784,\"cdS\":0},\"grader\":{\"energy\":99.87777777777784,\"cdS\":0}}",
+    "grader": 2,
+    "keys": 20
+   },
+   "afterReload2": {
+    "version": 6,
+    "coins": 1318245,
+    "F": 19,
+    "C": 17,
+    "H": 19,
+    "V": 13,
+    "tracksV7": 1,
+    "workers": "{\"market_hand\":{\"energy\":99.70000000000014,\"cdS\":0.40000000000000013},\"coop_hand\":{\"energy\":99.70000000000014,\"cdS\":0.39999999999999936},\"hawker\":{\"energy\":99.70000000000014,\"cdS\":0},\"grader\":{\"energy\":99.70000000000014,\"cdS\":0}}",
+    "grader": 2,
+    "keys": 20
+   },
+   "lsKeys": [
+    "eggfarm.save.bak",
+    "eggfarm.save",
+    "eggfarm.lease",
+    "eggfarm.telemetry",
+    "eggfarm.ui",
+    "eggfarm.install_id",
+    "eggfarm.save.v6_backup"
+   ],
+   "bakVersion": 6,
+   "anyV7Key": [],
+   "idb": "[{\"name\":\"eggfarm\",\"version\":1}]",
+   "console": [],
+   "v6backup": {
+    "present1": true,
+    "equalsInjected": true,
+    "unchangedAfterReload": true,
+    "backupVersion": 5,
+    "hasMarker": false
+   }
+  },
+  "v6": {
+   "pre": {
+    "version": 6,
+    "coins": 1317637,
+    "F": 19,
+    "C": 17,
+    "workers": "{\"market_hand\":{\"energy\":99.82222222222231,\"cdS\":0.5000000000000001},\"coop_hand\":{\"energy\":99.82222222222231,\"cdS\":1.4999999999999996},\"hawker\":{\"energy\":99.82222222222231,\"cdS\":0},\"grader\":{\"energy\":99.82222222222231,\"cdS\":0}}",
+    "grader": 2
+   },
+   "afterLoad1": {
+    "version": 6,
+    "coins": 1317629,
+    "F": 19,
+    "C": 17,
+    "H": 19,
+    "V": 13,
+    "tracksV7": 1,
+    "workers": "{\"market_hand\":{\"energy\":99.70000000000014,\"cdS\":0.40000000000000013},\"coop_hand\":{\"energy\":99.70000000000014,\"cdS\":0.39999999999999936},\"hawker\":{\"energy\":99.70000000000014,\"cdS\":0},\"grader\":{\"energy\":99.70000000000014,\"cdS\":0}}",
+    "grader": 2,
+    "keys": 20
+   },
+   "afterReload2": {
+    "version": 6,
+    "coins": 1366141,
+    "F": 19,
+    "C": 17,
+    "H": 19,
+    "V": 13,
+    "tracksV7": 1,
+    "workers": "{\"market_hand\":{\"energy\":99.52222222222245,\"cdS\":0.8},\"coop_hand\":{\"energy\":99.52222222222245,\"cdS\":0.7999999999999993},\"hawker\":{\"energy\":99.52222222222245,\"cdS\":0},\"grader\":{\"energy\":99.52222222222245,\"cdS\":0}}",
+    "grader": 2,
+    "keys": 20
+   },
+   "lsKeys": [
+    "eggfarm.save.bak",
+    "eggfarm.save",
+    "eggfarm.lease",
+    "eggfarm.telemetry",
+    "eggfarm.ui",
+    "eggfarm.install_id",
+    "eggfarm.save.v6_backup"
+   ],
+   "bakVersion": 6,
+   "anyV7Key": [],
+   "idb": "[{\"name\":\"eggfarm\",\"version\":1}]",
+   "console": [],
+   "v6backup": {
+    "present1": true,
+    "equalsInjected": true,
+    "unchangedAfterReload": true,
+    "backupVersion": 6,
+    "hasMarker": false
+   }
+  }
+ },
+ "6.webkitHScroll": [
+  {
+   "sw": 375,
+   "cw": 375,
+   "bsw": 375,
+   "sx": 0
+  },
+  {
+   "sw": 375,
+   "cw": 375,
+   "bsw": 375,
+   "sx": 0
+  },
+  {
+   "sw": 375,
+   "cw": 375,
+   "bsw": 375,
+   "sx": 0
+  },
+  {
+   "sw": 375,
+   "cw": 375,
+   "bsw": 375,
+   "sx": 0
+  },
+  {
+   "sw": 375,
+   "cw": 375,
+   "bsw": 375,
+   "sx": 0
+  }
+ ]
+}

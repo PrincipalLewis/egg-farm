@@ -1,0 +1,4 @@
+== pr12
+{"i_written_seq":0,"i_pick":"idb","i_reloadCoins":1000,"ii_pick":"idb","ii_reloadCoins":1000,"iii_lsSeq":0,"iii_pick":"idb","iii_reloadCoins":1000}
+== pr12b
+{"i_written_seq":6,"i_pick":"ls","i_reloadCoins":999999,"ii_pick":"ls","ii_reloadCoins":999999,"iii_lsSeq":2,"iii_pick":"idb","iii_reloadCoins":1000}

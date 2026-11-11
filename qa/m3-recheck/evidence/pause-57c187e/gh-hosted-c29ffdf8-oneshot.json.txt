@@ -1,0 +1,42 @@
+{
+  "checked_at_cet": "2026-11-06 01:48 CET",
+  "method": "cursor-github MCP one-shot (no poll)",
+  "head_sha": "c29ffdf8f10cb608686b200d17b001d79caaeda8",
+  "ls_remote": "c29ffdf8f10cb608686b200d17b001d79caaeda8\trefs/pull/115/head",
+  "ci": {
+    "run_id": 42139212054,
+    "name": "ci",
+    "run_number": 905,
+    "status": "in_progress",
+    "conclusion": null,
+    "html_url": "https://github.com/PrincipalLewis/egg-farm/actions/runs/42139212054",
+    "job": {
+      "id": 127634959044,
+      "name": "gate",
+      "status": "in_progress",
+      "conclusion": null,
+      "step_in_progress": "Unit tests (npm test; includes sync-economy --check)",
+      "pending_steps": ["Slow suites", "Release build", "Install browser (chromium)", "Release globals allowlist (chromium)", "build:html", "check-release-build --build-id"]
+    },
+    "standalone_release_globals": "not present among workflow_runs for this head_sha (skipped/not triggered on non-rc/* PR). Skipped ≠ pass; recorded per QA-D-1105-PR105-GO."
+  },
+  "pacing": {
+    "run_id": 42139212027,
+    "name": "pacing-x1-stack",
+    "run_number": 78,
+    "status": "in_progress",
+    "conclusion": null,
+    "html_url": "https://github.com/PrincipalLewis/egg-farm/actions/runs/42139212027",
+    "shards": [
+      {"id": 127635340667, "name": "pacing-x1-stack shard (seller15)", "status": "in_progress", "conclusion": null},
+      {"id": 127635340815, "name": "pacing-x1-stack shard (optimal)", "status": "in_progress", "conclusion": null},
+      {"id": 127635340347, "name": "pacing-x1-stack shard (casual)", "status": "in_progress", "conclusion": null}
+    ],
+    "aggregate": "not yet scheduled"
+  },
+  "k10_breeds_offset": {
+    "run_id": 42139212023,
+    "status": "in_progress",
+    "note": "known-red non-required monitor; not assessed"
+  }
+}

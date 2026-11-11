@@ -1,0 +1,16 @@
+PASS boundary $0.0999/s -> Wage $5.99/min — "Wage $5.99/min"
+PASS boundary $0.099999/s -> Wage $6.00/min — "Wage $6.00/min"
+PASS boundary $0.1/s -> Wage $0.10/s — "Wage $0.10/s"
+PASS boundary $0.5/s -> Wage $0.50/s — "Wage $0.50/s"
+PASS boundary $1.25/s -> Wage $1.25/s — "Wage $1.25/s"
+PASS boundary $12.34/s -> Wage $12.34/s — "Wage $12.34/s"
+PASS boundary $999.99/s -> Wage $999.99/s — "Wage $999.99/s"
+PASS boundary $999.994/s -> Wage $999.99/s — "Wage $999.99/s"
+PASS boundary $999.996/s -> Wage $1.0K/s — "Wage $1.0K/s"
+PASS boundary $1000/s -> Wage $1.0K/s — "Wage $1.0K/s"
+PASS boundary $1200/s -> Wage $1.2K/s — "Wage $1.2K/s"
+PASS boundary $0.0125/s -> Wage $0.75/min — "Wage $0.75/min"
+PASS boundary $0.001/s -> Wage $0.06/min — "Wage $0.06/min"
+PASS /min form has two decimals
+PASS label == fmt(exact economy.csv rate) == fmt(s2-money listedWageCentsPerSec) for all 52 (F, worker) rows — []
+SUMMARY 15/15

@@ -1,0 +1,984 @@
+{
+ "pr": null,
+ "branch": "main",
+ "sha": "dd52bfdc1c695cfc7695b3d63ba6a7883c5fd49b",
+ "pushed": true,
+ "build_label_checked": true,
+ "rev": 1,
+ "author": "QA Engineer, UI/Layout & Gameplay Verification",
+ "created": "2026-10-17T13:45:00+02:00",
+ "shots": [
+  {
+   "file": "chromium-dd52bfd-360x800-capped-collectiontab-card.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "chromium-dd52bfd-360x800-capped-collectiontab-full.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "chromium-dd52bfd-360x800-capped-farmtab-card.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "chromium-dd52bfd-360x800-capped-farmtab-full.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "chromium-dd52bfd-360x800-normal-collectiontab-card.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "chromium-dd52bfd-360x800-normal-collectiontab-full.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "chromium-dd52bfd-360x800-normal-farmtab-card.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "chromium-dd52bfd-360x800-normal-farmtab-full.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "chromium-dd52bfd-375x700-capped-collectiontab-card.png",
+   "engine": "chromium",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "chromium-dd52bfd-375x700-capped-collectiontab-full.png",
+   "engine": "chromium",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "chromium-dd52bfd-375x700-capped-farmtab-card.png",
+   "engine": "chromium",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "chromium-dd52bfd-375x700-capped-farmtab-full.png",
+   "engine": "chromium",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "chromium-dd52bfd-375x700-normal-collectiontab-card.png",
+   "engine": "chromium",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "chromium-dd52bfd-375x700-normal-collectiontab-full.png",
+   "engine": "chromium",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "chromium-dd52bfd-375x700-normal-farmtab-card.png",
+   "engine": "chromium",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "chromium-dd52bfd-375x700-normal-farmtab-full.png",
+   "engine": "chromium",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "chromium-dd52bfd-375x800-capped-collectiontab-card.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "chromium-dd52bfd-375x800-capped-collectiontab-full.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "chromium-dd52bfd-375x800-capped-farmtab-card.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "chromium-dd52bfd-375x800-capped-farmtab-full.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "chromium-dd52bfd-375x800-normal-collectiontab-card.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "chromium-dd52bfd-375x800-normal-collectiontab-full.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "chromium-dd52bfd-375x800-normal-farmtab-card.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "chromium-dd52bfd-375x800-normal-farmtab-full.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "chromium-dd52bfd-390x844-capped-collectiontab-card.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "chromium-dd52bfd-390x844-capped-collectiontab-full.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "chromium-dd52bfd-390x844-capped-farmtab-card.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "chromium-dd52bfd-390x844-capped-farmtab-full.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "chromium-dd52bfd-390x844-normal-collectiontab-card.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "chromium-dd52bfd-390x844-normal-collectiontab-full.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "chromium-dd52bfd-390x844-normal-farmtab-card.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "chromium-dd52bfd-390x844-normal-farmtab-full.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "firefox-dd52bfd-360x800-capped-collectiontab-card.png",
+   "engine": "firefox",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "firefox-dd52bfd-360x800-capped-collectiontab-full.png",
+   "engine": "firefox",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "firefox-dd52bfd-360x800-capped-farmtab-card.png",
+   "engine": "firefox",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "firefox-dd52bfd-360x800-capped-farmtab-full.png",
+   "engine": "firefox",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "firefox-dd52bfd-360x800-normal-collectiontab-card.png",
+   "engine": "firefox",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "firefox-dd52bfd-360x800-normal-collectiontab-full.png",
+   "engine": "firefox",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "firefox-dd52bfd-360x800-normal-farmtab-card.png",
+   "engine": "firefox",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "firefox-dd52bfd-360x800-normal-farmtab-full.png",
+   "engine": "firefox",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "firefox-dd52bfd-375x700-capped-collectiontab-card.png",
+   "engine": "firefox",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "firefox-dd52bfd-375x700-capped-collectiontab-full.png",
+   "engine": "firefox",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "firefox-dd52bfd-375x700-capped-farmtab-card.png",
+   "engine": "firefox",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "firefox-dd52bfd-375x700-capped-farmtab-full.png",
+   "engine": "firefox",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "firefox-dd52bfd-375x700-normal-collectiontab-card.png",
+   "engine": "firefox",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "firefox-dd52bfd-375x700-normal-collectiontab-full.png",
+   "engine": "firefox",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "firefox-dd52bfd-375x700-normal-farmtab-card.png",
+   "engine": "firefox",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "firefox-dd52bfd-375x700-normal-farmtab-full.png",
+   "engine": "firefox",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "firefox-dd52bfd-375x800-capped-collectiontab-card.png",
+   "engine": "firefox",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "firefox-dd52bfd-375x800-capped-collectiontab-full.png",
+   "engine": "firefox",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "firefox-dd52bfd-375x800-capped-farmtab-card.png",
+   "engine": "firefox",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "firefox-dd52bfd-375x800-capped-farmtab-full.png",
+   "engine": "firefox",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "firefox-dd52bfd-375x800-normal-collectiontab-card.png",
+   "engine": "firefox",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "firefox-dd52bfd-375x800-normal-collectiontab-full.png",
+   "engine": "firefox",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "firefox-dd52bfd-375x800-normal-farmtab-card.png",
+   "engine": "firefox",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "firefox-dd52bfd-375x800-normal-farmtab-full.png",
+   "engine": "firefox",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "firefox-dd52bfd-390x844-capped-collectiontab-card.png",
+   "engine": "firefox",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "firefox-dd52bfd-390x844-capped-collectiontab-full.png",
+   "engine": "firefox",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "firefox-dd52bfd-390x844-capped-farmtab-card.png",
+   "engine": "firefox",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "firefox-dd52bfd-390x844-capped-farmtab-full.png",
+   "engine": "firefox",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "firefox-dd52bfd-390x844-normal-collectiontab-card.png",
+   "engine": "firefox",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "firefox-dd52bfd-390x844-normal-collectiontab-full.png",
+   "engine": "firefox",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "firefox-dd52bfd-390x844-normal-farmtab-card.png",
+   "engine": "firefox",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "firefox-dd52bfd-390x844-normal-farmtab-full.png",
+   "engine": "firefox",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "sprite-chromium-dd52bfd-360x800.png",
+   "engine": "chromium",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "coop sprite crop, farm view, animations paused, F3/C2 $1"
+  },
+  {
+   "file": "sprite-chromium-dd52bfd-375x700.png",
+   "engine": "chromium",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "coop sprite crop, farm view, animations paused, F3/C2 $1"
+  },
+  {
+   "file": "sprite-chromium-dd52bfd-375x800.png",
+   "engine": "chromium",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "coop sprite crop, farm view, animations paused, F3/C2 $1"
+  },
+  {
+   "file": "sprite-chromium-dd52bfd-390x844.png",
+   "engine": "chromium",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "coop sprite crop, farm view, animations paused, F3/C2 $1"
+  },
+  {
+   "file": "sprite-firefox-dd52bfd-360x800.png",
+   "engine": "firefox",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "coop sprite crop, farm view, animations paused, F3/C2 $1"
+  },
+  {
+   "file": "sprite-firefox-dd52bfd-375x700.png",
+   "engine": "firefox",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "coop sprite crop, farm view, animations paused, F3/C2 $1"
+  },
+  {
+   "file": "sprite-firefox-dd52bfd-375x800.png",
+   "engine": "firefox",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "coop sprite crop, farm view, animations paused, F3/C2 $1"
+  },
+  {
+   "file": "sprite-firefox-dd52bfd-390x844.png",
+   "engine": "firefox",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "coop sprite crop, farm view, animations paused, F3/C2 $1"
+  },
+  {
+   "file": "sprite-webkit-dd52bfd-360x800.png",
+   "engine": "webkit",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "coop sprite crop, farm view, animations paused, F3/C2 $1"
+  },
+  {
+   "file": "sprite-webkit-dd52bfd-375x700.png",
+   "engine": "webkit",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "coop sprite crop, farm view, animations paused, F3/C2 $1"
+  },
+  {
+   "file": "sprite-webkit-dd52bfd-375x800.png",
+   "engine": "webkit",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "coop sprite crop, farm view, animations paused, F3/C2 $1"
+  },
+  {
+   "file": "sprite-webkit-dd52bfd-390x844.png",
+   "engine": "webkit",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "coop sprite crop, farm view, animations paused, F3/C2 $1"
+  },
+  {
+   "file": "webkit-dd52bfd-360x800-capped-collectiontab-card.png",
+   "engine": "webkit",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "webkit-dd52bfd-360x800-capped-collectiontab-full.png",
+   "engine": "webkit",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "webkit-dd52bfd-360x800-capped-farmtab-card.png",
+   "engine": "webkit",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "webkit-dd52bfd-360x800-capped-farmtab-full.png",
+   "engine": "webkit",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "webkit-dd52bfd-360x800-normal-collectiontab-card.png",
+   "engine": "webkit",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "webkit-dd52bfd-360x800-normal-collectiontab-full.png",
+   "engine": "webkit",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "webkit-dd52bfd-360x800-normal-farmtab-card.png",
+   "engine": "webkit",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "webkit-dd52bfd-360x800-normal-farmtab-full.png",
+   "engine": "webkit",
+   "size": "360x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "webkit-dd52bfd-375x700-capped-collectiontab-card.png",
+   "engine": "webkit",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "webkit-dd52bfd-375x700-capped-collectiontab-full.png",
+   "engine": "webkit",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "webkit-dd52bfd-375x700-capped-farmtab-card.png",
+   "engine": "webkit",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "webkit-dd52bfd-375x700-capped-farmtab-full.png",
+   "engine": "webkit",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "webkit-dd52bfd-375x700-normal-collectiontab-card.png",
+   "engine": "webkit",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "webkit-dd52bfd-375x700-normal-collectiontab-full.png",
+   "engine": "webkit",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "webkit-dd52bfd-375x700-normal-farmtab-card.png",
+   "engine": "webkit",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "webkit-dd52bfd-375x700-normal-farmtab-full.png",
+   "engine": "webkit",
+   "size": "375x700",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "webkit-dd52bfd-375x800-capped-collectiontab-card.png",
+   "engine": "webkit",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "webkit-dd52bfd-375x800-capped-collectiontab-full.png",
+   "engine": "webkit",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "webkit-dd52bfd-375x800-capped-farmtab-card.png",
+   "engine": "webkit",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "webkit-dd52bfd-375x800-capped-farmtab-full.png",
+   "engine": "webkit",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "webkit-dd52bfd-375x800-normal-collectiontab-card.png",
+   "engine": "webkit",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "webkit-dd52bfd-375x800-normal-collectiontab-full.png",
+   "engine": "webkit",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "webkit-dd52bfd-375x800-normal-farmtab-card.png",
+   "engine": "webkit",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "webkit-dd52bfd-375x800-normal-farmtab-full.png",
+   "engine": "webkit",
+   "size": "375x800",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "webkit-dd52bfd-390x844-capped-collectiontab-card.png",
+   "engine": "webkit",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "webkit-dd52bfd-390x844-capped-collectiontab-full.png",
+   "engine": "webkit",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "webkit-dd52bfd-390x844-capped-farmtab-card.png",
+   "engine": "webkit",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, card crop"
+  },
+  {
+   "file": "webkit-dd52bfd-390x844-capped-farmtab-full.png",
+   "engine": "webkit",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), coop-capped F3/C19 $20, full page"
+  },
+  {
+   "file": "webkit-dd52bfd-390x844-normal-collectiontab-card.png",
+   "engine": "webkit",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "webkit-dd52bfd-390x844-normal-collectiontab-full.png",
+   "engine": "webkit",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Collection tab ([data-tab=collection].active asserted), non-capped control F3/C2 $1, full page"
+  },
+  {
+   "file": "webkit-dd52bfd-390x844-normal-farmtab-card.png",
+   "engine": "webkit",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, card crop"
+  },
+  {
+   "file": "webkit-dd52bfd-390x844-normal-farmtab-full.png",
+   "engine": "webkit",
+   "size": "390x844",
+   "docked": false,
+   "save": "inline (rcprobe.mjs STATES)",
+   "seed": null,
+   "state": "Upgrades > Farm tab ([data-tab=farm].active asserted), non-capped control F3/C2 $1, full page"
+  }
+ ]
+}

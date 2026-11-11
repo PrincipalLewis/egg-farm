@@ -1,0 +1,22 @@
+diff vs 844f8e15 (rc/v5)
+ src/telemetry/telemetry.ts          | 27 ++++++++++---
+ tests/export-global.test.ts         |  2 +-
+ tests/telemetry-m3.test.ts          |  2 +-
+ tests/telemetry-ring-export.test.ts | 76 +++++++++++++++++++++++++++++++++++++
+ tests/telemetry.test.ts             |  2 +-
+ tests/zg-telemetry-annotate.test.ts |  2 +-
+ 6 files changed, 102 insertions(+), 9 deletions(-)
+---
+M	src/telemetry/telemetry.ts
+M	tests/export-global.test.ts
+M	tests/telemetry-m3.test.ts
+A	tests/telemetry-ring-export.test.ts
+M	tests/telemetry.test.ts
+M	tests/zg-telemetry-annotate.test.ts
+--- numstat ---
+22	5	src/telemetry/telemetry.ts
+1	1	tests/export-global.test.ts
+1	1	tests/telemetry-m3.test.ts
+76	0	tests/telemetry-ring-export.test.ts
+1	1	tests/telemetry.test.ts
+1	1	tests/zg-telemetry-annotate.test.ts

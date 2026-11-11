@@ -1,0 +1,10 @@
+09:15:33 CET
+origin head 694468eaad069cd58d48108c1dca11a8c6f57158
+{"headRefOid":"694468eaad069cd58d48108c1dca11a8c6f57158","isDraft":false,"mergeStateStatus":"UNSTABLE","mergeable":"MERGEABLE"}
+[{"conclusion":"","createdAt":"2026-10-30T08:14:44Z","databaseId":41025148264,"status":"in_progress"}]
+balance.json diff vs rc/v5:
+(empty = none)
+44:  validateM5(b.m4, W); // v5 F3: m4.flags (0/1, known names) + M5 tunable rules
+46:  if (m4On(b)) for (const [f, ks] of Object.entries(M5_TC_KEYS)) if ((b.m4?.flags as any)?.[f] === 1) ks.forEach(k => tcNum(b, k));
+{"c":"success","h":"694468eaad069cd58d48108c1dca11a8c6f57158","j":[{"c":"success","n":"gate"},{"c":"skipped","n":"release-globals"}],"t0":"2026-10-30T08:14:44Z","t1":"2026-10-30T08:23:25Z"}
+{"headRefOid":"694468eaad069cd58d48108c1dca11a8c6f57158","mergeStateStatus":"CLEAN","mergeable":"MERGEABLE"}

@@ -1,0 +1,6 @@
+42,43c42,43
+< passed	economy-copy.test.ts :: check script exits 0 (match or skipped)
+< passed	economy-copy.test.ts :: data/economy.csv == product/economy.csv (normalised line endings)
+---
+> failed	economy-copy.test.ts :: check script exits 0 (match or skipped)
+> failed	economy-copy.test.ts :: data/economy.csv == product/economy.csv (normalised line endings)

@@ -1,0 +1,18 @@
+pacing-x1-stack run 42114655642 @ headSha 560b4d437f06df1e399d3f91c7af850b2b1e2bb5
+conclusion: failure
+shards:
+  optimal  127550971851 SUCCESS
+  casual   127550972099 SUCCESS
+  seller15 127550972253 SUCCESS
+aggregate job 127573452971 FAILURE
+
+Verdict headline: ## pacing-x1-stack: **FAIL**
+rows: 45 PASS, 0 FAIL, 1 WARN, 20 INFO, 0 PENDING-REPRED, 3 N/A (row 903), 12 NOT-WIRED (3 blocking), 24 EXCLUDED
+
+Named FAIL lines (only):
+FAIL: blocking row 904 optimal NOT-WIRED
+FAIL: blocking row 904 seller15 NOT-WIRED
+FAIL: blocking row 904 casual NOT-WIRED
+
+Row 904 = RC-only. Aggregate FAIL attributed solely to these three named lines. No pacing grant.
+WARN (non-FAIL): L897 optimal N / H: worst 191 > 180 s (pre-existing L0–30 dead zone, known risk)

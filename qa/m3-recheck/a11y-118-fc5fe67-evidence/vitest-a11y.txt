@@ -1,0 +1,15 @@
+LOCK+START 2026-11-10T00:18:57+01:00 loadavg=17.84 10.82 5.84 15/2907 237506 node=v20.19.2 head=fc5fe67f18085784661b10bc292c67d90a24f8f0
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/a11y-118-fc5fe67/wt
+
+ ✓ tests/order-chip-a11y.test.ts > orderChipLabel copy helper (one swappable string) > singular only at raw 1; plural at 0 and >1; uses the given visible string verbatim 996ms
+ ✓ tests/order-chip-a11y.test.ts > OC-A11Y-1/2: rendered .chip.arrive names > name starts with .tag .num and is exactly "<num> egg(s) wanted by customer" (1, 0, 3, 1,500, 12.3K) 401ms
+ ✓ tests/order-chip-a11y.test.ts > OC-A11Y-1/2: rendered .chip.arrive names > no aria-label="Customer" remains in chip markup; no role / live region added
+ ✓ tests/order-chip-a11y.test.ts > OC-A11Y-3: name follows the count on re-render > 4 -> 3 -> 1 -> 0: name updates in the same render as .num, never stale
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  00:18:58
+   Duration  4.55s (transform 1.65s, setup 0ms, collect 1.26s, tests 1.72s, environment 923ms, prepare 390ms)
+
+EXIT=0 END 2026-11-10T00:19:02+01:00

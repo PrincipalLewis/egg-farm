@@ -1,0 +1,15 @@
+ci/gate 42114655500 conclusion=success headSha=560b4d437f06df1e399d3f91c7af850b2b1e2bb5
+  gate job 127550971018 SUCCESS
+  release-globals job 127558550472 SKIPPED (≠ pass)
+verify-smoke 42114655541 conclusion=success
+k10-breeds-offset 42114655863 conclusion=success
+pacing-x1-stack 42114655642 conclusion=failure
+  shard optimal 127550971851 SUCCESS
+  shard casual 127550972099 SUCCESS
+  shard seller15 127550972253 SUCCESS
+  aggregate pacing-x1-stack 127573452971 FAILURE
+=== reconfirm 2026-11-05T23:39:17+01:00 ===
+ci 42114655500 success 560b4d4
+verify-smoke 42114655541 success 560b4d4
+k10-breeds-offset 42114655863 success 560b4d4
+pacing-x1-stack 42114655642 failure 560b4d4

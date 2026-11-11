@@ -1,0 +1,25 @@
+{
+ "id": "FX-F27",
+ "spec": "product/collection/m5.1-zero-gain-purchase-ui.md v0.3.5 sha1 1098f14e100edb0e80b43a099777be22fa13fd04 \u00a79",
+ "ac": [
+  "ZG-AC11",
+  "ZG-AC14",
+  "ZG-AC5",
+  "ZG-AC16"
+ ],
+ "state": "derived: first post-action state of tests/bot-m4.ts seed 1 seller15 at the RC (observe-only hook) with 27<=F<=29, COLL offered+affordable, gain(COLL)<=0, >=1 affordable non-ZG row",
+ "coins": {
+  "rule": "from trace"
+ },
+ "flags": {
+  "m4.enabled": 1
+ },
+ "pre": [
+  "27<=F<=29",
+  "COLL offered",
+  "affordable(COLL)",
+  "gain(COLL)<=0",
+  ">=1 affordable non-ZG row"
+ ],
+ "fallback": "FX-F27s (substitute, layout-only, labelled): first grid state F27..29 meeting the same preconditions; never reported as FX-F27"
+}

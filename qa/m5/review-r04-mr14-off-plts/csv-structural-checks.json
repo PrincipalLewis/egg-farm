@@ -1,0 +1,207 @@
+{
+  "PL_AC5": {
+    "bc_cols": 32,
+    "bc_names": [
+      "bc_unlock_farm",
+      "bc_slot2_farm",
+      "bc_slot3_farm",
+      "bc_rare_farm",
+      "bc_legendary_farm",
+      "bc_hatch_cost_s",
+      "bc_hatch_farm_share_bp",
+      "bc_hatch_min_cents",
+      "bc_hatch_time_s",
+      "bc_settle_s",
+      "bc_incubators",
+      "bc_w_common",
+      "bc_w_rare",
+      "bc_w_epic",
+      "bc_w_legendary",
+      "bc_pity_rare_after",
+      "bc_star_cap",
+      "bc_star_bonus_bp",
+      "bc_lay_cap_bp_lt18",
+      "bc_lay_cap_bp",
+      "bc_away_cap_bp",
+      "bc_broody_cap_bp",
+      "bc_trait_leghorn_bp",
+      "bc_trait_sussex_bp",
+      "bc_trait_orpington_bp",
+      "bc_trait_rhode_island_red_bp",
+      "bc_trait_brahma_bp",
+      "bc_trait_ayam_cemani_bp",
+      "bc_trait_cochin_bp",
+      "bc_trait_cream_legbar_bp",
+      "bc_present_calm_w_s",
+      "bc_present_calm_k"
+    ],
+    "i_shared_cols": 150,
+    "i_ref_cols": 152,
+    "i_cand_cols": 184,
+    "i_mismatches_sample": [
+      [
+        0,
+        "tc_streak_cap",
+        "0.27",
+        "0.28"
+      ],
+      [
+        "missing_col",
+        "combo_window_s"
+      ],
+      [
+        1,
+        "tc_streak_cap",
+        "0.27",
+        "0.28"
+      ],
+      [
+        "missing_col",
+        "combo_window_s"
+      ],
+      [
+        2,
+        "tc_streak_cap",
+        "0.27",
+        "0.28"
+      ],
+      [
+        "missing_col",
+        "combo_window_s"
+      ],
+      [
+        3,
+        "tc_streak_cap",
+        "0.27",
+        "0.28"
+      ],
+      [
+        "missing_col",
+        "combo_window_s"
+      ],
+      [
+        4,
+        "tc_streak_cap",
+        "0.27",
+        "0.28"
+      ],
+      [
+        "missing_col",
+        "combo_window_s"
+      ],
+      [
+        5,
+        "tc_streak_cap",
+        "0.27",
+        "0.28"
+      ],
+      [
+        "missing_col",
+        "combo_window_s"
+      ],
+      [
+        6,
+        "tc_streak_cap",
+        "0.27",
+        "0.28"
+      ],
+      [
+        "missing_col",
+        "combo_window_s"
+      ],
+      [
+        7,
+        "tc_streak_cap",
+        "0.27",
+        "0.28"
+      ]
+    ],
+    "i_mismatch_count": ">21 truncated",
+    "ii_reach0_10_vs_baseline": {
+      "optimal": {
+        "mismatches": 0,
+        "samples": []
+      },
+      "seller15": {
+        "mismatches": 0,
+        "samples": []
+      },
+      "casual": {
+        "mismatches": 0,
+        "samples": []
+      }
+    }
+  },
+  "PL_AC6": {
+    "n_rows": 31,
+    "levels": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "a": {
+      "farm_cost_30": 624316.0,
+      "pass": true
+    },
+    "b": {
+      "misses": [
+        {
+          "L": 11,
+          "step": 2.01462,
+          "fc": 2756.0,
+          "prev": 1368.0
+        },
+        {
+          "L": 17,
+          "step": 1.42643,
+          "fc": 12273.0,
+          "prev": 8604.0
+        },
+        {
+          "L": 20,
+          "step": 1.311657,
+          "fc": 24789.0,
+          "prev": 18899.0
+        }
+      ],
+      "pass": false
+    },
+    "d": {
+      "max_level": 30,
+      "pass": true
+    },
+    "c_target_steps": {
+      "15": 1.1634,
+      "20": 1.3117,
+      "25": 1.0
+    }
+  }
+}

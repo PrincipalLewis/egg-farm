@@ -1,0 +1,302 @@
+{
+ "pr": 40,
+ "branch": "main (contains #40)",
+ "sha": "dd52bfdc1c695cfc7695b3d63ba6a7883c5fd49b",
+ "pushed": true,
+ "build_label_checked": true,
+ "build_label": "m3-rc1-pre+dd52bfd",
+ "rev": 1,
+ "author": "QA Engineer, UI/Layout & Gameplay Verification",
+ "created": "2026-10-17T12:28:00+02:00",
+ "note": "Collection tab asserted in-probe ([data-tab=collection].active)",
+ "shots": [
+  {
+   "file": "firefox-dd52bfd-360x800-capped-collection-card.png",
+   "engine": "firefox",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "firefox-dd52bfd-360x800-capped-collection-full.png",
+   "engine": "firefox",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab (full page), F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "firefox-dd52bfd-360x800-normal-collection-card.png",
+   "engine": "firefox",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C2, $1, not capped"
+  },
+  {
+   "file": "firefox-dd52bfd-360x800-normal-collection-full.png",
+   "engine": "firefox",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab (full page), F3/C2, $1, not capped"
+  },
+  {
+   "file": "firefox-dd52bfd-375x700-capped-collection-card.png",
+   "engine": "firefox",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "firefox-dd52bfd-375x700-capped-collection-full.png",
+   "engine": "firefox",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab (full page), F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "firefox-dd52bfd-375x700-normal-collection-card.png",
+   "engine": "firefox",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C2, $1, not capped"
+  },
+  {
+   "file": "firefox-dd52bfd-375x700-normal-collection-full.png",
+   "engine": "firefox",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab (full page), F3/C2, $1, not capped"
+  },
+  {
+   "file": "firefox-dd52bfd-375x800-capped-collection-card.png",
+   "engine": "firefox",
+   "size": "375×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "firefox-dd52bfd-375x800-capped-collection-full.png",
+   "engine": "firefox",
+   "size": "375×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab (full page), F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "firefox-dd52bfd-375x800-normal-collection-card.png",
+   "engine": "firefox",
+   "size": "375×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C2, $1, not capped"
+  },
+  {
+   "file": "firefox-dd52bfd-375x800-normal-collection-full.png",
+   "engine": "firefox",
+   "size": "375×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab (full page), F3/C2, $1, not capped"
+  },
+  {
+   "file": "firefox-dd52bfd-390x844-capped-collection-card.png",
+   "engine": "firefox",
+   "size": "390×844",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "firefox-dd52bfd-390x844-capped-collection-full.png",
+   "engine": "firefox",
+   "size": "390×844",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab (full page), F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "firefox-dd52bfd-390x844-normal-collection-card.png",
+   "engine": "firefox",
+   "size": "390×844",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C2, $1, not capped"
+  },
+  {
+   "file": "firefox-dd52bfd-390x844-normal-collection-full.png",
+   "engine": "firefox",
+   "size": "390×844",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab (full page), F3/C2, $1, not capped"
+  },
+  {
+   "file": "webkit-dd52bfd-360x800-capped-collection-card.png",
+   "engine": "webkit",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "webkit-dd52bfd-360x800-capped-collection-full.png",
+   "engine": "webkit",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab (full page), F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "webkit-dd52bfd-360x800-normal-collection-card.png",
+   "engine": "webkit",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C2, $1, not capped"
+  },
+  {
+   "file": "webkit-dd52bfd-360x800-normal-collection-full.png",
+   "engine": "webkit",
+   "size": "360×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab (full page), F3/C2, $1, not capped"
+  },
+  {
+   "file": "webkit-dd52bfd-375x700-capped-collection-card.png",
+   "engine": "webkit",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "webkit-dd52bfd-375x700-capped-collection-full.png",
+   "engine": "webkit",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab (full page), F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "webkit-dd52bfd-375x700-normal-collection-card.png",
+   "engine": "webkit",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C2, $1, not capped"
+  },
+  {
+   "file": "webkit-dd52bfd-375x700-normal-collection-full.png",
+   "engine": "webkit",
+   "size": "375×700",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab (full page), F3/C2, $1, not capped"
+  },
+  {
+   "file": "webkit-dd52bfd-375x800-capped-collection-card.png",
+   "engine": "webkit",
+   "size": "375×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "webkit-dd52bfd-375x800-capped-collection-full.png",
+   "engine": "webkit",
+   "size": "375×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab (full page), F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "webkit-dd52bfd-375x800-normal-collection-card.png",
+   "engine": "webkit",
+   "size": "375×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C2, $1, not capped"
+  },
+  {
+   "file": "webkit-dd52bfd-375x800-normal-collection-full.png",
+   "engine": "webkit",
+   "size": "375×800",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab (full page), F3/C2, $1, not capped"
+  },
+  {
+   "file": "webkit-dd52bfd-390x844-capped-collection-card.png",
+   "engine": "webkit",
+   "size": "390×844",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "webkit-dd52bfd-390x844-capped-collection-full.png",
+   "engine": "webkit",
+   "size": "390×844",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab (full page), F3/C19, $20, coop-capped, short of coins"
+  },
+  {
+   "file": "webkit-dd52bfd-390x844-normal-collection-card.png",
+   "engine": "webkit",
+   "size": "390×844",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab, \"Collect per tap\" card crop, F3/C2, $1, not capped"
+  },
+  {
+   "file": "webkit-dd52bfd-390x844-normal-collection-full.png",
+   "engine": "webkit",
+   "size": "390×844",
+   "docked": false,
+   "save": "inline v5 save (probe st())",
+   "seed": 5,
+   "state": "Upgrades > Collection tab (full page), F3/C2, $1, not capped"
+  }
+ ]
+}

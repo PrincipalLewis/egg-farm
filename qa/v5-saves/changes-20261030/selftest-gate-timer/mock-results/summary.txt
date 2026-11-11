@@ -1,0 +1,2 @@
+G0-pins | PASS | HARD | exit 0
+2026-10-30 08:08:57 CET WARNING lock window: 0 min elapsed of 0 (QA-D-1029-V5E-SCOPE). If it will overrun, tell HoQ and UI QA NOW.

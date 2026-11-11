@@ -1,0 +1,4 @@
+1c1
+< # Corrupt-save recovery when there is no valid .bak · **v0.2.3-M4.1 FINAL** · 2026-10-21 17:25 CEST · HoP
+---
+> # Corrupt-save recovery when there is no valid .bak · **v0.2.3-M4.1 FINAL** · 2026-10-21 17:25 CEST, amended 2026-10-23 00:22 CEST (D-HOP-2026-10-23-01) · HoP

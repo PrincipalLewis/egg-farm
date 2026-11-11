@@ -1,0 +1,32 @@
+LOCK+START 2026-11-10T00:10:11+01:00 loadavg=2.88 2.65 2.12 3/2676 118364 node=v24.22.1 head=cf55d44a057d8f7843481219f9ea1eb2602a95b1
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/goldens-111-cf55d44/wt
+
+ ✓ tests/v5-golden-game.test.ts > golden Game: spawn driver (R14/R15, sizing §12.2) > flag off: the spot probe is never read; tap / layout / frames change nothing golden
+ ✓ tests/v5-golden-game.test.ts > golden Game: spawn driver (R14/R15, sizing §12.2) > due + attended: Game measures the valid spot ids once and dispatches spawnGolden; collectible_id 1
+ ✓ tests/v5-golden-game.test.ts > golden Game: spawn driver (R14/R15, sizing §12.2) > not attended (menu / sheet): no focus, no measuring, no spawn
+ ✓ tests/v5-golden-game.test.ts > golden Game: spawn driver (R14/R15, sizing §12.2) > R15: an empty list defers; re-measured after 500 ms of focus, not before; a layout change re-measures at once
+ ✓ tests/v5-golden-game.test.ts > golden Game: spawn driver (R14/R15, sizing §12.2) > layoutChanged while not due, while unattended or with an egg on screen: no measuring
+ ✓ tests/v5-golden-game.test.ts > golden Game: tap + collectible_id (R6, R19/R20, §8) > tap under a menu does nothing (R6); attended after the grace: one reward, same collectible_id; the next egg is id 2
+ ✓ tests/v5-golden-game.test.ts > golden Game: tap + collectible_id (R6, R19/R20, §8) > a Frenzy roll: frenzy_started and the later frenzy_ended{timeout} carry the collectible_id of the egg that started it
+ ✓ tests/v5-golden-game.test.ts > golden Game: tap + collectible_id (R6, R19/R20, §8) > an egg of unknown origin (restored state) forwards with no collectible_id
+ ✓ tests/v5-golden-game.test.ts > golden Game: pagehide / takeover / reset seams (R10b, R10c, A24-1) > endSession: collectible_expired{reload} with its id BEFORE session_end; the save holds the fresh gap and no egg
+ ✓ tests/v5-golden-game.test.ts > golden Game: pagehide / takeover / reset seams (R10b, R10c, A24-1) > endSession with no egg / flag off: only session_end (byte-identical save path)
+ ✓ tests/v5-golden-game.test.ts > golden Game: pagehide / takeover / reset seams (R10b, R10c, A24-1) > takeover (deactivate): collectible_expired{takeover} before freezing; Frenzy time kept for the new tab
+ ✓ tests/v5-golden-game.test.ts > golden Game: pagehide / takeover / reset seams (R10b, R10c, A24-1) > beginReset: expired{reset} + frenzy_ended{reset} (run stats) then save_reset; nothing saved afterwards
+ ✓ tests/v5-golden-game.test.ts > golden Game: pagehide / takeover / reset seams (R10b, R10c, A24-1) > beginReset flag off: just resetting + save_reset (same as the old inline path)
+ ✓ tests/v5-golden-game.test.ts > golden Game: refuseNewer is not a takeover (Architect FINAL 2026-11-05) > newer save found on write: egg, evRng and gap untouched; no expire; nothing written
+ ✓ tests/v5-golden-game.test.ts > golden Game: refuseNewer is not a takeover (Architect FINAL 2026-11-05) > newer save found on write while hidden: egg, evRng and gap untouched; no expire; nothing written
+ ✓ tests/v5-golden-game.test.ts > golden UI helper: validSpotIds (R14 rect test; geometry from the caller) > a spot is valid iff its hit box grown by the zone clearance overlaps no zone; order follows the spot list
+ ✓ tests/v5-golden-game.test.ts > golden UI helper: validSpotIds (R14 rect test; geometry from the caller) > clearance per zone (16 default zones, 0 for the pill); touching edges is not an overlap
+ ✓ tests/v5-golden-game.test.ts > golden UI helper: validSpotIds (R14 rect test; geometry from the caller) > no zones -> every spot; no spots -> [] (R15 defer)
+ ✓ tests/v5-golden-game.test.ts > golden persist A (Architect T4-T6) > T4: goldenUnload once = one collectible_expired + exactly one draw; a second call is a no-op (same object, no event, no draw)
+ ✓ tests/v5-golden-game.test.ts > golden persist A (Architect T4-T6) > T5: endSession = one reload expire; live rng/gap = drawGap(stripEgg(pre)); serialize(post) == m5Persist(post) with the same gap/rng (B draws nothing); repeat pagehide is idempotent
+ ✓ tests/v5-golden-game.test.ts > golden persist A (Architect T4-T6) > T6: m5Offline egg arm == goldenUnload(..., offline): byte-same egg fields and events
+
+ Test Files  1 passed (1)
+      Tests  21 passed (21)
+   Start at  00:10:12
+   Duration  499ms (transform 247ms, setup 0ms, collect 305ms, tests 31ms, environment 0ms, prepare 47ms)
+
+EXIT=0 END 2026-11-10T00:10:12+01:00

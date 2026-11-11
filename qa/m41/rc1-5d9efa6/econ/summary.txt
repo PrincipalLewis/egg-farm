@@ -1,0 +1,14 @@
+2026-10-24 14:44:33 CEST === econ driver start
+2026-10-24 14:44:33 CEST dd223f5 HEAD dd223f5 porcelain 0
+2026-10-24 14:47:25 CEST dd223f5 pacing trio exit=0 172s       Tests  14 passed (14)
+2026-10-24 14:58:18 CEST dd223f5 per-seed dump exit=0 653s
+2026-10-24 15:01:29 CEST dd223f5 AC7 TS workers exit=0 191s RESULT: PASS
+2026-10-24 15:01:29 CEST 5d9efa6 HEAD 5d9efa6 porcelain 0
+2026-10-24 15:04:12 CEST 5d9efa6 pacing trio exit=0 163s       Tests  14 passed (14)
+2026-10-24 15:14:55 CEST 5d9efa6 per-seed dump exit=0 643s
+2026-10-24 15:18:28 CEST 5d9efa6 AC7 TS workers exit=0 213s RESULT: PASS
+2026-10-24 15:18:28 CEST compare exit=0 ECON_COMPARE metrics_changed=0 seeds_worse=0 per_seed_identical=true
+2026-10-24 15:18:28 CEST printed pacing reports diff lines: 0
+2026-10-24 15:18:28 CEST ECON_DONE
+2026-10-24 15:26:35 CEST dd223f5 test:slow exit=0 487s       Tests  16 passed | 1 skipped (17)
+2026-10-24 15:26:35 CEST ECON_SLOW_DONE

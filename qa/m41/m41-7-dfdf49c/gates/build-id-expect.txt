@@ -1,0 +1,5 @@
+m3-rc1-pre+dfdf49c [BUILD_PREFIX='m3-rc1-pre' from scripts/build-id.ts@dfdf49c; no suffix allowed]
+dist/index.html: ["m3-rc1-pre+dfdf49c"]
+dist-qa/index.html: ["m3-rc1-pre+dfdf49c"]
+dist-html/egg-farm.html: ["m3-rc1-pre+dfdf49c"]
+PASS build-id ["m3-rc1-pre+dfdf49c"] want m3-rc1-pre+dfdf49c [BUILD_PREFIX='m3-rc1-pre' from scripts/build-id.ts@dfdf49c; no suffix allowed]

@@ -1,0 +1,5 @@
+c43d2db5dd56f90096a6ba5c509d33ccef69117d 2ec5b803e65bc6c16299202d581114e3cacdebdf 844f8e15774daeb1c0a855cb69b1fabd2f0ab820 Merge rc/v5 into feat/v5-abilities-sim (HoQA merge-forward for #112)
+2ec5b803e65bc6c16299202d581114e3cacdebdf cc0642ae4730335eb79f0d047145d6a9d5770b9e fix(v5): abilities durS on AbilityState; drop top-level abilityDurS (#112 contract)
+cc0642ae4730335eb79f0d047145d6a9d5770b9e 30df38c0a0bd5d48db96d0705abccc6db197d161 feat(v5): abilities sim — fireAbility/activateAll, call timer, Rush/Shout/Sweep/Inspect effects
+
+exit_code=0

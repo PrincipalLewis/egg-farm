@@ -1,0 +1,25 @@
+{
+ "id": "CSR9a-3-fallback-savedAt-invalid",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-9a"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/TRIG-parse-truncated.raw"
+  },
+  "eggfarm.save.v6_backup": {
+   "ref": "raw/V6B-valid-unmarked-F12-savedAt-pre2020.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "recovered_from": "v6_backup",
+  "notice": "M2",
+  "variant": "fallback",
+  "body": "We restored an earlier save. A little recent progress may be missing."
+ }
+}

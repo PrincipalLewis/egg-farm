@@ -1,0 +1,44 @@
+{
+ "engine": "webkit",
+ "port": 4460,
+ "asset_sha256": "291229bca7e6d6fbcc12626ca6c07a4c265f05b1018ca9cb32ad10d05075bbc7",
+ "results": [
+  {
+   "fixture": "m1-rc2-v4-12min",
+   "rep": 1,
+   "now": 1792087260000,
+   "version": 6,
+   "savedAt": 1792087260000,
+   "sha256": "6d5e564852705184a963dc3f1c68f69a1fc162c620cae5a2c533681fd06ee7e4",
+   "bytes": 796,
+   "hasM4": [],
+   "coins": 141585,
+   "errs": []
+  },
+  {
+   "fixture": "m1-rc2-v4-12min",
+   "rep": 2,
+   "now": 1792087260000,
+   "version": 6,
+   "savedAt": 1792087260000,
+   "sha256": "6d5e564852705184a963dc3f1c68f69a1fc162c620cae5a2c533681fd06ee7e4",
+   "bytes": 796,
+   "hasM4": [],
+   "coins": 141585,
+   "errs": []
+  },
+  {
+   "fixture": "m2-rc1-v5-12min",
+   "rep": 1,
+   "now": 1792087260000,
+   "version": 6,
+   "savedAt": 1792087260000,
+   "sha256": "3ba8d98ea8dc0883e53baae045ec738a7d4b8e644dbea84b01d7e2652ec38d54",
+   "bytes": 1002,
+   "hasM4": [],
+   "coins": 213464,
+   "errs": []
+  }
+ ],
+ "build_id": "m3-rc1-pre+a01faea"
+}

@@ -1,0 +1,368 @@
+[
+ {
+  "n": "real market_hand F23 -> \"Wage $5.75/min\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $5.75/min",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 131.5,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "real market_hand F24 -> \"Wage $0.10/s\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $0.10/s",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 117.4,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "real coop_hand F30 -> \"Wage $0.25/s\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $0.25/s",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 117.4,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "boundary $0.0999/s market_hand -> \"Wage $5.99/min\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $5.99/min",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 131.5,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "boundary $0.0999/s coop_hand -> \"Wage $5.99/min\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $5.99/min",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 131.5,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "boundary $0.1/s market_hand -> \"Wage $0.10/s\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $0.10/s",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 117.4,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "boundary $0.1/s coop_hand -> \"Wage $0.10/s\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $0.10/s",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 117.4,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "boundary $0.5/s market_hand -> \"Wage $0.50/s\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $0.50/s",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 117.4,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "boundary $0.5/s coop_hand -> \"Wage $0.50/s\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $0.50/s",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 117.4,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "boundary $1.25/s market_hand -> \"Wage $1.25/s\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $1.25/s",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 117.4,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "boundary $1.25/s coop_hand -> \"Wage $1.25/s\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $1.25/s",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 117.4,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "boundary $12.34/s market_hand -> \"Wage $12.34/s\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $12.34/s",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 124.6,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "boundary $12.34/s coop_hand -> \"Wage $12.34/s\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $12.34/s",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 124.6,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "boundary $999.99/s market_hand -> \"Wage $999.99/s\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $999.99/s",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 131.8,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "boundary $999.99/s coop_hand -> \"Wage $999.99/s\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $999.99/s",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 131.8,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "boundary $1000/s market_hand -> \"Wage $1.0K/s\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $1.0K/s",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 118.1,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "boundary $1000/s coop_hand -> \"Wage $1.0K/s\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $1.0K/s",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 118.1,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "boundary $1200/s market_hand -> \"Wage $1.2K/s\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $1.2K/s",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 118.1,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "boundary $1200/s coop_hand -> \"Wage $1.2K/s\", one line, unclipped at 360",
+  "pass": true,
+  "i": {
+   "text": "Wage $1.2K/s",
+   "lines": 1,
+   "scrollW": 308,
+   "clientW": 308,
+   "rect": [
+    26,
+    334,
+    308,
+    16
+   ],
+   "textRight": 118.1,
+   "cardRight": 344,
+   "ws": "nowrap"
+  }
+ },
+ {
+  "n": "no page errors",
+  "pass": true,
+  "i": []
+ }
+]

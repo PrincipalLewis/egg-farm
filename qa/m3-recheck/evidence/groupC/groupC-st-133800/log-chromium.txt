@@ -1,0 +1,29 @@
+2026-10-30T12:37:15.533Z # fatigue-cue selftest chromium 156.0.8078.47 fixture sha256 a0c3cea4f27cd6541a53472abafac1dd8379e7687dd9a24a3a5a364b4e5c123a port 5281 pid 3470578
+2026-10-30T12:37:18.636Z FAIL SS-40a 360x640: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110
+2026-10-30T12:37:19.825Z FAIL SS-40a 360x640: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110
+2026-10-30T12:37:26.488Z FAIL SS-40a 375x667: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110
+2026-10-30T12:37:27.691Z FAIL SS-40a 375x667: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110
+2026-10-30T12:37:33.122Z FAIL SS-40a 360x739: popover right 248.671875 != chip right 260.390625 [SS-G31 360x739 popover rect not given (anchoring rule asserted)]
+2026-10-30T12:37:34.328Z FAIL SS-40a 360x739: popover right 248.671875 != chip right 260.390625 [SS-G31 360x739 popover rect not given (anchoring rule asserted)]
+2026-10-30T12:38:14.484Z FAIL SS-40all 360x640: target received 0 click events (want exactly 1: swallowed)
+2026-10-30T12:38:26.219Z FAIL SS-38c 360x740: ii 360x740->360x739 closed: focus lost (activeElement body, visible false)
+2026-10-30T12:38:52.245Z # positive: 238 pass, 8 fail, 3 unverified, 1 blocked (97 s)
+2026-10-30T12:38:52.573Z PASS  NEG chip740    -> SS-38a: caught: .fslot not rendered at >=740; .hud .fchip rendered at >=740; no CSSOM rule with media (max-height: 739px)
+2026-10-30T12:38:52.939Z PASS  NEG debounce   -> SS-38b: caught: 739->740: 2 rAF after resize variant=icon, want subline (JS-debounced or not CSS-driven)
+2026-10-30T12:38:54.093Z PASS  NEG bucket     -> SS-38e: caught: viewport_h '<740' != '740-899' at innerHeight 740
+2026-10-30T12:38:54.546Z PASS  NEG geom       -> SS-41: caught: chip 220.4,5–264.4,49 != 216.4,5–260.4,49
+2026-10-30T12:38:54.978Z PASS  NEG coinsbtn   -> SS-41: caught: coins pill is focusable (display pill, not a tap target) [SS-G38 coins/basket not-focusable is a QA reading (reported, not failed, if flag-off is focusable too)
+2026-10-30T12:38:56.205Z PASS  NEG arialabel  -> SS-39a: caught: chip has aria-label "Tired workers" (must be content-based); name raw "Tired workers" != "Tired workers are costing $999.9K per second. Open workers."
+2026-10-30T12:38:59.990Z PASS  NEG cover      -> SS-40a,SS-37: caught: popover 14.4,190–248.7,242 != 26.1,62–260.4,114; Manage 160.7,194–242.7,238 != 172.4,66–254.4,110; popover covers golden spot(s) S1
+2026-10-30T12:39:02.397Z PASS  NEG shift      -> SS-40a: caught: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110; layout shift 10 px on open/close
+2026-10-30T12:39:04.795Z PASS  NEG trap       -> SS-40a: caught: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110
+2026-10-30T12:39:07.177Z PASS  NEG labelclip  -> LAYOUT: caught: label fpop-t clipped (scrollWidth 121 > clientWidth 40)
+2026-10-30T12:39:11.903Z PASS  NEG swallow    -> SS-40p1: caught: target received 0 click events (want exactly 1: swallowed); 0 activations by state/handler delta (want exactly 1); golden egg still present
+2026-10-30T12:39:16.556Z PASS  NEG double     -> SS-40p3: caught: target received 2 click events (want exactly 1: double activation)
+2026-10-30T12:39:33.005Z PASS  NEG timeout    -> SS-40c: caught: idle10s: popover closed (want open, no timeout)
+2026-10-30T12:39:46.923Z PASS  NEG resizeopen -> SS-38c: caught: i 360x739->360x740 open-chip: popover still open after the crossing
+2026-10-30T12:39:47.086Z PASS  NEG rmscale    -> SS-40e: caught: scale animation under reduced motion on popover,popover
+2026-10-30T12:39:47.573Z PASS  NEG tapnav     -> SS-42: caught: h 740: sub-line tap did not open Workers; h 740: sub-line tap opened the popover; Workers order unreadable
+2026-10-30T12:39:48.772Z PASS  NEG ratex      -> SS-RATE: caught: #rate "−$999.9K/s" shows the fatigue loss X $999.9K
+2026-10-30T12:39:50.090Z PASS  NEG sub740     -> SS-37: caught: counts 5/5/2 != flag-off 8/7/4; failing spot set S4,S5,S8 != flag-off S4; Broody-eligible 0,11 != flag-off 0,5,8,9,10,11
+2026-10-30T12:39:50.090Z # chromium: SELFTEST FAIL (positive fails 8, negatives missed 0/18) 155 s

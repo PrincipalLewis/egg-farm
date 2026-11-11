@@ -1,0 +1,1026 @@
+{
+  "browser": "156.0.8078.47",
+  "M1-fresh-play": {
+    "oldBoot": {
+      "coins": "$0.00",
+      "basket": "0",
+      "recovery": false,
+      "build": "m4.1+5d9efa6",
+      "dirty": false
+    },
+    "play": {
+      "sellAll": "Sell all (11 eggs · $11.00)",
+      "upgradesBought": 1
+    },
+    "uiOld": {
+      "coins": "$1.00",
+      "basket": "8",
+      "recovery": false,
+      "build": "m4.1+5d9efa6",
+      "dirty": false
+    },
+    "before": {
+      "version": 6,
+      "coinsCents": 100,
+      "basket": 8,
+      "coop": 13,
+      "farmLevel": 0,
+      "collectionLevel": 1,
+      "graderTier": 0,
+      "workers": [],
+      "workerEnergy": {},
+      "trackish": {
+        "hensLevel": 0,
+        "eggValueLevel": 0,
+        "tracksV7": 1
+      },
+      "stateKeys": [
+        "basket",
+        "celebratedMilestones",
+        "celebratedTier",
+        "coinsCents",
+        "collectionLevel",
+        "coop",
+        "coopFullS",
+        "customers",
+        "eggValueLevel",
+        "farmLevel",
+        "graderTier",
+        "hensLevel",
+        "manageCdS",
+        "nextCustomerId",
+        "nextCustomerInS",
+        "pendingOfflineEggs",
+        "rng",
+        "tracksV7",
+        "v6BackupId",
+        "wageFracCents",
+        "workers"
+      ]
+    },
+    "uiNewPreStart": {
+      "recovery": false,
+      "build": "m4.1+30b29d3",
+      "dirty": false
+    },
+    "uiNew": {
+      "coins": "$1.00",
+      "basket": "8",
+      "recovery": false,
+      "build": "m4.1+30b29d3",
+      "dirty": false
+    },
+    "after": {
+      "version": 6,
+      "coinsCents": 100,
+      "basket": 8,
+      "coop": 21,
+      "farmLevel": 0,
+      "collectionLevel": 1,
+      "graderTier": 0,
+      "workers": [],
+      "workerEnergy": {},
+      "trackish": {
+        "hensLevel": 0,
+        "eggValueLevel": 0,
+        "tracksV7": 1
+      },
+      "stateKeys": [
+        "basket",
+        "celebratedMilestones",
+        "celebratedTier",
+        "coinsCents",
+        "collectionLevel",
+        "coop",
+        "coopFullS",
+        "customers",
+        "eggValueLevel",
+        "farmLevel",
+        "graderTier",
+        "hensLevel",
+        "manageCdS",
+        "nextCustomerId",
+        "nextCustomerInS",
+        "pendingOfflineEggs",
+        "rng",
+        "tracksV7",
+        "v6BackupId",
+        "wageFracCents",
+        "workers"
+      ]
+    },
+    "nothingLost": {
+      "levels": true,
+      "workers": true,
+      "keysKept": true,
+      "track": true,
+      "coins": true,
+      "v6": true
+    },
+    "errors": [
+      {
+        "tag": "M1-fresh-play:new",
+        "t": "console.error",
+        "m": "Failed to load resource: the server responded with a status of 404 (File not found)"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "k": "M1-fresh-play: old build m4.1+5d9efa6 / new build m4.1+30b29d3, no +dirty",
+      "pass": true,
+      "d": {
+        "old": "m4.1+5d9efa6",
+        "new": "m4.1+30b29d3"
+      }
+    },
+    {
+      "k": "M1-fresh-play: 30b29d3 boot, no recovery dialog",
+      "pass": true,
+      "d": {
+        "pre": {
+          "recovery": false,
+          "build": "m4.1+30b29d3",
+          "dirty": false
+        },
+        "uNew": {
+          "coins": "$1.00",
+          "basket": "8",
+          "recovery": false,
+          "build": "m4.1+30b29d3",
+          "dirty": false
+        }
+      }
+    },
+    {
+      "k": "M1-fresh-play: v6 save, nothing lost (levels, workers, tracks, keys; coins >=)",
+      "pass": true,
+      "d": {
+        "before": {
+          "version": 6,
+          "coinsCents": 100,
+          "basket": 8,
+          "coop": 13,
+          "farmLevel": 0,
+          "collectionLevel": 1,
+          "graderTier": 0,
+          "workers": [],
+          "workerEnergy": {},
+          "trackish": {
+            "hensLevel": 0,
+            "eggValueLevel": 0,
+            "tracksV7": 1
+          },
+          "stateKeys": [
+            "basket",
+            "celebratedMilestones",
+            "celebratedTier",
+            "coinsCents",
+            "collectionLevel",
+            "coop",
+            "coopFullS",
+            "customers",
+            "eggValueLevel",
+            "farmLevel",
+            "graderTier",
+            "hensLevel",
+            "manageCdS",
+            "nextCustomerId",
+            "nextCustomerInS",
+            "pendingOfflineEggs",
+            "rng",
+            "tracksV7",
+            "v6BackupId",
+            "wageFracCents",
+            "workers"
+          ]
+        },
+        "after": {
+          "version": 6,
+          "coinsCents": 100,
+          "basket": 8,
+          "coop": 21,
+          "farmLevel": 0,
+          "collectionLevel": 1,
+          "graderTier": 0,
+          "workers": [],
+          "workerEnergy": {},
+          "trackish": {
+            "hensLevel": 0,
+            "eggValueLevel": 0,
+            "tracksV7": 1
+          },
+          "stateKeys": [
+            "basket",
+            "celebratedMilestones",
+            "celebratedTier",
+            "coinsCents",
+            "collectionLevel",
+            "coop",
+            "coopFullS",
+            "customers",
+            "eggValueLevel",
+            "farmLevel",
+            "graderTier",
+            "hensLevel",
+            "manageCdS",
+            "nextCustomerId",
+            "nextCustomerInS",
+            "pendingOfflineEggs",
+            "rng",
+            "tracksV7",
+            "v6BackupId",
+            "wageFracCents",
+            "workers"
+          ]
+        },
+        "nl": {
+          "levels": true,
+          "workers": true,
+          "keysKept": true,
+          "track": true,
+          "coins": true,
+          "v6": true
+        }
+      }
+    },
+    {
+      "k": "M1-fresh-play: 0 page/console/HTTP errors",
+      "pass": false,
+      "d": [
+        {
+          "tag": "M1-fresh-play:new",
+          "t": "console.error",
+          "m": "Failed to load resource: the server responded with a status of 404 (File not found)"
+        }
+      ]
+    },
+    {
+      "k": "M2-v5-workers-via-5d9efa6: old build m4.1+5d9efa6 / new build m4.1+30b29d3, no +dirty",
+      "pass": true,
+      "d": {
+        "old": "m4.1+5d9efa6",
+        "new": "m4.1+30b29d3"
+      }
+    },
+    {
+      "k": "M2-v5-workers-via-5d9efa6: 30b29d3 boot, no recovery dialog",
+      "pass": true,
+      "d": {
+        "pre": {
+          "recovery": false,
+          "build": "m4.1+30b29d3",
+          "dirty": false
+        },
+        "uNew": {
+          "coins": "$575.18",
+          "basket": "19.4K",
+          "recovery": false,
+          "build": "m4.1+30b29d3",
+          "dirty": false
+        }
+      }
+    },
+    {
+      "k": "M2-v5-workers-via-5d9efa6: v6 save, nothing lost (levels, workers, tracks, keys; coins >=)",
+      "pass": true,
+      "d": {
+        "before": {
+          "version": 6,
+          "coinsCents": 43652,
+          "basket": 19481,
+          "coop": 3,
+          "farmLevel": 10,
+          "collectionLevel": 12,
+          "graderTier": 0,
+          "workers": [
+            "coop_hand",
+            "hawker",
+            "market_hand"
+          ],
+          "workerEnergy": {
+            "market_hand": 84.3,
+            "coop_hand": 84.3,
+            "hawker": 84.3
+          },
+          "trackish": {
+            "hensLevel": 10,
+            "eggValueLevel": 9,
+            "tracksV7": 1,
+            "seenTracksExplainer": true
+          },
+          "stateKeys": [
+            "basket",
+            "celebratedMilestones",
+            "celebratedTier",
+            "coinsCents",
+            "collectionLevel",
+            "coop",
+            "coopFullS",
+            "customers",
+            "eggValueLevel",
+            "farmLevel",
+            "graderTier",
+            "hensLevel",
+            "manageCdS",
+            "nextCustomerId",
+            "nextCustomerInS",
+            "pendingOfflineEggs",
+            "rng",
+            "seenTracksExplainer",
+            "tracksV7",
+            "v6BackupId",
+            "wageFracCents",
+            "workers"
+          ]
+        },
+        "after": {
+          "version": 6,
+          "coinsCents": 72433,
+          "basket": 19446,
+          "coop": 14,
+          "farmLevel": 10,
+          "collectionLevel": 12,
+          "graderTier": 0,
+          "workers": [
+            "coop_hand",
+            "hawker",
+            "market_hand"
+          ],
+          "workerEnergy": {
+            "market_hand": 83.7,
+            "coop_hand": 83.7,
+            "hawker": 83.7
+          },
+          "trackish": {
+            "hensLevel": 10,
+            "eggValueLevel": 9,
+            "tracksV7": 1,
+            "seenTracksExplainer": true
+          },
+          "stateKeys": [
+            "basket",
+            "celebratedMilestones",
+            "celebratedTier",
+            "coinsCents",
+            "collectionLevel",
+            "coop",
+            "coopFullS",
+            "customers",
+            "eggValueLevel",
+            "farmLevel",
+            "graderTier",
+            "hensLevel",
+            "manageCdS",
+            "nextCustomerId",
+            "nextCustomerInS",
+            "pendingOfflineEggs",
+            "rng",
+            "seenTracksExplainer",
+            "tracksV7",
+            "v6BackupId",
+            "wageFracCents",
+            "workers"
+          ]
+        },
+        "nl": {
+          "levels": true,
+          "workers": true,
+          "keysKept": true,
+          "track": true,
+          "coins": true,
+          "v6": true
+        }
+      }
+    },
+    {
+      "k": "M2-v5-workers-via-5d9efa6: 0 page/console/HTTP errors",
+      "pass": true,
+      "d": []
+    },
+    {
+      "k": "M3-v5-direct: build m4.1+30b29d3, no recovery dialog",
+      "pass": true,
+      "d": {
+        "pre": {
+          "recovery": false,
+          "build": "m4.1+30b29d3",
+          "dirty": false
+        },
+        "u": {
+          "coins": "$150.57",
+          "basket": "0",
+          "recovery": false,
+          "build": "m4.1+30b29d3",
+          "dirty": false
+        }
+      }
+    },
+    {
+      "k": "M3-v5-direct: migrated to v6, nothing lost",
+      "pass": true,
+      "d": {
+        "before": {
+          "version": 5,
+          "coinsCents": 15061,
+          "basket": 0,
+          "coop": 9,
+          "farmLevel": 10,
+          "collectionLevel": 11,
+          "graderTier": 0,
+          "workers": [
+            "coop_hand",
+            "hawker",
+            "market_hand"
+          ],
+          "workerEnergy": {
+            "market_hand": 86.7,
+            "coop_hand": 86.7,
+            "hawker": 86.7
+          },
+          "trackish": {},
+          "stateKeys": [
+            "basket",
+            "celebratedTier",
+            "coinsCents",
+            "collectionLevel",
+            "coop",
+            "coopFullS",
+            "customers",
+            "farmLevel",
+            "graderTier",
+            "manageCdS",
+            "nextCustomerId",
+            "nextCustomerInS",
+            "pendingOfflineEggs",
+            "rng",
+            "workers"
+          ]
+        },
+        "after": {
+          "version": 6,
+          "coinsCents": 31068,
+          "basket": 0,
+          "coop": 20,
+          "farmLevel": 10,
+          "collectionLevel": 11,
+          "graderTier": 0,
+          "workers": [
+            "coop_hand",
+            "hawker",
+            "market_hand"
+          ],
+          "workerEnergy": {
+            "market_hand": 86.1,
+            "coop_hand": 86.1,
+            "hawker": 86.1
+          },
+          "trackish": {
+            "hensLevel": 10,
+            "eggValueLevel": 9,
+            "tracksV7": 1
+          },
+          "stateKeys": [
+            "basket",
+            "celebratedMilestones",
+            "celebratedTier",
+            "coinsCents",
+            "collectionLevel",
+            "coop",
+            "coopFullS",
+            "customers",
+            "eggValueLevel",
+            "farmLevel",
+            "graderTier",
+            "hensLevel",
+            "manageCdS",
+            "nextCustomerId",
+            "nextCustomerInS",
+            "pendingOfflineEggs",
+            "rng",
+            "tracksV7",
+            "v6BackupId",
+            "wageFracCents",
+            "workers"
+          ]
+        },
+        "nl": {
+          "levels": true,
+          "workers": true,
+          "keysKept": true,
+          "track": true,
+          "coins": true,
+          "v6": true
+        }
+      }
+    },
+    {
+      "k": "M3-v5-direct: 0 page/console/HTTP errors",
+      "pass": true,
+      "d": []
+    },
+    {
+      "k": "M4-5d9efa6-save-cold-seed: build m4.1+30b29d3, no recovery dialog",
+      "pass": true,
+      "d": {
+        "pre": {
+          "recovery": false,
+          "build": "m4.1+30b29d3",
+          "dirty": false
+        },
+        "u": {
+          "coins": "$575.18",
+          "basket": "19.4K",
+          "recovery": false,
+          "build": "m4.1+30b29d3",
+          "dirty": false
+        }
+      }
+    },
+    {
+      "k": "M4-5d9efa6-save-cold-seed: migrated to v6, nothing lost",
+      "pass": true,
+      "d": {
+        "before": {
+          "version": 6,
+          "coinsCents": 43652,
+          "basket": 19481,
+          "coop": 3,
+          "farmLevel": 10,
+          "collectionLevel": 12,
+          "graderTier": 0,
+          "workers": [
+            "coop_hand",
+            "hawker",
+            "market_hand"
+          ],
+          "workerEnergy": {
+            "market_hand": 84.3,
+            "coop_hand": 84.3,
+            "hawker": 84.3
+          },
+          "trackish": {
+            "hensLevel": 10,
+            "eggValueLevel": 9,
+            "tracksV7": 1,
+            "seenTracksExplainer": true
+          },
+          "stateKeys": [
+            "basket",
+            "celebratedMilestones",
+            "celebratedTier",
+            "coinsCents",
+            "collectionLevel",
+            "coop",
+            "coopFullS",
+            "customers",
+            "eggValueLevel",
+            "farmLevel",
+            "graderTier",
+            "hensLevel",
+            "manageCdS",
+            "nextCustomerId",
+            "nextCustomerInS",
+            "pendingOfflineEggs",
+            "rng",
+            "seenTracksExplainer",
+            "tracksV7",
+            "v6BackupId",
+            "wageFracCents",
+            "workers"
+          ]
+        },
+        "after": {
+          "version": 6,
+          "coinsCents": 72433,
+          "basket": 19446,
+          "coop": 15,
+          "farmLevel": 10,
+          "collectionLevel": 12,
+          "graderTier": 0,
+          "workers": [
+            "coop_hand",
+            "hawker",
+            "market_hand"
+          ],
+          "workerEnergy": {
+            "market_hand": 83.7,
+            "coop_hand": 83.7,
+            "hawker": 83.7
+          },
+          "trackish": {
+            "hensLevel": 10,
+            "eggValueLevel": 9,
+            "tracksV7": 1,
+            "seenTracksExplainer": true
+          },
+          "stateKeys": [
+            "basket",
+            "celebratedMilestones",
+            "celebratedTier",
+            "coinsCents",
+            "collectionLevel",
+            "coop",
+            "coopFullS",
+            "customers",
+            "eggValueLevel",
+            "farmLevel",
+            "graderTier",
+            "hensLevel",
+            "manageCdS",
+            "nextCustomerId",
+            "nextCustomerInS",
+            "pendingOfflineEggs",
+            "rng",
+            "seenTracksExplainer",
+            "tracksV7",
+            "v6BackupId",
+            "wageFracCents",
+            "workers"
+          ]
+        },
+        "nl": {
+          "levels": true,
+          "workers": true,
+          "keysKept": true,
+          "track": true,
+          "coins": true,
+          "v6": true
+        }
+      }
+    },
+    {
+      "k": "M4-5d9efa6-save-cold-seed: 0 page/console/HTTP errors",
+      "pass": true,
+      "d": []
+    }
+  ],
+  "M2-v5-workers-via-5d9efa6": {
+    "oldBoot": {
+      "coins": "$150.57",
+      "basket": "0",
+      "recovery": false,
+      "build": "m4.1+5d9efa6",
+      "dirty": false
+    },
+    "play": {
+      "sellAll": "No eggs to sell",
+      "upgradesBought": 1
+    },
+    "uiOld": {
+      "coins": "$436.52",
+      "basket": "19.5K",
+      "recovery": false,
+      "build": "m4.1+5d9efa6",
+      "dirty": false
+    },
+    "before": {
+      "version": 6,
+      "coinsCents": 43652,
+      "basket": 19481,
+      "coop": 3,
+      "farmLevel": 10,
+      "collectionLevel": 12,
+      "graderTier": 0,
+      "workers": [
+        "coop_hand",
+        "hawker",
+        "market_hand"
+      ],
+      "workerEnergy": {
+        "market_hand": 84.3,
+        "coop_hand": 84.3,
+        "hawker": 84.3
+      },
+      "trackish": {
+        "hensLevel": 10,
+        "eggValueLevel": 9,
+        "tracksV7": 1,
+        "seenTracksExplainer": true
+      },
+      "stateKeys": [
+        "basket",
+        "celebratedMilestones",
+        "celebratedTier",
+        "coinsCents",
+        "collectionLevel",
+        "coop",
+        "coopFullS",
+        "customers",
+        "eggValueLevel",
+        "farmLevel",
+        "graderTier",
+        "hensLevel",
+        "manageCdS",
+        "nextCustomerId",
+        "nextCustomerInS",
+        "pendingOfflineEggs",
+        "rng",
+        "seenTracksExplainer",
+        "tracksV7",
+        "v6BackupId",
+        "wageFracCents",
+        "workers"
+      ]
+    },
+    "uiNewPreStart": {
+      "recovery": false,
+      "build": "m4.1+30b29d3",
+      "dirty": false
+    },
+    "uiNew": {
+      "coins": "$575.18",
+      "basket": "19.4K",
+      "recovery": false,
+      "build": "m4.1+30b29d3",
+      "dirty": false
+    },
+    "after": {
+      "version": 6,
+      "coinsCents": 72433,
+      "basket": 19446,
+      "coop": 14,
+      "farmLevel": 10,
+      "collectionLevel": 12,
+      "graderTier": 0,
+      "workers": [
+        "coop_hand",
+        "hawker",
+        "market_hand"
+      ],
+      "workerEnergy": {
+        "market_hand": 83.7,
+        "coop_hand": 83.7,
+        "hawker": 83.7
+      },
+      "trackish": {
+        "hensLevel": 10,
+        "eggValueLevel": 9,
+        "tracksV7": 1,
+        "seenTracksExplainer": true
+      },
+      "stateKeys": [
+        "basket",
+        "celebratedMilestones",
+        "celebratedTier",
+        "coinsCents",
+        "collectionLevel",
+        "coop",
+        "coopFullS",
+        "customers",
+        "eggValueLevel",
+        "farmLevel",
+        "graderTier",
+        "hensLevel",
+        "manageCdS",
+        "nextCustomerId",
+        "nextCustomerInS",
+        "pendingOfflineEggs",
+        "rng",
+        "seenTracksExplainer",
+        "tracksV7",
+        "v6BackupId",
+        "wageFracCents",
+        "workers"
+      ]
+    },
+    "nothingLost": {
+      "levels": true,
+      "workers": true,
+      "keysKept": true,
+      "track": true,
+      "coins": true,
+      "v6": true
+    },
+    "errors": []
+  },
+  "M3-v5-direct": {
+    "before": {
+      "version": 5,
+      "coinsCents": 15061,
+      "basket": 0,
+      "coop": 9,
+      "farmLevel": 10,
+      "collectionLevel": 11,
+      "graderTier": 0,
+      "workers": [
+        "coop_hand",
+        "hawker",
+        "market_hand"
+      ],
+      "workerEnergy": {
+        "market_hand": 86.7,
+        "coop_hand": 86.7,
+        "hawker": 86.7
+      },
+      "trackish": {},
+      "stateKeys": [
+        "basket",
+        "celebratedTier",
+        "coinsCents",
+        "collectionLevel",
+        "coop",
+        "coopFullS",
+        "customers",
+        "farmLevel",
+        "graderTier",
+        "manageCdS",
+        "nextCustomerId",
+        "nextCustomerInS",
+        "pendingOfflineEggs",
+        "rng",
+        "workers"
+      ]
+    },
+    "uiPreStart": {
+      "recovery": false,
+      "build": "m4.1+30b29d3",
+      "dirty": false
+    },
+    "ui": {
+      "coins": "$150.57",
+      "basket": "0",
+      "recovery": false,
+      "build": "m4.1+30b29d3",
+      "dirty": false
+    },
+    "after": {
+      "version": 6,
+      "coinsCents": 31068,
+      "basket": 0,
+      "coop": 20,
+      "farmLevel": 10,
+      "collectionLevel": 11,
+      "graderTier": 0,
+      "workers": [
+        "coop_hand",
+        "hawker",
+        "market_hand"
+      ],
+      "workerEnergy": {
+        "market_hand": 86.1,
+        "coop_hand": 86.1,
+        "hawker": 86.1
+      },
+      "trackish": {
+        "hensLevel": 10,
+        "eggValueLevel": 9,
+        "tracksV7": 1
+      },
+      "stateKeys": [
+        "basket",
+        "celebratedMilestones",
+        "celebratedTier",
+        "coinsCents",
+        "collectionLevel",
+        "coop",
+        "coopFullS",
+        "customers",
+        "eggValueLevel",
+        "farmLevel",
+        "graderTier",
+        "hensLevel",
+        "manageCdS",
+        "nextCustomerId",
+        "nextCustomerInS",
+        "pendingOfflineEggs",
+        "rng",
+        "tracksV7",
+        "v6BackupId",
+        "wageFracCents",
+        "workers"
+      ]
+    },
+    "nothingLost": {
+      "levels": true,
+      "workers": true,
+      "keysKept": true,
+      "track": true,
+      "coins": true,
+      "v6": true
+    },
+    "errors": []
+  },
+  "M4-5d9efa6-save-cold-seed": {
+    "before": {
+      "version": 6,
+      "coinsCents": 43652,
+      "basket": 19481,
+      "coop": 3,
+      "farmLevel": 10,
+      "collectionLevel": 12,
+      "graderTier": 0,
+      "workers": [
+        "coop_hand",
+        "hawker",
+        "market_hand"
+      ],
+      "workerEnergy": {
+        "market_hand": 84.3,
+        "coop_hand": 84.3,
+        "hawker": 84.3
+      },
+      "trackish": {
+        "hensLevel": 10,
+        "eggValueLevel": 9,
+        "tracksV7": 1,
+        "seenTracksExplainer": true
+      },
+      "stateKeys": [
+        "basket",
+        "celebratedMilestones",
+        "celebratedTier",
+        "coinsCents",
+        "collectionLevel",
+        "coop",
+        "coopFullS",
+        "customers",
+        "eggValueLevel",
+        "farmLevel",
+        "graderTier",
+        "hensLevel",
+        "manageCdS",
+        "nextCustomerId",
+        "nextCustomerInS",
+        "pendingOfflineEggs",
+        "rng",
+        "seenTracksExplainer",
+        "tracksV7",
+        "v6BackupId",
+        "wageFracCents",
+        "workers"
+      ]
+    },
+    "uiPreStart": {
+      "recovery": false,
+      "build": "m4.1+30b29d3",
+      "dirty": false
+    },
+    "ui": {
+      "coins": "$575.18",
+      "basket": "19.4K",
+      "recovery": false,
+      "build": "m4.1+30b29d3",
+      "dirty": false
+    },
+    "after": {
+      "version": 6,
+      "coinsCents": 72433,
+      "basket": 19446,
+      "coop": 15,
+      "farmLevel": 10,
+      "collectionLevel": 12,
+      "graderTier": 0,
+      "workers": [
+        "coop_hand",
+        "hawker",
+        "market_hand"
+      ],
+      "workerEnergy": {
+        "market_hand": 83.7,
+        "coop_hand": 83.7,
+        "hawker": 83.7
+      },
+      "trackish": {
+        "hensLevel": 10,
+        "eggValueLevel": 9,
+        "tracksV7": 1,
+        "seenTracksExplainer": true
+      },
+      "stateKeys": [
+        "basket",
+        "celebratedMilestones",
+        "celebratedTier",
+        "coinsCents",
+        "collectionLevel",
+        "coop",
+        "coopFullS",
+        "customers",
+        "eggValueLevel",
+        "farmLevel",
+        "graderTier",
+        "hensLevel",
+        "manageCdS",
+        "nextCustomerId",
+        "nextCustomerInS",
+        "pendingOfflineEggs",
+        "rng",
+        "seenTracksExplainer",
+        "tracksV7",
+        "v6BackupId",
+        "wageFracCents",
+        "workers"
+      ]
+    },
+    "nothingLost": {
+      "levels": true,
+      "workers": true,
+      "keysKept": true,
+      "track": true,
+      "coins": true,
+      "v6": true
+    },
+    "errors": []
+  },
+  "bad": 1
+}

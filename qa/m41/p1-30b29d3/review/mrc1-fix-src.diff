@@ -1,0 +1,35 @@
+commit d5fc62644369891e73115e8bdb9e51476af2b91f
+Author: Senior Engineer, UI & rc1 Fixes <engineering@egg-farm-studio.local>
+Date:   Sat Oct 24 17:27:44 2026 +0200
+
+    M4.1 patch 1: HoQA m-RC1-1 - explainer entry (expin) without scale overshoot (CSS only)
+    
+    qa/m41/rc1-5d9efa6-ui.md m-RC1-1: at 375x667 (Upgrades > Farm, scroll
+    200, refund card placed 'band', 0.75px clear when settled) the expin
+    easing --ease-pop (cubic-bezier(.34,1.56,.64,1)) overshoots scale ~1.0098
+    and the card covers the Hens Buy by <=0.27px for ~35 ms.
+    
+    Fix (CSS only): .tracks-exp expin uses the same curve with y1 1.56 -> 1
+    (cubic-bezier(.34,1,.64,1)): same .2s duration, same start (scale .9,
+    opacity 0), monotonic to scale 1, no overshoot. --ease-pop is unchanged
+    for every other animation. No layout or other visual change.
+    
+    Proof: rc0 section mrc1 (375x667, scroll 150..260 step 10, the expin
+    animation paused and stepped 0..200 ms every 2 ms + settled; the card
+    must not intersect any Buy rect clipped to the sheet body; max scale
+    <= 1). Before the fix it FAILS (0.257px over Hens at t=114 ms, scale
+    1.0098, Chromium); after, worst gap -0.75px (clear) at every sample.
+
+diff --git a/src/ui/styles.css b/src/ui/styles.css
+index 21aded5..434e7e1 100644
+--- a/src/ui/styles.css
++++ b/src/ui/styles.css
+@@ -521,7 +521,7 @@ html,body{overflow-x:hidden;max-width:100%}
+ .ghosts .bubble.soldout{animation:fadeout 800ms ease forwards}
+ .rm .ghosts .ghost img,.rm .ghosts .ghost.leave img{animation:none}
+ /* M4-AC-EXP1 tracks explainer: non-blocking coach card (no scrim), top-centre under the top bar */
+-.tracks-exp,.tracks-exp-out{position:fixed;z-index:27;left:50%;top:72px;transform:translateX(-50%);width:min(296px,calc(100vw - 32px));box-sizing:border-box;background:var(--c-white);border:2px solid var(--c-outline);border-radius:var(--r-md);padding:var(--s-3);color:#3E2C23;box-shadow:var(--shadow);animation:expin .2s var(--ease-pop,ease-out)}
++.tracks-exp,.tracks-exp-out{position:fixed;z-index:27;left:50%;top:72px;transform:translateX(-50%);width:min(296px,calc(100vw - 32px));box-sizing:border-box;background:var(--c-white);border:2px solid var(--c-outline);border-radius:var(--r-md);padding:var(--s-3);color:#3E2C23;box-shadow:var(--shadow);animation:expin .2s cubic-bezier(.34,1,.64,1)} /* HoQA m-RC1-1: --ease-pop's curve with y1 1.56 -> 1 (no scale overshoot past 1, which put the card <=0.27px over the Hens Buy at 375x667); same timing and start, no other change */
+ .tracks-exp h2,.tracks-exp-out h2{margin:0 0 4px;font:700 18px var(--f-display,var(--f-body))}
+ .tracks-exp p,.tracks-exp-out p{margin:0 0 8px;font:400 16px var(--f-body)}
+ .tracks-exp-ok,.tracks-exp-out .btn{min-height:48px;min-width:48px;width:100%}

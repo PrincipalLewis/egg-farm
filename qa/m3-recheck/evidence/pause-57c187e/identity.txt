@@ -1,0 +1,80 @@
+identity 2026-11-06T00:22:14+01:00
+HEAD=57c187e5e2c2b031206497091bff6a89a87e286e
+parents=a73804d45519c758a5bcb8310461643f04e9788f
+subject=fix(saves): offline egg grant ignores pause (D-HOP-2026-11-06-01 a)
+author=Senior Engineer, Saves & Persistence <engineering@egg-farm-studio.local> 2026-11-05T23:12:46Z
+origin/cursor/saves-pause-sim-4c0b=57c187e5e2c2b031206497091bff6a89a87e286e
+origin/fix/saves-endcalls-durs=98e1af5b51d86a7e8b7bd0a6602d91332e3ee32f
+origin/rc/v5=f8036e8f0826ca76fcc0ee13092d575533d4969b
+merge-base(tip, base)=98e1af5b51d86a7e8b7bd0a6602d91332e3ee32f
+== diff vs PR base fix/saves-endcalls-durs (three-dot)
+ src/config/m5-rules.ts                             |   2 +-
+ src/econ/income.ts                                 |   4 +-
+ src/sim/offline.ts                                 |   2 +
+ src/sim/pause.ts                                   |  37 ++-
+ src/sim/tick.ts                                    |  12 +-
+ src/sim/workers.ts                                 |   3 +
+ tests/fixtures/saves/m5-pause-committed-hired.json |  26 ++
+ tests/v5-f3-config.test.ts                         |   5 +-
+ tests/v5-pause-sim.test.ts                         | 342 +++++++++++++++++++++
+ 9 files changed, 423 insertions(+), 10 deletions(-)
+== diff vs PR base (two-dot)
+M	src/config/m5-rules.ts
+M	src/econ/income.ts
+M	src/sim/offline.ts
+M	src/sim/pause.ts
+M	src/sim/tick.ts
+M	src/sim/workers.ts
+A	tests/fixtures/saves/m5-pause-committed-hired.json
+M	tests/v5-f3-config.test.ts
+A	tests/v5-pause-sim.test.ts
+== tip delta vs parent a73804d
+ src/sim/offline.ts         | 19 +++-----------
+ tests/v5-pause-sim.test.ts | 62 ++++++++++++++++++++++++++++++++--------------
+ 2 files changed, 47 insertions(+), 34 deletions(-)
+== deletions-only hunks / reverts check vs base: removed lines per file
+1	1	src/config/m5-rules.ts
+2	2	src/econ/income.ts
+2	0	src/sim/offline.ts
+36	1	src/sim/pause.ts
+8	4	src/sim/tick.ts
+3	0	src/sim/workers.ts
+26	0	tests/fixtures/saves/m5-pause-committed-hired.json
+3	2	tests/v5-f3-config.test.ts
+342	0	tests/v5-pause-sim.test.ts
+== commits in base..tip
+57c187e fix(saves): offline egg grant ignores pause (D-HOP-2026-11-06-01 a)
+a73804d Merge commit '98e1af5b51d86a7e8b7bd0a6602d91332e3ee32f' into cursor/saves-pause-sim-4c0b Co-authored-by: Korshunov Vadim <PrincipalLewis@users.noreply.github.com>
+2ffa02c Merge commit '9e043c4a29ac5b0b44d137b272cc48c75cb8d8a6' into cursor/saves-pause-sim-4c0b Co-authored-by: Korshunov Vadim <PrincipalLewis@users.noreply.github.com>
+c840716 Merge commit '86973e52d17c8921b3fcb5bebcd47e35e8861b5f' into cursor/saves-pause-sim-4c0b Co-authored-by: Korshunov Vadim <PrincipalLewis@users.noreply.github.com>
+3b62913 test(saves): AC-P13 fixture pause, resume, round-trip, and clock freeze
+8e7532e test(saves): committed tracksV7 fixture with hired workers (AC-P13)
+409fa6a merge: stack Pause sim on endCalls durS tip e4117c4
+a447c1c test(saves): drop duplicate durS load cases from the pause suite
+2465b36 feat(saves): pause/resume sim and score combo calls by durS
+e4117c4 v5 Saves: endCalls honors AbilityState.durS (D-HOE-41)
+== rg offlineAccrualFrozen in tip tree (git grep)
+git-grep-exit=1
+== rg worktree
+rg-exit=1
+== isPaused/WORKERS imports in offline.ts
+1:import type { Balance } from '../config/balance';
+2:import { GameState, eggsPerSec } from './state';
+3:import { prodEggsPerSec, offlineMult } from './tracks';
+4:import { m4On, clampL } from '../config/formulas';
+5:import { breedsOffline } from './breeds';
+== golden pin blobs tip vs rc/v5
+engineering/golden/flagoff-golden.a01faea.test.ts tip=3584795c42b509f61799260323e46ee37c210bc2 rc=3584795c42b509f61799260323e46ee37c210bc2
+engineering/golden/m4on-golden.90a9c84.test.ts tip=dd9c637fc3d28acc013bc72fce90889b9863175a rc=dd9c637fc3d28acc013bc72fce90889b9863175a
+tests/m4a-flag-off.test.ts tip=2c9130528d7b9ab5a770133df6b00b6c86d34b3c rc=2c9130528d7b9ab5a770133df6b00b6c86d34b3c
+tests/zg-flagoff-dom.test.ts tip=e4045bc6f68fdd9ed32c241f6a9ea28bd4ada5c6 rc=e4045bc6f68fdd9ed32c241f6a9ea28bd4ada5c6
+engineering/golden/flagoff-golden.a01faea.test.ts:25:// (data/economy.csv = m4cols 86f0e80e) moves it to f90d1678. No code changes. Storage-bytes pins (PINS) unchanged.
+engineering/golden/flagoff-golden.a01faea.test.ts:26:const GOLDEN_MAIN_A01FAEA = 'f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544';
+engineering/golden/m4on-golden.90a9c84.test.ts:23:// Generated 2026-10-19 on 90a9c84 + this branch, two runs, identical. Re-pinned for the D-HOP-2026-10-19-02 bot (game pick over all purchasables): history 403ca889bb02121e764c402cb2c408b0aebf0bed43ca14d187ea62bbeafa7974 (no bot change) -> 9173492e41ac06cbe3c077bcbadc464ad5ce681646eb4b9619b640ff40a31f6b (-01 bot) -> 723b91ab311be9bf403e7bd5a8f7363bc85234287354c4dedf94a45613faa817 (-02 bot) -> a54c9cf9 (T3 data b48be8a4, D-CEO-20261019-04). Storage pins unchanged (no bot). A retune or any M4 sim change moves these: re-pin with HoE OK.
+engineering/golden/m4on-golden.90a9c84.test.ts:24:const GOLDEN_M4ON = 'a54c9cf9d6a4c967ef8fc9d2cb741ba2deab042b8cad5097b38d5c192339fda5';
+== shipping flag pause
+3: * streak spec §5, broody spec §5, pause spec §6). Each rule runs only when its keys exist in m4.tc, so a CSV that doesn't carry
+13:  pause: ['pause_unlock_farm', 'pause_call_lockout_s', 'rest_recovery_mult'], // rule 1 / B5 (m5Load) + rule 3 recovery (sim/pause.ts)
+54:  // D-HOE-20261030-02: [0, 0.35]; 0 is valid (pause spec §6, AC-P17). Non-finite is refused here too, not only by the leaf check.
+55:  if (has(tc, 'rest_recovery_mult') && !(Number.isFinite(tc.rest_recovery_mult) && tc.rest_recovery_mult >= 0)) fail('tc.rest_recovery_mult must be a finite number >= 0 (pause spec §6; 0 is valid, AC-P17)');
+56:  if (has(tc, 'rest_recovery_mult') && !(tc.rest_recovery_mult <= 0.35)) fail('tc.rest_recovery_mult must be <= 0.35 (pause spec §6, decisions.md:9)');

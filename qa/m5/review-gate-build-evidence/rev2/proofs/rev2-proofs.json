@@ -1,0 +1,266 @@
+{
+  "blocking_or_open": 1,
+  "open_cases": [
+    "P5IB_freetext_approval_and_b4_run_ref"
+  ],
+  "results": [
+    {
+      "case": "A_empty_dict",
+      "status": "CLOSED_OK",
+      "detail": {
+        "overall": "NOT-PASS",
+        "4a": "UNASSESSED",
+        "4b": "UNASSESSED",
+        "bands": {},
+        "unassessed": {
+          "F11-15": {
+            "after_seeds_with_absent_cells": 5,
+            "before_seeds_with_absent_cells": 0
+          },
+          "F16-20": {
+            "after_seeds_with_absent_cells": 5,
+            "before_seeds_with_absent_cells": 0
+          },
+          "F21-25": {
+            "after_seeds_with_absent_cells": 5,
+            "before_seeds_with_absent_cells": 0
+          },
+          "F26-30": {
+            "after_seeds_with_absent_cells": 5,
+            "before_seeds_with_absent_cells": 0
+          }
+        },
+        "note": "empty {} -> UNASSESSED, no gP95 subset"
+      }
+    },
+    {
+      "case": "B_partial_missing_key",
+      "status": "CLOSED_OK",
+      "detail": {
+        "overall": "NOT-PASS",
+        "4a": "UNASSESSED",
+        "miss": {
+          "before": 0,
+          "after": 3
+        },
+        "bands": {
+          "F16-20": {
+            "gP95": "54",
+            "gW": "54"
+          },
+          "F21-25": {
+            "gP95": "54",
+            "gW": "54"
+          },
+          "F26-30": {
+            "gP95": "54",
+            "gW": "54"
+          }
+        },
+        "note": "one missing key -> UNASSESSED, no subset stats"
+      }
+    },
+    {
+      "case": "D_one_seed_empty",
+      "status": "CLOSED_OK",
+      "detail": {
+        "overall": "NOT-PASS",
+        "4a": "UNASSESSED",
+        "bands": {},
+        "note": "one seed empty map -> UNASSESSED whole band"
+      }
+    },
+    {
+      "case": "G_measured_zero_vs_absent",
+      "status": "CLOSED_OK",
+      "detail": {
+        "zero_overall": "PASS",
+        "absent_overall": "NOT-PASS",
+        "zero_4a": "PASS",
+        "absent_4a": "UNASSESSED",
+        "note": "explicit 0 PASS; absent UNASSESSED"
+      }
+    },
+    {
+      "case": "X_null_gap_FAIL",
+      "status": "CLOSED_OK",
+      "detail": {
+        "overall": "NOT-PASS",
+        "4a": "FAIL",
+        "errs": [
+          "after seed 1 L12: gap null is not a measurement",
+          "after seed 2 L12: gap null is not a measurement"
+        ],
+        "note": "null -> FAIL"
+      }
+    },
+    {
+      "case": "X_empty_array_noAff_FAIL",
+      "status": "CLOSED_OK",
+      "detail": {
+        "overall": "NOT-PASS",
+        "4a": "FAIL",
+        "errs": [
+          "after seed 1: noAffByF missing",
+          "after seed 2: noAffByF missing"
+        ],
+        "note": "[] not a dict -> FAIL"
+      }
+    },
+    {
+      "case": "X_nan_gap_FAIL",
+      "status": "CLOSED_OK",
+      "detail": {
+        "overall": "NOT-PASS",
+        "4a": "FAIL",
+        "errs": [
+          "after /workspace/egg-farm-studio/qa/m5/review-gate-build-evidence/rev2/pkg/.tmp/synth-v8t993tj/anan-optimal.json: unreadable/non-finite JSON: non-finite JSON constant NaN",
+          "after /workspace/egg-farm-studio/qa/m5/review-gate-build-evidence/rev2/pkg/.tmp/synth-v8t993tj/anan-seller15.json: unreadable/non-finite JSON: non-finite JSON constant NaN",
+          "after /workspace/egg-farm-studio/qa/m5/review-gate-build-evidence/rev2/pkg/.tmp/synth-v8t993tj/anan-casual.json: unreadable/non-finite JSON: non-finite JSON constant NaN"
+        ],
+        "note": "NaN -> non-PASS"
+      }
+    },
+    {
+      "case": "X_missing_file_FAIL",
+      "status": "CLOSED_OK",
+      "detail": {
+        "overall": "NOT-PASS",
+        "errs": [
+          "after /workspace/egg-farm-studio/qa/m5/review-gate-build-evidence/rev2/pkg/.tmp/synth-hggrtbjw/no-such-file.json: unreadable/non-finite JSON: [Errno 2] No such file or directory: '/workspace/egg-farm-studio/qa/m5/review-gate-build-evidence/rev2/pkg/.tmp/synth-hggrtbjw/no-such-file.json'",
+          "after: profile optimal missing"
+        ],
+        "note": "missing file -> non-PASS"
+      }
+    },
+    {
+      "case": "C_omit_field_FAIL",
+      "status": "CLOSED_OK",
+      "detail": {
+        "overall": "NOT-PASS",
+        "4a": "FAIL",
+        "note": "field absent -> FAIL"
+      }
+    },
+    {
+      "case": "X_partial_F_L29_absent",
+      "status": "CLOSED_OK",
+      "detail": {
+        "overall": "NOT-PASS",
+        "4a": "UNASSESSED",
+        "bands": [
+          "F11-15",
+          "F16-20",
+          "F21-25"
+        ],
+        "unassessed": {
+          "F26-30": {
+            "after_seeds_with_absent_cells": 5,
+            "before_seeds_with_absent_cells": 0
+          }
+        },
+        "note": "L29 absent -> F26-30 UNASSESSED, no subset gP95 for that band"
+      }
+    },
+    {
+      "case": "CTRL_complete_PASS",
+      "status": "CLOSED_OK",
+      "detail": {
+        "overall": "PASS",
+        "note": "complete maps still PASS"
+      }
+    },
+    {
+      "case": "F_b4_ref_None",
+      "status": "CLOSED_OK",
+      "detail": {
+        "CAP": "CONDITIONAL-UNMET",
+        "overall": "NOT-PASS",
+        "doc": null,
+        "ev": "NOT VERIFIED: --b4-ref is documentary metadata, not B4 evidence; this tool has no B4 evidence ingestion",
+        "note": "breeds=1 ref=None -> CONDITIONAL-UNMET"
+      }
+    },
+    {
+      "case": "F_b4_ref_'documentary-only-no-evidence'",
+      "status": "CLOSED_OK",
+      "detail": {
+        "CAP": "CONDITIONAL-UNMET",
+        "overall": "NOT-PASS",
+        "doc": "documentary-only-no-evidence",
+        "ev": "NOT VERIFIED: --b4-ref is documentary metadata, not B4 evidence; this tool has no B4 evidence ingestion",
+        "note": "breeds=1 ref='documentary-only-no-evidence' -> CONDITIONAL-UNMET"
+      }
+    },
+    {
+      "case": "F_b4_ref_'I-am-not-a-B4-run'",
+      "status": "CLOSED_OK",
+      "detail": {
+        "CAP": "CONDITIONAL-UNMET",
+        "overall": "NOT-PASS",
+        "doc": "I-am-not-a-B4-run",
+        "ev": "NOT VERIFIED: --b4-ref is documentary metadata, not B4 evidence; this tool has no B4 evidence ingestion",
+        "note": "breeds=1 ref='I-am-not-a-B4-run' -> CONDITIONAL-UNMET"
+      }
+    },
+    {
+      "case": "F_b4_ref_'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "status": "CLOSED_OK",
+      "detail": {
+        "CAP": "CONDITIONAL-UNMET",
+        "overall": "NOT-PASS",
+        "doc": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "ev": "NOT VERIFIED: --b4-ref is documentary metadata, not B4 evidence; this tool has no B4 evidence ingestion",
+        "note": "breeds=1 ref='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' -> CONDITIONAL-UNMET"
+      }
+    },
+    {
+      "case": "F_b4_ref_'{\"sha256\":\"deadbeef\",\"seeds\":[1,200]}'",
+      "status": "CLOSED_OK",
+      "detail": {
+        "CAP": "CONDITIONAL-UNMET",
+        "overall": "NOT-PASS",
+        "doc": "{\"sha256\":\"deadbeef\",\"seeds\":[1,200]}",
+        "ev": "NOT VERIFIED: --b4-ref is documentary metadata, not B4 evidence; this tool has no B4 evidence ingestion",
+        "note": "breeds=1 ref='{\"sha256\":\"deadbeef\",\"seeds\":[1,200]}' -> CONDITIONAL-UNMET"
+      }
+    },
+    {
+      "case": "CTRL_breeds0_literal_PASS",
+      "status": "CLOSED_OK",
+      "detail": {
+        "CAP": "PASS",
+        "overall": "PASS",
+        "note": "breeds=0 path unchanged"
+      }
+    },
+    {
+      "case": "P5IB_freetext_approval_and_b4_run_ref",
+      "status": "STILL_OPEN_OR_NEW",
+      "detail": {
+        "P5IB": "PASS",
+        "CAP": "CONDITIONAL-UNMET",
+        "overall": "NOT-PASS",
+        "P5IB_detail": {
+          "errors": [],
+          "bc_columns": [
+            "bc_lay_cap_bp_lt18"
+          ],
+          "note": "D-HOP-2026-11-05-15 (3): bc_broody_cap_bp 700 unapproved, 2000 not endorsed \u2014 approval_ref must cite an explicit approval"
+        },
+        "note": "P5IB must not PASS on free-text approval_ref/b4_run_ref; if PASS => NEW blocker"
+      }
+    },
+    {
+      "case": "P5IB_whitespace_approval_ref",
+      "status": "CLOSED_OK",
+      "detail": {
+        "P5IB": "FAIL",
+        "errors": [
+          "bc_lay_cap_bp_lt18: missing approval_ref"
+        ],
+        "note": "whitespace-only approval_ref should FAIL (strip check)"
+      }
+    }
+  ]
+}

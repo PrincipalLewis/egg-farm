@@ -1,0 +1,22 @@
+{
+ "id": "CSR14-preserve-quota-case-Q",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-14"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-OQ1-abc.json"
+  }
+ },
+ "lsQuota": "corrupt.*",
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "notice": "storage",
+  "copy_failed": true,
+  "exportFromMemory": true
+ }
+}

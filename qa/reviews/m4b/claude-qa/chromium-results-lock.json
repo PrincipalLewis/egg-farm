@@ -1,0 +1,340 @@
+{
+ "eng": "chromium",
+ "url": "file:///tmp/relchk/egg-farm.html",
+ "lock-text-w360": {
+  "F5C15": [
+   {
+    "st": {
+     "c": 1000000000000,
+     "F": 5,
+     "C": 15,
+     "H": 5,
+     "V": 9,
+     "t7": 1,
+     "seen": true,
+     "bk": 0
+    },
+    "rows": [
+     {
+      "k": "hens",
+      "t": "L5 Hens Eggs/s 6 → 7 Next at L10: bigger coop · offline ×1.25 Level 5 / 30 $73.00"
+     },
+     {
+      "k": "eggValue",
+      "t": "L9 Egg value Egg price $3.65 Next at L10: Large ×1.25 Level 9 / 30 Needs Farm L6",
+      "lockAria": "Egg value, level 9, locked. Needs Farm level 6."
+     },
+     {
+      "k": "farm",
+      "t": "L5 Farm level Coop upgrade at L10 Hens & Egg value up to L8 → L9 Coop capacity 300 → 350 Customers every 3.87s → 3.68s Customer demand 19–38"
+     }
+    ]
+   },
+   {
+    "st": {
+     "c": 999999955200,
+     "F": 6,
+     "C": 15,
+     "H": 5,
+     "V": 9,
+     "t7": 1,
+     "seen": true,
+     "bk": 0
+    },
+    "rows": [
+     {
+      "k": "hens",
+      "t": "L5 Hens Eggs/s 6 → 7 Next at L10: bigger coop · offline ×1.25 Level 5 / 30 $73.00"
+     },
+     {
+      "k": "eggValue",
+      "t": "L9 Egg value Egg price $3.65 Next at L10: Large ×1.25 Level 9 / 30 Needs Farm L7",
+      "lockAria": "Egg value, level 9, locked. Needs Farm level 7."
+     },
+     {
+      "k": "farm",
+      "t": "L6 Farm level Coop upgrade at L10 Hens & Egg value up to L9 → L10 Coop capacity 350 → 400 Customers every 3.68s → 3.49s Customer demand 21–4"
+     }
+    ]
+   },
+   {
+    "st": {
+     "c": 999999899200,
+     "F": 7,
+     "C": 15,
+     "H": 5,
+     "V": 9,
+     "t7": 1,
+     "seen": true,
+     "bk": 0
+    },
+    "rows": [
+     {
+      "k": "hens",
+      "t": "L5 Hens Eggs/s 6 → 7 Next at L10: bigger coop · offline ×1.25 Level 5 / 30 $73.00"
+     },
+     {
+      "k": "eggValue",
+      "t": "L9 Egg value Egg price $3.65 → $4.54 Next at L10: Large ×1.25 Level 9 / 30 $468.00"
+     },
+     {
+      "k": "farm",
+      "t": "L7 Farm level Coop upgrade at L10 Hens & Egg value up to L10 → L11 Coop capacity 400 → 450 Customers every 3.49s → 3.32s Customer demand 23–"
+     }
+    ]
+   }
+  ],
+  "F0C30": [
+   {
+    "st": {
+     "c": 1000000000000,
+     "F": 0,
+     "C": 30,
+     "H": 0,
+     "V": 12,
+     "t7": 1,
+     "seen": true,
+     "bk": 0
+    },
+    "rows": [
+     {
+      "k": "hens",
+      "t": "L0 Hens Eggs/s 1 → 2 Level 0 / 30 $20.00"
+     },
+     {
+      "k": "eggValue",
+      "t": "L12 Egg value Egg price $4.88 Level 12 / 30 Needs Farm L1",
+      "lockAria": "Egg value, level 12, locked. Needs Farm level 1."
+     },
+     {
+      "k": "farm",
+      "t": "L0 Farm level Coop upgrade at L5 Hens & Egg value up to L3 → L4 Coop capacity 50 → 100 Customers every 5s → 4.75s Customer demand 6–12 → 8–1"
+     }
+    ]
+   },
+   {
+    "st": {
+     "c": 999999990000,
+     "F": 1,
+     "C": 30,
+     "H": 0,
+     "V": 12,
+     "t7": 1,
+     "seen": true,
+     "bk": 0
+    },
+    "rows": [
+     {
+      "k": "hens",
+      "t": "L0 Hens Eggs/s 1 → 2 Level 0 / 30 $20.00"
+     },
+     {
+      "k": "eggValue",
+      "t": "L12 Egg value Egg price $4.88 Level 12 / 30 Needs Farm L2",
+      "lockAria": "Egg value, level 12, locked. Needs Farm level 2."
+     },
+     {
+      "k": "farm",
+      "t": "L1 Farm level Coop upgrade at L5 Hens & Egg value up to L4 → L5 Coop capacity 100 → 150 Customers every 4.75s → 4.51s Customer demand 8–16 →"
+     }
+    ]
+   },
+   {
+    "st": {
+     "c": 999999976500,
+     "F": 2,
+     "C": 30,
+     "H": 0,
+     "V": 12,
+     "t7": 1,
+     "seen": true,
+     "bk": 0
+    },
+    "rows": [
+     {
+      "k": "hens",
+      "t": "L0 Hens Eggs/s 1 → 2 Level 0 / 30 $20.00"
+     },
+     {
+      "k": "eggValue",
+      "t": "L12 Egg value Egg price $4.88 Level 12 / 30 Needs Farm L3",
+      "lockAria": "Egg value, level 12, locked. Needs Farm level 3."
+     },
+     {
+      "k": "farm",
+      "t": "L2 Farm level Coop upgrade at L5 Hens & Egg value up to L5 → L6 Coop capacity 150 → 200 Customers every 4.51s → 4.29s Customer demand 11–22 "
+     }
+    ]
+   }
+  ],
+  "F27": "L27 Farm level Hens & Egg value up to L30 → L30 Coop capacity 2,100 → 2,175 Customers every 1.5s → 1.5s Customer demand 34–68 → 35–70 Level 27 / 30 $177.6K"
+ },
+ "lock-text-w1280": {
+  "F5C15": [
+   {
+    "st": {
+     "c": 1000000000000,
+     "F": 5,
+     "C": 15,
+     "H": 5,
+     "V": 9,
+     "t7": 1,
+     "seen": true,
+     "bk": 0
+    },
+    "rows": [
+     {
+      "k": "hens",
+      "t": "L5 Hens Eggs/s 6 → 7 Next at L10: bigger coop · offline ×1.25 Level 5 / 30 $73.00"
+     },
+     {
+      "k": "eggValue",
+      "t": "L9 Egg value Egg price $3.65 Next at L10: Large ×1.25 Level 9 / 30 Needs Farm L6",
+      "lockAria": "Egg value, level 9, locked. Needs Farm level 6."
+     },
+     {
+      "k": "farm",
+      "t": "L5 Farm level Coop upgrade at L10 Hens & Egg value up to L8 → L9 Coop capacity 300 → 350 Customers every 3.87s → 3.68s Customer demand 19–38"
+     }
+    ]
+   },
+   {
+    "st": {
+     "c": 999999955200,
+     "F": 6,
+     "C": 15,
+     "H": 5,
+     "V": 9,
+     "t7": 1,
+     "seen": true,
+     "bk": 0
+    },
+    "rows": [
+     {
+      "k": "hens",
+      "t": "L5 Hens Eggs/s 6 → 7 Next at L10: bigger coop · offline ×1.25 Level 5 / 30 $73.00"
+     },
+     {
+      "k": "eggValue",
+      "t": "L9 Egg value Egg price $3.65 Next at L10: Large ×1.25 Level 9 / 30 Needs Farm L7",
+      "lockAria": "Egg value, level 9, locked. Needs Farm level 7."
+     },
+     {
+      "k": "farm",
+      "t": "L6 Farm level Coop upgrade at L10 Hens & Egg value up to L9 → L10 Coop capacity 350 → 400 Customers every 3.68s → 3.49s Customer demand 21–4"
+     }
+    ]
+   },
+   {
+    "st": {
+     "c": 999999899200,
+     "F": 7,
+     "C": 15,
+     "H": 5,
+     "V": 9,
+     "t7": 1,
+     "seen": true,
+     "bk": 0
+    },
+    "rows": [
+     {
+      "k": "hens",
+      "t": "L5 Hens Eggs/s 6 → 7 Next at L10: bigger coop · offline ×1.25 Level 5 / 30 $73.00"
+     },
+     {
+      "k": "eggValue",
+      "t": "L9 Egg value Egg price $3.65 → $4.54 Next at L10: Large ×1.25 Level 9 / 30 $468.00"
+     },
+     {
+      "k": "farm",
+      "t": "L7 Farm level Coop upgrade at L10 Hens & Egg value up to L10 → L11 Coop capacity 400 → 450 Customers every 3.49s → 3.32s Customer demand 23–"
+     }
+    ]
+   }
+  ],
+  "F0C30": [
+   {
+    "st": {
+     "c": 1000000000000,
+     "F": 0,
+     "C": 30,
+     "H": 0,
+     "V": 12,
+     "t7": 1,
+     "seen": true,
+     "bk": 0
+    },
+    "rows": [
+     {
+      "k": "hens",
+      "t": "L0 Hens Eggs/s 1 → 2 Level 0 / 30 $20.00"
+     },
+     {
+      "k": "eggValue",
+      "t": "L12 Egg value Egg price $4.88 Level 12 / 30 Needs Farm L1",
+      "lockAria": "Egg value, level 12, locked. Needs Farm level 1."
+     },
+     {
+      "k": "farm",
+      "t": "L0 Farm level Coop upgrade at L5 Hens & Egg value up to L3 → L4 Coop capacity 50 → 100 Customers every 5s → 4.75s Customer demand 6–12 → 8–1"
+     }
+    ]
+   },
+   {
+    "st": {
+     "c": 999999990000,
+     "F": 1,
+     "C": 30,
+     "H": 0,
+     "V": 12,
+     "t7": 1,
+     "seen": true,
+     "bk": 0
+    },
+    "rows": [
+     {
+      "k": "hens",
+      "t": "L0 Hens Eggs/s 1 → 2 Level 0 / 30 $20.00"
+     },
+     {
+      "k": "eggValue",
+      "t": "L12 Egg value Egg price $4.88 Level 12 / 30 Needs Farm L2",
+      "lockAria": "Egg value, level 12, locked. Needs Farm level 2."
+     },
+     {
+      "k": "farm",
+      "t": "L1 Farm level Coop upgrade at L5 Hens & Egg value up to L4 → L5 Coop capacity 100 → 150 Customers every 4.75s → 4.51s Customer demand 8–16 →"
+     }
+    ]
+   },
+   {
+    "st": {
+     "c": 999999976500,
+     "F": 2,
+     "C": 30,
+     "H": 0,
+     "V": 12,
+     "t7": 1,
+     "seen": true,
+     "bk": 0
+    },
+    "rows": [
+     {
+      "k": "hens",
+      "t": "L0 Hens Eggs/s 1 → 2 Level 0 / 30 $20.00"
+     },
+     {
+      "k": "eggValue",
+      "t": "L12 Egg value Egg price $4.88 Level 12 / 30 Needs Farm L3",
+      "lockAria": "Egg value, level 12, locked. Needs Farm level 3."
+     },
+     {
+      "k": "farm",
+      "t": "L2 Farm level Coop upgrade at L5 Hens & Egg value up to L5 → L6 Coop capacity 150 → 200 Customers every 4.51s → 4.29s Customer demand 11–22 "
+     }
+    ]
+   }
+  ],
+  "F27": "L27 Farm level Hens & Egg value up to L30 → L30 Coop capacity 2,100 → 2,175 Customers every 1.5s → 1.5s Customer demand 34–68 → 35–70 Level 27 / 30 $177.6K"
+ }
+}

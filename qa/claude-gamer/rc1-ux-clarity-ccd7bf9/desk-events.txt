@@ -1,0 +1,141 @@
+0:01 shot desk-01-0m01-title.png
+0:03 build m3-rc1-pre+ccd7bf9
+0:03 shot desk-02-0m03-start.png
+0:03 shot desk-03-0m03-collect-tap.png
+0:04 state {"top":"Egg Farm $0.00 +$1.50/s 1 build ccd7bf9 $0.00, 1 eggs","goal":"★ Collection L1 · +12% income~0:07›","collect":"Collect +5 · 2 ready","toast":"A customer is on the way… 8 s | ○ ● ○","t":"0:04","sinceBuy":1}
+0:12 sell Sell all (10 eggs · $10.00)
+0:12 shot desk-04-0m12-sell-feedback.png
+0:13 shot desk-05-0m13-first-upgrade.png
+0:13 buy [Collection] gap=10s :: Collect per tap +12% egg price · +5/tap Egg price +0% → +12% Eggs per tap 5 → 10 +12% income Pays back in ~56 s ★ Best buy Level 0 / 30 $10.
+0:19 sell Sell all (12 eggs · $13.44)
+0:20 state {"top":"Egg Farm $13.44 +$1.68/s 3 build ccd7bf9 $13.44, 3 eggs","goal":"★ Collection L2 · +11% income ~0:02 ›","collect":"Collect +10 · 2 ready","toast":"","t":"0:20","sinceBuy":7}
+0:22 sell Sell all (8 eggs · $8.96)
+0:22 buy [Collection] gap=10s :: Collect per tap +12% egg price · +5/tap Egg price +12% → +24% Eggs per tap 10 → 15 +11% income Pays back in ~1 min 29 s ★ Best buy Level 1 /
+0:25 sell Sell all (2 eggs · $2.48)
+0:28 sell Sell all (6 eggs · $7.44)
+0:31 sell Sell all (2 eggs · $2.48)
+0:34 sell Sell all (7 eggs · $8.68)
+0:34 buy [Collection] gap=12s :: Collect per tap +12% egg price · +5/tap Egg price +24% → +36% Eggs per tap 15 → 20 +10% income Pays back in ~2 min 19 s Level 2 / 30 $25.00
+0:35 state {"top":"Egg Farm $2.48 +$2.04/s 0 build ccd7bf9 $2.48, 0 eggs","goal":"★ Farm L1 · +40% income ~0:48 ›","collect":"Collect +20 · 3 ready","toast":"","t":"0:35","sinceBuy":1}
+0:37 sell Sell all (5 eggs · $6.80)
+0:40 sell Sell all (4 eggs · $5.44)
+0:42 sell Sell all (4 eggs · $5.44)
+0:45 sell Sell all (4 eggs · $5.44)
+0:48 sell Sell all (5 eggs · $6.80)
+0:51 sell Sell all (4 eggs · $5.44)
+0:52 state {"top":"Egg Farm $37.84 +$2.04/s 0 build ccd7bf9 $37.84, 0 eggs","goal":"★ Farm L1 · +40% income ~0:31 ›","collect":"Collect +20 · 2 ready","toast":"","t":"0:52","sinceBuy":18}
+0:54 sell Sell all (4 eggs · $5.44)
+0:54 buy [Collection] gap=20s :: Collect per tap +12% egg price · +5/tap Egg price +36% → +48% Eggs per tap 20 → 25 +9% income Pays back in ~3 min 43 s Level 3 / 30 $40.00
+0:57 sell Sell all (5 eggs · $7.40)
+1:00 sell Sell all (4 eggs · $5.92)
+1:00 shot desk-06-1m00-upgrades-Collection.png
+1:00 shot desk-07-1m00-upgrades-Farm.png
+1:01 shot desk-08-1m01-upgrades-Workers.png
+1:03 sell Sell all (5 eggs · $7.40)
+1:06 sell Sell all (4 eggs · $5.92)
+1:07 state {"top":"Egg Farm $29.92 +$2.22/s 0 build ccd7bf9 $29.92, 0 eggs","goal":"★ Farm L1 · +40% income ~0:32 ›","collect":"Collect +25 · 2 ready","toast":"","t":"1:07","sinceBuy":13}
+1:08 sell Sell all (4 eggs · $5.92)
+1:11 sell Sell all (4 eggs · $5.92)
+1:14 sell Sell all (5 eggs · $7.40)
+1:17 sell Sell all (4 eggs · $5.92)
+1:20 sell Sell all (4 eggs · $5.92)
+1:22 sell Sell all (4 eggs · $5.92)
+1:23 buy [Collection] gap=29s :: Collect per tap +12% egg price · +5/tap Egg price +48% → +60% Eggs per tap 25 → 30 +8% income Pays back in ~6 min 2 s Level 4 / 30 $65.00
+1:23 state {"top":"Egg Farm $1.92 +$2.40/s 0 build ccd7bf9 $1.92, 0 eggs","goal":"★ Farm L1 · +40% income ~0:41 ›","collect":"Collect +30 · 2 ready","toast":"","t":"1:23","sinceBuy":1}
+1:26 sell Sell all (5 eggs · $8.00)
+1:29 sell Sell all (5 eggs · $8.00)
+1:32 sell Sell all (4 eggs · $6.40)
+1:35 sell Sell all (5 eggs · $8.00)
+1:38 sell Sell all (4 eggs · $6.40)
+1:39 state {"top":"Egg Farm $38.72 +$2.40/s 0 build ccd7bf9 $32.32, 4 eggs","goal":"★ Farm L1 · +40% income ~0:26 ›","collect":"Collect +30 · 2 ready","toast":"","t":"1:39","sinceBuy":16}
+1:41 sell Sell all (5 eggs · $8.00)
+1:43 sell Sell all (4 eggs · $6.40)
+1:46 sell Sell all (4 eggs · $6.40)
+1:49 sell Sell all (5 eggs · $8.00)
+1:52 sell Sell all (4 eggs · $6.40)
+1:54 state {"top":"Egg Farm $73.92 +$2.40/s 0 build ccd7bf9 $73.92, 0 eggs","goal":"★ Farm L1 · +40% income ~0:11 ›","collect":"Collect +30 · 3 ready","toast":"","t":"1:54","sinceBuy":31}
+1:54 shot desk-09-1m54-periodic.png
+1:55 sell Sell all (5 eggs · $8.00)
+1:58 sell Sell all (4 eggs · $6.40)
+2:01 sell Sell all (4 eggs · $6.40)
+2:04 sell Sell all (4 eggs · $6.40)
+2:04 buy [Farm] gap=42s :: Farm level Coop upgrade at L5 Hens 5 → 10 Coop capacity 50 → 100 Egg price $1.60 → $1.68 Customers every 5s → 4.75s Customer demand 6–12 → 8
+2:07 sell Sell all (7 eggs · $11.76)
+2:09 state {"top":"Egg Farm $12.88 +$3.36/s 0 build ccd7bf9 $12.88, 0 eggs","goal":"★ Farm L2 · +57% income ~0:37 ›","collect":"Collect +30 · 3 ready","toast":"","t":"2:09","sinceBuy":4}
+2:10 sell Sell all (5 eggs · $8.40)
+2:13 sell Sell all (6 eggs · $10.08)
+2:16 sell Sell all (6 eggs · $10.08)
+2:19 sell Sell all (7 eggs · $11.76)
+2:22 sell Sell all (5 eggs · $8.40)
+2:24 state {"top":"Egg Farm $61.60 +$3.36/s 3 build ccd7bf9 $61.60, 0 eggs","goal":"★ Farm L2 · +57% income ~0:22 ›","collect":"Collect +30 · 1 ready","toast":"","t":"2:24","sinceBuy":19}
+2:25 sell Sell all (5 eggs · $8.40)
+2:27 sell Sell all (6 eggs · $10.08)
+2:30 sell Sell all (6 eggs · $10.08)
+2:33 sell Sell all (5 eggs · $8.40)
+2:35 sell Sell all (5 eggs · $8.40)
+2:36 buy [Collection] gap=31s :: Collect per tap +12% egg price · +5/tap Egg price +60% → +72% Eggs per tap 30 → 35 +8% income Pays back in ~6 min 40 s Level 5 / 30 $104.00
+2:39 sell Sell all (6 eggs · $10.86)
+2:39 state {"top":"Egg Farm $13.82 +$3.62/s 0 build ccd7bf9 $13.82, 0 eggs","goal":"★ Farm L2 · +57% income ~0:34 ›","collect":"Collect +35 · 3 ready","toast":"","t":"2:39","sinceBuy":3}
+2:42 sell Sell all (7 eggs · $12.67)
+2:45 sell Sell all (5 eggs · $9.05)
+2:47 sell Sell all (6 eggs · $10.86)
+2:50 sell Sell all (6 eggs · $10.86)
+2:53 sell Sell all (6 eggs · $10.86)
+2:55 state {"top":"Egg Farm $68.12 +$3.62/s 0 build ccd7bf9 $68.12, 0 eggs","goal":"★ Farm L2 · +57% income ~0:19 ›","collect":"Collect +35 · 3 ready","toast":"","t":"2:55","sinceBuy":19}
+2:56 sell Sell all (5 eggs · $9.05)
+2:59 sell Sell all (6 eggs · $10.86)
+3:02 sell Sell all (5 eggs · $9.05)
+3:04 sell Sell all (6 eggs · $10.86)
+3:07 sell Sell all (6 eggs · $10.86)
+3:10 sell Sell all (6 eggs · $10.86)
+3:11 state {"top":"Egg Farm $129.66 +$3.62/s 0 build ccd7bf9 $129.66, 0 eggs","goal":"★ Farm L2 · +57% income ~0:02 ›","collect":"Collect +35 · 3 ready","toast":"","t":"3:11","sinceBuy":35}
+3:13 sell Sell all (5 eggs · $9.05)
+3:14 buy [Farm] gap=38s :: Farm level Coop upgrade at L5 Hens 10 → 15 Coop capacity 100 → 150 Egg price $1.81 → $1.89 Customers every 4.75s → 4.51s Customer demand 8–1
+3:16 sell Sell all (9 eggs · $17.01)
+3:19 sell Sell all (8 eggs · $15.12)
+3:22 sell Sell all (9 eggs · $17.01)
+3:25 sell Sell all (9 eggs · $17.01)
+3:27 state {"top":"Egg Farm $69.86 +$5.67/s 5 build ccd7bf9 $69.86, 5 eggs","goal":"★ Farm L3 · +40% income ~0:20 ›","collect":"Collect +35 · 1 ready","toast":"","t":"3:27","sinceBuy":13}
+3:27 sell Sell all (8 eggs · $15.12)
+3:31 sell Sell all (9 eggs · $17.01)
+3:34 sell Sell all (9 eggs · $17.01)
+3:37 sell Sell all (9 eggs · $17.01)
+3:40 sell Sell all (9 eggs · $17.01)
+3:43 sell Sell all (9 eggs · $17.01)
+3:43 buy [Collection] gap=29s :: Collect per tap +12% egg price · +5/tap Egg price +72% → +84% Eggs per tap 35 → 40 +7% income Pays back in ~7 min 9 s Level 6 / 30 $167.00
+3:44 state {"top":"Egg Farm $3.03 +$5.67/s 0 build ccd7bf9 $170.03, 0 eggs","goal":"★ Farm L3 · +40% income ~0:30 ›","collect":"Collect +40 · 4 ready","toast":"","t":"3:44","sinceBuy":1}
+3:46 sell Sell all (9 eggs · $18.18)
+3:49 sell Sell all (9 eggs · $18.18)
+3:51 sell Sell all (9 eggs · $18.18)
+3:54 sell Sell all (8 eggs · $16.16)
+3:57 sell Sell all (9 eggs · $18.18)
+3:59 state {"top":"Egg Farm $91.91 +$6.06/s 4 build ccd7bf9 $91.91, 0 eggs","goal":"★ Farm L3 · +40% income ~0:15 ›","collect":"Collect +40 · 1 ready","toast":"","t":"3:59","sinceBuy":16}
+3:59 shot desk-10-3m59-periodic.png
+4:00 sell Sell all (9 eggs · $18.18)
+4:03 sell Sell all (8 eggs · $16.16)
+4:06 sell Sell all (9 eggs · $18.18)
+4:09 sell Sell all (9 eggs · $18.18)
+4:12 sell Sell all (9 eggs · $18.18)
+4:15 sell Sell all (8 eggs · $16.16)
+4:15 buy [Farm] gap=32s :: Farm level Coop upgrade at L5 Hens 15 → 20 Coop capacity 150 → 200 Egg price $2.02 → $2.12 Customers every 4.51s → 4.29s Customer demand 11–
+4:16 state {"top":"Egg Farm $14.95 +$6.06/s 0 build ccd7bf9 $196.95, 0 eggs","goal":"★ Farm L4 · +30% income ~0:28 ›","collect":"Collect +40 · 5 ready","toast":"","t":"4:16","sinceBuy":0}
+4:17 sell Sell all (10 eggs · $21.20)
+4:20 sell Sell all (11 eggs · $23.32)
+4:21 buy [Workers] gap=6s :: Market Hand Serves customers for you Wage $0.75/min Hire $40.00
+4:21 shot desk-11-4m21-workers-manage.png
+4:21 manage-state [{"t":"Refill","dis":"true","title":"Refill Market Hand"}]
+4:53 sell Sell all (4 eggs · $8.48)
+4:54 state {"top":"Egg Farm $42.46 +$8.47/s 0 build ccd7bf9 $42.46, 0 eggs","goal":"★ Farm L4 · +30% income ~0:25 ›","collect":"Collect +40","toast":"","t":"4:54","sinceBuy":33}
+4:54 shot desk-12-4m54-collect-empty.png
+4:54 collect-empty Collect +40
+4:55 sell Sell all (40 eggs · $84.80)
+5:09 state {"top":"Egg Farm $127.10 +$8.47/s 0 build ccd7bf9 $127.11, 0 eggs","goal":"★ Farm L4 · +30% income ~0:15 ›","collect":"Collect +40","toast":"","t":"5:09","sinceBuy":48}
+5:24 state {"top":"Egg Farm $126.95 +$8.47/s 0 build ccd7bf9 $126.95, 0 eggs","goal":"★ Farm L4 · +30% income ~0:15 ›","collect":"Collect +40","toast":"","t":"5:24","sinceBuy":63}
+5:39 state {"top":"Egg Farm $126.80 +$8.47/s 0 build ccd7bf9 $126.80, 0 eggs","goal":"★ Farm L4 · +30% income ~0:15 ›","collect":"Collect +40","toast":"","t":"5:39","sinceBuy":79}
+5:55 state {"top":"Egg Farm $126.65 +$8.47/s 0 build ccd7bf9 $126.65, 0 eggs","goal":"★ Farm L4 · +30% income ~0:15 ›","collect":"Collect +40","toast":"","t":"5:55","sinceBuy":94}
+6:10 state {"top":"Egg Farm $126.49 +$8.47/s 0 build ccd7bf9 $126.50, 0 eggs","goal":"★ Farm L4 · +30% income ~0:15 ›","collect":"Collect +40","toast":"","t":"6:10","sinceBuy":109}
+6:25 state {"top":"Egg Farm $126.34 +$8.47/s 0 build ccd7bf9 $126.35, 0 eggs","goal":"★ Farm L4 · +30% income ~0:15 ›","collect":"Collect +40","toast":"","t":"6:25","sinceBuy":124}
+6:25 shot desk-13-6m25-periodic.png
+6:40 state {"top":"Egg Farm $126.19 +$8.47/s 0 build ccd7bf9 $126.19, 0 eggs","goal":"★ Farm L4 · +30% income ~0:15 ›","collect":"Collect +40","toast":"","t":"6:40","sinceBuy":140}
+6:56 state {"top":"Egg Farm $126.04 +$8.47/s 0 build ccd7bf9 $126.04, 0 eggs","goal":"★ Farm L4 · +30% income ~0:15 ›","collect":"Collect +40","toast":"","t":"6:56","sinceBuy":155}
+7:00 shot desk-14-7m00-end.png

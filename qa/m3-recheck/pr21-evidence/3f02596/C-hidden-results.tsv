@@ -1,0 +1,473 @@
+passed	/tmp/pr21env/game/engineering/golden/flagoff-golden.a01faea.test.ts :: golden sim trace
+passed	/tmp/pr21env/game/engineering/golden/flagoff-golden.a01faea.test.ts :: golden storage bytes
+passed	ac14.test.ts :: AC14a real-save migration, field by field m1-rc2-v4-12min.json
+passed	ac14.test.ts :: AC14a real-save migration, field by field m2-rc1-v5-12min.json
+passed	ac14.test.ts :: AC14a real-save migration, field by field m2-rc1-v5-40min-edge.json
+passed	ac14.test.ts :: AC14a real-save migration, field by field m2-rc1-v5-40min.json
+passed	ac14.test.ts :: AC14a real-save migration, field by field synthetic v1, v2, v3 migrate (coins dollars->cents, filled, celebratedTier)
+passed	ac14.test.ts :: AC14a real-save migration, field by field the edge fixture really has Unpaid / partial energy / running cooldown
+passed	ac14.test.ts :: AC14c quota / private mode setItem throwing: game keeps running, warns once, logs save_failed once
+passed	ac14.test.ts :: AC14d two tabs first tab owns; second tab is told and goes read-only; first stays writable
+passed	ac14.test.ts :: AC14d two tabs read-only tab never writes the save (load-time save, autosave, .bak)
+passed	ac14.test.ts :: AC14e clock tamper clock forward a day: offline capped at 2 h; worker energy and cooldown do not advance; cooldown <= 30 s
+passed	ac14.test.ts :: AC14e clock tamper clock set back: 0 offline, no negative timers
+passed	ac14.test.ts :: AC14e clock tamper in-session jump forward simulates at most 60 s, back grants nothing
+passed	ac14.test.ts :: AC14f kill / background right after a purchase (automated part; device force-kill is manual) pagehide and visibilitychange->hidden save immediately
+passed	art-ux-rc0.test.ts :: F1 slot toast only when a slot is added true only at F5/10/15/20
+passed	art-ux-rc0.test.ts :: F2 greyed Sell all "No eggs to sell", never $0.00
+passed	art-ux-rc0.test.ts :: F4 separator " · " with spaces on both sides
+passed	art-ux-rc0.test.ts :: F5 shared coalesced waiting count one value for strip and Market, <= 1 change / 2 s, trailing
+passed	art-ux-rc0.test.ts :: font credits OFL bundled, Settings line verbatim, README credits
+passed	art-ux-rc0.test.ts :: rotate-to-portrait prompt query and copy per spec; recovery dialog takes priority
+passed	audio-unlock.test.ts :: PT1-3 audio unlock timeout AUDIO_UNLOCK_MS is 500
+passed	audio-unlock.test.ts :: PT1-3 audio unlock timeout unlock returns within ~AUDIO_UNLOCK_MS when resume never resolves
+passed	audio-unlock.test.ts :: PT1-3 audio unlock timeout withTimeout resolves undefined when the promise never settles
+passed	audio-unlock.test.ts :: PT1-3 audio unlock timeout withTimeout returns the value when the promise wins
+passed	bug6-savedat.test.ts :: BUG-6 missing / invalid savedAt Infinity (1e999): 0 offline, savedAt stamped now and written at once; reload also 0 offline
+passed	bug6-savedat.test.ts :: BUG-6 missing / invalid savedAt a refused newer save without savedAt still gets no writes
+passed	bug6-savedat.test.ts :: BUG-6 missing / invalid savedAt a string savedAt stays on the corrupt path (wrong_type)
+passed	bug6-savedat.test.ts :: BUG-6 missing / invalid savedAt missing: 0 offline, savedAt stamped now and written at once; reload also 0 offline
+passed	bug6-savedat.test.ts :: BUG-6 missing / invalid savedAt valid savedAt still grants offline; future savedAt still clamps to 0
+passed	contrast.test.ts :: §A AA contrast tokens empty-slot outline on cream >= 3:1
+passed	contrast.test.ts :: §A AA contrast tokens exact §A values
+passed	contrast.test.ts :: §A AA contrast tokens floater on white >= 4.5:1
+passed	contrast.test.ts :: §A AA contrast tokens focus ring on cream >= 3:1
+passed	contrast.test.ts :: §A AA contrast tokens focus ring on white >= 3:1
+passed	contrast.test.ts :: §A AA contrast tokens muted on cream >= 4.5:1
+passed	contrast.test.ts :: §A AA contrast tokens muted on white >= 4.5:1
+passed	contrast.test.ts :: §A AA contrast tokens white on barn >= 4.5:1
+passed	contrast.test.ts :: §A AA contrast tokens white on button bg >= 4.5:1
+passed	contrast.test.ts :: §A AA contrast tokens wood text on cream >= 4.5:1
+passed	contrast.test.ts :: §A AA contrast tokens wood text on white >= 4.5:1
+passed	economy-copy.test.ts :: check script exits 0 (match or skipped)
+skipped	economy-copy.test.ts :: data/economy.csv == product/economy.csv (normalised line endings)
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level +0
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 1
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 10
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 11
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 12
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 13
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 14
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 15
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 16
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 17
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 18
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 19
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 2
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 20
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 21
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 22
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 23
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 24
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 25
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 26
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 27
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 28
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 29
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 3
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 30
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 4
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 5
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 6
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 7
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 8
+passed	economy.test.ts :: AC6 every economy.csv cell reproduced from config formulas level 9
+passed	economy.test.ts :: economy.csv parses the same with CRLF (product/economy.csv) and LF (sim output) line endings
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) config params equal the reference sim params
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) fixture is fresh vs the vendored reference sim (config chosen by economy.csv sha256)
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level +0 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 1 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 10 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 11 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 12 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 13 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 14 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 15 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 16 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 17 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 18 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 19 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 2 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 20 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 21 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 22 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 23 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 24 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 25 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 26 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 27 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 28 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 29 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 3 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 30 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 4 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 5 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 6 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 7 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 8 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) level 9 stats
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) offline eggs
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) sale price for all 31x31 (F, C)
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) vendored SOURCE provenance equals the SHA256SUMS pins (unmodified copies)
+passed	economy.test.ts :: parity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures) vendored reference sim matches its sha256 pins
+passed	economy.test.ts :: price formula (1.00 + a*F)(1 + c*C) half-up, coefficients from config
+passed	export-global.test.ts :: eggfarmExportTelemetry snapshot touches no money, save, game state or storage; open windows reported without closing them; no install_id
+passed	frame-sampler.test.ts :: SM-9 frame sampler 60 fps passes
+passed	frame-sampler.test.ts :: SM-9 frame sampler any frame > 100 ms fails
+passed	frame-sampler.test.ts :: SM-9 frame sampler empty sample does not pass
+passed	frame-sampler.test.ts :: SM-9 frame sampler exactly 5% over 20 still passes on p95 and share
+passed	frame-sampler.test.ts :: SM-9 frame sampler p95 > 20 ms fails
+passed	frame-sampler.test.ts :: SM-9 frame sampler sampler skips warm-up and collects deltas over the window
+passed	ftue-v11.test.ts :: FTUE v1.1 §2.1 gates Buy needs coins >= cost (PT1: "Tap Buy" while $2 short)
+passed	ftue-v11.test.ts :: FTUE v1.1 §2.1 gates Collect only once coop >= eggs_per_tap
+passed	ftue-v11.test.ts :: FTUE v1.1 §2.1 gates Sell needs a customer AND basket >= 1; empty queue shows the countdown hint
+passed	ftue-v11.test.ts :: FTUE v1.1 §2.1 gates each step waits for its own event; pointer hides if the gate closes while shown
+passed	ftue-v11.test.ts :: FTUE v1.1 §2.1 gates hint auto-hides after 15 s, re-shows when the gate opens; 60 s closed = silent skip with timeout
+passed	ftue-v11.test.ts :: FTUE v1.1 §2.1 gates skip works from a hint
+passed	ftue-v11.test.ts :: FTUE v1.1 §2.2 Collect label always shows real eggs_per_tap; smaller coop is secondary
+passed	ftue-v11.test.ts :: R1 FTUE pauses under any dialog selector covers Settings/welcome modal, save recovery, rotate prompt and other alertdialogs (not the FTUE bubble itself)
+passed	ftue-v11.test.ts :: R1 resume after the dialog closes step timer freezes while paused and continues from the same value after close; Skip still works
+passed	idb-mirror.test.ts :: D2 IndexedDB mirror Game mirrors every save (load-time save and immediate purchase save) with the exact localStorage bytes
+passed	idb-mirror.test.ts :: D2 IndexedDB mirror Reset save clears the mirror (awaited) so a reload does not restore the old save
+passed	idb-mirror.test.ts :: D2 IndexedDB mirror every write uses a readwrite transaction with durability strict; read returns the last write
+passed	idb-mirror.test.ts :: D2 IndexedDB mirror falls back cleanly: no IndexedDB, open error, open timeout -> null (localStorage only)
+passed	idb-mirror.test.ts :: D2 IndexedDB mirror localStorage quota failure still mirrors the save; second tab (no mirror) writes nothing
+passed	idb-mirror.test.ts :: D2 IndexedDB mirror older saves in IndexedDB still load through migrations (v4 fixture)
+passed	idb-mirror.test.ts :: D2 IndexedDB mirror pickNewest: newer valid IndexedDB wins; ties, older, invalid or missing IndexedDB keep localStorage
+passed	idb-mirror.test.ts :: D2 IndexedDB mirror purchase lost from localStorage (kill before flush) is recovered from the IndexedDB copy on the next boot
+passed	idb-mirror.test.ts :: D2 IndexedDB mirror reconcile writes the IndexedDB copy back to localStorage; a corrupt localStorage save is preserved first
+passed	idb-mirror.test.ts :: D2 IndexedDB mirror save_restore fires only when the IndexedDB copy wins (QA D1): never for an older/one-behind or invalid IndexedDB copy
+passed	idb-mirror.test.ts :: D2 IndexedDB mirror store name is stable (save compatibility across builds)
+passed	idb-mirror.test.ts :: D2 IndexedDB mirror write never throws when the transaction cannot start
+passed	ios-tip.test.ts :: ?ios= debug flag ignored when disabled (release)
+passed	ios-tip.test.ts :: ?ios= debug flag overrides detection when enabled
+passed	ios-tip.test.ts :: copy + timing how-to lines
+passed	ios-tip.test.ts :: copy + timing session 2+, not during FTUE, once
+passed	ios-tip.test.ts :: detectIos (real UAs) Android Chrome -> no tip
+passed	ios-tip.test.ts :: detectIos (real UAs) Chrome on iOS (CriOS) -> chrome (tip with address-bar line)
+passed	ios-tip.test.ts :: detectIos (real UAs) Firefox on iOS (FxiOS) -> chrome bucket
+passed	ios-tip.test.ts :: detectIos (real UAs) display-mode standalone also counts
+passed	ios-tip.test.ts :: detectIos (real UAs) iPadOS desktop UA (MacIntel + touch) -> safari
+passed	ios-tip.test.ts :: detectIos (real UAs) iPhone Safari -> safari
+passed	ios-tip.test.ts :: detectIos (real UAs) iPhone standalone -> standalone
+passed	ios-tip.test.ts :: detectIos (real UAs) real Mac Safari (no touch) -> no tip
+passed	market.test.ts :: RNG seeding first demand is not pinned to demand_min for small seeds (bug: unmixed xorshift seed)
+passed	market.test.ts :: config tunables (economy.md names) has market + feel tunables
+passed	market.test.ts :: config tunables (economy.md names) reads values from config (MK-15)
+passed	market.test.ts :: config tunables (economy.md names) rejects cost growth < 1
+passed	market.test.ts :: config tunables (economy.md names) rejects demand lo > hi
+passed	market.test.ts :: config tunables (economy.md names) rejects flying eggs 1.5
+passed	market.test.ts :: config tunables (economy.md names) rejects negative first arrival
+passed	market.test.ts :: config tunables (economy.md names) rejects patience 0
+passed	market.test.ts :: config tunables (economy.md names) rejects queue base non-integer
+passed	market.test.ts :: config tunables (economy.md names) rejects queue cap 0
+passed	market.test.ts :: config tunables (economy.md names) rejects queue cap < base
+passed	market.test.ts :: config tunables (economy.md names) rejects string value
+passed	market.test.ts :: config tunables (economy.md names) rejects tap window 0
+passed	market.test.ts :: market spec MK-* F8 queue size = min(cap, base + floor(F/step)) from config, P1q 6..10: 6/7/8/10 at L4/L5/L10/L20
+passed	market.test.ts :: market spec MK-* MK-10 partly served customer leaves 30s after ARRIVAL; partial coins kept; logs customer_partial
+passed	market.test.ts :: market spec MK-* MK-10 unserved customer timeout is not partial
+passed	market.test.ts :: market spec MK-* MK-11 sell to departed customer / zero basket is a no-op
+passed	market.test.ts :: market spec MK-* MK-12 / Q3 price at sale time after farm upgrade; queued N unchanged
+passed	market.test.ts :: market spec MK-* MK-2 spawn interval at L10 is 5.99s
+passed	market.test.ts :: market spec MK-* MK-3 / Q2 arrival to a full queue is lost, no burst later
+passed	market.test.ts :: market spec MK-* MK-4 demand distribution at L0 (10k seeded spawns)
+passed	market.test.ts :: market spec MK-* MK-5 same seed same demands, different seed differs
+passed	market.test.ts :: market spec MK-* MK-8 / Q4 partial fill stays with remaining N-k, patience not reset
+passed	market.test.ts :: market spec MK-* MK-9 sell all front-to-back stops at empty basket
+passed	newer-save.test.ts :: fixture corrupt-version-99.json (was case F) is now refused untouched no preserve copy, no fresh start, save bytes unchanged
+passed	newer-save.test.ts :: newer-version save (M4) is refused, never touched Game: refuses, read-only, constructor/save()/endSession() never write the save or .bak
+passed	newer-save.test.ts :: newer-version save (M4) is refused, never touched IndexedDB reconcile never replaces a newer localStorage save (nor writes when IndexedDB holds the newer one)
+passed	newer-save.test.ts :: newer-version save (M4) is refused, never touched a newer .bak is never overwritten by .bak rotation
+passed	newer-save.test.ts :: newer-version save (M4) is refused, never touched loadSafe: no file, no recovery, newer=version; no write/remove of save, .bak or corrupt keys
+passed	newer-save.test.ts :: newer-version save (M4) is refused, never touched newerSaveVersion
+passed	newer-save.test.ts :: review 8669522 fixes B1: newerStoredVersion sees main, .bak and the IndexedDB copy
+passed	newer-save.test.ts :: review 8669522 fixes B1: reconcile writes nothing when .bak is newer
+passed	newer-save.test.ts :: review 8669522 fixes B1: v7 only in IndexedDB, localStorage holds valid v6 -> loadSafe refuses, Game writes nothing, mirror never written
+passed	newer-save.test.ts :: review 8669522 fixes B1: v7 only in IndexedDB, no localStorage save -> refused, no new game, nothing written
+passed	newer-save.test.ts :: review 8669522 fixes M1: main.ts runs the newer-save check before requestFlush / claim
+passed	newer-save.test.ts :: review 8669522 fixes m1: non-integer versions are not "newer"; they go down the corrupt path
+passed	newer-save.test.ts :: review 8669522 fixes m2: corrupt main + newer .bak -> refuse (no fresh start, no corrupt copies)
+passed	newer-save.test.ts :: review 8669522 fixes m3: refusal copy is exactly M4A-31(b), Try again kept
+passed	next-goal.test.ts :: B3 goal chip screen-reader text aria text has the same target and timer as the visible chip
+passed	next-goal.test.ts :: B3 goal chip screen-reader text pluralises correctly
+passed	next-goal.test.ts :: next-goal anti-flicker hold Ready<->Waiting applies only after 2 consecutive ticks
+passed	next-goal.test.ts :: next-goal anti-flicker hold a purchase updates immediately
+passed	next-goal.test.ts :: next-goal anti-flicker hold countdown text on the same target updates every tick
+passed	next-goal.test.ts :: next-goal selection (AC5) Done when nothing is left
+passed	next-goal.test.ts :: next-goal selection (AC5) Farm suffixes: unlock > new coop > Grader tier
+passed	next-goal.test.ts :: next-goal selection (AC5) Ready picks the cheapest affordable; coins = cost counts
+passed	next-goal.test.ts :: next-goal selection (AC5) Waiting picks the cheapest overall with a countdown
+passed	next-goal.test.ts :: next-goal selection (AC5) hired workers never appear; Grader appears as W4 at its tier level
+passed	next-goal.test.ts :: next-goal selection (AC5) start state: Collection L1, no income -> dash (QA note 1)
+passed	next-goal.test.ts :: next-goal selection (AC5) tie-break FARM > COLL > W1 when costs are equal (crafted balance)
+passed	offline-modal.test.ts :: welcome-back modal & one grant per load closing the modal without Collect still grants
+passed	offline-modal.test.ts :: welcome-back modal & one grant per load closing the tab with the modal open: next load settles old grant + at most one new
+passed	offline-modal.test.ts :: welcome-back modal & one grant per load gap < 60s between save and load: no grant
+passed	offline-modal.test.ts :: welcome-back modal & one grant per load offline gap freezes customers (no arrivals/timeouts), timers resume
+passed	offline-modal.test.ts :: welcome-back modal & one grant per load reloading immediately after a grant does not grant again
+passed	offline.test.ts :: AC11 offline progress (expectations derived from config) < 60s grants 0; exactly 60s grants
+passed	offline.test.ts :: AC11 offline progress (expectations derived from config) > cap same as exactly cap
+passed	offline.test.ts :: AC11 offline progress (expectations derived from config) config tunables
+passed	offline.test.ts :: AC11 offline progress (expectations derived from config) coop unchanged; collect puts eggs in basket ignoring coop cap
+passed	offline.test.ts :: AC11 offline progress (expectations derived from config) formula floor(min(t,cap)*mult*eps(saved farm L))
+passed	offline.test.ts :: AC11 offline progress (expectations derived from config) negative gap grants 0
+passed	onboarding.test.ts :: M3 FTUE / Workers intro telemetry (AC4) onboarding_step carries the AC4 names and an action
+passed	onboarding.test.ts :: M3 FTUE / Workers intro telemetry (AC4) step dots show the current of 3 steps
+passed	onboarding.test.ts :: M3 pointer anchoring (m3-ftue-spec §1) bob-peak hand box clears full-width meter text (grow gap on the preferred side)
+passed	onboarding.test.ts :: M3 pointer anchoring (m3-ftue-spec §1) rest tip is REST_GAP from the edge; bob peak keeps ≥ TIP_CLEARANCE
+passed	onboarding.test.ts :: M3 pointer anchoring (m3-ftue-spec §1) shifts sideways when both variants would cover label text even with a larger gap
+passed	onboarding.test.ts :: M3 pointer anchoring (m3-ftue-spec §1) switches side or shifts at REST_GAP when the meter text would be covered
+passed	onboarding.test.ts :: M3 pointer anchoring (m3-ftue-spec §1) tip anchors are the viewBox points scaled to 40px (up 24,0 / down 24,48 of 48)
+passed	onboarding.test.ts :: debug hooks debugAdvance runs the normal tick path
+passed	onboarding.test.ts :: debug hooks debugBackdateSave produces an offline grant on next load
+passed	onboarding.test.ts :: onboarding flow 3 steps in order: collect -> sell -> upgrade, then done
+passed	onboarding.test.ts :: onboarding flow existing save is not a new game (no onboarding)
+passed	onboarding.test.ts :: onboarding flow skip logs the step it was skipped at and ends the flow
+passed	onboarding.test.ts :: onboarding flow telemetry hooks record onboarding_step / onboarding_skip on the Game
+passed	orders.test.ts :: order card (P2) big numbers stay compact
+passed	orders.test.ts :: order card (P2) earlier partial sales count toward have (MK-8/MK-10 partial selling)
+passed	orders.test.ts :: order card (P2) progress bar ARIA + width, disabled Need
+passed	orders.test.ts :: order card (P2) shows full order value and have/want, never $0.00
+passed	orders.test.ts :: order card (P2) three button states: Need N / Sell k / Sell
+passed	orders.test.ts :: queue display (P1q) 4 cards at 360x640/375x667, 5 at 390x844, all on desktop
+passed	orders.test.ts :: queue display (P1q) chip label + accessible name
+passed	orders.test.ts :: queue display (P1q) farm strip: <= 5 chips, 4 + "+N" past 5
+passed	p4.test.ts :: P4 build numbers vs Economy re-sim W4 ~5.5, W4b ~7.5, Manage ~5.62 / 15 min (20 seeds vs Economy 100; +-0.3 min / +-10%)
+passed	p4.test.ts :: P4 build numbers vs Economy re-sim report
+passed	p4.test.ts :: regression: a worker going Unpaid while the Grader is hired (Python sim crashed here) no crash, Grader unaffected, Unpaid worker resumes once paid
+passed	pacing-acw1.test.ts :: AC-W1 casual (100 seeds, slow) >= 95% reach F10 within 15 min, F18 median <= 40 min, parity with Python (±20% medians, ±5 pts pass rate)
+passed	pacing-acw1.test.ts :: AC-W1 casual (100 seeds, slow) hooks are off by default and rejected in production
+passed	pacing-m2.test.ts :: M2 pacing: managed workers AC-W2: seller15 managed at most +1 min slower than M1 at F10 and F18
+passed	pacing-m2.test.ts :: M2 pacing: managed workers AC-W4: seller15 managed steps F18->F25 <= 6 min, F25 <= 70 min
+passed	pacing-m2.test.ts :: M2 pacing: managed workers AC-W4b (soft, non-gating): cheapest managed steps F18->F25 <= 8 min
+passed	pacing-m2.test.ts :: M2 pacing: managed workers report
+passed	pacing-m2b.test.ts :: M2 pacing: unmanaged + slow tapper AC-W3: unmanaged F25 faster than no workers (seller15, cheapest); F10/F18 within +0.8 min hire cost
+passed	pacing-m2b.test.ts :: M2 pacing: unmanaged + slow tapper AC-W6: slow tapper with Coop Hand beats no Coop Hand by >= 4 min at F18 and >= 15% F21 income
+passed	pacing.test.ts :: AC7 pacing bot on the real sim >= 9 upgrades by 5 min
+passed	pacing.test.ts :: AC7 pacing bot on the real sim Farm L10 reached within 8-12 min
+passed	pacing.test.ts :: AC7 pacing bot on the real sim Farm L18 reached within 24-36 min
+passed	pacing.test.ts :: AC7 pacing bot on the real sim cheapest-first Farm level >= 70% of seller15 at 10 and 30 min
+passed	pacing.test.ts :: AC7 pacing bot on the real sim first upgrade <= 30 s
+passed	pacing.test.ts :: AC7 pacing bot on the real sim report
+passed	post-rc1.test.ts :: post-rc1 m-1: Manage all greyed during shared cooldown CSS greys out all three Manage all copies with the same disabled style as Manage
+passed	post-rc1.test.ts :: post-rc1 m-1: Manage all greyed during shared cooldown Workers tab pill: aria-disabled + is-cooldown, keeps countdown text and ring, like single Manage
+passed	post-rc1.test.ts :: post-rc1 m-2: worker_yawn telemetry fires once with {worker_id, energy_pct, farm_level} when a worker crosses into Yawning
+passed	post-rc1.test.ts :: post-rc1 m-2: worker_yawn telemetry no event when already Yawning at start; fires again after Manage refills and it drops back
+passed	post-rc1.test.ts :: post-rc1 m-2: worker_yawn telemetry one event per worker
+passed	recovery-v11.test.ts :: recovery v1.1 export copy
+passed	recovery-v11.test.ts :: recovery v1.1 export share ok -> true; share error falls back to clipboard; both failing -> false
+passed	recovery-v11.test.ts :: recovery v1.1 export share sheet cancelled -> false (dialog shows FAIL_MSG, stays open)
+passed	release-build-id.test.ts :: clean id passes, +dirty fails
+passed	release-build-id.test.ts :: m3-rc0 name only allowed when HEAD is the m3-rc0 tag commit 16176a3
+passed	release-bundle.test.ts :: release bundle D3/D4: no ?perf=1 SM-9 sampler and no ?debug=1 cheat panel in release (QA builds keep both)
+passed	release-bundle.test.ts :: release bundle has no ?ios= override (the flag reader is dead-code eliminated)
+passed	release-bundle.test.ts :: release bundle has no window.eggfarm game handle in release (QA/dev builds keep it)
+passed	release-bundle.test.ts :: release bundle has no window.eggfarmOnb onboarding debug handle (QA builds only)
+passed	resume.test.ts :: coop float + whole-egg collect keeps fraction after tap; collects only whole eggs
+passed	resume.test.ts :: wall-clock resume gap < 60s catch-up is capped at coop capacity
+passed	resume.test.ts :: wall-clock resume gap < 60s catches up at full online rate
+passed	resume.test.ts :: wall-clock resume gap exactly 90s with uncapped coop shows 60s of production
+passed	resume.test.ts :: wall-clock resume hidden tab gap >= 60s: simulates the first 60s (coop capped), then freezes; no grant
+passed	resume.test.ts :: wall-clock resume hidden time counts as offline only when the tab is then closed (last save -> next load)
+passed	resume.test.ts :: wall-clock resume negative wall-clock gap grants nothing
+passed	resume.test.ts :: wall-clock resume tick uses wall-clock time, not frame count (throttled frames)
+passed	s2-3a.test.ts :: Art & UX compact amount on the Thanks card / pop "$12.50" under $1K, then 1.2K style (floored, no trailing .0)
+passed	s2-3a.test.ts :: MK-16/18 ServedDwell a customer who leaves part-served never shows a Thanks card
+passed	s2-3a.test.ts :: MK-16/18 ServedDwell a served card stays exactly served_dwell_ms with the coins it paid, then expires once
+passed	s2-3a.test.ts :: MK-17/21 visibility re-run (L12, 1,500 eggs, Market Hand Working) before: ~15% visible; after: >= 40% over 60 s for several seeds
+passed	s2-3a.test.ts :: MK-20 the sim is untouched by the dwell (deterministic) same seed -> identical state and event stream whatever served_dwell_ms is
+passed	s2-3a.test.ts :: MK-22 first customer as soon as the player returns closing the welcome-back modal (Collect or dismiss) brings a customer on the next tick
+passed	s2-3a.test.ts :: MK-22 first customer as soon as the player returns no grant pending -> timer untouched; settling a stale grant at load does not trigger it
+passed	s2-3a.test.ts :: Product ruling: strip full of waiting customers S2-3a-1: a drawn card that loses its slot to a live customer is squeezed (fade + pop) once, then gone
+passed	s2-3a.test.ts :: Product ruling: strip full of waiting customers a served customer with no free slot leaves at once as a "+$X" pop: never drawn, never shown later
+passed	s2-3a.test.ts :: Product ruling: strip full of waiting customers invariant: every served customer gets the full 1.5 s card or a pop - never nothing (random strip pressure)
+passed	s2-3a.test.ts :: Product ruling: strip full of waiting customers with room the card is drawn; extra served customers beyond the free slots pop; a drawn card keeps its slot
+passed	s2-3a.test.ts :: S2-3a config served_dwell_ms comes from balance data (1500) and must be > 0
+passed	s2-8-10.test.ts :: S2-8 gate: wages draining money to $0 money never goes negative (small, exact-wage and huge balances)
+passed	s2-8-10.test.ts :: S2-8 gate: wages draining money to $0 no soft-lock at $0: Collect and manual Sell still work and earn money
+passed	s2-8-10.test.ts :: S2-8 gate: wages draining money to $0 no soft-lock with 0 eggs and $0: the coop refills and customers keep arriving
+passed	s2-8-10.test.ts :: S2-8 gate: wages draining money to $0 offline settlement at $0: grant pays no wages, money stays >= 0, Collect/Sell work after
+passed	s2-8-10.test.ts :: S2-8 gate: wages draining money to $0 workers go Unpaid when a wage cannot be paid, and resume once money covers it
+passed	s2-8-10.test.ts :: S2-8 wage from the Player log (Farm L3, Market Hand, 0 eggs) 60 s of Market Hand wages at L3 = $0.75 +- 1 c (was $0.60 with per-charge rounding)
+passed	s2-8-10.test.ts :: S2-8 wage from the Player log (Farm L3, Market Hand, 0 eggs) drain = Market Hand wage at the exact economy.csv rate (0.75 $/min at L3 = 1.25 c/s; fraction carried)
+passed	s2-8-10.test.ts :: S2-8 wage from the Player log (Farm L3, Market Hand, 0 eggs) net rate = income - wages (exact per-second rate at any pace); Asleep/Unpaid/not hired cost 0
+passed	s2-8-10.test.ts :: S2-8 wage from the Player log (Farm L3, Market Hand, 0 eggs) the fraction survives a save round-trip; v5 saves migrate with nothing owed
+passed	s2-8-10.test.ts :: S2-9 Market never opens by itself a queue tap opens Market only on the same chip, present >= 250 ms
+passed	s2-8-10.test.ts :: S2-9 Market never opens by itself queueFull flag tracks capacity
+passed	s2-money.test.ts :: S2-4a: tapping a greyed (unaffordable) control a button drawn greyed but affordable NOW buys exactly once at the listed price (stale DOM no longer decides)
+passed	s2-money.test.ts :: S2-4a: tapping a greyed (unaffordable) control every greyed control in the sheet is a no-op on money and save (collection, hire, tier, manage, manage all, sell, sell all)
+passed	s2-money.test.ts :: S2-4a: tapping a greyed (unaffordable) control greyed Farm L12: no dispatch, money, level and save unchanged
+passed	s2-money.test.ts :: S2-4a: tapping a greyed (unaffordable) control money only ever drops through a purchase, hire or wage (no other path lowers coins over 60 s of play)
+passed	s2-money.test.ts :: S2-4b: the UI (header + open sheet) refreshes while rAF is stalled a throwing render does not kill the loop
+passed	s2-money.test.ts :: S2-4b: the UI (header + open sheet) refreshes while rAF is stalled rAF running: ticks every frame; timer adds nothing extra
+passed	s2-money.test.ts :: S2-4b: the UI (header + open sheet) refreshes while rAF is stalled rAF stalled (occluded/throttled window): the fallback keeps ticking at >= 3 Hz
+passed	s2-money.test.ts :: S2-4b: the UI (header + open sheet) refreshes while rAF is stalled the sheet shows live money: a render tick after 85 s of stalled rAF reflects the sim, not the value from when it stalled
+passed	save-durability-v4.test.ts :: v4 issue 1: an invalid savedAt ranks as the OLDEST copy in reconcile e3 repro: older localStorage save with a FUTURE savedAt does not beat a newer IndexedDB copy
+passed	save-durability-v4.test.ts :: v4 issue 1: an invalid savedAt ranks as the OLDEST copy in reconcile every offline-invalid savedAt in localStorage loses to a valid IndexedDB copy, and vice versa
+passed	save-durability-v4.test.ts :: v4 issue 1: an invalid savedAt ranks as the OLDEST copy in reconcile pre-2020 floor only applies when the clock is past 2020
+passed	save-durability-v4.test.ts :: v4 issue 1: an invalid savedAt ranks as the OLDEST copy in reconcile small clock skew is still valid; both invalid keeps localStorage
+passed	save-durability-v4.test.ts :: v4 issue 2: a lone tab with localStorage full is not locked out a normal claim is not storage-blocked and recovers once storage frees up
+passed	save-durability-v4.test.ts :: v4 issue 2: a lone tab with localStorage full is not locked out a real newer tab still takes over a storage-blocked owner via the channel
+passed	save-durability-v4.test.ts :: v4 issue 2: a lone tab with localStorage full is not locked out f6 repro: claim write throws (prev lease null) -> owner, storage outcome, never "another tab"
+passed	save-durability-v4.test.ts :: v4 issue 2: a lone tab with localStorage full is not locked out f6 repro: claim write throws (prev lease {"id":"oldsession","at":0}) -> owner, storage outcome, never "another tab"
+passed	save-durability-v4.test.ts :: v4 issue 2: a lone tab with localStorage full is not locked out f6 repro: claim write throws (prev lease {"id":"oldsession","at":1792151999000}) -> owner, storage outcome, never "another tab"
+passed	save-durability-v4.test.ts :: v4 issue 2: a lone tab with localStorage full is not locked out main.ts: storage-blocked lease gives the storage recovery outcome and the save notice
+passed	save-durability-v4.test.ts :: v4 issue 2: a lone tab with localStorage full is not locked out silent failed write (read-back mismatch) is detected the same way
+passed	save-durability-v4.test.ts :: v4 issue 3 (Reviewer N3) a failed IndexedDB re-read keeps the first read
+passed	save-fixtures.test.ts :: QA M3 save fixtures (smoke) m1-rc2-v4-12min.json migrates and loads
+passed	save-fixtures.test.ts :: QA M3 save fixtures (smoke) m2-rc1-v5-12min.json migrates and loads
+passed	save-fixtures.test.ts :: QA M3 save fixtures (smoke) m2-rc1-v5-40min-edge.json migrates and loads
+passed	save-fixtures.test.ts :: QA M3 save fixtures (smoke) m2-rc1-v5-40min.json migrates and loads
+passed	save-hardening.test.ts :: Game + rotation Q logs copy_failed:true
+passed	save-hardening.test.ts :: Game + rotation QA case 2: a purchase also unlocks rotation
+passed	save-hardening.test.ts :: Game + rotation QA case 2: fresh start never rotates into .bak until progress (purchase or 60 s)
+passed	save-hardening.test.ts :: Game + rotation logs save_corrupt with reason/had_backup/restored_from_backup/build
+passed	save-hardening.test.ts :: Game + rotation normal play rotates the previous valid save into .bak
+passed	save-hardening.test.ts :: Game + rotation restored game (R) keeps rotating; bad main never overwrites .bak
+passed	save-hardening.test.ts :: Game + rotation save() writes a checksummed save that validates
+passed	save-hardening.test.ts :: PT1-4 flags on fresh fallback keepPrefsOnly drops FTUE/Workers-tip flags, keeps prefs + install-level tip state
+passed	save-hardening.test.ts :: loadSafe QA case 1: backup also corrupt -> F, both bad files kept
+passed	save-hardening.test.ts :: loadSafe QA case 3: quota while copying -> Q, copy_failed, raw in memory, single attempt
+passed	save-hardening.test.ts :: loadSafe corrupt-empty.json: no backup -> case F, raw preserved
+passed	save-hardening.test.ts :: loadSafe corrupt-missing-state.json: no backup -> case F, raw preserved
+passed	save-hardening.test.ts :: loadSafe corrupt-truncated.json: no backup -> case F, raw preserved
+passed	save-hardening.test.ts :: loadSafe corrupt-wrong-type.json: no backup -> case F, raw preserved
+passed	save-hardening.test.ts :: loadSafe keeps only the last 3 corrupt copies
+passed	save-hardening.test.ts :: loadSafe no save -> new game, no recovery
+passed	save-hardening.test.ts :: loadSafe valid backup -> case R
+passed	save-hardening.test.ts :: recovery dialog copy export file name
+passed	save-hardening.test.ts :: recovery dialog copy three cases, no jargon (v2.1 strings)
+passed	save-hardening.test.ts :: validate checksum catches a changed state
+passed	save-hardening.test.ts :: validate corrupt-empty.json is rejected as empty
+passed	save-hardening.test.ts :: validate corrupt-missing-state.json is rejected as missing_state
+passed	save-hardening.test.ts :: validate corrupt-truncated.json is rejected as parse
+passed	save-hardening.test.ts :: validate corrupt-version-99.json is rejected as version
+passed	save-hardening.test.ts :: validate corrupt-wrong-type.json is rejected as wrong_type
+passed	save-hardening.test.ts :: validate negative / non-finite numbers are invalid_state
+passed	save-hardening.test.ts :: validate real QA fixtures (no checksum, v4/v5) still validate
+passed	save-majors-2959ba0.test.ts :: BUG-1/BUG-5: invalid savedAt (<= 0, pre-2020, null) -> 0 offline, re-stamped now, loaded (not corrupt) a 2h-old valid savedAt still pays; exactly 2020-01-01 is valid; a future one clamps to 0
+passed	save-majors-2959ba0.test.ts :: BUG-1/BUG-5: invalid savedAt (<= 0, pre-2020, null) -> 0 offline, re-stamped now, loaded (not corrupt) future savedAt is invalid (Product 15:15): 0 offline, loaded, re-stamped now; reload 30 min later pays a normal grant from now
+passed	save-majors-2959ba0.test.ts :: BUG-1/BUG-5: invalid savedAt (<= 0, pre-2020, null) -> 0 offline, re-stamped now, loaded (not corrupt) savedAt -5000000000000
+passed	save-majors-2959ba0.test.ts :: BUG-1/BUG-5: invalid savedAt (<= 0, pre-2020, null) -> 0 offline, re-stamped now, loaded (not corrupt) savedAt 0
+passed	save-majors-2959ba0.test.ts :: BUG-1/BUG-5: invalid savedAt (<= 0, pre-2020, null) -> 0 offline, re-stamped now, loaded (not corrupt) savedAt 1000
+passed	save-majors-2959ba0.test.ts :: BUG-1/BUG-5: invalid savedAt (<= 0, pre-2020, null) -> 0 offline, re-stamped now, loaded (not corrupt) savedAt 1577836799999
+passed	save-majors-2959ba0.test.ts :: BUG-1/BUG-5: invalid savedAt (<= 0, pre-2020, null) -> 0 offline, re-stamped now, loaded (not corrupt) savedAt null
+passed	save-majors-2959ba0.test.ts :: BUG-1/BUG-5: invalid savedAt (<= 0, pre-2020, null) -> 0 offline, re-stamped now, loaded (not corrupt) string savedAt stays on the corrupt path (wrong_type)
+passed	save-majors-2959ba0.test.ts :: BUG-2: a live tab re-checks for a newer save before every write newer copy appears in eggfarm.save.bak: autosave/pagehide write nothing, onNewerSave fires once
+passed	save-majors-2959ba0.test.ts :: BUG-2: a live tab re-checks for a newer save before every write newer copy appears in eggfarm.save: autosave/pagehide write nothing, onNewerSave fires once
+passed	save-majors-2959ba0.test.ts :: BUG-2: a live tab re-checks for a newer save before every write newer copy only in IndexedDB: the mirror write checks in its transaction, never puts, and stops the Game
+passed	save-majors-2959ba0.test.ts :: BUG-3: main missing everywhere, valid .bak -> restore from .bak (never a fresh game over it) invalid .bak with no main: preserved, fresh start
+passed	save-majors-2959ba0.test.ts :: BUG-3: main missing everywhere, valid .bak -> restore from .bak (never a fresh game over it) restores .bak as case R reason missing; .bak survives the next saves
+passed	save-majors-2959ba0.test.ts :: BUG-4: Reset clears .bak resetProgress removes main and .bak; a reload is a new game
+passed	save-majors-2959ba0.test.ts :: Product 15:15: single recovery outcome from the loader corrupt main + valid .bak -> 'restored'; corrupt main, no .bak -> 'fresh'; copy failed -> 'storage'; normal / none -> null
+passed	save-majors-2959ba0.test.ts :: Product 15:15: single recovery outcome from the loader main missing + valid .bak -> 'restored'
+passed	save-majors-2959ba0.test.ts :: Review minor idb-mirror.ts:55: missing/invalid savedAt is the oldest copy ls savedAt -1 vs valid IndexedDB -> idb; reverse -> ls
+passed	save-majors-2959ba0.test.ts :: Review minor idb-mirror.ts:55: missing/invalid savedAt is the oldest copy ls savedAt 0 vs valid IndexedDB -> idb; reverse -> ls
+passed	save-majors-2959ba0.test.ts :: Review minor idb-mirror.ts:55: missing/invalid savedAt is the oldest copy ls savedAt null vs valid IndexedDB -> idb; reverse -> ls
+passed	save-majors-2959ba0.test.ts :: Review minor idb-mirror.ts:55: missing/invalid savedAt is the oldest copy missing savedAt in localStorage loses to a valid IndexedDB copy
+passed	save-recovery-v21.test.ts :: AC14b v2.1 outcome -> dialog SD4-3 / N5: main missing + invalid .bak -> fresh (not silent), old bytes exportable
+passed	save-recovery-v21.test.ts :: AC14b v2.1 outcome -> dialog dialog markup + CSS follow §2/§5 (alertdialog, labelled/described, hidden icon, 44px controls, focus ring)
+passed	save-recovery-v21.test.ts :: AC14b v2.1 outcome -> dialog fresh: corrupt main + corrupt .bak
+passed	save-recovery-v21.test.ts :: AC14b v2.1 outcome -> dialog null outcome: no copy, no dialog
+passed	save-recovery-v21.test.ts :: AC14b v2.1 outcome -> dialog restored + copy_failed: Restored title, export-now body, outlined button
+passed	save-recovery-v21.test.ts :: AC14b v2.1 outcome -> dialog restored: corrupt main + valid .bak keeps the export link
+passed	save-recovery-v21.test.ts :: AC14b v2.1 outcome -> dialog restored: main missing + valid .bak
+passed	save-recovery-v21.test.ts :: AC14b v2.1 outcome -> dialog storage: corrupt main, preserving the copy hits the quota once
+passed	save-recovery-v21.test.ts :: AC14b v2.1 outcome -> dialog v2.1 strings: titles <= 4 words, no jargon, export aria label
+passed	save-recovery-v21.test.ts :: v2.2 'Can't save' (storage refused, farm loaded) card has no opacity animation (fix 1)
+passed	save-recovery-v21.test.ts :: v2.2 'Can't save' (storage refused, farm loaded) exact v2.2 copy; real Storage keeps v2.1
+passed	save-recovery-v21.test.ts :: v2.2 'Can't save' (storage refused, farm loaded) main.ts holds the save-warning toast until the dialog closes (fix 2), and Export uses the live farm
+passed	save-recovery-v21.test.ts :: v2.2 'Can't save' (storage refused, farm loaded) not an old save: no session "Export old save" in Settings
+passed	save-recovery-v21.test.ts :: v4 storageBlocked routes through the v2.1 Storage dialog blocked localStorage still yields a storage recovery
+passed	save-recovery-v21.test.ts :: v4 storageBlocked routes through the v2.1 Storage dialog main.ts sets g.recovery so app.ts opens the dialog
+passed	save-recovery-v21.test.ts :: v4 storageBlocked routes through the v2.1 Storage dialog synthesized recovery is the storage outcome with the current main bytes for Export
+passed	save.test.ts :: autosave offline modal not granted twice for one absence
+passed	save.test.ts :: autosave saves every 5 s (from config)
+passed	save.test.ts :: autosave saves immediately on every upgrade purchase
+passed	save.test.ts :: autosave saves on visibilitychange→hidden (not visible), pagehide, beforeunload
+passed	save.test.ts :: save/load + migrations AC8 round-trips coins, coop, basket, levels
+passed	save.test.ts :: save/load + migrations migrates v1 (float dollars) -> v2 (cents) and fills new fields
+passed	save.test.ts :: save/load + migrations migrates v2 customers (no filled) -> v3
+passed	save.test.ts :: save/load + migrations null on empty, corrupt, or newer-version save
+passed	save.test.ts :: v4 celebratedTier v3 save at farm L12 migrates with tier 2 celebrated
+passed	slot-preview.test.ts :: slotPreview (§6) absent at F3, F20+ and every non-boundary level
+passed	slot-preview.test.ts :: slotPreview (§6) lead line exactly at F4, F9, F14, F19 (next = 5/10/15/20), with n -> n+1
+passed	slot-preview.test.ts :: slotPreview (§6) order-range line from config, K formatter, omitted when unchanged
+passed	staging-f1-m4cols.test.ts :: staging economy.f1-m4cols.csv (rc2 Workers columns) every cell is a plain decimal; costs are safe integers
+passed	staging-f1-m4cols.test.ts :: staging economy.f1-m4cols.csv (rc2 Workers columns) file sha256 matches the approved revision
+passed	staging-f1-m4cols.test.ts :: staging economy.f1-m4cols.csv (rc2 Workers columns) rc2 worker scalars are constant and match the spec
+passed	staging-f1-m4cols.test.ts :: staging economy.f1-m4cols.csv (rc2 Workers columns) shape: 125 columns, 31 rows, LF only
+passed	staging-f1-m4cols.test.ts :: staging economy.f1-m4cols.csv (rc2 Workers columns) w2_asleep_collect_share is read from the file and matches W2_ASLEEP_COLLECT_SHARE (MK-33a)
+passed	sync-economy.test.ts :: sync-economy (MK-15) M2 v1.1 worker tunables come from the CSV
+passed	sync-economy.test.ts :: sync-economy (MK-15) a consistent CSV change (new cost curve) changes config without code changes
+passed	sync-economy.test.ts :: sync-economy (MK-15) balance.json is exactly what the CSV generates
+passed	sync-economy.test.ts :: sync-economy (MK-15) fails loudly on a CSV cell no formula explains
+passed	sync-economy.test.ts :: sync-economy (MK-15) fails loudly on inconsistent worker columns
+passed	sync-economy.test.ts :: sync-economy (MK-15) rejects malformed CSV
+passed	tab-guard-tg.test.ts :: single-tab guard TG-1 without BroadcastChannel: the lease check before the next save (or heartbeat poll) blocks A
+passed	tab-guard-tg.test.ts :: single-tab guard TG-1: opening B makes A inactive at once (channel); A's money and save stop changing
+passed	tab-guard-tg.test.ts :: single-tab guard TG-2: after 60 s in B, "Play here" in A loads exactly B's money, nothing lost or duplicated
+passed	tab-guard-tg.test.ts :: single-tab guard TG-3: 20 purchases in B while A is inactive leave exactly B's state in the save
+passed	tab-guard-tg.test.ts :: single-tab guard TG-4: owner killed (no release) -> after >= 6 s the next load takes over silently ("stale")
+passed	tab-guard-tg.test.ts :: single-tab guard TG-5: returning with two tabs pays offline earnings only once
+passed	tab-guard-tg.test.ts :: single-tab guard TG-6: a single tab behaves as before - no notice, every save written, heartbeat keeps the lease fresh
+passed	tab-guard-tg.test.ts :: single-tab guard hand-over: the new tab asks the owner to flush, so unsaved in-memory progress is not lost
+passed	telemetry-m3.test.ts :: M3-AC7 install_id + build +dirty only for uncommitted changes
+passed	telemetry-m3.test.ts :: M3-AC7 install_id + build BUILD_ID is m3-rc1-pre+<short git hash>[+dirty] matching HEAD and the tree state (Vite define)
+passed	telemetry-m3.test.ts :: M3-AC7 install_id + build corrupt-save fallback keeps the install id unchanged
+passed	telemetry-m3.test.ts :: M3-AC7 install_id + build gitBuildId reflects a real dirty/clean tree
+passed	telemetry-m3.test.ts :: M3-AC7 install_id + build save reset keeps install_id, telemetry and sfx/reducedMotion; clears save and FTUE flags (PT1-2)
+passed	telemetry-m3.test.ts :: M3-AC7 install_id + build session_start carries install_id and build; id stored under its own key, not in the save
+passed	telemetry-m3.test.ts :: M3-AC7 telemetry retention first-session / onboarding events are never evicted by the capped ring
+passed	telemetry-m3.test.ts :: M3-AC7 telemetry retention high-rate events stay ring-trimmed
+passed	telemetry-m3.test.ts :: M3-AC7 telemetry retention pinned events survive a reload and a 4 h-like flood; export contains them
+passed	telemetry-m3.test.ts :: PT1-9 isDirty ignores Vite timestamp files only
+passed	telemetry.test.ts :: telemetry events carry ts + sessionMs
+passed	telemetry.test.ts :: telemetry export JSON round-trips
+passed	telemetry.test.ts :: telemetry flush writes only when dirty; persisted buffer reloads
+passed	telemetry.test.ts :: telemetry game emits session, sell, customer, upgrade, offline_grant, coop_full events
+passed	telemetry.test.ts :: telemetry ring buffer capped at ring_size
+passed	telemetry.test.ts :: telemetry taps batched per second with count + eggs; no storage write per tap
+passed	tick.test.ts :: AC3 tick order (QA-RC2-1) timeouts are processed before arrivals in the same tick: a leaver frees the slot for the newcomer
+passed	tick.test.ts :: actions AC2 collect moves min(coop, per tap)
+passed	tick.test.ts :: actions AC4 sale credits sold x price, partial fill
+passed	tick.test.ts :: actions AC5 upgrade deducts exact cost only when affordable
+passed	tick.test.ts :: fixed 10 Hz tick AC1 coop grows at eggs_per_sec (1.5 at L0 after P3) and caps at capacity
+passed	tick.test.ts :: fixed 10 Hz tick AC3 first customer at 10s, queue <= queueMax(0), demand within range
+passed	tick.test.ts :: fixed 10 Hz tick customers leave after 30s
+passed	tick.test.ts :: fixed 10 Hz tick runs whole 100 ms ticks and keeps the remainder
+passed	tick.test.ts :: fixed 10 Hz tick same result regardless of frame chunking (deterministic)
+passed	ui-logic.test.ts :: formatters F7 time to afford
+passed	ui-logic.test.ts :: formatters away
+passed	ui-logic.test.ts :: formatters counts
+passed	ui-logic.test.ts :: formatters money: 2 dp under 1K, K/M above
+passed	ui-logic.test.ts :: formatters rolling 60s income
+passed	ui-logic.test.ts :: queue full cue throttle at most once per queue_full_cue_min_gap_ms (3s)
+passed	ui-logic.test.ts :: tap combine + flying eggs (config feel tunables) config values
+passed	ui-logic.test.ts :: tap combine + flying eggs (config feel tunables) empty coop tap: no flyers, no merge
+passed	ui-logic.test.ts :: tap combine + flying eggs (config feel tunables) never more than max_flying_eggs live flyers; budget frees after flight
+passed	ui-logic.test.ts :: tap combine + flying eggs (config feel tunables) taps within the window combine into one floater total
+passed	workers-v11.test.ts :: Farm View Manage all visibility (mobile nav + desktop docked share it) PT1-10 (Product final): always shown greyed during the cooldown; after it, hidden iff no worker <= 40%
+passed	workers-v11.test.ts :: M2 UI logic (§4.4, §4.6) Farm View Manage all: >= 3 hired and someone yawning
+passed	workers-v11.test.ts :: M2 UI logic (§4.4, §4.6) one shared ring drives Manage and Manage all; is-cooldown only while cooling down
+passed	workers-v11.test.ts :: M2 UI logic (§4.4, §4.6) ring offset = 100 x (1 - remaining / cooldown), clamped
+passed	workers-v11.test.ts :: M2 UI logic (§4.4, §4.6) yawn sfx: global 6 s throttle, first yawning worker in card order, never Asleep/Unpaid
+passed	workers-v11.test.ts :: M2 Workers v1.1 (m2-proposal §8 items 15-16, §10) B5: individual Manage is enabled only at <= 40%
+passed	workers-v11.test.ts :: M2 Workers v1.1 (m2-proposal §8 items 15-16, §10) Manage all shown only with >= manage_all_min_workers hired; refills all, one shared cooldown
+passed	workers-v11.test.ts :: M2 Workers v1.1 (m2-proposal §8 items 15-16, §10) ruling 2: Manage / Manage all refill an Unpaid worker; it stays Unpaid
+passed	workers-v11.test.ts :: M2 Workers v1.1 (m2-proposal §8 items 15-16, §10) ruling 3: buying a Grader tier does not refill energy
+passed	workers-v11.test.ts :: M2 Workers v1.1 (m2-proposal §8 items 15-16, §10) ruling 4 + B5: Manage all hidden when N is 0 (nobody at <= manage_prompt_threshold), starts no cooldown
+passed	workers-v11.test.ts :: M2 Workers v1.1 (m2-proposal §8 items 15-16, §10) ruling 5 + R9: resume W1 then W2, reserving 1 min for already-paid and earlier-resumed workers
+passed	workers-v11.test.ts :: M2 Workers v1.1 (m2-proposal §8 items 15-16, §10) wage short -> Unpaid: no charge, no action, acts as Asleep, no drain (ruling 1)
+passed	workers-v11.test.ts :: M2 Workers v1.1 (m2-proposal §8 items 15-16, §10) yawn cue at <= yawn_at_pct (40), still Working above tired threshold; not at 0 or Unpaid
+passed	workers.test.ts :: M2 workers (m2-proposal v1.1) Coop Hand collects eggs_per_tap every 2 s (4 s Tired)
+passed	workers.test.ts :: M2 workers (m2-proposal v1.1) Grader: tier multipliers, cost floor(0.5 x farmCost(F)), half bonus Tired, asleep keeps 15% (v1.1)
+passed	workers.test.ts :: M2 workers (m2-proposal v1.1) Hawker scales new demand x1.25 Working, x1.10 Tired, x1 Asleep; queue cap unchanged
+passed	workers.test.ts :: M2 workers (m2-proposal v1.1) Manage refills to 100% with one shared 30 s cooldown
+passed	workers.test.ts :: M2 workers (m2-proposal v1.1) Market Hand serves the queue every 1 s (3 s Tired), charges wage per interval, stops Asleep
+passed	workers.test.ts :: M2 workers (m2-proposal v1.1) energy: -1% per drain_s_per_pct (v1.1: 9 s = 15 min), Tired below tired_below_pct (30), Asleep at 0, stays asleep
+passed	workers.test.ts :: M2 workers (m2-proposal v1.1) hire respects unlock Farm level and cost; no double hire
+passed	workers.test.ts :: M2 workers (m2-proposal v1.1) offline: workers do nothing (no work, drain or wage)
+passed	workers.test.ts :: M2 workers (m2-proposal v1.1) save v4 -> current migration (v5: no workers, tier 0; v6: no wage fraction)
+passed	workers.test.ts :: M2 workers (m2-proposal v1.1) wages never push coins negative

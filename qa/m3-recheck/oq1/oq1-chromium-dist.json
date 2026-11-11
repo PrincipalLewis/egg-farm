@@ -1,0 +1,34 @@
+{
+ "engine": "chromium",
+ "dist": "dist",
+ "before": {
+  "dialog": true,
+  "outcome": "fresh",
+  "variant": null,
+  "title": "A fresh start",
+  "body": "We couldn't open your farm. Your old save is kept safe.",
+  "button": "Start farming",
+  "exportBtn": true,
+  "keys": [
+   "eggfarm.install_id",
+   "eggfarm.lease",
+   "eggfarm.save",
+   "eggfarm.save.corrupt.1792387694593",
+   "eggfarm.save.corrupt.index",
+   "eggfarm.telemetry",
+   "eggfarm.ui"
+  ]
+ },
+ "after": {
+  "coinsCents": 0,
+  "farmLevel": 0,
+  "hensLevel": 0,
+  "corruptKeys": [
+   "eggfarm.save.corrupt.index",
+   "eggfarm.save.corrupt.1792387694593"
+  ],
+  "corruptHasAbc": true,
+  "onb": true
+ },
+ "pageErrors": []
+}

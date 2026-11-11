@@ -1,0 +1,409 @@
+{
+ "engine": "chromium",
+ "version": "156.0.8078.47",
+ "fixture": "tests/fixtures/m5c/fatigue-dom.html",
+ "fixtureSha256": "05eda2c6dc8997141be7c96cae66d6f2834fb489abff0ca057a96c3d27556723",
+ "port": 5281,
+ "seconds": 318,
+ "positive": {
+  "SS-38a": {
+   "pass": 24,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-39": {
+   "pass": 18,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-39a": {
+   "pass": 18,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-40a": {
+   "pass": 15,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "LAYOUT": {
+   "pass": 6,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-41": {
+   "pass": 9,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-37": {
+   "pass": 24,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-42": {
+   "pass": 15,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-RATE": {
+   "pass": 4,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-48t": {
+   "pass": 100,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-47": {
+   "pass": 30,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-39s": {
+   "pass": 30,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-38f": {
+   "pass": 18,
+   "fail": 0,
+   "unverified": 6,
+   "blocked": 0
+  },
+  "SS-40p2": {
+   "pass": 18,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-40p3": {
+   "pass": 31,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-40c": {
+   "pass": 10,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-40p1": {
+   "pass": 24,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-40all": {
+   "pass": 16,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-40d": {
+   "pass": 5,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-40e": {
+   "pass": 2,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-38b": {
+   "pass": 6,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-38c": {
+   "pass": 28,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-38e": {
+   "pass": 7,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-42r": {
+   "pass": 7,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-TEL": {
+   "pass": 3,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-49": {
+   "pass": 3,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  },
+  "SS-36j": {
+   "pass": 5,
+   "fail": 0,
+   "unverified": 0,
+   "blocked": 0
+  }
+ },
+ "positiveFails": [],
+ "negatives": {
+  "chip740": {
+   "rows": [
+    "SS-38a"
+   ],
+   "caught": 2,
+   "first": ".fslot not rendered at >=740; .hud .fchip rendered at >=740; no CSSOM rule with media (max-height: 739px)"
+  },
+  "debounce": {
+   "rows": [
+    "SS-38b"
+   ],
+   "caught": 3,
+   "first": "739->740: 2 rAF after resize variant=icon, want subline (JS-debounced or not CSS-driven)"
+  },
+  "bucket": {
+   "rows": [
+    "SS-38e"
+   ],
+   "caught": 1,
+   "first": "viewport_h '<740' != '740-899' at innerHeight 740"
+  },
+  "geom": {
+   "rows": [
+    "SS-41"
+   ],
+   "caught": 1,
+   "first": "chip 220.4,5–264.4,49 != 216.4,5–260.4,49"
+  },
+  "coinsbtn": {
+   "rows": [
+    "SS-41"
+   ],
+   "caught": 1,
+   "first": "coins pill is focusable (FC-SV16: no tabindex, non-focusable); coins pill has an interactive role/handler (button)"
+  },
+  "arialabel": {
+   "rows": [
+    "SS-39a"
+   ],
+   "caught": 4,
+   "first": "icon has aria-label \"Tired workers\" (must be content-based); name raw \"Tired workers\" != \"Tired workers are costing $999.9K per second. Show details.\""
+  },
+  "cover": {
+   "rows": [
+    "SS-40a",
+    "SS-37"
+   ],
+   "caught": 3,
+   "first": "popover 26.4,190–260.7,242 != 26.1,62–260.4,114; Manage 172.7,194–254.7,238 != 172.4,66–254.4,110; popover covers golden spot(s) S1"
+  },
+  "shift": {
+   "rows": [
+    "SS-40a"
+   ],
+   "caught": 2,
+   "first": "layout shift 10 px on open/close"
+  },
+  "trap": {
+   "rows": [
+    "SS-40a"
+   ],
+   "caught": 1,
+   "first": "Tab from chip: manage>manage (want Manage, then out of the popover: no focus trap); Shift+Tab from Manage -> manage (want chip, FC-SV15)"
+  },
+  "labelclip": {
+   "rows": [
+    "LAYOUT"
+   ],
+   "caught": 2,
+   "first": "label fpop-t clipped (scrollWidth 121 > clientWidth 40)"
+  },
+  "swallow": {
+   "rows": [
+    "SS-40p1"
+   ],
+   "caught": 6,
+   "first": "target received 0 click events (want exactly 1: swallowed); 0 activations by state/handler delta (want exactly 1); golden egg still present"
+  },
+  "double": {
+   "rows": [
+    "SS-40p3"
+   ],
+   "caught": 1,
+   "first": "target received 2 click events (want exactly 1: double activation)"
+  },
+  "timeout": {
+   "rows": [
+    "SS-40c"
+   ],
+   "caught": 1,
+   "first": "idle10s: popover closed (want open, no timeout)"
+  },
+  "resizeopen": {
+   "rows": [
+    "SS-38c"
+   ],
+   "caught": 6,
+   "first": "i 360x739->360x740 open-chip: popover still open after the crossing"
+  },
+  "rmscale": {
+   "rows": [
+    "SS-40e"
+   ],
+   "caught": 1,
+   "first": "scale animation under reduced motion on popover,popover"
+  },
+  "tapnav": {
+   "rows": [
+    "SS-42"
+   ],
+   "caught": 1,
+   "first": "h 740: sub-line tap did not open Workers; h 740: sub-line tap opened the popover; Workers order unreadable"
+  },
+  "ratex": {
+   "rows": [
+    "SS-RATE"
+   ],
+   "caught": 1,
+   "first": "#rate \"−$999.9K/s\" shows the fatigue loss X $999.9K"
+  },
+  "sub740": {
+   "rows": [
+    "SS-37"
+   ],
+   "caught": 2,
+   "first": "counts 5/5/2 != flag-off 8/7/4; failing spot set S4,S5,S8 != flag-off S4; Broody-eligible 0,11 != flag-off 0,5,8,9,10,11"
+  },
+  "tapclose": {
+   "rows": [
+    "SS-48t"
+   ],
+   "caught": 2,
+   "first": "chipClose: 0 fatigue_cue_tapped (want exactly 1, SS-48 spec v1.3.27 L485-489)"
+  },
+  "esclog": {
+   "rows": [
+    "SS-48t"
+   ],
+   "caught": 1,
+   "first": "esc: 1 fatigue_cue_tapped (want exactly 0, SS-48 spec v1.3.27 L485-489)"
+  },
+  "stallkeep": {
+   "rows": [
+    "SS-47"
+   ],
+   "caught": 2,
+   "first": "popover still open after the stall chip showed"
+  },
+  "refire": {
+   "rows": [
+    "SS-47"
+   ],
+   "caught": 3,
+   "first": "1 fatigue_cue_* event(s) across stall show/clear (fatigue_cue_shown): no log, no re-fired shown"
+  },
+  "subsr": {
+   "rows": [
+    "SS-39s"
+   ],
+   "caught": 4,
+   "first": "name raw \"Tired −$999.9K/s Open workers.\" != \"Tired −$999.9K/s\""
+  },
+  "sub400": {
+   "rows": [
+    "SS-39s"
+   ],
+   "caught": 2,
+   "first": "name raw \"Tired −$999.9K/s\" != \"Tired workers −$999.9K/s\""
+  },
+  "dialog": {
+   "rows": [
+    "SS-40a"
+   ],
+   "caught": 2,
+   "first": "popover role=dialog (want group, not dialog; FC-SV15)"
+  },
+  "oldname": {
+   "rows": [
+    "SS-39a"
+   ],
+   "caught": 4,
+   "first": "name raw \"Tired workers are costing $999.9K per second. Open workers.\" != \"Tired workers are costing $999.9K per second. Show details.\""
+  },
+  "nohyst": {
+   "rows": [
+    "SS-49"
+   ],
+   "caught": 1,
+   "first": "2 fatigue_cue_shown, model expects 1 episode(s) (Rule 2 hysteresis)"
+  },
+  "rowtie": {
+   "rows": [
+    "SS-40d"
+   ],
+   "caught": 1,
+   "first": "Shift sheet focused row hawker != coop_hand (max workerAtRisk, ties in code id order market_hand > coop_hand > hawker > grader)"
+  },
+  "tapsup": {
+   "rows": [
+    "SS-48t"
+   ],
+   "caught": 2,
+   "first": "suppressed_by_stall on fatigue_cue_tapped (fatigue_cue_shown only, §8 L294)"
+  },
+  "tapstale": {
+   "rows": [
+    "SS-48t"
+   ],
+   "caught": 1,
+   "first": "tapped loss_per_s=99990 != at-tap 154985, loss_share=0.2 != at-tap 0.31 (= the fatigue_cue_shown values: stale payload) [sales-stopped spec c29c9285 errata note 3 (a) L866 (PM Marke]"
+  },
+  "shownmin": {
+   "rows": [
+    "SS-48t"
+   ],
+   "caught": 1,
+   "first": "missing loss_share,n_tired,n_asleep,n_paused"
+  },
+  "tapmin": {
+   "rows": [
+    "SS-48t"
+   ],
+   "caught": 3,
+   "first": "missing loss_share,n_tired,n_asleep,n_paused"
+  },
+  "swallow@960": {
+   "rows": [
+    "SS-40p3"
+   ],
+   "caught": 2,
+   "first": "target received 0 click events (want exactly 1: swallowed); 0 activations by state/handler delta (want exactly 1); basket not emptied"
+  }
+ },
+ "negMissed": [],
+ "ok": true
+}

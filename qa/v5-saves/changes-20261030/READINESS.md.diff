@@ -1,0 +1,35 @@
+--- ../scratch/READINESS.md.orig-20261030-073448	2026-10-30 07:26:00.116541179 +0100
++++ READINESS.md	2026-10-30 07:36:22.712212814 +0100
+@@ -36,7 +36,7 @@
+ |---|---|---|
+ | 1. 18 rows (TRACE 13 + GOLDEN 5) to V5-E, removed from Saves lane | **DONE** | q13-to-V5-E.md (cf8ad023…); q13-rows.json `owner` field (20c8dd0c…); q13-saves-lane-rows.md ownership table (ea276fb8…). Flags for HoQA: 6 of the 18 look like unit rows (AC-M5A-17, GE-AC7, GE-AC8, SS-1, SS-26, E7) and 11 probable trace/golden rows sit in other buckets (AC-M5A-16, SG-7, SG-9, BH-AC25, GE-AC3, SS-21, ST-AC23, ST-AC29, AC-P1, AC-P14, AC-P14-CI). Not moved; counts stay as ruled |
+ | 2. 56 UNIT rows author-owned; review template | **DONE** | unit-trace-review.md (5d0c6ec7…): abilities 10, broody 13, golden 8, sales-stopped 20, streak 5; columns author test / trace OK / gaps / RC re-run |
+-| 3. Sales-stopped plan of record 8626c650 | **DONE** | re-cited in q13 docs; pinned in spec/PLANS.sha256 (9c61baa5…; sales-stopped sha256 a29bd338…) + spec/PLANS.sha1. Stale cite removed |
++| 3. Sales-stopped plan of record 8626c650 | **DONE** | re-cited in q13 docs; pinned in spec/PLANS.sha256 (b1f81b78…, was 9c61baa5… before the 2026-10-30 streak-plan re-pin to sha1 1ebd7fc3 / sha256 403c2c46… (HoQ OK, D-HOP-08, L68 only; `-c` 7/7 OK); sales-stopped sha256 a29bd338…) + spec/PLANS.sha1. Stale cite removed |
+ | 4. G-TEL-4 → pinned retention HARD (D-HOP-2026-10-29-07) | **DONE** | telemetry-check.mjs: retention oracle + TS8 (seeds the 2 pinned events oldest + a non-pinned marker + ring_size taps; game trim must drop the marker and keep both). Self-tests now **25/25 PASS** incl. 3 negatives (milestone_reached lost, balanced_tier lost, no trim) which correctly FAIL. Driver passes `--ring-size` from RC balance (default 5000). TS8 PASS on Latest p1 Chromium (`dryrun/telemetry-TS8-DRYRUN-latest-p1/`). Payload/enum checks unchanged, HARD |
+ | 5. RC-run estimate | **DONE** | section "RC-run estimate" below |
+ 
+@@ -95,13 +95,13 @@
+    - SS-15 step.
+ 3. telemetry-check.mjs: (b), (c) and (d) above.
+ 
+-**SCRIPTS.sha256 = 72977983…** (re-pinned after the V5E-SCOPE lock-window timer; telemetry-check 7c6b2621, v5-saves-gate aabf3614; before: f20f17d0…, 6b5cf63f…), covering:
++**SCRIPTS.sha256 = a045b620…** (re-pinned 2026-10-30 after the HoQ-approved status.log signing fix: v5-saves-gate 1e1d63cf, new selftest-gate-sums e2c14c0c; status.log now excluded from SHA256SUMS and signed last in STATUS.sha256; self-test 9/9 PASS incl. negatives, evidence changes-20261030/; before: 72977983… (V5E-SCOPE lock-window timer, v5-saves-gate aabf3614), f20f17d0…, 6b5cf63f…), covering:
+ 
+ | script | sha256 (prefix) |
+ |---|---|
+ | telemetry-check | 7c6b2621 |
+ | lib | dc7ccbac |
+-| v5-saves-gate | aabf3614 |
++| v5-saves-gate | 1e1d63cf |
+ | ss15-share-guard | c8565122 |
+ | offline-seed | f9c21487 |
+ | offline-seed-proof | e18f8920 |
+@@ -109,6 +109,7 @@
+ | runtime-smoke | 968e2b90 |
+ | publish-verify | d634dfc8 |
+ | gen-fixtures | 87f41c8a |
++| selftest-gate-sums | e2c14c0c |
+ 
+ SPEC.sha256 cd39288f…, FIXTURES.sha256 25e4e603…, case doc v5-saves-cases.md ef87eb96…
+ 

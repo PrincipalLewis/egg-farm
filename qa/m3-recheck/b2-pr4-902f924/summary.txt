@@ -1,0 +1,17 @@
+2026-10-17 02:18:42 CEST guard chromium release=0 qa=0 BUILD OK 902f924 chromium
+2026-10-17 02:20:24 CEST b2 chromium exit=0 DONE pr chromium pass=8/12
+2026-10-17 02:20:35 CEST smoke chromium exit=1 Node.js v20.19.2
+2026-10-17 02:21:07 CEST layout chromium exit=0 chromium need 1280 card aria null / Order 4 of 17 eggs chromium
+2026-10-17 02:25:21 CEST rc0 chromium exit=0 209/209 passed
+2026-10-17 02:25:21 CEST WARN listener left
+2026-10-17 02:29:16 CEST NOTE b2 harness v1 counted visibility:hidden deferred tip at 0,0 and lacked direct sheet-open step; v2 fixed; chain restarted (b2 chromium, then FF, WK)
+2026-10-17 02:32:28 CEST b2 chromium exit=0 DONE pr chromium pass=11/12
+2026-10-17 03:05:33 CEST guard firefox release=0 qa=0 BUILD OK 902f924 firefox
+2026-10-17 03:11:16 CEST b2 firefox exit=0 DONE pr firefox pass=12/12
+2026-10-17 03:17:55 CEST layout firefox exit=0 firefox need 1280 card aria null / Order 4 of 17 eggs firefox
+2026-10-17 03:27:11 CEST rc0 firefox exit=0 209/209 passed
+2026-10-17 03:50:07 CEST guard webkit release=0 qa=0 BUILD OK 902f924 webkit
+2026-10-17 03:57:17 CEST b2 webkit exit=0 DONE pr webkit pass=12/12
+2026-10-17 04:06:30 CEST layout webkit exit=0 webkit need 1280 card aria null / Order 4 of 17 eggs webkit
+2026-10-17 04:07:12 CEST RETARGET to 192f273: 902f924 kept as baseline; webkit rc0 allowed to finish; chromium v3 rerun cancelled (v2 1280x800-direct CHECK = harness preOpen counted docked workers tab, fixed in v3; FF/WK v3 12/12)
+2026-10-17 04:28:31 CEST rc0 webkit exit=0 209/209 passed

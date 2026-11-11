@@ -1,0 +1,60 @@
+diff --git a/src/econ/income.ts b/src/econ/income.ts
+index d4cdab4..e5d797d 100644
+--- a/src/econ/income.ts
++++ b/src/econ/income.ts
+@@ -74,10 +74,11 @@ export function incomePerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): n
+   return eggs * priceDollars(s, b, opts) - wagesPerSec(s, b, opts);
+ }
+ 
+-/** Gross sales per second ($), before wages. */
++/** TEST-ONLY (CCR #70 n1): no src/ caller. Gross sales per second ($), before wages. */
+ export const grossSalesPerSec = (s: GameState, b: Balance) => incomePerSec(s, b) + wagesPerSec(s, b);
+-/** PM Workers ruling (a), one shared threshold (review 23a3798 #3): production is "stopped" only when gross sales round to $0.00/s.
+- *  A negative net rate (wages > sales) is not "stopped": production is running. Used by the header aria and the worker banners. */
++/** TEST-ONLY (CCR #70 n1): no src/ caller; tests use it as the "gross sales round to $0.00/s" oracle. A negative net rate
++ *  (wages > sales) is not "stopped". The HUD aria uses marketHandStalled() (HoE ruling, Oct 24) and the worker banners use only
++ *  their own role and state (workerBanner); neither reads this. */
+ export const salesStopped = (s: GameState, b: Balance) => Math.round(grossSalesPerSec(s, b) * 100) <= 0;
+ /** True when any hired worker is asleep/unpaid (Critic #3 / AC-R2). */
+ export function productionStopped(s: GameState, b: Balance): boolean {
+diff --git a/src/ui/s2-economy-ui.ts b/src/ui/s2-economy-ui.ts
+index 19921e2..92c697f 100644
+--- a/src/ui/s2-economy-ui.ts
++++ b/src/ui/s2-economy-ui.ts
+@@ -30,5 +30,6 @@ export function rateView(cps: number, opts: { stopped?: boolean } = {}): { text:
+   if (c < 0) return { text: `⚠ \u2212${money}/s`, sign: 'neg', aria: `Net income minus ${spoken} per second${opts.stopped ? ', sales stopped' : ''}`, money };
+   return { text: `+${money}/s`, sign: 'pos', aria: `Net income plus ${spoken} per second`, money };
+ }
+-/** HUD header rate (Cut A FIX3, T6): negative/stopped -> '⚠ ▼ <rest>' (e.g. '⚠ ▼ $0.00/s', '⚠ ▼ −$0.03/s'); otherwise rateView's text. Pure, shared by app.ts and tests (reviewer m2). */
++/** m6 (option A): '⚠ ' is a marker only; app.ts renders it as the inline WARN_SVG and never paints the glyph.
++ *  HUD header rate (Cut A FIX3, T6): negative/stopped -> '⚠ ▼ <rest>' (e.g. '⚠ ▼ $0.00/s', '⚠ ▼ −$0.03/s'); otherwise rateView's text. Pure, shared by app.ts and tests (reviewer m2). */
+ export const headerRateText = (v: { text: string; sign: RateSign }) => v.sign === 'neg' ? `⚠ ▼ ${v.text.replace(/^⚠ /, '')}` : v.text;
+diff --git a/src/ui/tracks-explainer.ts b/src/ui/tracks-explainer.ts
+index d4218ff..3731487 100644
+--- a/src/ui/tracks-explainer.ts
++++ b/src/ui/tracks-explainer.ts
+@@ -96,15 +96,21 @@ export function placeCard(el: HTMLElement, doc: Document = document) {
+  *  number-pop-spec.md) and a coin burst; nothing while the card is up. Decorative (aria-hidden). Reduced motion: none; the
+  *  balance itself is already credited (migration) and rendered, so it updates at once. */
+ export const EXP_BURST = 3;
++/** Refund pop geometry (Art nit n1 on #70): rise and the box height budget (26px Fredoka line ≈ 31-33px, x1.1 overshoot) in CSS px. */
++export const REFUND_RISE_PX = 8, POP_BOX_H = 36;
+ function refundPop(cents: number, doc: Document) {
+   if (!(cents > 0) || reducedMotion(doc)) return;
+-  const pill = visibleRect(doc.querySelector('.pill.coins') ?? doc.getElementById('coins'));
+-  const x = pill ? pill.left + pill.width / 2 : (doc.defaultView?.innerWidth ?? 0) / 2, y = pill ? pill.bottom + 30 : 64; // rises 32px onto the pill
++  const pill = visibleRect(doc.querySelector('.pill.coins') ?? doc.getElementById('coins')), rate = visibleRect(doc.getElementById('rate'));
++  // Art nit on #70 (n1, art-ux/reviews/m41-pr70-30b29d3.md (a)): the pop must never cover the HUD #rate. Its box (bottom-anchored, up to
++  // POP_BOX_H at the 1.1 overshoot) starts below the pill + #rate and rises only REFUND_RISE_PX (CSS exppop -8px), so its top stays >= 4px
++  // below them for the whole 800 ms. The coin burst ends at the same line (--dy).
++  const clear = Math.max(pill?.bottom ?? 0, rate?.bottom ?? 0) + 4;
++  const x = pill ? pill.left + pill.width / 2 : (doc.defaultView?.innerWidth ?? 0) / 2, y = pill ? clear + POP_BOX_H + REFUND_RISE_PX : 64;
+   const coin = `${import.meta.env.BASE_URL}assets/icon-coin.svg`;
+   const pop = doc.createElement('div'); pop.className = 'exp-pop num'; pop.setAttribute('aria-hidden', 'true');
+   pop.style.left = `${x}px`; pop.style.top = `${y}px`; pop.innerHTML = `<img src="${coin}" alt="" width="16" height="16">+${fmtMoneyShort(cents)}`;
+   const parts = Array.from({ length: EXP_BURST }, (_, i) => { const p = doc.createElement('img'); p.className = 'exp-coin'; p.alt = ''; p.setAttribute('aria-hidden', 'true');
+-    p.src = coin; p.width = p.height = 16; p.style.left = `${x}px`; p.style.top = `${pill ? pill.top + pill.height / 2 : y}px`; p.style.setProperty('--dx', `${(i - (EXP_BURST - 1) / 2) * 18}px`); return p; });
++    p.src = coin; p.width = p.height = 16; p.style.left = `${x}px`; p.style.top = `${y - 8}px`; p.style.setProperty('--dx', `${(i - (EXP_BURST - 1) / 2) * 18}px`); if (pill) p.style.setProperty('--dy', `${Math.min(0, Math.round(clear + 8 - (y - 8)))}px`); return p; });
+   doc.body.append(pop, ...parts); setTimeout(() => { pop.remove(); parts.forEach(p => p.remove()); }, EXP_POP_MS + 50);
+ }
+ /** UX-M5: the card leaves the DOM at once (focus, EXP_CLOSED, explainerOpen() unchanged); an inert, aria-hidden copy plays the

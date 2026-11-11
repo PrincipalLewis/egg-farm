@@ -1,0 +1,44 @@
+[
+ {
+  "type": "hire_nudge_shown",
+  "source": "l25",
+  "farm_level": 25,
+  "sessionMs": 1949,
+  "ts": 1792192061350
+ },
+ {
+  "type": "hire_nudge_dismissed",
+  "source": "l25",
+  "farm_level": 25,
+  "sessionMs": 3939,
+  "ts": 1792192063340
+ },
+ {
+  "type": "hire_nudge_shown",
+  "source": "l25",
+  "farm_level": 25,
+  "sessionMs": 47,
+  "ts": 1792192065155
+ },
+ {
+  "type": "hire_nudge_dismissed",
+  "source": "l25",
+  "farm_level": 25,
+  "sessionMs": 1923,
+  "ts": 1792192067031
+ },
+ {
+  "type": "hire_nudge_shown",
+  "source": "l25",
+  "farm_level": 25,
+  "sessionMs": 32,
+  "ts": 1792192067921
+ },
+ {
+  "type": "hire_nudge_clicked",
+  "source": "l25",
+  "farm_level": 25,
+  "sessionMs": 2538,
+  "ts": 1792192070427
+ }
+]

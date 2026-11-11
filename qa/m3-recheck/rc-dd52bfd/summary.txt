@@ -1,0 +1,28 @@
+# RC dd52bfd checkpoint log (UI/Layout & Gameplay QA)
+2026-10-17 13:10:46 CEST gates: tsc=0 sync=0 build=0 crb=0 buildqa=0 vitest=0 slow=0 DONE slow=0  vitest 851/851, test:slow 14/14, build-id dist+dist-qa m3-rc1-pre+dd52bfd; p3 chromium 16/16 BAD 0
+2026-10-17 13:10:53 CEST guard chromium release=0 qa=0 BUILD OK dd52bfd chromium | BUILD OK dd52bfd chromium
+2026-10-17 13:11:01 CEST globals chromium exit=0 3PASS 0FAIL
+2026-10-17 13:14:37 CEST rc0 chromium exit=0 249/249 passed FAIL=0
+2026-10-17 13:15:25 CEST layout chromium exit=0 BAD 12 CONSOLE_ERRORS 0
+2026-10-17 13:16:10 CEST shots chromium exit=0 BAD 0 CONSOLE_ERRORS 0
+2026-10-17 13:16:10 CEST WARN listener left
+2026-10-17 13:17:01 CEST chromium checkpoint: guard OK, globals 3/3, rc0 249/249, p3 16/16 (0 ov), layout BAD 12 = mobile Upgrades segmented tabs 36px tall inside 44px track (spec: 44px track; >=44 button rule is desktop-only; desktop PASS) -> Minor/pre-existing, shots 20/20 asserted, console errors 0. SCOPE NOTE: PR #5 (a56b3a2) and PR #35 (3fa3781) are NOT ancestors of dd52bfd -> not in this RC.
+2026-10-17 13:17:44 CEST guard firefox release=0 qa=0 BUILD OK dd52bfd firefox | BUILD OK dd52bfd firefox
+2026-10-17 13:19:02 CEST globals firefox exit=0 3PASS 0FAIL
+2026-10-17 13:20:09 CEST p3 firefox exit=1 Node.js v20.19.2 
+2026-10-17 13:24:46 CEST rc0 firefox exit=0 249/249 passed FAIL=0
+2026-10-17 13:24:53 CEST layout firefox exit=1 Node.js v20.19.2 
+2026-10-17 13:25:02 CEST shots firefox exit=1 Node.js v20.19.2 
+2026-10-17 13:25:02 CEST WARN listener left
+2026-10-17 13:28:38 CEST firefox p3/layout/shots exit=1 = harness (probe resolved wrong playwright-core from qa/; no firefox-1511). Fixed: probe copied into worktree scripts/. Re-running. firefox guard OK, globals see log, rc0 249/249.
+2026-10-17 13:29:46 CEST p3 firefox exit=0 BAD 0 CONSOLE_ERRORS 0
+2026-10-17 13:30:48 CEST layout firefox exit=0 BAD 12 CONSOLE_ERRORS 0
+2026-10-17 13:32:02 CEST shots firefox exit=0 BAD 0 CONSOLE_ERRORS 0
+2026-10-17 13:32:09 CEST guard webkit release=0 qa=0 BUILD OK dd52bfd webkit | BUILD OK dd52bfd webkit
+2026-10-17 13:32:18 CEST globals webkit exit=0 3PASS 0FAIL
+2026-10-17 13:32:59 CEST p3 webkit exit=0 BAD 0 CONSOLE_ERRORS 0
+2026-10-17 13:36:56 CEST rc0 webkit exit=0 249/249 passed FAIL=0
+2026-10-17 13:37:46 CEST layout webkit exit=0 BAD 12 CONSOLE_ERRORS 0
+2026-10-17 13:38:44 CEST shots webkit exit=0 BAD 0 CONSOLE_ERRORS 0
+2026-10-17 13:39:43 CEST shots chromium exit=0 BAD 0 CONSOLE_ERRORS 0
+2026-10-17 13:43:43 CEST FINAL: PASS, 0 B/C/M. Minor: mobile segmented tabs 36px (pre-existing). Scope: #5 and #35 not in dd52bfd. Shots 72/72 checked, p3 48/48 rows, sprite 0px x9, rc0 249x3, console 0.

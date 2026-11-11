@@ -1,0 +1,22 @@
+{
+ "id": "CSR1-control-valid-C3-farmLevel-str12-valid",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-1",
+  "control"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "../../csr/fixtures/C3-farmLevel-str12-valid.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "recovery": false,
+  "notice": null,
+  "noSaveCorrupt": true
+ }
+}

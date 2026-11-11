@@ -1,0 +1,25 @@
+{
+ "id": "CSR14-restore-write-fails-continue",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-14"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-OQ1-abc.json"
+  },
+  "eggfarm.save.bak": {
+   "ref": "raw/BAK-valid-F20-seq4-older.json"
+  }
+ },
+ "lsQuota": "eggfarm.save",
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "farmLevel": 20,
+  "noStorageText": true,
+  "stateKept": true
+ }
+}

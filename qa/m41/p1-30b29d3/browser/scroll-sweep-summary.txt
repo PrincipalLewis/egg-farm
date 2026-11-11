@@ -1,0 +1,30 @@
+M41-9 #65 scroll sweep @ 30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134 (scripts/m41-9-scroll-sweep.mjs)
+
+| engine | width | states | card over Buy/Collect | 4px fine sweep: positions / over a Buy | places (states) | taps | BUY | DISMISS-ONLY | NOTHING | page errors |
+|---|---|---|---|---|---|---|---|---|---|---|
+| chromium | 360 | 40 | 0 | 200 / 0 | inside 2, default 34, none 2, band 2 | 56 | 56 | 0 | 0 | 0 |
+| chromium | 375 | 40 | 0 | 190 / 0 | inside 2, default 36, band 2 | 56 | 56 | 0 | 0 | 0 |
+| chromium | 390 | 40 | 0 | 124 / 0 | inside 2, default 34, band 4 | 72 | 72 | 0 | 0 | 0 |
+| firefox | 360 | 40 | 0 | 200 / 0 | inside 2, default 34, none 2, band 2 | 56 | 56 | 0 | 0 | 0 |
+| firefox | 375 | 40 | 0 | 190 / 0 | inside 2, default 36, band 2 | 56 | 56 | 0 | 0 | 0 |
+| firefox | 390 | 40 | 0 | 124 / 0 | inside 2, default 34, band 4 | 72 | 72 | 0 | 0 | 0 |
+| webkit | 360 | 40 | 0 | 200 / 0 | inside 2, default 34, none 2, band 2 | 56 | 56 | 0 | 0 | 0 |
+| webkit | 375 | 40 | 0 | 190 / 0 | inside 2, default 36, band 2 | 56 | 56 | 0 | 0 | 0 |
+| webkit | 390 | 40 | 0 | 124 / 0 | inside 2, default 34, band 4 | 72 | 72 | 0 | 0 | 0 |
+
+place:'none' states (card kept out of the way, hidden): 6
+chromium 360 farm refund=on scroll=200(200px) mouse
+chromium 360 farm refund=on scroll=200(200px) touch
+firefox 360 farm refund=on scroll=200(200px) mouse
+firefox 360 farm refund=on scroll=200(200px) touch
+webkit 360 farm refund=on scroll=200(200px) mouse
+webkit 360 farm refund=on scroll=200(200px) touch
+chromium 360 farm refund=on: 25 of 99 positions (fine sweep)
+chromium 375 farm refund=on: 23 of 94 positions (fine sweep)
+firefox 360 farm refund=on: 25 of 99 positions (fine sweep)
+firefox 375 farm refund=on: 23 of 94 positions (fine sweep)
+webkit 360 farm refund=on: 25 of 99 positions (fine sweep)
+webkit 375 farm refund=on: 23 of 94 positions (fine sweep)
+
+PASS: 0 overlaps, 0 dismiss-only, 0 nothing, every engine x width run
+

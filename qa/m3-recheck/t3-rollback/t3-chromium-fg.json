@@ -1,0 +1,13 @@
+{
+ "eng": "chromium",
+ "mode": "fg",
+ "durS": 300,
+ "sells": 694,
+ "floaters": 3468,
+ "sale": 280,
+ "maxLifeMs": 782,
+ "p99": 752,
+ "over1s": [],
+ "stillLive": [],
+ "worst": []
+}

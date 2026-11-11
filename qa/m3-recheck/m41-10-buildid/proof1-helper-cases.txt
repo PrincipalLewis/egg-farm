@@ -1,0 +1,38 @@
+expectations:
+  old: m3-rc1-pre+246de09 [BUILD_PREFIX='m3-rc1-pre' from scripts/build-id.ts@246de09; no suffix allowed]
+  oldNone: (m3-rc1-pre|m4.1)+246de09 [FALLBACK ^(m3-rc1-pre|m4\.1)\+[0-9a-f]{7} (override); no suffix allowed]
+  pr53: m4.1+4e1252d [BUILD_PREFIX='m4.1' from scripts/build-id.ts@4e1252d; no suffix allowed]
+  fbMissing: (m3-rc1-pre|m4.1)+d72008a [FALLBACK ^(m3-rc1-pre|m4\.1)\+[0-9a-f]{7} (scripts/build-id.ts missing @d72008a); no suffix allowed]
+  fbNoConst: (m3-rc1-pre|m4.1)+4e1252d [FALLBACK ^(m3-rc1-pre|m4\.1)\+[0-9a-f]{7} (BUILD_PREFIX not found in override); no suffix allowed]
+OK  U1a m3-rc1-pre+246de09 @246de09, old build-id.ts (BUILD_PREFIX='m3-rc1-pre'): got PASS (expected PASS) :: ok
+OK  U1b m3-rc1-pre+246de09 @246de09, build-id.ts treated as absent (fallback): got PASS (expected PASS) :: ok
+OK  U2 m4.1+4e1252d @4e1252d (BUILD_PREFIX='m4.1'): got PASS (expected PASS) :: ok
+OK  U3 m4.1+1234567 @4e1252d hash mismatch: got FAIL (expected FAIL) :: hash '1234567' != sha under test 4e1252d
+OK  U4a m4.1+4e1252d+dirty @4e1252d: got FAIL (expected FAIL) :: suffix '+dirty' present (dirty/unknown build not allowed)
+OK  U4b m4.1+4e1252d+unknownsuffix @4e1252d: got FAIL (expected FAIL) :: suffix '+rc' present (dirty/unknown build not allowed)
+OK  U4c m4.1+unknown @4e1252d: got FAIL (expected FAIL) :: hash 'unknown' != sha under test 4e1252d
+OK  U4d m4.1+4e1252d+dirty with dirty='require' (rc-pass dist-qa-m4 only): got PASS (expected PASS) :: ok
+OK  U4e clean m4.1+4e1252d with dirty='require' must FAIL: got FAIL (expected FAIL) :: expected +dirty suffix, got ''
+OK  U5 wrong prefix m3-rc1-pre+4e1252d @4e1252d (BUILD_PREFIX m4.1): got FAIL (expected FAIL) :: prefix 'm3-rc1-pre' != BUILD_PREFIX 'm4.1' at 4e1252d
+OK  U5b wrong prefix m4.1+246de09 @246de09 (BUILD_PREFIX m3-rc1-pre): got FAIL (expected FAIL) :: prefix 'm4.1' != BUILD_PREFIX 'm3-rc1-pre' at 246de09
+OK  U6a fallback (build-id.ts missing @d72008a): m3-rc1-pre+d72008a: got PASS (expected PASS) :: ok
+OK  U6b fallback (missing): m4.1+d72008a: got PASS (expected PASS) :: ok
+OK  U6c fallback (missing): m5+d72008a wrong prefix: got FAIL (expected FAIL) :: fallback: does not match ^(m3-rc1-pre|m4\.1)\+[0-9a-f]{7}
+OK  U6d fallback (missing): m4.1+1234567 hash mismatch: got FAIL (expected FAIL) :: hash '1234567' != sha under test d72008a
+OK  U6e fallback (missing): m3-rc1-pre+d72008a+dirty: got FAIL (expected FAIL) :: suffix '+dirty' present (dirty/unknown build not allowed)
+OK  U6f fallback (file present, constant absent) @4e1252d: m4.1+4e1252d: got PASS (expected PASS) :: ok
+OK  U6g fallback (file present, constant absent) @4e1252d: m3-rc0+4e1252d: got FAIL (expected FAIL) :: fallback: does not match ^(m3-rc1-pre|m4\.1)\+[0-9a-f]{7}
+OK  U7a surfaces all agree: got PASS (expected PASS) :: ok
+OK  U7b one surface (telemetry) disagrees: got FAIL (expected FAIL) :: m4.1+1234567: hash '1234567' != sha under test 4e1252d
+OK  U7c a surface missing (null): got FAIL (expected FAIL) :: null: missing build id
+OK  U7d no surface at all: got FAIL (expected FAIL) :: no build id found
+OK  U7e hash longer than sha7 (strict, as before): got FAIL (expected FAIL) :: hash '4e1252d6' != sha under test 4e1252d
+OK  U8 scan finds wrong-prefix and suffixed ids (so they fail, not vanish): ["m3-rc1-pre+4e1252d","m4.1+4e1252d+dirty"]
+OK  CLI1 exit 0 (want 0) :: PASS build-id ["m3-rc1-pre+246de09"] want m3-rc1-pre+246de09 [BUILD_PREFIX='m3-rc1-pre' from scripts/build-id.ts@246de09; no suffix allowed]
+OK  CLI2 exit 0 (want 0) :: PASS build-id ["m4.1+4e1252d"] want m4.1+4e1252d [BUILD_PREFIX='m4.1' from scripts/build-id.ts@4e1252d; no suffix allowed]
+OK  CLI3 exit 1 (want 1) :: FAIL build-id ["m4.1+4e1252d+dirty"] want m4.1+4e1252d [BUILD_PREFIX='m4.1' from scripts/build-id.ts@4e1252d; no suffix allowed] :: m4.1+4e1252d+dirty: suffix '+dirty' present (dirty/unknown build not allowed)
+OK  CLI4 exit 1 (want 1) :: FAIL build-id ["m3-rc1-pre+4e1252d"] want m4.1+4e1252d [BUILD_PREFIX='m4.1' from scripts/build-id.ts@4e1252d; no suffix allowed] :: m3-rc1-pre+4e1252d: prefix 'm3-rc1-pre' != BUILD_PREFIX 'm4.1' at 4e1252d
+OK  CLI5 exit 1 (want 1) :: FAIL build-id ["m4.1+1234567"] want m4.1+4e1252d [BUILD_PREFIX='m4.1' from scripts/build-id.ts@4e1252d; no suffix allowed] :: m4.1+1234567: hash '1234567' != sha under test 4e1252d
+OK  CLI6 exit 0 (want 0) :: PASS build-id ["m4.1+d72008a"] want (m3-rc1-pre|m4.1)+d72008a [FALLBACK ^(m3-rc1-pre|m4\.1)\+[0-9a-f]{7} (scripts/build-id.ts missing @d72008a); no suffix allowed]
+OK  CLI7 exit 2 (want 2) :: build-id-expect: cannot resolve nosuchsha0 in /workspace/egg-farm-studio/game: Command failed: git -C /workspace/egg-farm-studio/game rev-parse --verify nosuchsha0^{commit}
+PASS 31/31 cases behaved as expected

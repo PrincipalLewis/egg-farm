@@ -1,0 +1,316 @@
+=== fold snapshot 2026-10-17 03:23:23 CEST ===
+PR15 exits:
+globals chromium(lock2) exit=0
+rc0 chromium(lock2) exit=0
+globals chromium exit=0
+rc0 chromium exit=0
+globals firefox exit=0
+globals firefox exit=0 sha=f67a425 (prequeued) 01:44:44
+rc0 firefox exit=0
+rc0 firefox exit=0 sha=f67a425 bid=m3-rc1-pre+f67a425 02:13:00
+globals webkit exit=0
+globals webkit exit=0 sha=f67a425 bid=m3-rc1-pre+f67a425 02:26:33
+rc0 webkit exit=0
+rc0 webkit exit=0 sha=f67a425 bid=m3-rc1-pre+f67a425 (log-complete) 02:44:17
+rc0 webkit exit=0 sha=f67a425 bid=m3-rc1-pre+f67a425 02:45:31
+PR17 exits:
+globals chromium (lock2) exit=0 sha=b0e8278 bid=m3-rc1-pre+b0e8278 01:56:29
+rc0 chromium (lock2) exit=1 sha=b0e8278 bid=m3-rc1-pre+b0e8278 01:58:50
+OLD_SHA_CHROMIUM: #17 b0e8278 and #18 6f19823 lane2 results retained; remote now c428fae / a913934
+globals chromium (lock2) exit=0 sha=c428fae bid=m3-rc1-pre+c428fae 02:44:33
+rc0 chromium (lock2) exit=1 sha=c428fae bid=m3-rc1-pre+c428fae 02:57:48
+globals chromium exit=0 sha=c428fae bid=m3-rc1-pre+c428fae 03:02:18
+rc0 chromium (lock2) exit=1 sha=c428fae bid=m3-rc1-pre+c428fae 03:11:38
+globals firefox exit=0 sha=c428fae bid=m3-rc1-pre+c428fae 03:18:07
+globals chromium exit=0
+PR18 exits:
+globals chromium exit=0
+globals chromium exit=0 sha=79edfa1-OLD bid=m3-rc1-pre+79edfa1 (prequeued-on-old-head) 01:54:53
+globals chromium (lock2) exit=0 sha=6f19823 bid=m3-rc1-pre+6f19823 02:00:53
+rc0 chromium (lock2) exit=1 sha=6f19823 bid=m3-rc1-pre+6f19823 02:03:14
+rc0 chromium exit=1
+OLD_SHA_CHROMIUM: #17 b0e8278 and #18 6f19823 lane2 results retained; remote now c428fae / a913934
+globals firefox exit=0
+rc0 firefox exit=1
+globals chromium (lock2) exit=0 sha=a913934 bid=m3-rc1-pre+a913934 03:02:00
+globals firefox exit=0 sha=79edfa1-OLD bid=m3-rc1-pre+79edfa1 (other-agent-on-old-worktree) 03:05:29
+rc0 firefox exit=1 sha=79edfa1-OLD bid=m3-rc1-pre+79edfa1 (other-agent-on-old-worktree; B5 likely) 03:05:29
+globals webkit exit=0
+rc0 chromium (lock2) exit=1 sha=a913934 bid=m3-rc1-pre+a913934 03:09:17
+rc0 webkit exit=1
+main_q=A 1437227 bash /workspace/egg-farm-studio/qa/m3-recheck/queue-pr15-17-18-browsers.sh
+1831292 bash /workspace/egg-farm-studio/qa/m3-recheck/queue-pr15-17-18-browsers.sh
+lane2=G
+remote17=c428fae
+remote18=a913934
+local17=c428fae
+local18=a913934
+
+## Status at 03:23 CEST
+- Deadline: 06:00 CEST. Chromium #17/#18 on lane2 when load<12. AC7 no-workers = INFO (done).
+- PR15 @ f67a425: COMPLETE — globals+rc0 PASS all 3 engines. Report updated Addendum 02:45.
+- PR17 @ c428fae (was b0e8278): chrom globals PASS; chrom rc0 FAIL B5 (195/197, yawn50). FF globals PASS. FF rc0 queued. WK not started.
+- PR18 @ a913934 (was 6f19823/79edfa1): chrom globals PASS; chrom rc0 FAIL B5. Old-head FF/WK: globals PASS, rc0 FAIL B5. Current-head FF/WK pending main queue.
+- B5 root cause: F1 yawn_at_pct 40→50 / manage_prompt_threshold 0.4→0.5 → pill "(2 need it)" vs expected "(1 need it)".
+- Main queue PID alive; next: pr17 rc0 firefox → pr17 wk → pr18 all on a913934.
+
+=== fold 03:33:52 CEST ===
+PR17: chrom globals PASS; chrom/ff rc0 FAIL B5 @ c428fae. FF globals PASS. WK globals queued.
+PR18: chrom done @ a913934 (rc0 B5 FAIL). Old-head FF/WK complete (rc0 B5 FAIL). Current-head FF/WK pending.
+main queue: QUEUE pr17 globals webkit
+remotes: 17=c428fae 18=a913934
+
+=== fold 03:44:09 CEST ===
+[03:18:07] DONE pr17 globals firefox exit=0
+[03:18:07] QUEUE pr17 rc0 firefox sha=c428fae bid=m3-rc1-pre+c428fae port=4516 lock=.browser-test.lock load=5
+[03:30:17] DONE pr17 rc0 firefox exit=1
+[03:30:17] QUEUE pr17 globals webkit sha=c428fae bid=m3-rc1-pre+c428fae port=4438 lock=.browser-test.lock load=3
+main=G
+
+=== fold 03:44 CEST — main queue DIED; remotes moved ===
+Was: c428fae / a913934. Now: c08cff5 / abe0991
+PR17 missing on current: wk globals+rc0 (had ff+chrom on c428fae).
+PR18 missing on current head: ff+wk (chrom done on a913934; old 79edfa1 had ff/wk).
+Action: rebuild new heads; restart remaining browser queue.
+Retain labeled old-SHA results in exits.
+
+=== residual sync 03:54:32 CEST pr17 ===
+rc0 firefox exit=1 sha=c428fae bid=m3-rc1-pre+c428fae 03:30:17
+rc0 chromium exit=1
+globals firefox exit=0
+rc0 firefox exit=1
+globals chromium exit=0 sha=c08cff5 bid=m3-rc1-pre+c08cff5 03:54:32
+
+=== fold 03:55:20 CEST ===
+residual_alive=Y
+[03:45:00] residual queue start; wait rebuild3
+[03:45:30] rebuild status: BUILDQA_OK [03:45:25] DONE pr18-new bid=m3-rc1-pre+abe0991 REBUILD3_DONE 
+[03:45:30] heads c08cff5 abe0991 load=23
+[03:45:30] QUEUE pr17 globals chromium sha=c08cff5 bid=m3-rc1-pre+c08cff5 port=4816 lock=.browser-test.lock load=23
+[03:54:32] DONE pr17 globals chromium exit=0 sha=c08cff5
+[03:54:32] QUEUE pr17 rc0 chromium sha=c08cff5 bid=m3-rc1-pre+c08cff5 port=4926 lock=.browser-test-2.lock load=4
+r17=c08cff5 r18=abe0991
+
+=== residual sync 03:57:41 CEST pr17 ===
+globals firefox exit=0
+rc0 firefox exit=1
+globals chromium exit=0 sha=c08cff5 bid=m3-rc1-pre+c08cff5 03:54:32
+globals webkit exit=0
+rc0 chromium (lock2) exit=1 sha=c08cff5 bid=m3-rc1-pre+c08cff5 03:57:41
+
+=== fold 04:05:37 CEST ===
+[03:45:30] heads c08cff5 abe0991 load=23
+[03:45:30] QUEUE pr17 globals chromium sha=c08cff5 bid=m3-rc1-pre+c08cff5 port=4816 lock=.browser-test.lock load=23
+[03:54:32] DONE pr17 globals chromium exit=0 sha=c08cff5
+[03:54:32] QUEUE pr17 rc0 chromium sha=c08cff5 bid=m3-rc1-pre+c08cff5 port=4926 lock=.browser-test-2.lock load=4
+[03:57:41] DONE pr17 rc0 chromium exit=1 sha=c08cff5
+[03:57:41] QUEUE pr17 globals firefox sha=c08cff5 bid=m3-rc1-pre+c08cff5 port=4804 lock=.browser-test.lock load=5
+
+=== fold 04:05 CEST ===
+Remotes moved mid-residual to #17=cf50663 #18=d8d680e while running c08cff5/abe0991.
+Keeping residual on c08cff5/abe0991 (newer than b0e8278/6f19823); label results with that sha.
+PR17 c08cff5: chrom globals PASS; chrom rc0 FAIL B5; FF globals queued.
+B5 FAIL confirmed on c08cff5 (same yawn50).
+Will NOT chase further remote moves before 06:00 unless residual finishes early with time left.
+
+=== residual sync 04:06:41 CEST pr17 ===
+globals chromium exit=0 sha=c08cff5 bid=m3-rc1-pre+c08cff5 03:54:32
+globals webkit exit=0
+rc0 chromium (lock2) exit=1 sha=c08cff5 bid=m3-rc1-pre+c08cff5 03:57:41
+rc0 webkit exit=1
+globals firefox exit=0 sha=c08cff5 bid=m3-rc1-pre+c08cff5 04:06:41
+
+=== fold 04:13 CEST (resume) ===
+Residual ALIVE on c08cff5/abe0991 (remotes now cf50663/d8d680e — not chasing).
+PR15: COMPLETE PASS 3 engines @ f67a425.
+PR17 @ c08cff5 so far: chrom globals PASS; chrom rc0 FAIL B5; FF globals PASS; FF rc0 QUEUED (lock).
+PR17 still needed: FF rc0, WK globals+rc0.
+PR18 @ abe0991: not started by residual yet (chrom done earlier @ a913934; old 79edfa1 FF/WK done).
+Next check: wait for residual FF rc0 progress.
+
+=== fold 04:18:51 CEST ===
+residual_log_tail: [03:57:41] QUEUE pr17 globals firefox sha=c08cff5 bid=m3-rc1-pre+c08cff5 port=4804 lock=.browser-test.lock load=5 [04:06:41] DONE pr17 globals firefox exit=0 sha=c08cff5 [04:06:41] QUEUE pr17 rc0 firefox sha=c08cff5 bid=m3-rc1-pre+c08cff5 port=4973 lock=.browser-test.lock load=9 
+residual_alive=Y
+pr17_last_exits: rc0 chromium (lock2) exit=1 sha=c08cff5 bid=m3-rc1-pre+c08cff5 03:57:41 rc0 webkit exit=1 globals firefox exit=0 sha=c08cff5 bid=m3-rc1-pre+c08cff5 04:06:41 
+
+=== fold 04:28:59 CEST ===
+residual_alive=Y
+[03:54:32] QUEUE pr17 rc0 chromium sha=c08cff5 bid=m3-rc1-pre+c08cff5 port=4926 lock=.browser-test-2.lock load=4
+[03:57:41] DONE pr17 rc0 chromium exit=1 sha=c08cff5
+[03:57:41] QUEUE pr17 globals firefox sha=c08cff5 bid=m3-rc1-pre+c08cff5 port=4804 lock=.browser-test.lock load=5
+[04:06:41] DONE pr17 globals firefox exit=0 sha=c08cff5
+[04:06:41] QUEUE pr17 rc0 firefox sha=c08cff5 bid=m3-rc1-pre+c08cff5 port=4973 lock=.browser-test.lock load=9
+PR17 FF rc0 @ c08cff5: RUNNING (vite preview :4973). Still holding main lock.
+
+=== residual sync 04:31:43 CEST pr17 ===
+globals webkit exit=0
+rc0 chromium (lock2) exit=1 sha=c08cff5 bid=m3-rc1-pre+c08cff5 03:57:41
+rc0 webkit exit=1
+globals firefox exit=0 sha=c08cff5 bid=m3-rc1-pre+c08cff5 04:06:41
+rc0 firefox exit=1 sha=c08cff5 bid=m3-rc1-pre+c08cff5 04:31:43
+
+=== fold 04:34:13 CEST ===
+residual_alive=Y
+[03:57:41] DONE pr17 rc0 chromium exit=1 sha=c08cff5
+[03:57:41] QUEUE pr17 globals firefox sha=c08cff5 bid=m3-rc1-pre+c08cff5 port=4804 lock=.browser-test.lock load=5
+[04:06:41] DONE pr17 globals firefox exit=0 sha=c08cff5
+[04:06:41] QUEUE pr17 rc0 firefox sha=c08cff5 bid=m3-rc1-pre+c08cff5 port=4973 lock=.browser-test.lock load=9
+[04:31:43] DONE pr17 rc0 firefox exit=1 sha=c08cff5
+[04:31:43] QUEUE pr17 globals webkit sha=c08cff5 bid=m3-rc1-pre+c08cff5 port=4800 lock=.browser-test.lock load=7
+PR17 @ c08cff5: FF rc0 FAIL B5 (195/197). WK globals queued on main lock.
+
+=== fold 04:47 CEST — BOX RESET resume ===
+/tmp wiped; locks reset. Final heads per HoQA: #17=cf50663 #18=d8d680e.
+Older SHA results (3ea9f04,79edfa1,b0e8278,6f19823,c428fae,a913934,c08cff5,abe0991) SUPERSEDED.
+Plan: fresh worktrees /tmp/qa-final/pr17|/pr18; build; globals+rc0×3 engines (chrom lane2 if load<12); ac7 workers (+ INFO no-workers); update pr17-cf50663.md / pr18-d8d680e.md; send-ready for Features cc HoQA.
+STEP1 done: worktrees /tmp/qa-final/pr17=cf50663 pr18=d8d680e
+STEP2: build both (tsc + build + build:qa)
+STEP2 done: builds PASS. bid pr17=m3-rc1-pre+cf50663 pr18=m3-rc1-pre+d8d680e (dist+dist-qa).
+STEP3: browser gates one-at-a-time; chrom lane2 if load<12.
+[04:50:40] AC7 workers gate start on /tmp/qa-final/pr17
+[04:50:40] START pr17-cf50663 globals chromium sha=cf50663 port=5729 lock=.browser-test.lock load=26
+STEP4 04:53: PR17 chrom globals waiting on L1 (load 19→main lock). L2 free but load>=12. AC7 workers running.
+[04:54:00] AC7 workers exit=0
+npm warn exec The following package was not found and will be installed: vite-node@6.0.0
+QA ac7-l18-25-gate-workers | workers=default runM2 set | clone=/tmp/qa-final/pr17 | seeds=30 | need=29
+PASS L@30 P95-low=21 P95-high=21 median=21 in L20-24; OLD=PASS (median only)
+PASS L18-25 step min: P95=4.50 (<=6) worst=4.50 (<=8) median=4.50; OLD=PASS (median<=6)
+OLD_RESULT: PASS
+NEW_RESULT: PASS
+runtime 192s
+RESULT: PASS
+[04:54:00] AC7 no-workers INFO run
+[04:54:51] AC7 no-workers exit=0 (expect 0 INFO)
+QA ac7-l18-25-gate-workers | workers=none | clone=/tmp/qa-final/pr17 | seeds=30 | need=29
+INFO L@30 P95-low=20 P95-high=20 median=20 in L18-22 (no-workers informational; TR-5 is the no-worker gate)
+INFO L18-25 step min: P95=10.25 worst=10.25 median=10.25 (no-workers informational; not a fail)
+OLD_RESULT: INFO
+NEW_RESULT: INFO
+runtime 49s
+RESULT: INFO (no-workers; HoP 00:35 — TR-5 covers this case)
+[04:56:26] DONE pr17-cf50663 globals chromium exit=0 PASS=2 FAIL=0
+[04:56:26] START pr17-cf50663 rc0 chromium sha=cf50663 port=5739 lock=.browser-test.lock load=12
+STEP5 05:04: AC7 DONE — workers PASS (L@30=21, step P95=4.50); no-workers INFO exit=0 (P95 step 10.25).
+PR17 chrom globals PASS. Runtime buildid probe: m3-rc1-pre+cf50663.
+PR17 chrom rc0 STARTED 04:56 (main lock; load was 12). Fixing exits contamination; will resume queue with fixed sync.
+[05:04:41] SKIP pr17-cf50663 globals chromium sha=cf50663
+[05:04:41] START pr17-cf50663 rc0 chromium sha=cf50663 port=5739 lock=.browser-test-2.lock load=2
+STEP6 05:04: restarted queue — chrom uses lane2 (load~2). Fixed evidence sync. pr18 exits cleaned.
+[05:07:00] DONE pr17-cf50663 rc0 chromium exit=1 PASS=192 FAIL=3
+[05:07:00] START pr18-d8d680e globals chromium sha=d8d680e port=5749 lock=.browser-test-2.lock load=4
+[05:07:08] DONE pr18-d8d680e globals chromium exit=0 PASS=2 FAIL=0
+[05:07:08] START pr18-d8d680e rc0 chromium sha=d8d680e port=5759 lock=.browser-test-2.lock load=4
+[05:09:28] DONE pr18-d8d680e rc0 chromium exit=1 PASS=192 FAIL=3
+[05:09:28] START pr17-cf50663 globals firefox sha=cf50663 port=5728 lock=.browser-test.lock load=4
+
+=== fold 05:10:00 CEST ===
+[05:07:08] DONE pr18-d8d680e globals chromium exit=0 PASS=2 FAIL=0
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/globals-chromium.log' and '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/globals-chromium.log' are the same file
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/exits.txt' and '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/exits.txt' are the same file
+[05:07:08] START pr18-d8d680e rc0 chromium sha=d8d680e port=5759 lock=.browser-test-2.lock load=4
+[05:09:28] DONE pr18-d8d680e rc0 chromium exit=1 PASS=192 FAIL=3
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/rc0-chromium.log' and '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/rc0-chromium.log' are the same file
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/exits.txt' and '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/exits.txt' are the same file
+[05:09:28] START pr17-cf50663 globals firefox sha=cf50663 port=5728 lock=.browser-test.lock load=4
+STEP7 05:09: chrom done both PRs. globals PASS. rc0 FAIL×3: axe ENOENT (/tmp wiped) + B5×2 (yawn50). Restoring /tmp/axe for later FF/WK and optional chrom re-run.
+PR17/18 FF globals started on main lock.
+
+=== B5 analysis 05:20 CEST (UI/VD steering) ===
+Fixture rc0-browser.mjs:145 sets energies [30, 41, 98].
+- main: manage_prompt_threshold=0.4 → needs = energy<=40 → only 30 qualifies → "(1 need it)" PASS
+- F1 #17/#18: manage_prompt_threshold=0.5 (HoP 23:58 decisions.md; yawn_at_pct=50) → needs = energy<=50 → 30 AND 41 qualify → "(2 need it)"
+Code: canManageWorker in src/sim/workers.ts:20 (`w.energy <= b.workers.energy.manage_prompt_threshold * 100`); pill in workers-ui.ts:49.
+Verdict: PRODUCT CORRECT for F1. EXPECTATION/FIXTURE STALE (written for 0.4). Preferred fix: fixture [30, 51, 98] to keep one-worker intent; alt: assert "(2 need it)" + rename off "40%".
+axe: /tmp/axe/axe.min.js restored 05:09. Chrom rc0 will be rerun after FF/WK progress (or in parallel on lane2 if free).
+[05:21:20] RERUN rc0 chromium cf50663 port=5761 (axe restored)
+[05:23:41] RERUN DONE cf50663 exit=1 PASS=195 FAIL=2
+--- FAIL lines cf50663 ---
+FAIL [chromium] B5 one worker <= 40% -> Farm View button visible + "(1 need it)" (390) — vis=1 pill=Manage all (2 need it)
+FAIL [chromium] B5 one worker <= 40% -> Farm View button visible + "(1 need it)" (1280) — vis=1 pill=Manage all (2 need it)
+[05:23:41] RERUN rc0 chromium d8d680e port=5762 (axe restored)
+[05:25:35] DONE pr17-cf50663 globals firefox exit=0 PASS=2 FAIL=0
+[05:25:35] START pr17-cf50663 rc0 firefox sha=cf50663 port=5738 lock=.browser-test.lock load=2
+[05:26:21] RERUN DONE d8d680e exit=1 PASS=195 FAIL=2
+--- FAIL lines d8d680e ---
+FAIL [chromium] B5 one worker <= 40% -> Farm View button visible + "(1 need it)" (390) — vis=1 pill=Manage all (2 need it)
+FAIL [chromium] B5 one worker <= 40% -> Farm View button visible + "(1 need it)" (1280) — vis=1 pill=Manage all (2 need it)
+
+=== fold 05:26 CEST — axe rerun ===
+Chrom rc0 RERUN with /tmp/axe restored: both PRs PASS=195 FAIL=2 (B5×2 only). axe ENOENT gone.
+B5 = stale fixture/expectation for F1 threshold 0.5 (not product bug).
+PR17 FF globals PASS; FF rc0 running. WK pending.
+
+=== fold 05:30 CEST — HoQA steering ===
+#18 report: restored workers AC7 P5=20 zero-margin risk line.
+B5 classified Minor; send-ready for SE UI (e80556fd) with [30,51,98] fix in send-ready-pr17-18.txt.
+HoQA killed stale preview on 5723; we use our own free ports only (never reuse held).
+FF rc0 still on main lock (PORT=5738). WK next with a free port.
+
+=== fold 05:38:15 CEST ===
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/exits.txt' and '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/exits.txt' are the same file
+[05:09:28] START pr17-cf50663 globals firefox sha=cf50663 port=5728 lock=.browser-test.lock load=4
+[05:25:35] DONE pr17-cf50663 globals firefox exit=0 PASS=2 FAIL=0
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr17-cf50663-evidence/globals-firefox.log' and '/workspace/egg-farm-studio/qa/m3-recheck/pr17-cf50663-evidence/globals-firefox.log' are the same file
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr17-cf50663-evidence/exits.txt' and '/workspace/egg-farm-studio/qa/m3-recheck/pr17-cf50663-evidence/exits.txt' are the same file
+[05:25:35] START pr17-cf50663 rc0 firefox sha=cf50663 port=5738 lock=.browser-test.lock load=2
+[05:44:24] DONE pr17-cf50663 rc0 firefox exit=1 PASS=195 FAIL=2
+[05:44:24] START pr18-d8d680e globals firefox sha=d8d680e port=5748 lock=.browser-test.lock load=1
+
+=== fold 05:48:26 CEST ===
+[05:25:35] DONE pr17-cf50663 globals firefox exit=0 PASS=2 FAIL=0
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr17-cf50663-evidence/globals-firefox.log' and '/workspace/egg-farm-studio/qa/m3-recheck/pr17-cf50663-evidence/globals-firefox.log' are the same file
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr17-cf50663-evidence/exits.txt' and '/workspace/egg-farm-studio/qa/m3-recheck/pr17-cf50663-evidence/exits.txt' are the same file
+[05:25:35] START pr17-cf50663 rc0 firefox sha=cf50663 port=5738 lock=.browser-test.lock load=2
+[05:44:24] DONE pr17-cf50663 rc0 firefox exit=1 PASS=195 FAIL=2
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr17-cf50663-evidence/rc0-firefox.log' and '/workspace/egg-farm-studio/qa/m3-recheck/pr17-cf50663-evidence/rc0-firefox.log' are the same file
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr17-cf50663-evidence/exits.txt' and '/workspace/egg-farm-studio/qa/m3-recheck/pr17-cf50663-evidence/exits.txt' are the same file
+[05:44:24] START pr18-d8d680e globals firefox sha=d8d680e port=5748 lock=.browser-test.lock load=1
+PR17 FF rc0: 195/197 FAIL=2 (B5×2 only; axe OK). PR18 FF globals started.
+[05:55:49] DONE pr18-d8d680e globals firefox exit=0 PASS=2 FAIL=0
+[05:55:49] START pr18-d8d680e rc0 firefox sha=d8d680e port=5758 lock=.browser-test.lock load=2
+
+=== fold 06:01:46 CEST ===
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr17-cf50663-evidence/exits.txt' and '/workspace/egg-farm-studio/qa/m3-recheck/pr17-cf50663-evidence/exits.txt' are the same file
+[05:25:35] START pr17-cf50663 rc0 firefox sha=cf50663 port=5738 lock=.browser-test.lock load=2
+[05:44:24] DONE pr17-cf50663 rc0 firefox exit=1 PASS=195 FAIL=2
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr17-cf50663-evidence/rc0-firefox.log' and '/workspace/egg-farm-studio/qa/m3-recheck/pr17-cf50663-evidence/rc0-firefox.log' are the same file
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr17-cf50663-evidence/exits.txt' and '/workspace/egg-farm-studio/qa/m3-recheck/pr17-cf50663-evidence/exits.txt' are the same file
+[05:44:24] START pr18-d8d680e globals firefox sha=d8d680e port=5748 lock=.browser-test.lock load=1
+[05:55:49] DONE pr18-d8d680e globals firefox exit=0 PASS=2 FAIL=0
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/globals-firefox.log' and '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/globals-firefox.log' are the same file
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/exits.txt' and '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/exits.txt' are the same file
+[05:55:49] START pr18-d8d680e rc0 firefox sha=d8d680e port=5758 lock=.browser-test.lock load=2
+[06:12:03] DONE pr18-d8d680e rc0 firefox exit=1 PASS=195 FAIL=2
+[06:12:03] START pr17-cf50663 globals webkit sha=cf50663 port=5727 lock=.browser-test.lock load=4
+
+=== fold 06:14:59 CEST ===
+[05:55:49] DONE pr18-d8d680e globals firefox exit=0 PASS=2 FAIL=0
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/globals-firefox.log' and '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/globals-firefox.log' are the same file
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/exits.txt' and '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/exits.txt' are the same file
+[05:55:49] START pr18-d8d680e rc0 firefox sha=d8d680e port=5758 lock=.browser-test.lock load=2
+[06:12:03] DONE pr18-d8d680e rc0 firefox exit=1 PASS=195 FAIL=2
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/rc0-firefox.log' and '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/rc0-firefox.log' are the same file
+cp: '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/exits.txt' and '/workspace/egg-farm-studio/qa/m3-recheck/pr18-d8d680e-evidence/exits.txt' are the same file
+[06:12:03] START pr17-cf50663 globals webkit sha=cf50663 port=5727 lock=.browser-test.lock load=4
+06:14: Chrom+FF done both PRs (globals PASS; rc0 195/197 B5 Minor only after axe). WK globals #17 started port 5727 (own free port).
+[06:18:01] DONE pr17-cf50663 globals webkit exit=0 PASS=2 FAIL=0
+[06:18:01] START pr17-cf50663 rc0 webkit sha=cf50663 port=5737 lock=.browser-test.lock load=4
+
+=== fold 06:20 CEST resume ===
+My queue ALIVE on pr17 rc0 webkit (port 5737). Remaining: pr17 rc0 WK; pr18 globals+rc0 WK.
+Chrom+FF complete both PRs (B5 Minor only after axe). AC7 done. axe present at /tmp/axe.
+[06:25:02] DONE pr17-cf50663 rc0 webkit exit=1 PASS=195 FAIL=2
+[06:25:02] START pr18-d8d680e globals webkit sha=d8d680e port=5747 lock=.browser-test.lock load=2
+[06:33:29] DONE pr18-d8d680e globals webkit exit=0 PASS=2 FAIL=0
+[06:33:29] START pr18-d8d680e rc0 webkit sha=d8d680e port=5757 lock=.browser-test.lock load=2
+06:34: PR17 complete 3 engines (globals PASS; rc0 195/197 B5 Minor×2). PR18 WK globals PASS; rc0 WK in progress port 5757.
+[06:50:23] DONE pr18-d8d680e rc0 webkit exit=1 PASS=195 FAIL=2
+[06:50:23] BROWSER_QUEUE_ALL_DONE
+
+=== fold 07:00 CEST — COMPLETE ===
+BROWSER_QUEUE_ALL_DONE 06:50:23.
+#17 cf50663 + #18 d8d680e: globals PASS ×3; rc0 195/197 ×3 (B5 Minor only; axe restored).
+AC7 workers PASS; no-workers INFO.
+Reports finalized; send-ready-pr17-18.txt has Features cc HoQA + SE UI ([30,51,98]).
+#18 includes P5=20 zero-margin risk.
+No idle servers left from this queue.

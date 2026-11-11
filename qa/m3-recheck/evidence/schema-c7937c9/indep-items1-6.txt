@@ -1,0 +1,21 @@
+PASS 1 tapped fields == six :: loss_per_s,loss_share,n_asleep,n_paused,n_tired,surface
+PASS 1b each of six required on tapped
+PASS 1c extra field rejected on tapped
+PASS 2 FAIL fixture 2+2+1=5 rejected on tapped :: ["fatigue_cue_tapped: n_tired + n_asleep + n_paused > 4"]
+PASS 2b 2+2+1=5 rejected on shown :: ["fatigue_cue_shown: n_tired + n_asleep + n_paused > 4"]
+PASS 2c sum 4 accepted (2+1+1, 4+0+0, 0+0+4, 1+1+2)
+PASS 2d other sums >4 rejected (4+1+0, 0+4+4, 3+3+0)
+PASS 3 tapped rejects suppressed_by_stall (true and false)
+PASS 3b shown = six + suppressed_by_stall; accepts true/false :: loss_per_s,loss_share,n_asleep,n_paused,n_tired,suppressed_by_stall,surface
+PASS 3c shown without suppressed_by_stall :: required on shown: ["fatigue_cue_shown.suppressed_by_stall: required"]
+PASS 4 zero_gain_purchase valid accepted, no capped spec
+PASS 4b capped marker rejected (bare and with fields)
+PASS 4c session_end.zero_gain_purchase_dropped count, optional
+PASS 4d overflow field only on session_end :: session_end.zero_gain_purchase_dropped
+PASS 4e cap from balance.telemetry.bbv2.zero_gain_purchase_cap = 50
+PASS 5 dead_zone none_affordable accepted, enum is exactly [none_affordable]
+PASS 5b cap/max/idle/"" rejected
+PASS 5c isPinned dead_zone & zero_gain_purchase
+PASS 6a base worst case valid, all pinned, <= 204800 :: events=847 dead_zone=120 zero_gain=5 chars=155374 utf8_bytes=155376 headroom=49424 errs=0
+PASS 6b buy-spam worst case valid, all pinned, <= 204800 :: events=958 dead_zone=120 zero_gain=50 chars=175905 utf8_bytes=175907 headroom=28893 errs=0
+INDEP: PASS 20/20

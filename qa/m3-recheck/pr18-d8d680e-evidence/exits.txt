@@ -1,0 +1,10 @@
+SUPERSEDED_NOTE: prior SHA browser results (79edfa1,6f19823,a913934,abe0991,c08cff5) superseded by final head d8d680e 04:50:40
+globals chromium (lock2) exit=0 sha=d8d680e bid=m3-rc1-pre+d8d680e PASS=2 FAIL=0 05:07:08
+rc0 chromium (lock2) exit=1 sha=d8d680e bid=m3-rc1-pre+d8d680e PASS=192 FAIL=3 05:09:28
+buildid chromium exit=0 fails=0 summary="runtime build ids [chromium]: ["m3-rc1-pre+d8d680e"]" 05:13:37
+globals chromium exit=0 fails=0 summary="PASS [chromium] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]" 05:25:50
+rc0 chromium (lock2) RERUN-axe exit=1 sha=d8d680e PASS=195 FAIL=2 05:26:21
+globals firefox exit=0 sha=d8d680e bid=m3-rc1-pre+d8d680e PASS=2 FAIL=0 05:55:49
+rc0 firefox exit=1 sha=d8d680e bid=m3-rc1-pre+d8d680e PASS=195 FAIL=2 06:12:03
+globals webkit exit=0 sha=d8d680e bid=m3-rc1-pre+d8d680e PASS=2 FAIL=0 06:33:29
+rc0 webkit exit=1 sha=d8d680e bid=m3-rc1-pre+d8d680e PASS=195 FAIL=2 06:50:23

@@ -1,0 +1,104 @@
+{
+  "engine": "firefox",
+  "checks": [
+    {
+      "k": "1 loads; runtime build-id m4.1+30b29d3, no +dirty",
+      "pass": true,
+      "d": {
+        "meta": "m4.1+30b29d3",
+        "app": "m4.1+30b29d3",
+        "dirty": false,
+        "browser": "157.0"
+      }
+    },
+    {
+      "k": "2 fresh boot, no recovery dialog",
+      "pass": true,
+      "d": {
+        "coins": "$0.00",
+        "basket": "0",
+        "recovery": false
+      }
+    },
+    {
+      "k": "3 core loop: collect -> basket up; sell -> coins change",
+      "pass": true,
+      "d": {
+        "boot": {
+          "coins": "$0.00",
+          "basket": "0",
+          "recovery": false
+        },
+        "collected": {
+          "coins": "$0.00",
+          "basket": "20",
+          "recovery": false
+        },
+        "sellAll": "Sell all (12 eggs · $12.00)",
+        "sold": {
+          "coins": "$12.00",
+          "basket": "8",
+          "recovery": false
+        }
+      }
+    },
+    {
+      "k": "4 autosave v6 with coins > 0",
+      "pass": true,
+      "d": {
+        "version": 6,
+        "coinsCents": 1200,
+        "basket": 8,
+        "farmLevel": 0,
+        "collectionLevel": 0
+      }
+    },
+    {
+      "k": "5 save/reload persists",
+      "pass": true,
+      "d": {
+        "before": {
+          "u3": {
+            "coins": "$12.00",
+            "basket": "8",
+            "recovery": false
+          },
+          "s1": {
+            "version": 6,
+            "coinsCents": 1200,
+            "basket": 8,
+            "farmLevel": 0,
+            "collectionLevel": 0
+          }
+        },
+        "after": {
+          "u4": {
+            "coins": "$12.00",
+            "basket": "8",
+            "recovery": false
+          },
+          "s2": {
+            "version": 6,
+            "coinsCents": 1200,
+            "basket": 8,
+            "farmLevel": 0,
+            "collectionLevel": 0
+          }
+        },
+        "id2": {
+          "meta": "m4.1+30b29d3",
+          "app": "m4.1+30b29d3",
+          "dirty": false
+        }
+      }
+    },
+    {
+      "k": "6 0 console/page/HTTP errors",
+      "pass": true,
+      "d": []
+    }
+  ],
+  "browser": "157.0",
+  "errors": [],
+  "bad": 0
+}

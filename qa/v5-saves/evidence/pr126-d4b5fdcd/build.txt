@@ -1,0 +1,28 @@
+
+> egg-farm@0.1.0 build
+> vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && vite build && node scripts/check-release-build.mjs dist
+
+balance.json up to date with economy.csv
+vite v5.4.21 building for production...
+transforming...
+✓ 74 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.68 kB │ gzip:  0.40 kB
+dist/assets/index-DUjXgk7c.css   53.57 kB │ gzip: 11.58 kB
+dist/assets/index-CeTO7QLL.js   217.88 kB │ gzip: 73.98 kB
+✓ built in 715ms
+check-release-build: m4.1+d4b5fdc ok
+check-release-build: release prefix m4.1 ok
+check-release-build: no eggfarmUi in release ok
+check-release-build: no ?debug/?perf/?ios/QA hooks ok
+check-release-build: window global writes only eggfarmExportTelemetry ok
+check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok
+check-release-build: eggfarm* identifiers eggfarmRecovery, eggfarmTabGuard, eggfarmExportTelemetry ok
+BUILD_EXIT=0
+npm error Missing script: "check-release-build"
+npm error
+npm error To see a list of scripts, run:
+npm error   npm run
+npm error A complete log of this run can be found in: /home/box/.npm/_logs/2026-11-10T00_21_06_841Z-debug-0.log
+CHECK_EXIT=1

@@ -1,0 +1,26 @@
+=== identity 2026-11-10 00:22:18 CET Europe/Belgrade ===
+ls-remote refs/pull/120/head:
+0bbcea5277a7be7f8e8d4303b7aac49e0dc04a7e	refs/pull/120/head
+ls-remote refs/heads/rc/v5:
+f20b91839fdf09ba0ed45a890281ccbf7bf2909d	refs/heads/rc/v5
+HEAD=0bbcea5277a7be7f8e8d4303b7aac49e0dc04a7e
+PARENTS=f20b91839fdf09ba0ed45a890281ccbf7bf2909d
+SUBJECT=docs(breeds): re-cite spec to v0.2 rev 3.8.9 ea922eb8 + Q6/E10 tests
+TREE=9ad161ed2bf597fff013774839d933eb7021b828
+PARENT_TREE=$PARENT^{tree}
+891f1f93f98dc786ac586487c91b795ad8cf8d4f
+diffstat vs f20b91839fdf09ba0ed45a890281ccbf7bf2909d:
+ src/config/breeds.ts          |  4 ++--
+ src/sim/breeds.ts             |  2 +-
+ tests/v5-breeds-state.test.ts | 23 +++++++++++++++++++++--
+ 3 files changed, 24 insertions(+), 5 deletions(-)
+name-status:
+M	src/config/breeds.ts
+M	src/sim/breeds.ts
+M	tests/v5-breeds-state.test.ts
+numstat:
+2	2	src/config/breeds.ts
+1	1	src/sim/breeds.ts
+21	2	tests/v5-breeds-state.test.ts
+GitHub PR #120 head.sha claim cross-check: 0bbcea5277a7be7f8e8d4303b7aac49e0dc04a7e
+origin/rc/v5 claim: f20b91839fdf09ba0ed45a890281ccbf7bf2909d (equals parent: YES if ls-remote matches)

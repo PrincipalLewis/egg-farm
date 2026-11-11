@@ -1,0 +1,898 @@
+{
+ "res": {
+  "engine": "firefox",
+  "build": "m3-rc1-pre+5248dd9",
+  "layout": {},
+  "func": {
+   "cac27-671s": {
+    "card": {
+     "x": 35,
+     "y": 257.5,
+     "w": 320,
+     "h": 329,
+     "b": 586.5,
+     "r": 355
+    },
+    "vw": 390,
+    "vh": 844,
+    "sh": 325,
+    "ch": 325,
+    "cw": 268,
+    "clip": [],
+    "ell": [],
+    "ov": [],
+    "closeOv": [
+     "wb-head"
+    ],
+    "btns": [
+     {
+      "id": "icon-btn close",
+      "x": 305,
+      "y": 263.5,
+      "w": 44,
+      "h": 44,
+      "b": 307.5,
+      "r": 349,
+      "u44": false
+     },
+     {
+      "id": "wbCollect",
+      "x": 61,
+      "y": 512.5,
+      "w": 268,
+      "h": 48,
+      "b": 560.5,
+      "r": 329,
+      "u44": false
+     }
+    ],
+    "text": "Welcome back. Away 11 minutes 11 seconds. Plus 2,687 eggs added to your basket. Worth up to 6,959 dollars when sold. | Welcome back! | Away 11m 11s | +2,527 eggs | added to your basket | Worth up to $6,959 when sold | 240/min offline · 25% of your farm's rate | Collect",
+    "a": {
+     "x": 132.6,
+     "y": 349.5,
+     "w": 124.8,
+     "h": 25,
+     "b": 374.5,
+     "r": 257.4
+    },
+    "hero": {
+     "x": 92.1,
+     "y": 382.5,
+     "w": 205.8,
+     "h": 39,
+     "b": 421.5,
+     "r": 297.9
+    },
+    "heroText": "+2,527 eggs",
+    "heroAnim": "wbpop",
+    "rateHidden": false,
+    "capColor": null,
+    "role": "dialog",
+    "modal": "true",
+    "label": "Welcome back!",
+    "desc": "Welcome back. Away 11 minutes 11 seconds. Plus 2,687 eggs added to your basket. Worth up to 6,959 dollars when sold.",
+    "btnName": "Collect 2,687 eggs",
+    "focus": "BODY",
+    "coins": "$0.00"
+   },
+   "cac28-11520s": {
+    "card": {
+     "x": 35,
+     "y": 219,
+     "w": 320,
+     "h": 406,
+     "b": 625,
+     "r": 355
+    },
+    "vw": 390,
+    "vh": 844,
+    "sh": 402,
+    "ch": 402,
+    "cw": 268,
+    "clip": [],
+    "ell": [],
+    "ov": [],
+    "closeOv": [
+     "wb-head"
+    ],
+    "btns": [
+     {
+      "id": "icon-btn close",
+      "x": 305,
+      "y": 225,
+      "w": 44,
+      "h": 44,
+      "b": 269,
+      "r": 349,
+      "u44": false
+     },
+     {
+      "id": "wbCollect",
+      "x": 61,
+      "y": 551,
+      "w": 268,
+      "h": 48,
+      "b": 599,
+      "r": 329,
+      "u44": false
+     }
+    ],
+    "text": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 28,800 eggs added to your basket. Worth up to 74,592 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +26,683 eggs | added to your basket | Worth up to $74,592 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect",
+    "a": {
+     "x": 75.9,
+     "y": 311,
+     "w": 238.3,
+     "h": 25,
+     "b": 336,
+     "r": 314.1
+    },
+    "hero": {
+     "x": 82,
+     "y": 344,
+     "w": 225.9,
+     "h": 39,
+     "b": 383,
+     "r": 307.9
+    },
+    "heroText": "+26,683 eggs",
+    "heroAnim": "wbpop",
+    "rateHidden": false,
+    "capColor": "rgb(138, 85, 40)",
+    "role": "dialog",
+    "modal": "true",
+    "label": "Welcome back!",
+    "desc": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 28,800 eggs added to your basket. Worth up to 74,592 dollars when sold. Offline limit is 2 hours.",
+    "btnName": "Collect 28,800 eggs",
+    "focus": "BODY",
+    "coins": "$0.00"
+   },
+   "cac32-7200": {
+    "card": {
+     "x": 35,
+     "y": 219,
+     "w": 320,
+     "h": 406,
+     "b": 625,
+     "r": 355
+    },
+    "vw": 390,
+    "vh": 844,
+    "sh": 402,
+    "ch": 402,
+    "cw": 268,
+    "clip": [],
+    "ell": [],
+    "ov": [],
+    "closeOv": [
+     "wb-head"
+    ],
+    "btns": [
+     {
+      "id": "icon-btn close",
+      "x": 305,
+      "y": 225,
+      "w": 44,
+      "h": 44,
+      "b": 269,
+      "r": 349,
+      "u44": false
+     },
+     {
+      "id": "wbCollect",
+      "x": 61,
+      "y": 551,
+      "w": 268,
+      "h": 48,
+      "b": 599,
+      "r": 329,
+      "u44": false
+     }
+    ],
+    "text": "Welcome back. Away 2 hours, capped at 2 hours. Plus 28,800 eggs added to your basket. Worth up to 74,592 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 2h · capped at 2h | +27,017 eggs | added to your basket | Worth up to $74,592 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect",
+    "a": {
+     "x": 97,
+     "y": 311,
+     "w": 196,
+     "h": 25,
+     "b": 336,
+     "r": 293
+    },
+    "hero": {
+     "x": 82,
+     "y": 344,
+     "w": 225.9,
+     "h": 39,
+     "b": 383,
+     "r": 307.9
+    },
+    "heroText": "+27,017 eggs",
+    "heroAnim": "wbpop",
+    "rateHidden": false,
+    "capColor": "rgb(138, 85, 40)",
+    "role": "dialog",
+    "modal": "true",
+    "label": "Welcome back!",
+    "desc": "Welcome back. Away 2 hours, capped at 2 hours. Plus 28,800 eggs added to your basket. Worth up to 74,592 dollars when sold. Offline limit is 2 hours.",
+    "btnName": "Collect 28,800 eggs",
+    "focus": "BODY",
+    "coins": "$0.00"
+   },
+   "cac32-7199": {
+    "card": {
+     "x": 35,
+     "y": 245,
+     "w": 320,
+     "h": 354,
+     "b": 599,
+     "r": 355
+    },
+    "vw": 390,
+    "vh": 844,
+    "sh": 350,
+    "ch": 350,
+    "cw": 268,
+    "clip": [],
+    "ell": [],
+    "ov": [],
+    "closeOv": [
+     "wb-head"
+    ],
+    "btns": [
+     {
+      "id": "icon-btn close",
+      "x": 305,
+      "y": 251,
+      "w": 44,
+      "h": 44,
+      "b": 295,
+      "r": 349,
+      "u44": false
+     },
+     {
+      "id": "wbCollect",
+      "x": 61,
+      "y": 525,
+      "w": 268,
+      "h": 48,
+      "b": 573,
+      "r": 329,
+      "u44": false
+     }
+    ],
+    "text": "Welcome back. Away 1 hour 59 minutes. Plus 28,799 eggs added to your basket. Worth up to 74,589 dollars when sold. | Welcome back! | Away 1h 59m | +27,105 eggs | added to your basket | Worth up to $74,589 when sold | 240/min offline · 25% of your farm's rate | Collect",
+    "a": {
+     "x": 137.1,
+     "y": 337,
+     "w": 115.8,
+     "h": 25,
+     "b": 362,
+     "r": 252.9
+    },
+    "hero": {
+     "x": 83.8,
+     "y": 370,
+     "w": 222.5,
+     "h": 39,
+     "b": 409,
+     "r": 306.2
+    },
+    "heroText": "+27,105 eggs",
+    "heroAnim": "wbpop",
+    "rateHidden": false,
+    "capColor": null,
+    "role": "dialog",
+    "modal": "true",
+    "label": "Welcome back!",
+    "desc": "Welcome back. Away 1 hour 59 minutes. Plus 28,799 eggs added to your basket. Worth up to 74,589 dollars when sold.",
+    "btnName": "Collect 28,799 eggs",
+    "focus": "BODY",
+    "coins": "$0.00"
+   },
+   "cac35-59": {
+    "card": {
+     "x": 35,
+     "y": 245,
+     "w": 320,
+     "h": 354,
+     "b": 599,
+     "r": 355
+    },
+    "vw": 390,
+    "vh": 844,
+    "sh": 350,
+    "ch": 350,
+    "cw": 268,
+    "clip": [],
+    "ell": [],
+    "ov": [],
+    "closeOv": [
+     "wb-head"
+    ],
+    "btns": [
+     {
+      "id": "icon-btn close",
+      "x": 305,
+      "y": 251,
+      "w": 44,
+      "h": 44,
+      "b": 295,
+      "r": 349,
+      "u44": false
+     },
+     {
+      "id": "wbCollect",
+      "x": 61,
+      "y": 525,
+      "w": 268,
+      "h": 48,
+      "b": 573,
+      "r": 329,
+      "u44": false
+     }
+    ],
+    "text": "Welcome back. Away 1 minute. Plus 240 eggs added to your basket. Worth up to 621 dollars 60 cents when sold. | Welcome back! | Away 1m | +221 eggs | added to your basket | Worth up to $621.60 when sold | 240/min offline · 25% of your farm's rate | Collect",
+    "a": {
+     "x": 155.6,
+     "y": 337,
+     "w": 78.7,
+     "h": 25,
+     "b": 362,
+     "r": 234.4
+    },
+    "hero": {
+     "x": 103.1,
+     "y": 370,
+     "w": 183.7,
+     "h": 39,
+     "b": 409,
+     "r": 286.9
+    },
+    "heroText": "+221 eggs",
+    "heroAnim": "wbpop",
+    "rateHidden": false,
+    "capColor": null,
+    "role": "dialog",
+    "modal": "true",
+    "label": "Welcome back!",
+    "desc": "Welcome back. Away 1 minute. Plus 240 eggs added to your basket. Worth up to 621 dollars 60 cents when sold.",
+    "btnName": "Collect 240 eggs",
+    "focus": "BODY",
+    "coins": "$0.00"
+   },
+   "cac35-neg": null,
+   "cac30-price": {
+    "card": {
+     "x": 35,
+     "y": 245,
+     "w": 320,
+     "h": 354,
+     "b": 599,
+     "r": 355
+    },
+    "vw": 390,
+    "vh": 844,
+    "sh": 350,
+    "ch": 350,
+    "cw": 268,
+    "clip": [],
+    "ell": [],
+    "ov": [],
+    "closeOv": [
+     "wb-head"
+    ],
+    "btns": [
+     {
+      "id": "icon-btn close",
+      "x": 305,
+      "y": 251,
+      "w": 44,
+      "h": 44,
+      "b": 295,
+      "r": 349,
+      "u44": false
+     },
+     {
+      "id": "wbCollect",
+      "x": 61,
+      "y": 525,
+      "w": 268,
+      "h": 48,
+      "b": 573,
+      "r": 329,
+      "u44": false
+     }
+    ],
+    "text": "Welcome back. Away 11 minutes 11 seconds. Plus 2,687 eggs added to your basket. Worth up to 10,344 dollars when sold. | Welcome back! | Away 11m 11s | +2,530 eggs | added to your basket | Worth up to $10,344 when sold | 240/min offline · 25% of your farm's rate | Collect",
+    "a": {
+     "x": 132.6,
+     "y": 337,
+     "w": 124.8,
+     "h": 25,
+     "b": 362,
+     "r": 257.4
+    },
+    "hero": {
+     "x": 91.5,
+     "y": 370,
+     "w": 207.1,
+     "h": 39,
+     "b": 409,
+     "r": 298.5
+    },
+    "heroText": "+2,530 eggs",
+    "heroAnim": "wbpop",
+    "rateHidden": false,
+    "capColor": null,
+    "role": "dialog",
+    "modal": "true",
+    "label": "Welcome back!",
+    "desc": "Welcome back. Away 11 minutes 11 seconds. Plus 2,687 eggs added to your basket. Worth up to 10,344 dollars when sold.",
+    "btnName": "Collect 2,687 eggs",
+    "focus": "BODY",
+    "coins": "$0.00"
+   },
+   "cac30extra": {
+    "worth": "10,344",
+    "pend": 2687,
+    "priceTxt": []
+   },
+   "cac31-basket": {
+    "card": {
+     "x": 35,
+     "y": 257.5,
+     "w": 320,
+     "h": 329,
+     "b": 586.5,
+     "r": 355
+    },
+    "vw": 390,
+    "vh": 844,
+    "sh": 325,
+    "ch": 325,
+    "cw": 268,
+    "clip": [],
+    "ell": [],
+    "ov": [],
+    "closeOv": [
+     "wb-head"
+    ],
+    "btns": [
+     {
+      "id": "icon-btn close",
+      "x": 305,
+      "y": 263.5,
+      "w": 44,
+      "h": 44,
+      "b": 307.5,
+      "r": 349,
+      "u44": false
+     },
+     {
+      "id": "wbCollect",
+      "x": 61,
+      "y": 512.5,
+      "w": 268,
+      "h": 48,
+      "b": 560.5,
+      "r": 329,
+      "u44": false
+     }
+    ],
+    "text": "Welcome back. Away 11 minutes 11 seconds. Plus 2,687 eggs added to your basket. Worth up to 6,959 dollars when sold. | Welcome back! | Away 11m 11s | +2,522 eggs | added to your basket | Worth up to $6,959 when sold | 240/min offline · 25% of your farm's rate | Collect",
+    "a": {
+     "x": 132.6,
+     "y": 349.5,
+     "w": 124.8,
+     "h": 25,
+     "b": 374.5,
+     "r": 257.4
+    },
+    "hero": {
+     "x": 91.4,
+     "y": 382.5,
+     "w": 207.1,
+     "h": 39,
+     "b": 421.5,
+     "r": 298.6
+    },
+    "heroText": "+2,522 eggs",
+    "heroAnim": "wbpop",
+    "rateHidden": false,
+    "capColor": null,
+    "role": "dialog",
+    "modal": "true",
+    "label": "Welcome back!",
+    "desc": "Welcome back. Away 11 minutes 11 seconds. Plus 2,687 eggs added to your basket. Worth up to 6,959 dollars when sold.",
+    "btnName": "Collect 2,687 eggs",
+    "focus": "BODY",
+    "coins": "$0.00"
+   },
+   "cac34-one": {
+    "card": {
+     "x": 35,
+     "y": 257.5,
+     "w": 320,
+     "h": 329,
+     "b": 586.5,
+     "r": 355
+    },
+    "vw": 390,
+    "vh": 844,
+    "sh": 325,
+    "ch": 325,
+    "cw": 268,
+    "clip": [],
+    "ell": [],
+    "ov": [],
+    "closeOv": [
+     "wb-head"
+    ],
+    "btns": [
+     {
+      "id": "icon-btn close",
+      "x": 305,
+      "y": 263.5,
+      "w": 44,
+      "h": 44,
+      "b": 307.5,
+      "r": 349,
+      "u44": false
+     },
+     {
+      "id": "wbCollect",
+      "x": 61,
+      "y": 512.5,
+      "w": 268,
+      "h": 48,
+      "b": 560.5,
+      "r": 329,
+      "u44": false
+     }
+    ],
+    "text": "Welcome back. Away 1 hour. Plus 1,800 eggs added to your basket. Worth up to 2,790 dollars when sold. | Welcome back! | Away 1h | +1,662 eggs | added to your basket | Worth up to $2,790 when sold | 30/min offline · 25% of your farm's rate | Collect",
+    "a": {
+     "x": 158.3,
+     "y": 349.5,
+     "w": 73.5,
+     "h": 25,
+     "b": 374.5,
+     "r": 231.7
+    },
+    "hero": {
+     "x": 93.7,
+     "y": 382.5,
+     "w": 202.6,
+     "h": 39,
+     "b": 421.5,
+     "r": 296.3
+    },
+    "heroText": "+1,662 eggs",
+    "heroAnim": "wbpop",
+    "rateHidden": false,
+    "capColor": null,
+    "role": "dialog",
+    "modal": "true",
+    "label": "Welcome back!",
+    "desc": "Welcome back. Away 1 hour. Plus 1,800 eggs added to your basket. Worth up to 2,790 dollars when sold.",
+    "btnName": "Collect 1,800 eggs",
+    "focus": "BODY",
+    "coins": "$0.00"
+   },
+   "cac34b": {
+    "card": {
+     "x": 35,
+     "y": 257.5,
+     "w": 320,
+     "h": 329,
+     "b": 586.5,
+     "r": 355
+    },
+    "vw": 390,
+    "vh": 844,
+    "sh": 325,
+    "ch": 325,
+    "cw": 268,
+    "clip": [],
+    "ell": [],
+    "ov": [],
+    "closeOv": [
+     "wb-head"
+    ],
+    "btns": [
+     {
+      "id": "icon-btn close",
+      "x": 305,
+      "y": 263.5,
+      "w": 44,
+      "h": 44,
+      "b": 307.5,
+      "r": 349,
+      "u44": false
+     },
+     {
+      "id": "wbCollect",
+      "x": 61,
+      "y": 512.5,
+      "w": 268,
+      "h": 48,
+      "b": 560.5,
+      "r": 329,
+      "u44": false
+     }
+    ],
+    "text": "Welcome back. Away 11 minutes 11 seconds. Plus 1 egg added to your basket. Worth up to 1 dollar 55 cents when sold. | Welcome back! | Away 11m 11s | +1 egg | added to your basket | Worth up to $1.55 when sold | 30/min offline · 25% of your farm's rate | Collect",
+    "a": {
+     "x": 132.6,
+     "y": 349.5,
+     "w": 124.8,
+     "h": 25,
+     "b": 374.5,
+     "r": 257.4
+    },
+    "hero": {
+     "x": 131.3,
+     "y": 382.5,
+     "w": 127.4,
+     "h": 39,
+     "b": 421.5,
+     "r": 258.7
+    },
+    "heroText": "+1 egg",
+    "heroAnim": "wbpop",
+    "rateHidden": false,
+    "capColor": null,
+    "role": "dialog",
+    "modal": "true",
+    "label": "Welcome back!",
+    "desc": "Welcome back. Away 11 minutes 11 seconds. Plus 1 egg added to your basket. Worth up to 1 dollar 55 cents when sold.",
+    "btnName": "Collect 1 egg",
+    "focus": "BODY",
+    "coins": "$0.00"
+   },
+   "cac37-motion": {
+    "card": {
+     "x": 35,
+     "y": 219,
+     "w": 320,
+     "h": 406,
+     "b": 625,
+     "r": 355
+    },
+    "vw": 390,
+    "vh": 844,
+    "sh": 402,
+    "ch": 402,
+    "cw": 268,
+    "clip": [],
+    "ell": [],
+    "ov": [],
+    "closeOv": [
+     "wb-head"
+    ],
+    "btns": [
+     {
+      "id": "icon-btn close",
+      "x": 305,
+      "y": 225,
+      "w": 44,
+      "h": 44,
+      "b": 269,
+      "r": 349,
+      "u44": false
+     },
+     {
+      "id": "wbCollect",
+      "x": 61,
+      "y": 551,
+      "w": 268,
+      "h": 48,
+      "b": 599,
+      "r": 329,
+      "u44": false
+     }
+    ],
+    "text": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 28,800 eggs added to your basket. Worth up to 74,592 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +26,699 eggs | added to your basket | Worth up to $74,592 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect",
+    "a": {
+     "x": 75.9,
+     "y": 311,
+     "w": 238.3,
+     "h": 25,
+     "b": 336,
+     "r": 314.1
+    },
+    "hero": {
+     "x": 82,
+     "y": 344,
+     "w": 225.9,
+     "h": 39,
+     "b": 383,
+     "r": 307.9
+    },
+    "heroText": "+26,699 eggs",
+    "heroAnim": "wbpop",
+    "rateHidden": false,
+    "capColor": "rgb(138, 85, 40)",
+    "role": "dialog",
+    "modal": "true",
+    "label": "Welcome back!",
+    "desc": "Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 28,800 eggs added to your basket. Worth up to 74,592 dollars when sold. Offline limit is 2 hours.",
+    "btnName": "Collect 28,800 eggs",
+    "focus": "BODY",
+    "coins": "$0.00"
+   },
+   "cac39": [
+    {
+     "t": "$812.40",
+     "slot": 80.06666564941406,
+     "tab": "tabular-nums"
+    },
+    {
+     "t": "$1,000",
+     "slot": 80.06666564941406,
+     "tab": "tabular-nums"
+    },
+    {
+     "t": "$10,412",
+     "slot": 80.06666564941406,
+     "tab": "tabular-nums"
+    },
+    {
+     "t": "$999,999",
+     "slot": 80.06666564941406,
+     "tab": "tabular-nums"
+    },
+    {
+     "t": "$1.23M",
+     "slot": 80.06666564941406,
+     "tab": "tabular-nums"
+    }
+   ]
+  }
+ },
+ "R": [
+  {
+   "ac": "C-AC27",
+   "name": "real load 671 s L15: \"Away 11m 11s\", no cap, hero = spec +2,732",
+   "pass": false,
+   "info": "[\"+2,527 eggs\",\"Welcome back. Away 11 minutes 11 seconds. Plus 2,687 eggs added to your basket. Worth up to 6,959 dollars when sold. | Welcome back! | Away 11m 11s | +2,527 eggs | added to your basket | Worth up to $6,959 when sold | 240/min offline · 25% of your farm's rate | Collect\"]"
+  },
+  {
+   "ac": "errors",
+   "name": "cac27-671s no page errors",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC28",
+   "name": "3h12m L15: line A, +28,800, cap line accent ⏱, no 2h+",
+   "pass": false,
+   "info": "[\"+26,683 eggs\",\"rgb(138, 85, 40)\",\"Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 28,800 eggs added to your basket. Worth up to 74,592 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 3h 12m · capped at 2h | +26,683 eggs | added to your basket | Worth up to $74,592 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect\"]"
+  },
+  {
+   "ac": "errors",
+   "name": "cac28-11520s no page errors",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC32",
+   "name": "7200 s: cap line + capped at 2h",
+   "pass": true,
+   "info": "Welcome back. Away 2 hours, capped at 2 hours. Plus 28,800 eggs added to your basket. Worth up to 74,592 dollars when sold. Offline limit is 2 hours. | Welcome back! | Away 2h · capped at 2h | +27,017 eggs | added to your basket | Worth up to $74,592 when sold | 240/min offline · 25% of your farm's rate | ⏱ Offline limit is 2h. Check in sooner to earn more. | Collect"
+  },
+  {
+   "ac": "errors",
+   "name": "cac32-7200 no page errors",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC32",
+   "name": "7199 s: neither",
+   "pass": true,
+   "info": "Welcome back. Away 1 hour 59 minutes. Plus 28,799 eggs added to your basket. Worth up to 74,589 dollars when sold. | Welcome back! | Away 1h 59m | +27,105 eggs | added to your basket | Worth up to $74,589 when sold | 240/min offline · 25% of your farm's rate | Collect"
+  },
+  {
+   "ac": "errors",
+   "name": "cac32-7199 no page errors",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC35",
+   "name": "59 s: no popup",
+   "pass": false,
+   "info": "Welcome back. Away 1 minute. Plus 240 eggs added to your basket. Worth up to 621 dollars 60 cents when sold. | Welcome back! | Away 1m | +221 eggs | added to your basket | Worth up to $621.60 when sold | 240/min offline · 25% of your farm's rate | Collect"
+  },
+  {
+   "ac": "errors",
+   "name": "cac35-59 no page errors",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC35",
+   "name": "negative delta: no popup",
+   "pass": true,
+   "info": ""
+  },
+  {
+   "ac": "errors",
+   "name": "cac35-neg no page errors",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC30",
+   "name": "worth line format, no \"Coins while away\"",
+   "pass": true,
+   "info": "[\"Welcome back. Away 11 minutes 11 seconds. Plus 2,687 eggs added to your basket. Worth up to 10,344 dollars when sold. | Welcome back! | Away 11m 11s | +2,530 eggs | added to your basket | Worth up to $10,344 when sold | 240/min offline · 25% of your farm's rate | Collect\",{\"pend\":2687,\"priceTxt\":[]}]"
+  },
+  {
+   "ac": "errors",
+   "name": "cac30-price no page errors",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC31",
+   "name": "sub-line + Basket += N exactly, N > coop 800",
+   "pass": true,
+   "info": "0->2687 N=2687"
+  },
+  {
+   "ac": "errors",
+   "name": "cac31-basket no page errors",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC34",
+   "name": "N=1: \"+1 egg\", worth = single egg price",
+   "pass": true,
+   "info": "Welcome back. Away 11 minutes 11 seconds. Plus 1 egg added to your basket. Worth up to 1 dollar 55 cents when sold. | Welcome back! | Away 11m 11s | +1 egg | added to your basket | Worth up to $1.55 when sold | 30/min offline · 25% of your farm's rate | Collect"
+  },
+  {
+   "ac": "errors",
+   "name": "cac34-one no page errors",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC37",
+   "name": "motion on: pop + reaches N",
+   "pass": false,
+   "info": "[\"wbpop\",\"+26,699 eggs\"]"
+  },
+  {
+   "ac": "errors",
+   "name": "cac37-motion no page errors",
+   "pass": true,
+   "info": "[]"
+  },
+  {
+   "ac": "C-AC37",
+   "name": "reduced motion: static N, no pop",
+   "pass": true,
+   "info": "[\"none\",\"+28,800 eggs\"]"
+  },
+  {
+   "ac": "C-AC38",
+   "name": "aria text in full + button name",
+   "pass": true,
+   "info": "[\"Welcome back. Away 3 hours 12 minutes, capped at 2 hours. Plus 28,800 eggs added to your basket. Worth up to 74,592 dollars when sold. Offline limit is 2 hours.\",\"Collect 28,800 eggs\"]"
+  },
+  {
+   "ac": "C-AC39",
+   "name": "HUD $812.40/$1,000/$10,412/$999,999/$1.23M",
+   "pass": true,
+   "info": "$812.40|$1,000|$10,412|$999,999|$1.23M"
+  },
+  {
+   "ac": "C-AC39",
+   "name": "tabular + slot width constant $1,000..$999,999",
+   "pass": true,
+   "info": "[{\"t\":\"$812.40\",\"slot\":80.06666564941406,\"tab\":\"tabular-nums\"},{\"t\":\"$1,000\",\"slot\":80.06666564941406,\"tab\":\"tabular-nums\"},{\"t\":\"$10,412\",\"slot\":80.06666564941406,\"tab\":\"tabular-nums\"},{\"t\":\"$999,999\",\"slot\":80.06666564941406,\"tab\":\"tabular-nums\"},{\"t\":\"$1.23M\",\"slot\":80.06666564941406,\"tab\":\"tabular-nums\"}]"
+  }
+ ]
+}

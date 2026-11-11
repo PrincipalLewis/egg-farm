@@ -1,0 +1,41 @@
+{
+  "ls_remote_head": "a5f8e3c916833eae0a68aca03940e2fd08e01725",
+  "ls_remote_base": "71375901de8b72acfaa49c695c5c18f0d0088080",
+  "tree_full": "92a3dbf8c0c14723609717adb9d8a47b2a48facc",
+  "tree_short_match_92a3dbf8": true,
+  "parents": [
+    "27660196a081f379f467499d667fbe4f5ef3bda3",
+    "71375901de8b72acfaa49c695c5c18f0d0088080"
+  ],
+  "parent0_is_old_tip": true,
+  "parent1_is_new_base": true,
+  "ahead_behind": "0\t4",
+  "files": [
+    "src/config/formulas.ts",
+    "src/config/m5-rules.ts",
+    "src/sim/effects.ts",
+    "src/sim/golden.ts",
+    "src/sim/timers.ts",
+    "tests/v5-golden-rewards.test.ts"
+  ],
+  "old_files": [
+    "src/config/formulas.ts",
+    "src/config/m5-rules.ts",
+    "src/sim/effects.ts",
+    "src/sim/golden.ts",
+    "src/sim/timers.ts",
+    "tests/v5-golden-rewards.test.ts"
+  ],
+  "same_file_set": true,
+  "non_telemetry_or_all_patch_preserved": true,
+  "clean_merge_exit": 0,
+  "computed_merge_tree": "92a3dbf8c0c14723609717adb9d8a47b2a48facc",
+  "clean_merge_matches_tip": true,
+  "architect_exact_head_notes": [],
+  "inherit_eligible_structural": true,
+  "m5_rules_blob_changed_vs_old_tip": true,
+  "m5_rules_note": "m5-rules.ts tip blob differs from 27660196 because newer rc changed that path; clean merge-tree still matches tip (auto-union). Normalized base\u2192tip patch still equals prior base\u2192tip patch.",
+  "architect_exact_head_addendum": "ABSENT",
+  "architect_inherit_basis": "D-HOE-51 / D-CEO-20261106-02 + HoE ACK recorded in engineering/status.md 02:41 CET that prior Architect PASS inherits at a5f8e3c; structural clean inherit verified independently this turn.",
+  "hosted_this_turn": "NOT READ (scheduled gate 42145282654 @ 03:00; pacing 42145282651 @ 03:25, last 03:40 if pending). Prior gate 42139828949 was read for old tip 27660196 only \u2014 not repeated, not applied to a5f8e3c."
+}

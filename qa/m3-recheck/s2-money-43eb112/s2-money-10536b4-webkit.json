@@ -1,0 +1,223 @@
+[
+ {
+  "n": "S2-3a-1 fuzz 300s: every served customer got a card or a pop",
+  "pass": true,
+  "i": {
+   "served": 110,
+   "partial": 0,
+   "cards": 113,
+   "pops": 0,
+   "squeezes": 0,
+   "uncovered": 0,
+   "maxSimul": 4,
+   "errs": []
+  }
+ },
+ {
+  "n": "S2-3a full-queue: sale with strip full fires a +$X pop (no card)",
+  "pass": true,
+  "i": [
+   {
+    "full": "true",
+    "more": true,
+    "pop": 1,
+    "card": 0,
+    "txt": [
+     "+$478.40"
+    ],
+    "earned": 47840
+   },
+   {
+    "full": "false",
+    "more": true,
+    "pop": 1,
+    "card": 0,
+    "txt": [
+     "+$615.68"
+    ],
+    "earned": 61568
+   },
+   {
+    "full": "false",
+    "more": true,
+    "pop": 1,
+    "card": 0,
+    "txt": [
+     "+$411.84"
+    ],
+    "earned": 41184
+   }
+  ]
+ },
+ {
+  "n": "S2-8 $0 gate: money never negative over 2 h accelerated",
+  "pass": true,
+  "i": {
+   "minCoins": 0,
+   "endCoins": 16650,
+   "unpaidSeen": [
+    "market_hand",
+    "coop_hand"
+   ],
+   "resumed": [
+    "market_hand",
+    "coop_hand"
+   ],
+   "collectOk": 60,
+   "collectTry": 60,
+   "sellOk": 60,
+   "sellTry": 60,
+   "endCollect": true,
+   "endSellEarned": true,
+   "unpaidEvents": 0,
+   "resumeEvents": 6,
+   "workers": {
+    "market_hand": {
+     "energy": 0,
+     "cdS": 0.09999999999999848,
+     "unpaid": false
+    },
+    "coop_hand": {
+     "energy": 0,
+     "cdS": 2.0999999999999983,
+     "unpaid": false
+    }
+   }
+  }
+ },
+ {
+  "n": "S2-8 $0 gate: unpaid workers pause and resume",
+  "pass": true,
+  "i": {
+   "unpaid": [
+    "market_hand",
+    "coop_hand"
+   ],
+   "resumed": [
+    "market_hand",
+    "coop_hand"
+   ],
+   "unpaidEvents": 0,
+   "resumeEvents": 6
+  }
+ },
+ {
+  "n": "S2-8 $0 gate: Collect and Sell always work at $0, no soft-lock",
+  "pass": true,
+  "i": {
+   "collect": "60/60",
+   "sell": "60/60",
+   "end": [
+    true,
+    true
+   ],
+   "errs": []
+  }
+ },
+ {
+  "n": "S2-9 no auto-open as queue fills",
+  "pass": true,
+  "i": {
+   "opened": false,
+   "full": "true",
+   "ms": 13910
+  }
+ },
+ {
+  "n": "S2-9 tap on on-screen chip opens Market",
+  "pass": true,
+  "i": {
+   "opened": true
+  }
+ },
+ {
+  "n": "S2-9 tap that started elsewhere (other chip / empty area) does not open",
+  "pass": true,
+  "i": {
+   "chipAtoB": false,
+   "emptyToChip": false
+  }
+ },
+ {
+  "n": "S2-9 chip on screen < 250 ms does not open; same chip later does",
+  "pass": true,
+  "i": {
+   "at100ms": false,
+   "at400ms": true
+  }
+ },
+ {
+  "n": "Fast Collect: touch-action manipulation on #app/.scene/.queue",
+  "pass": true,
+  "i": [
+   [
+    "#app",
+    "manipulation"
+   ],
+   [
+    ".scene",
+    "manipulation"
+   ],
+   [
+    ".queue",
+    "manipulation"
+   ],
+   [
+    "#collect",
+    "manipulation"
+   ]
+  ]
+ },
+ {
+  "n": "Fast Collect button 10x@50ms: every tap registers, squash+pop <= 100 ms",
+  "pass": true,
+  "i": {
+   "taps": 10,
+   "collects": 10,
+   "sq100": 10,
+   "pop100": 10,
+   "lostCount": 0,
+   "coopLeft": 209,
+   "class": "OK"
+  }
+ },
+ {
+  "n": "Fast Collect scene 10x@50ms: every tap registers, squash+pop <= 100 ms",
+  "pass": true,
+  "i": {
+   "taps": 10,
+   "collects": 10,
+   "sq100": 10,
+   "pop100": 10,
+   "lostCount": 0,
+   "coopLeft": 209,
+   "class": "OK"
+  }
+ },
+ {
+  "n": "Fast Collect button 45x@15/s: every tap registers, squash+pop <= 100 ms",
+  "pass": false,
+  "i": {
+   "taps": 45,
+   "collects": 44,
+   "sq100": 45,
+   "pop100": 45,
+   "lostCount": 1,
+   "coopLeft": 5,
+   "class": "LOST"
+  }
+ },
+ {
+  "n": "Fast Collect scene 45x@15/s: every tap registers, squash+pop <= 100 ms",
+  "pass": true,
+  "i": {
+   "taps": 45,
+   "collects": 45,
+   "sq100": 45,
+   "pop100": 45,
+   "lostCount": 0,
+   "coopLeft": 4,
+   "class": "OK"
+  }
+ }
+]

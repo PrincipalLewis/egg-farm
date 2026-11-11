@@ -1,0 +1,75 @@
+# gate 42717222277 job 129501771105 @ cf55d44a — extracted 2026-11-10 00:18 CET
+
+## run
+status=completed conclusion=success headSha=cf55d44a057d8f7843481219f9ea1eb2602a95b1
+jobs: gate=129501771105 success; release-globals=129507563894 skipped
+checkout: HEAD is now at 35d6614 Merge cf55d44a057d8f7843481219f9ea1eb2602a95b1 into f46544efaae907217126491b29588d77258ab28a
+
+## Node 20 (setup-node completed log)
+2026-11-09T23:03:23.1299794Z ##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+2026-11-09T23:03:23.1300232Z with:
+2026-11-09T23:03:23.1300473Z   node-version: 20
+2026-11-09T23:03:23.1300734Z   cache: npm
+2026-11-09T23:03:23.1300980Z   always-auth: false
+2026-11-09T23:03:23.1301230Z   check-latest: false
+2026-11-09T23:03:23.1303613Z   token: ***
+2026-11-09T23:03:23.1303856Z ##[endgroup]
+2026-11-09T23:03:23.2526943Z Attempting to download 20...
+2026-11-09T23:03:23.2670918Z (node:2105) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-09T23:03:23.2671616Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-09T23:03:24.3751197Z Acquiring 20.20.2 - x64 from https://github.com/actions/node-versions/releases/download/20.20.2-23521894959/node-20.20.2-linux-x64.tar.gz
+2026-11-09T23:03:24.8480200Z Extracting ...
+2026-11-09T23:03:24.8630698Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/3196f4d6-761e-4111-b868-f740a4ad72e3 -f /home/runner/work/_temp/b96ff24d-4d33-404c-b055-8bf9d1274b2e
+2026-11-09T23:03:25.7391024Z Adding to the cache ...
+2026-11-09T23:03:27.4293747Z ##[group]Environment details
+2026-11-09T23:03:27.6674645Z node: v20.20.2
+2026-11-09T23:03:27.6675001Z npm: 10.8.2
+2026-11-09T23:03:27.6675225Z yarn: 1.22.22
+2026-11-09T23:03:27.6675750Z ##[endgroup]
+2026-11-09T23:03:27.6690248Z [command]/opt/hostedtoolcache/node/20.20.2/x64/bin/npm config get cache
+2026-11-09T23:03:27.7527476Z /home/runner/.npm
+
+## Chromium check-globals
+2026-11-09T23:14:32.7778186Z ##[group]Run npm run check-globals -- chromium
+2026-11-09T23:14:32.7778490Z npm run check-globals -- chromium
+2026-11-09T23:14:32.7795057Z shell: /usr/bin/bash -e {0}
+2026-11-09T23:14:32.7795283Z ##[endgroup]
+2026-11-09T23:14:32.8709645Z 
+2026-11-09T23:14:32.8710515Z > egg-farm@0.1.0 check-globals
+2026-11-09T23:14:32.8710938Z > node scripts/release-globals-browser.mjs chromium
+2026-11-09T23:14:32.8711136Z 
+2026-11-09T23:14:34.0738451Z serveOwn: dist on port 38743 (free port; set PORT to pin)
+2026-11-09T23:14:34.0899054Z check-globals: dist m4.1+35d6614 on port 38743
+2026-11-09T23:14:46.5660752Z PASS [chromium] B-4 release ?perf=1: eggfarm* globals ["eggfarmExportTelemetry"], no perf overlay
+2026-11-09T23:14:47.8313227Z PASS [chromium] refused newer-save boot window globals vs blank page: []
+2026-11-09T23:14:47.8314242Z PASS [chromium] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]
+
+## golden-game-browser
+2026-11-09T23:14:54.8230514Z ##[group]Run npm run golden-game-browser
+2026-11-09T23:14:54.8230816Z npm run golden-game-browser
+2026-11-09T23:14:54.8248708Z shell: /usr/bin/bash -e {0}
+2026-11-09T23:14:54.8248925Z env:
+2026-11-09T23:14:54.8249110Z   CHROME: /usr/bin/google-chrome
+2026-11-09T23:14:54.8249346Z   SHOTS: artifacts/golden-game-browser
+2026-11-09T23:14:54.8249581Z ##[endgroup]
+2026-11-09T23:14:54.9204387Z 
+2026-11-09T23:14:54.9204976Z > egg-farm@0.1.0 golden-game-browser
+2026-11-09T23:14:54.9205433Z > node scripts/golden-game-browser.mjs
+2026-11-09T23:14:54.9205609Z 
+2026-11-09T23:14:56.0881229Z serveOwn: dist-qa on port 37189 (free port; set PORT to pin)
+2026-11-09T23:14:56.1021226Z golden-game-browser: dist-qa m4.1+35d6614 on port 37189
+2026-11-09T23:14:57.4312275Z PASS [chromium] F0-0 QA build boots at 360x640 with shipped golden flag 0 and HEAD build-id — {"flag":0,"bid":"m4.1+35d6614","hasEgg":false,"dbg":false}
+2026-11-09T23:14:57.4313775Z PASS [chromium] F0-1 flag 0: no live state.goldenEgg — {"hasEgg":false}
+2026-11-09T23:14:57.4314771Z PASS [chromium] F0-2 without ?debug=1: debug panel not mounted (no details.dbg / #dbgInfo) — {"dbg":false}
+2026-11-09T23:14:58.5923421Z PASS [chromium] F1-0 runtime overlay applied in-page only (live balance golden=1) — {"golden":1,"hasEgg":false}
+2026-11-09T23:14:58.6114535Z PASS [chromium] F1-1 seeded live goldenEgg on state (test-only; UI may not paint yet) — {"hasEgg":true,"egg":{"ageS":0,"slotId":"farm","intervalS":120},"golden":1}
+2026-11-09T23:14:58.7141716Z PASS [chromium] F1-2 FINAL A endSession: state.goldenEgg gone — {"hasEgg":false}
+2026-11-09T23:14:58.7145028Z PASS [chromium] F1-3 FINAL A: collectible_expired{skin:golden_egg,reason:reload} before session_end — {"hasEgg":false,"expIdx":1,"endIdx":2,"exportOk":true,"expired":{"type":"collectible_expired","skin":"golden_egg","reason":"reload"},"typesTail":[{"type":"session_start"},{"type":"collectible_expired","skin":"golden_egg","reason":"reload"},{"type":"session_end"}]}
+2026-11-09T23:14:58.7490255Z PASS [chromium] No page errors — []
+2026-11-09T23:14:58.7491813Z shots: artifacts/golden-game-browser: flag0-farm.png, flag1-after-unload.png, flag1-egg-live.png, flag1-farm.png
+2026-11-09T23:14:58.8111794Z ALL PASS
+
+## step conclusions (from jobs API)
+Release globals allowlist (chromium): success
+Golden-game browser: success (implies process.exit 0; log ends ALL PASS; no FAILED)
+Upload golden-game browser screenshots: success; artifact id 13718928643

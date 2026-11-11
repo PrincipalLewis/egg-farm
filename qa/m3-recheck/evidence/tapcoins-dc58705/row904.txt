@@ -1,0 +1,18 @@
+=== row 904 attribution (RC-only) ===
+Source: pacing-x1-stack run 42124406279 aggregate job 127603711152 (completed 2026-11-06 00:32:55 CET)
+Checkout: refs/pull/106/merge = ccee277 'Merge dc58705 into d9539a5'; d9539a5 is an ancestor of dc58705 so merge tree == dc58705 tree
+## pacing-x1-stack: **FAIL**
+
+- data: `shipped-tree` (shipped data/economy.csv + src/config/balance.json from the tree, full M5.0 stack (pause rows out)); CSV data/economy.csv sha256 a8c4e26836bf7af98cb51f8e3e8a646750e82a4cdc18be450afe2f86eeeeb07f, src/config/balance.json sha256 ddd02fbaea437e14c55f1df3251c2331b60e33697512a4e5107b69cd5f34b41a (read from the tree, sha256 recorded)
+- run: seeds 1-200, T 4000 s, windows every 300 s (A1/A2), step ratio from L11; commit ccee277700dd; shard runtimes casual 1892s, optimal 2608s, seller15 2413s
+- **balance.json (QA-D-1030-SHIPFLAGS):** src/config/balance.json sha256 ddd02fbaea437e14c55f1df3251c2331b60e33697512a4e5107b69cd5f34b41a; m4.enabled=1; m4.flags golden=0 streak=0 tapCoins=0 abilities=0 broody=0 salesStopped=0 fatigueCue=0 pause=0 rc2Refill=0 autoRefill=0 clockWage=0 breeds=0 zeroGainUi=0 bestBuyV2=0; flags ON: none; bot-modelled src M5 flags (golden/streak/tapCoins/broody/abilities/pause) ON: none (bot model runs; O-3 guard would throw if any were on)
+- table: tests/fixtures/x1/pred-13.2a-7bbb5925.csv sha256 7bbb5925 (§13.2a of record, economy.c0d9492b.md L879-913)
+- rows: 45 PASS, 0 FAIL, 1 WARN, 20 INFO, 0 PENDING-REPRED (not judged until HoP signs the re-prediction), 3 N/A (row 903, D-CEO-20261030-04), 12 NOT-WIRED (3 blocking), 24 EXCLUDED (G5-P pause rows)
+- **FAIL: blocking row 904 optimal NOT-WIRED**
+- **FAIL: blocking row 904 seller15 NOT-WIRED**
+WARN L897 optimal N / H: worst 191 > 180 s (pre-existing L0–30 dead zone, known risk)
+FAIL: blocking row 904 optimal NOT-WIRED
+FAIL: blocking row 904 seller15 NOT-WIRED
+FAIL: blocking row 904 casual NOT-WIRED
+##[error]Process completed with exit code 1.
+Only FAIL lines: row 904 optimal/seller15/casual NOT-WIRED. Rows: 0 FAIL. No pacing grant.

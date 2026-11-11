@@ -1,0 +1,7 @@
+ src/sim/actions.ts              |  2 +-
+ src/sim/streak.ts               |  2 +-
+ tests/v5-f2-game-settle.test.ts |  6 ++---
+ tests/v5-f2-helpers.ts          |  5 ++--
+ tests/v5-f2-m5-fields.test.ts   |  2 +-
+ tests/v5-streak-sim.test.ts     | 55 ++++++++++++++++++++++++++++++-----------
+ 6 files changed, 49 insertions(+), 23 deletions(-)

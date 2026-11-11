@@ -1,0 +1,23 @@
+diff --git a/src/config/balance.json b/src/config/balance.json
+index 834fcee..89727cc 100644
+--- a/src/config/balance.json
++++ b/src/config/balance.json
+@@ -21,7 +21,7 @@
+     "worker_summary_s": 60
+   },
+   "workers": {
+-    "_note": "M2 Workers v1.1 (product/workers/m2-proposal.md §10) GENERATED from data/economy.csv (copied from product/economy.csv); wages in $ per Farm level per minute.",
++    "_note": "M2 Workers v1.1 (product/workers/m2-proposal.md \u00a710) GENERATED from data/economy.csv (copied from product/economy.csv); wages in $ per Farm level per minute.",
+     "energy": {
+       "start_pct": 100,
+       "drain_s_per_pct": 9,
+@@ -391,5 +391,6 @@
+       "streak_max_taps_per_s": 1,
+       "streak_per_tap": 0.01
+     }
+-  }
+-}
++  },
++  "farmMaxLevel": 20
++}
+\ No newline at end of file

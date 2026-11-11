@@ -1,0 +1,41 @@
+-43:     expect(g.state.seenTracksExplainer).toBe(true);
+-44:     expect(JSON.parse(kv.getItem(SAVE_KEY)).state.seenTracksExplainer).toBe(true); // persisted when shown
++43:     expect(g.state.seenTracksExplainer).toBeUndefined(); // D-HOP-2026-10-22-06 (c): seen is set and saved only on dismissal
++45:     expect(g.state.seenTracksExplainer).toBe(true);
++46:     expect(JSON.parse(kv.getItem(SAVE_KEY)).state.seenTracksExplainer).toBe(true); // persisted when dismissed
+-55:     const m2 = await mount(g2, on); expect(m2.cards()).toBe(1); expect(g2.state.seenTracksExplainer).toBe(true);
++56:     const m2 = await mount(g2, on); expect(m2.cards()).toBe(1); expect(g2.state.seenTracksExplainer).toBeUndefined();
++57:     document.querySelector<HTMLButtonElement>('.tracks-exp-ok')!.click(); expect(g2.state.seenTracksExplainer).toBe(true); // D-HOP-2026-10-22-06 (c): seen is set and saved only on dismissal
+-100:     vi.useFakeTimers(); fake.state.seenTracksExplainer = false; showTracksExplainer(fake); expect(cards()).toBe(1);
+-101:     vi.advanceTimersByTime(EXP_MS); expect(cards()).toBe(0);
++102:     const fake2 = { ...fake, state: { ...fake.state, seenTracksExplainer: false } };
++103:     vi.useFakeTimers(); showTracksExplainer(fake2); expect(cards()).toBe(1);
++104:     vi.advanceTimersByTime(EXP_MS); expect(cards()).toBe(0); expect(fake2.state.seenTracksExplainer).toBe(false); // auto-hide never marks it seen
+-113:     expect(document.querySelectorAll('.tracks-exp').length).toBe(1); expect(saved).toEqual([true]);
++116:     expect(document.querySelectorAll('.tracks-exp').length).toBe(1); expect(saved).toEqual([]); // D-HOP-2026-10-22-06 (c): seen is set and saved only on dismissal
++117:     document.querySelector<HTMLButtonElement>('.tracks-exp-ok')!.click(); expect(saved).toEqual([true]);
+-124:     vis.mockReturnValue('visible'); vi.advanceTimersByTime(1000); expect(document.querySelectorAll('.tracks-exp').length).toBe(1); expect(g.state.seenTracksExplainer).toBe(true);
++128:     vis.mockReturnValue('visible'); vi.advanceTimersByTime(1000); expect(document.querySelectorAll('.tracks-exp').length).toBe(1); expect(g.state.seenTracksExplainer).toBeUndefined();
++129:     document.querySelector<HTMLButtonElement>('.tracks-exp-ok')!.click(); expect(g.state.seenTracksExplainer).toBe(true); // D-HOP-2026-10-22-06 (c): seen is set and saved only on dismissal
+-226:     expect(g.state.seenTracksExplainer).toBe(true); expect(showTracksExplainer(g, document, () => false)).toBeNull();
+-227:     document.querySelector('.tracks-exp')?.remove();
++231:     expect(showTracksExplainer(g, document, () => false)).toBeNull(); // never a second card while one is up
++232:     document.querySelector<HTMLButtonElement>('.tracks-exp-ok')!.click(); expect(g.state.seenTracksExplainer).toBe(true); // D-HOP-2026-10-22-06 (c): seen is set and saved only on dismissal
+-232:   it('save() fails on the flag write: no card; next load with storage still failing: no card', () => {
++237:   it('save() fails on the flag write (at dismissal, D-HOP-2026-10-22-06): seen reverted; next load with storage still failing: no card', () => {
+-237:     const g1 = mk(); expect(showTracksExplainer(g1, document, () => lease.storageBlocked || g1.storageFailed)).toBeNull();
++242:     const g1 = mk(); const c1 = showTracksExplainer(g1, document, () => lease.storageBlocked || g1.storageFailed); expect(c1).not.toBeNull(); expect(g1.saves).toBe(0);
++243:     c1!.querySelector('button')!.click(); expect(g1.state.seenTracksExplainer).toBe(false);
+-246:   it('flag write hits QuotaExceededError: no card, seen=false in g.state; later saves never carry seen=true', () => {
++252:   it('flag write (on dismissal) hits QuotaExceededError: seen=false in g.state; later saves never carry seen=true', () => {
+-253:     expect(showTracksExplainer(g as any, document, () => g.storageFailed)).toBeNull();
+-254:     expect(document.querySelectorAll('.tracks-exp').length).toBe(0);
++259:     const c = showTracksExplainer(g as any, document, () => g.storageFailed); expect(c).not.toBeNull(); expect(writes.length).toBe(flagWrite); // nothing saved at show
++260:     c!.querySelector('button')!.click(); expect(document.querySelectorAll('.tracks-exp').length).toBe(0);
+-278:   it('mirror vs localStorage on the next boot: the card is shown exactly once overall', async () => {
++284:   it('mirror vs localStorage on the next boot: shown until a dismissal persists (failed one, then the next load), then never', async () => {
+-285:       const show = () => { const c = showTracksExplainer(g as any, document, () => g.storageFailed); if (c) { k++; c.remove(); } };
++291:       const show = () => { const c = showTracksExplainer(g as any, document, () => g.storageFailed); if (c) { k++; c.querySelector('button')!.click(); } }; // dismissed
+-293:     expect(ev.shown1 + ev.shown2 + ev.shown3, 'card shown exactly once overall: ' + JSON.stringify(ev)).toBe(1);
++299:     // D-HOP-2026-10-22-06: the failed dismissal did not persist seen, so the next load shows it again; never after a persisted one.
++300:     expect([ev.shown1, ev.mem1, ev.shown2, ev.ls2, ev.shown3], 'shown until a dismissal persists: ' + JSON.stringify(ev)).toEqual([1, false, 1, true, 0]);

@@ -1,0 +1,13 @@
+raw line 120: 2026-11-06 01:51:34 CET (Europe/Belgrade) HEAD is now at bc092ec Merge 27660196a081f379f467499d667fbe4f5ef3bda3 into dc58705a3ca86902ef0a0d4a58e1799671800ac0
+raw line 140: 2026-11-06 01:51:38 CET (Europe/Belgrade) node: v20.20.2
+raw line 544: 2026-11-06 01:55:02 CET (Europe/Belgrade)  Test Files  152 passed (152)
+raw line 545: 2026-11-06 01:55:02 CET (Europe/Belgrade)       Tests  2219 passed | 1 skipped (2220)
+raw line 599: 2026-11-06 01:58:58 CET (Europe/Belgrade)  Test Files  4 passed (4)
+raw line 600: 2026-11-06 01:58:58 CET (Europe/Belgrade)       Tests  17 passed | 1 skipped (18)
+raw line 633: 2026-11-06 01:59:04 CET (Europe/Belgrade) ##[group]Run npm run check-globals -- chromium
+raw line 634: 2026-11-06 01:59:04 CET (Europe/Belgrade) npm run check-globals -- chromium
+raw line 638: 2026-11-06 01:59:04 CET (Europe/Belgrade) > egg-farm@0.1.0 check-globals
+raw line 642: 2026-11-06 01:59:05 CET (Europe/Belgrade) check-globals: dist m4.1+bc092ec on port 38393
+raw line 643: 2026-11-06 01:59:24 CET (Europe/Belgrade) PASS [chromium] B-4 release ?perf=1: eggfarm* globals ["eggfarmExportTelemetry"], no perf overlay
+raw line 644: 2026-11-06 01:59:26 CET (Europe/Belgrade) PASS [chromium] refused newer-save boot window globals vs blank page: []
+raw line 645: 2026-11-06 01:59:26 CET (Europe/Belgrade) PASS [chromium] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]

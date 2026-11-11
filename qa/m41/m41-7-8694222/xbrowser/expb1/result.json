@@ -1,0 +1,366 @@
+{
+ "port": "5961",
+ "N": 12000,
+ "cases": {
+  "EXPB1-1-unmarked-v6-commit--single": {
+   "mode": "b1",
+   "checks": [
+    {
+     "n": "B1 precondition: no Welcome back! (clock pinned, normal show path)",
+     "pass": true,
+     "x": false,
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): card appears at the in-session commit, once",
+     "pass": true,
+     "x": {
+      "card": true,
+      "inserts": 1,
+      "flags": {
+       "tracksV7": 1,
+       "seen": true
+      }
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): never under a modal/dialog",
+     "pass": true,
+     "hard": true
+    },
+    {
+     "n": "-07(a) B1 AC(1): auto-hide closed the card with no dismiss click",
+     "pass": true,
+     "x": {
+      "cardGone": 8633,
+      "firstVisible": 633
+     },
+     "hard": true
+    },
+    {
+     "n": "-07(a) B1 AC(1): seen set at show (LS write <= first visible + 50 ms)",
+     "pass": true,
+     "x": {
+      "seenTrue": {
+       "mem": 633,
+       "ls": 632,
+       "idb": 643
+      },
+      "firstVisible": 633
+     },
+     "hard": true
+    },
+    {
+     "n": "-07(a) B1 AC(1): seen=true in mem and LS after auto-hide (no dismiss)",
+     "pass": true,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): seen=true in IDB main after autosave",
+     "pass": true,
+     "x": true,
+     "hard": false
+    },
+    {
+     "n": "B1 AC(1): reload 1 -> not shown",
+     "pass": true,
+     "x": 0,
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "welcome": false,
+   "flags": {
+    "tracksV7": 1,
+    "seen": true
+   },
+   "seenAfterAutoHide": {
+    "mem": true,
+    "ls": true,
+    "idb": true
+   },
+   "reloadInserts": [
+    0
+   ]
+  },
+  "EXPB1-AH-commit-autohide-3-reloads--single": {
+   "mode": "b1",
+   "checks": [
+    {
+     "n": "B1 precondition: no Welcome back! (clock pinned, normal show path)",
+     "pass": true,
+     "x": false,
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): card appears at the in-session commit, once",
+     "pass": true,
+     "x": {
+      "card": true,
+      "inserts": 1,
+      "flags": {
+       "tracksV7": 1,
+       "seen": true
+      }
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): never under a modal/dialog",
+     "pass": true,
+     "hard": true
+    },
+    {
+     "n": "-07(a) B1 AC(1): auto-hide closed the card with no dismiss click",
+     "pass": true,
+     "x": {
+      "cardGone": 8506,
+      "firstVisible": 506
+     },
+     "hard": true
+    },
+    {
+     "n": "-07(a) B1 AC(1): seen set at show (LS write <= first visible + 50 ms)",
+     "pass": true,
+     "x": {
+      "seenTrue": {
+       "mem": 506,
+       "ls": 505,
+       "idb": 516
+      },
+      "firstVisible": 506
+     },
+     "hard": true
+    },
+    {
+     "n": "-07(a) B1 AC(1): seen=true in mem and LS after auto-hide (no dismiss)",
+     "pass": true,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): seen=true in IDB main after autosave",
+     "pass": true,
+     "x": true,
+     "hard": false
+    },
+    {
+     "n": "B1 AC(1): reload 1 -> not shown",
+     "pass": true,
+     "x": 0,
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): reload 2 -> not shown",
+     "pass": true,
+     "x": 0,
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): reload 3 -> not shown",
+     "pass": true,
+     "x": 0,
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "welcome": false,
+   "flags": {
+    "tracksV7": 1,
+    "seen": true
+   },
+   "seenAfterAutoHide": {
+    "mem": true,
+    "ls": true,
+    "idb": true
+   },
+   "reloadInserts": [
+    0,
+    0,
+    0
+   ]
+  },
+  "EXPB1-2-committed-unseen-reload--single": {
+   "mode": "b1",
+   "checks": [
+    {
+     "n": "B1 AC(2): card shown on the load after an unshown commit, once",
+     "pass": true,
+     "x": {
+      "card": true,
+      "inserts": 1,
+      "flags": {
+       "tracksV7": 1,
+       "seen": true
+      }
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(2): never under a modal/dialog",
+     "pass": true,
+     "hard": true
+    },
+    {
+     "n": "-07(a) B1 AC(2): auto-hide closed the card with no dismiss click",
+     "pass": true,
+     "x": {
+      "cardGone": 11468,
+      "firstVisible": 3467
+     },
+     "hard": true
+    },
+    {
+     "n": "-07(a) B1 AC(2): seen set at show (LS write <= first visible + 50 ms)",
+     "pass": true,
+     "x": {
+      "seenTrue": {
+       "mem": 3467,
+       "ls": 3466,
+       "idb": 3467
+      },
+      "firstVisible": 3467
+     },
+     "hard": true
+    },
+    {
+     "n": "-07(a) B1 AC(2): seen=true in mem and LS after auto-hide (no dismiss)",
+     "pass": true,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(2): seen=true in IDB main after autosave",
+     "pass": true,
+     "x": true,
+     "hard": false
+    },
+    {
+     "n": "B1 AC(2): reload 1 -> not shown",
+     "pass": true,
+     "x": 0,
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "welcome": true,
+   "flags": {
+    "tracksV7": 1,
+    "seen": true
+   },
+   "seenAfterAutoHide": {
+    "mem": true,
+    "ls": true,
+    "idb": true
+   },
+   "reloadInserts": [
+    0
+   ]
+  },
+  "EXPB1-3-new-m4-farm--single": {
+   "mode": "b1",
+   "checks": [
+    {
+     "n": "B1 AC(3): new M4 farm -> never shown, on any load (2 loads)",
+     "pass": true,
+     "x": {
+      "load1": 0,
+      "load2": 0
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(3): seen not set on a new farm",
+     "pass": true,
+     "x": null,
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "welcome": false
+  },
+  "EXPB1-4-m4-off--single": {
+   "mode": "na",
+   "checks": [
+    {
+     "n": "N/A",
+     "pass": null,
+     "x": "M4 on/off is compile-time (balance m4.enabled); not reachable in a dist-qa browser build. Covered by unit: game tests/m4-exp1-explainer.test.ts:64 \"M4 off: never shown, and a stored seenTracksExplainer is kept on load and save\" (run by m41-7-delta.sh csr9c step)."
+    }
+   ]
+  },
+  "EXPB1-5-deferred-load--single": {
+   "mode": "b1",
+   "checks": [
+    {
+     "n": "B1 AC(5) precondition: migration deferred (IDB unknown), tracksV7 not committed",
+     "pass": true,
+     "x": {
+      "tracksV7": null,
+      "pending": false
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(5): deferred load -> not shown",
+     "pass": true,
+     "x": 0,
+     "hard": true
+    },
+    {
+     "n": "B1 AC(5): seen not set",
+     "pass": true,
+     "x": null,
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "welcome": false,
+   "flags": {
+    "tracksV7": null,
+    "pending": false
+   }
+  }
+ },
+ "buildId": "m3-rc1-pre+8694222",
+ "fails": 0
+}

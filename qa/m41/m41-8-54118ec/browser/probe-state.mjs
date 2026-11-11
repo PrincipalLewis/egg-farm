@@ -1,0 +1,9 @@
+// one-off: find a state where the Hens best buy is the only pick that flips around its cost (no Collection/Value alternative)
+const pw=(await import('/tmp/qa-m41-8-54118ec/node_modules/playwright-core/index.mjs')).default;
+const br=await pw.chromium.launch({executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']});const c=await br.newContext({viewport:{width:360,height:800}});const p=await c.newPage();
+await p.addInitScript(()=>{if(!sessionStorage.getItem('qa62')){sessionStorage.setItem('qa62','1');localStorage.clear();localStorage.setItem('eggfarm.ui',JSON.stringify({onboardingDone:true,seenSlots:10,workersIntroA:true,workersIntroB:true,sfx:false,reducedMotion:true}));}});
+await p.goto(process.env.BASE);console.log(await p.evaluate(()=>document.querySelector('meta[name=build-id]').content));await p.getByText('Tap to start').click();await p.waitForFunction(()=>window.eggfarm&&window.eggfarmUi);
+for(let i=0;i<6;i++){if(await p.locator('#wbCollect').isVisible().catch(()=>false))await p.locator('#wbCollect').click().catch(()=>{});if(await p.locator('.tracks-exp button').first().isVisible().catch(()=>false))await p.locator('.tracks-exp button').first().click().catch(()=>{});await p.waitForTimeout(200);}
+for(const st of JSON.parse(process.argv[2])){for(const coins of st.coins){await p.evaluate(([st,coins])=>{const g=window.eggfarm;g.state={...g.state,...st,coinsCents:coins,tracksV7:1,workers:{},seenTracksExplainer:true,customers:[],nextCustomerInS:1e9,coop:0,basket:0};window.eggfarmUi.render();},[st.s,coins]);await p.waitForTimeout(1300);await p.evaluate(()=>window.eggfarmUi.render());
+ const r=await p.evaluate(()=>({label:document.querySelector('#goal .goal-label').textContent,desc:document.getElementById('goalDesc')?.textContent,chips:[...document.querySelectorAll('.best-chip')].map(c=>c.dataset.bestBuy)}));console.log(JSON.stringify(st.s),coins,JSON.stringify(r));}}
+await br.close();

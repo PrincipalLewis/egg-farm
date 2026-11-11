@@ -1,0 +1,30 @@
+# PR #1 recheck: engineering/m4-design.md @ f1869c4 (v0.2.8; supersedes the ab8f366 recheck, which was not filed separately)
+Saves QA · 2026-10-16 ~22:00 CEST · doc read via the GitHub API (diffed against ab8f366 and 2e86a6e). No PR comments, push, merge or tag. Verdict: HoQA.
+
+| Item | Status | § | Reason |
+|---|---|---|---|
+| M-5 §3b zero-writes | CLOSED | §3b | Serialized save object defined (all of version + savedAt + a state object, at any depth or in a JSON string; a raw copy counts). Telemetry snapshot fields are explicitly OK. Exact LS allow list: `eggfarm.lease`, `eggfarm.tab`, `eggfarm.telemetry`, with no wildcards. install_id is create-if-absent. |
+| R-1 IDB flag | CLOSED (no red flag) | §3b | IDB `eggfarm/save` `main` and `v6_backup` are only in the **byte-identical** list, not among the allowed writes. "Telemetry has no IndexedDB store"; any other IDB db/store/key = FAIL. |
+| M-6 golden 2 | **OPEN** | §4 Per-flag golden 2 | Clock named (`now = 1792087260000`). Defaults included in the expected state (`hensLevel:0, eggValueLevel:0, celebratedMilestones:[]`, no tracksV7). **But:** (1) no sha256 pins are in the doc. The golden files are "generated on the M4 branch" later, so there is nothing to compare against yet. (2) Empirically, a01faea's stored bytes are **not reproducible run-to-run in a browser** under a fixed clock (below), so golden 2 needs a named deterministic harness (node/vitest stepping exactly 600 ticks of 0.1 s), not a browser run. (3) "Clock fixed at now" doesn't say whether load happens at savedAt (no offline grant) or at now (60 s offline grant + 600 ticks). Name it. |
+| N-4 export tiebreak | OPEN (Nit) | §3a.3 | Highest newer version ✔. On a version tie the doc goes straight to LS > .bak > IDB. The rule to prefer the **newest valid savedAt** first (per our savedAt validity rules) is missing. |
+| M4-14 flag-off rules until commit | CLOSED | §3c, §3 Tests 2a, §6a | Pending and aborted sessions run v6 under flag-off rules. Test 2a covers tracks UI/purchases disabled after abort. |
+| M4-15 commit marker | **OPEN** | §3c, §3 Tests 5, §6a | The rule is defined (backup committed iff its `migrationId` == `state.v6BackupId`), but there's no explicit test row for a **mismatched id** (record id ≠ live `v6BackupId`, and live save with no id). It should assert: treated as leftover, not restored, not write-once-protected, deleted or overwritten on next load. Row 5 covers only the post-abort leftover plus the cleanup-throws case. |
+| M4-16 IDB unavailable | **OPEN** | §3c IndexedDB/Async commit, §3 Tests "[S-3] IDB unavailable" | HoQA bar not met. LS is "written (sync)… when both are confirmed", but "confirmed" for LS is not defined as **read back + `migrationId` match before the in-place write**, and if that read-back fails the doc doesn't say that M4-12 abort applies. The test row checks only "commits on LS alone + `save_backup_idb_unavailable`". Add: LS read-back mismatch/throw ⇒ abort per M4-12; commit only after a confirmed LS record. |
+| .bak → v6_backup | CLOSED (Nit) | §3 Tests M4-on write test, §3a.5 | The assertion is now the committed `v6_backup` record with `v6BackupId`; `.bak` "rotates and is not asserted". Residual: the §8 S-4 row still says "M4-on v7-write/.bak tests". |
+| Reset clears v6_backup | CLOSED (Nit) | §3c Reset, §3 Tests "[S-3] Reset clears", S-3 row | Reset clears LS (`RESET_KEYS`) and IDB (`clearMirror`), with a test row for both stores. Nit: assert after a reload, and include a **leftover** (uncommitted) record in both stores, so no orphan survives an async IDB delete. |
+
+## Other new findings / regressions (Nit unless noted)
+- §3c IDB timeout 2000 ms vs the mirror's 1.5 s: two timeouts for the same DB. Make the test fixtures inject >2000 ms specifically.
+- §3c: the backup record is now `{migrationId, raw}` JSON, not raw bytes. §3b's "copy of v6_backup bytes" still works, but the QA guard M4-W2 (`v6_backup === original v6 bytes`) and the ZW-6b2 fixture (raw v6 in v6_backup) must change to the record shape. QA-side follow-up, not a doc fault.
+- §3c restore order is LS → IDB "with checksum". The `raw` checksum is the v6 `sum`; the record itself has no integrity field. Acceptable, but say so.
+- M4A-31(f)1 is narrowed by M4-16 ("a store that is present fails"). Product spec note pending (HoP); QA tests follow the doc.
+
+## Golden-2 empirical check (a01faea release asset, sha256 291229bc…, build ID `m3-rc1-pre+a01faea` checked per run)
+Harness: qa/m3-recheck/pr1-ab8f366-golden2/probe.mjs. It runs the 4 fixtures (sha256 match a01faea SHA256SUMS; all savedAt 1792087200000) under the Playwright clock installed at fixture savedAt, then runFor to now = 1792087260000 and a pagehide flush. Two reps per fixture. All saves are v6, savedAt 1792087260000, no M4 fields, 0 console errors.
+- chromium (:4400): rep1 vs rep2 sha256 differ for 3 of 4 fixtures (m1-rc2-v4-12min 19da5c83… vs 58a1ad33…; m2-rc1-v5-12min ac8df408… vs 836e734d…; m2-rc1-v5-40min 3c5aafbf… vs 9c04f5e4…). Only m2-rc1-v5-40min-edge was stable (32418250…). The diff is sim progress (rng, customers, coop, nextCustomerId), i.e. a different tick count. Even within one engine the browser timing isn't deterministic.
+- firefox (:4430): m1-rc2-v4-12min stable across reps (6d5e5648…), and it differs from chromium. Then the run was stopped (new box lock rule). webkit: **did not run**.
+- Caveat: the chromium and firefox runs were started before the CEO flock rule and were not under `.browser-test.lock`. No further browser runs were made.
+- Conclusion: no doc pins to compare against, and browser output can't serve as a golden. That supports M-6 OPEN.
+
+## QA-side change (HoQA R-1 ruling)
+qa/m3-scripts/m4-guard-lib.mjs: `ALLOWED_LS = ['eggfarm.lease','eggfarm.tab','eggfarm.telemetry']` exact, and `ALLOWED_IDB = []` (no IDB write allowed). The wildcard `eggfarm.telemetry*` and `/telemetry/` IDB rules are removed, and the header comment updated in both files. New self-test asserts cover near-miss keys/stores (all rejected). `node m4-guard-lib.mjs --selftest` → **selftest OK**; the guard passes `node --check`. sha256: lib 9a97cd90…, guard d7989492….

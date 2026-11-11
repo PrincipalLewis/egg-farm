@@ -1,0 +1,20 @@
+{
+ "id": "CSR16-fresh-no-rotation-until-progress",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-16"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-OQ1-abc.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "bakAbsentAfterFirstSave": true,
+  "bakAfterProgress": true
+ }
+}

@@ -1,0 +1,63 @@
+[
+  {
+    "install_id": "e9ecda12-e1e2-4d95-8658-ca2a11d32545",
+    "build": "m4.1+22eac98",
+    "type": "session_start",
+    "ts": 1793309166336,
+    "sessionMs": 0
+  },
+  {
+    "reason": "parse",
+    "had_backup": false,
+    "restored_from_backup": false,
+    "build": "m4.1+22eac98",
+    "recovered_from": "none",
+    "store": "ls",
+    "tried": [
+      {
+        "source": "bak",
+        "result": "absent"
+      },
+      {
+        "source": "idb",
+        "result": "absent"
+      },
+      {
+        "source": "v6_backup",
+        "result": "absent"
+      }
+    ],
+    "migrated": false,
+    "type": "save_corrupt",
+    "ts": 1793309166337,
+    "sessionMs": 1
+  },
+  {
+    "notice": "M3",
+    "source": "none",
+    "store": "ls",
+    "type": "save_recovery_notice_shown",
+    "ts": 1793309166374,
+    "sessionMs": 38
+  },
+  {
+    "notice": "M3",
+    "source": "none",
+    "store": "ls",
+    "type": "save_recovery_notice_dismissed",
+    "ts": 1793309167665,
+    "sessionMs": 1329
+  },
+  {
+    "step": 1,
+    "name": "collect",
+    "type": "onboarding_step",
+    "ts": 1793309167667,
+    "sessionMs": 1331
+  },
+  {
+    "type": "session_end",
+    "ts": 1793309167701,
+    "sessionMs": 1365
+  }
+]

@@ -1,0 +1,8 @@
+tests/v5-f1a-fields.test.ts
+tests/v5-f1b-clock-rng.test.ts
+tests/v5-f1b-focus-wiring.test.ts
+tests/v5-f1c-effects.test.ts
+tests/v5-f2-downgrade.test.ts
+tests/v5-f2-game-settle.test.ts
+tests/v5-f2-m5-fields.test.ts
+tests/v5-f2-roundtrip.test.ts

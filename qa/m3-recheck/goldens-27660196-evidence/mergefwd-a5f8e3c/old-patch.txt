@@ -1,0 +1,283 @@
+diff --git a/src/config/formulas.ts b/src/config/formulas.ts
+index 69935f5..45f71ae 100644
+--- a/src/config/formulas.ts
++++ b/src/config/formulas.ts
+@@ -143,7 +143,7 @@ export const trackPriceCents = (F: number, H: number, V: number, p: EconomyParam
+ export const m4On = (p: EconomyParams) => !!p.m4?.enabled;
+ /** v5: the tc_* columns each M5 flag reads. validateBalance requires them while that flag is on (missing = load error). */
+ export const M5_TC_KEYS: Record<string, readonly string[]> = {
+-  golden: ['egg_gap_min_s', 'egg_gap_max_s', 'frenzy_s'], abilities: ['ability_s', 'ability_cd_s'],
++  golden: ['egg_gap_min_s', 'egg_gap_max_s', 'frenzy_s', 'frenzy_price_mult', 'egg_cash_s', 'egg_eggs_s', 'egg_eggs_as_cash_from_farm', 'egg_w_cash', 'egg_w_frenzy', 'egg_w_eggs'], abilities: ['ability_s', 'ability_cd_s'],
+   streak: ['streak_unlock_farm', 'streak_per_tap', 'tap_credit_min_s', 'streak_hold_s', 'streak_decay_per_s', 'streak_cap', 'streak_tier_count'],
+   tapCoins: ['streak_unlock_farm', 'tap_credit_min_s', 'tap_income_share', 'tap_bonus_income_window_s'], // #3: R1 unlock, R2 window, A1 share, I_ref window
+ };
+diff --git a/src/config/m5-rules.ts b/src/config/m5-rules.ts
+index 11c85d6..5e416ba 100644
+--- a/src/config/m5-rules.ts
++++ b/src/config/m5-rules.ts
+@@ -35,6 +35,8 @@ export function validateM5(m4: any, workers: any): void {
+   if (has(tc, 'warn_at_s', 'urgent_at_s', 'egg_despawn_s') && !(tc.warn_at_s < tc.urgent_at_s && tc.urgent_at_s < tc.egg_despawn_s)) fail('tc: warn_at_s < urgent_at_s < egg_despawn_s');
+   for (const k of ['egg_despawn_s', 'frenzy_s', 'first_spawn_s']) if (has(tc, k) && !(tc[k] > 0)) fail(`tc.${k} must be > 0`);
+   if (has(tc, 'frenzy_price_mult') && !(tc.frenzy_price_mult >= 1)) fail('tc.frenzy_price_mult must be >= 1');
++  // D-HOP-2026-11-05-11: R22 all-sales scope is fixed in v5; 1 is the only valid value (0 has no defined semantics, no alternate branch)
++  if (has(tc, 'frenzy_all_sales') && tc.frenzy_all_sales !== 1) fail('tc.frenzy_all_sales must be 1 (R22 all-sales scope, D-HOP-2026-11-05-11)');
+   // #2 streak / #3 tap coins (streak spec §5: 0 < cap <= 1, tier_count >= 1, window >= 1)
+   if (has(tc, 'streak_cap') && !(tc.streak_cap > 0 && tc.streak_cap <= 1)) fail('tc.streak_cap must be in (0, 1]');
+   if (has(tc, 'streak_tier_count') && !(Number.isInteger(tc.streak_tier_count) && tc.streak_tier_count >= 1)) fail('tc.streak_tier_count must be an integer >= 1');
+diff --git a/src/sim/effects.ts b/src/sim/effects.ts
+index 17561e0..4e6654c 100644
+--- a/src/sim/effects.ts
++++ b/src/sim/effects.ts
+@@ -9,9 +9,9 @@
+  */
+ import type { Balance } from '../config/balance';
+ import { flagOn, type M5Flag } from '../config/flags';
++import { tcNum } from '../config/formulas';
+ import type { GameState } from './state';
+ import { abilityActive } from './abilities';
+-import { tcNum } from '../config/formulas';
+ /** Who made the sale (SimEvent sell.by). Rush keys on 'market_hand'. */
+ export type SaleBy = 'player' | 'market_hand';
+ /** suspended = this sale/tick has no focus time: every timed effect counts as 1 (D-C3, R23). */
+@@ -21,8 +21,11 @@ export interface SaleEffect { id: string; flag: M5Flag; factor(s: GameState, b:
+ export interface LayEffect { id: string; flag: M5Flag; factor(s: GameState, b: Balance): number; }
+ /** Feature PRs append their entry IN THIS FILE (one line each). Order is documentation only: factors multiply (golden X7).
+  *  Typed readonly (CCR nit #80): src cannot mutate them; only tests cast to push a fixture entry and clear it in afterEach. */
++/** #1 golden R22: x tc_frenzy_price_mult on every sale (player, workers, Basket stock) while a Frenzy runs (frenzyRemainingS > 0). */
++export const frenzyFactor = (s: GameState, b: Balance) => ((s.frenzyRemainingS ?? 0) > 0 ? tcNum(b, 'frenzy_price_mult') : 1);
+ export const SALE_EFFECTS: readonly SaleEffect[] = [
+   { id: 'streak', flag: 'streak', factor: s => 1 + (s.streakS ?? 0) }, // #2 Collect Streak R8: (1 + s) on every sale while live
++  { id: 'frenzy', flag: 'golden', factor: frenzyFactor }, // #1 golden R22/R23 (suspended sales pay 1x via saleEffectFactors)
+   { id: 'rush', flag: 'abilities', factor: (s, b, c) => (c.by === 'market_hand' && abilityActive(s, b, 'market_hand') ? tcNum(b, 'ability_w1_price_mult') : 1) }, // #4 Rush: Market Hand sales only
+   { id: 'shout', flag: 'abilities', factor: (s, b) => (abilityActive(s, b, 'hawker') ? tcNum(b, 'ability_w3_price_mult') : 1) }, // #4 Shout: all sales
+ ];
+diff --git a/src/sim/golden.ts b/src/sim/golden.ts
+new file mode 100644
+index 0000000..caadf27
+--- /dev/null
++++ b/src/sim/golden.ts
+@@ -0,0 +1,57 @@
++/**
++ * v5 Wave A #1 (slice 1): golden-egg rewards + the Frenzy timer (product/collection/m5-golden-egg-spec.md v1.3.2 §3.5 R22/R23/X7,
++ * §4 #2-#3; GE-AC7/8/9/9b/10/10b). Pure sim: the reward roll is a pure function of one evRng draw (the caller draws, Q4 rule 1),
++ * grants are applied by grantGolden. Integer money (HoE money-math ruling 2):
++ *   baseScaled = Math.round(E x P_cents x 100)  (1/100 cent; E = goldenEEggsPerSec, P = priceDollars: Grader in, streak/Frenzy out)
++ *   reward     = floor((baseScaled x bp + 500000) / 1000000), bp = Math.round(seconds x 10000), BigInt above MAX_SAFE_INTEGER.
++ * Frenzy: frenzyRemainingS counts down on FOCUS seconds only (frozen under menus / hidden, R23); the x tc_frenzy_price_mult enters
++ * saleMultipliers() through the 'frenzy' entry in sim/effects.ts (R22), which already pays 1x on suspended sales (D-C3).
++ * Live only with m4.flags.golden (default 0, needs m4.enabled). Spawn / lifetime / tap action / events / UI are NOT here.
++ */
++import type { Balance } from '../config/balance';
++import { m4On, tcNum } from '../config/formulas';
++import type { GoldenReward } from './events';
++import type { GameState } from './state';
++import { goldenEEggsPerSec } from './tracks';
++import { priceDollars } from '../econ/income';
++export { frenzyFactor } from './effects';
++export const goldenOn = (b: Balance) => m4On(b) && b.m4?.flags?.golden === 1;
++/** Units of §4 #2 (bp = seconds x 10^4; baseScaled in 10^-4 $ -> cents / 10^6), not tunables. */
++const SEC_BP = 10_000, DENOM = 1_000_000, HALF = DENOM / 2, DENOM_N = BigInt(DENOM), HALF_N = BigInt(HALF);
++export const cashBp = (b: Balance) => Math.round(tcNum(b, 'egg_cash_s') * SEC_BP);
++export const eggsBp = (b: Balance) => Math.round(tcNum(b, 'egg_eggs_s') * SEC_BP);
++/** E x P in 1/100 cent, read once at tap time (GE-AC8). */
++export const baseScaled = (s: GameState, b: Balance) => Math.round(goldenEEggsPerSec(s, b) * (priceDollars(s, b) * 100) * 100);
++/** The two integer paths, on an object so a test can spy which one ran (GE-AC9b). */
++export const GOLDEN_MATH = {
++  num: (x: number, bp: number) => Math.floor((x * bp + HALF) / DENOM),
++  big: (x: number, bp: number) => Number((BigInt(x) * BigInt(bp) + HALF_N) / DENOM_N),
++};
++/** floor((baseScaled x bp + 500000) / 1000000) for integer inputs >= 0; the float overflow test is exact (see tap-coins.ts). */
++export function rewardCents(x: number, bp: number): number {
++  if (!(x > 0) || !(bp > 0)) return 0;
++  return x * bp + HALF > Number.MAX_SAFE_INTEGER ? GOLDEN_MATH.big(x, bp) : GOLDEN_MATH.num(x, bp);
++}
++/** §3.5 table order: [0, w_cash) cash, [w_cash, w_cash + w_frenzy) frenzy, the rest eggs (F < tc_egg_eggs_as_cash_from_farm) or eggs_cash. */
++export function rollReward(u: number, farmLevel: number, b: Balance): GoldenReward {
++  const wc = tcNum(b, 'egg_w_cash'), wf = wc + tcNum(b, 'egg_w_frenzy');
++  return u < wc ? 'cash' : u < wf ? 'frenzy' : farmLevel >= tcNum(b, 'egg_eggs_as_cash_from_farm') ? 'eggs_cash' : 'eggs';
++}
++/** Apply one reward (R20: the caller grants once per egg). Identity when golden is off. */
++export function grantGolden(s: GameState, r: GoldenReward, b: Balance): GameState {
++  if (!goldenOn(b)) return s;
++  switch (r) {
++    case 'cash': return { ...s, coinsCents: s.coinsCents + rewardCents(baseScaled(s, b), cashBp(b)) };
++    case 'eggs_cash': return { ...s, coinsCents: s.coinsCents + rewardCents(baseScaled(s, b), eggsBp(b)) };
++    case 'eggs': return { ...s, basket: s.basket + Math.floor(tcNum(b, 'egg_eggs_s') * goldenEEggsPerSec(s, b)) }; // coop untouched, cap ignored
++    case 'frenzy': return { ...s, frenzyRemainingS: tcNum(b, 'frenzy_s') }; // R23: reset to 30 s, never stacked
++  }
++}
++const r12 = (x: number) => Math.round(x * 1e12) / 1e12, EPS = 1e-9;
++/** R23: counts down on focus seconds only; at 0 the field is removed (no Frenzy). Identity when off or none running. */
++export function frenzyTick(s: GameState, focusS: number, b: Balance): GameState {
++  const f = s.frenzyRemainingS; if (!goldenOn(b) || f === undefined || !(focusS > 0)) return s;
++  const left = r12(f - focusS);
++  if (left > EPS) return { ...s, frenzyRemainingS: left };
++  const { frenzyRemainingS: _x, ...o } = s; return o as GameState;
++}
+diff --git a/src/sim/timers.ts b/src/sim/timers.ts
+index 1a941ad..6d3fbed 100644
+--- a/src/sim/timers.ts
++++ b/src/sim/timers.ts
+@@ -11,6 +11,7 @@ import { tickFocusS, type StepClock } from './clock';
+ import { ensureEvRng } from './rng';
+ import { streakTick } from './streak';
+ import { incomeRefTick } from './income-ref';
++import { frenzyTick } from './golden';
+ import { ensureBreeds } from './breeds';
+ import { breedsTick } from './breeds-hatch';
+ import { abilitiesTick } from './abilities';
+@@ -28,9 +29,11 @@ const streak: TimerSystem = (s, dt, f, b, _c, ev) => streakTick(s, dt, f, b, ev)
+ const breeds: TimerSystem = (s, dt, _f, b, c) => ensureBreeds(breedsTick(s, dt, b, c?.slotsFarm), b);
+ /** #3 I_ref (§4.1/§4.1a): the 1 s sim-time ring rolls and refWarmS advances on sim dt (hidden ticks too). Identity unless m4.flags.tapCoins. */
+ const incomeRef: TimerSystem = (s, dt, _f, b) => incomeRefTick(s, dt, b);
++/** #1 golden R23: frenzyRemainingS counts down on focus seconds (frozen under menus / hidden). Identity unless m4.flags.golden. */
++const frenzy: TimerSystem = (s, _dt, f, b) => frenzyTick(s, f, b);
+ /** #4 abilities (rules 6, 10): early end, then focus countdown / expiry of running calls. Identity unless m4.flags.abilities. */
+ const abilities: TimerSystem = (s, _dt, f, b, _c, ev) => abilitiesTick(s, f, b, ev);
+-export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak, breeds, incomeRef, abilities];
++export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak, breeds, incomeRef, frenzy, abilities];
+ export const anyM5FlagOn = (b: Balance) => M5_FLAGS.some(f => flagOn(b, f));
+ export function stepTimers(s: GameState, dt: number, b: Balance, clock?: StepClock, ev?: Sink, systems: readonly TimerSystem[] = TIMER_SYSTEMS): GameState {
+   const f = tickFocusS(dt, clock);
+diff --git a/tests/v5-golden-rewards.test.ts b/tests/v5-golden-rewards.test.ts
+new file mode 100644
+index 0000000..c7ccb25
+--- /dev/null
++++ b/tests/v5-golden-rewards.test.ts
+@@ -0,0 +1,136 @@
++// v5 Wave A #1 (slice 1): golden-egg reward math + Frenzy sim (product/collection/m5-golden-egg-spec.md v1.3.2 §3.5 R22/R23/X7,
++// §4 #2-#3; GE-AC7, GE-AC8, GE-AC9, GE-AC9b, GE-AC10, GE-AC10b sim part, R23 reset-not-stack). Pure sim only: no spawn/lifetime,
++// no tap action, no events/telemetry, no UI (those wait for the spawn-input ruling, see PR body).
++import { describe, it, expect, vi, afterEach } from 'vitest';
++import { balance as b, validateBalance } from '../src/config/balance';
++import { initialState, type GameState } from '../src/sim/state';
++import { step } from '../src/sim/tick';
++import { saleValueCents, saleMultipliers } from '../src/sim/payout';
++import { graderMult } from '../src/sim/workers';
++import { priceDollars } from '../src/econ/income';
++import { goldenEEggsPerSec, salePriceCents } from '../src/sim/tracks';
++import { ensureEvRng, evDraw } from '../src/sim/rng';
++import { goldenOn, cashBp, eggsBp, baseScaled, rewardCents, GOLDEN_MATH, rollReward, grantGolden, frenzyFactor } from '../src/sim/golden';
++import { ON } from './v5-f2-helpers';
++type B = typeof b;
++const flags = (f: Record<string, number>, bb: B = ON) => ({ ...bb, m4: { ...bb.m4!, flags: { ...bb.m4!.flags, ...f } } }) as B;
++const withTc = (t: Record<string, number>, bb: B = ON) => ({ ...bb, m4: { ...bb.m4!, tc: { ...bb.m4!.tc!, ...t } } }) as B;
++const G = flags({ golden: 1, streak: 1 }), OFF = flags({ golden: 0 }), tc = G.m4!.tc!, DT = 1 / G.tickHz, PER_S = Math.round(G.tickHz);
++const working = { energy: 100, cdS: 0 };
++const farm = (extra: Partial<GameState> = {}): GameState => ({ ...initialState(G, 9), farmLevel: 10, collectionLevel: 8, hensLevel: 10, eggValueLevel: 10,
++  coinsCents: 50_000_000, coop: 30, basket: 0, graderTier: 1, workers: { grader: { ...working } }, ...extra });
++const big = (x: number, bp: number) => Number((BigInt(x) * BigInt(bp) + 500000n) / 1000000n); // the HoE BigInt reference
++afterEach(() => vi.restoreAllMocks());
++
++describe('#1 golden rewards: integer money (§4 #2-#3, GE-AC9b)', () => {
++  it('cashBp / eggsBp = Math.round(seconds x 10000): 45 -> 450000, 60 -> 600000; fixture 59.5 -> 595000', () => {
++    expect([cashBp(G), eggsBp(G), eggsBp(withTc({ egg_eggs_s: 59.5 }, G))]).toEqual([450_000, 600_000, 595_000]);
++  });
++  it('GE-AC9b cash .5 edges: 128250 -> 57713, 128249 -> 57712, 10 -> 5', () => {
++    expect([128_250, 128_249, 10].map(x => rewardCents(x, 450_000))).toEqual([57_713, 57_712, 5]);
++  });
++  it('GE-AC9b eggs_cash: fixture 59.5 s: 100 -> 60, 99 -> 59; CSV 60 s: 128250 -> 76950', () => {
++    expect([rewardCents(100, 595_000), rewardCents(99, 595_000), rewardCents(128_250, 600_000)]).toEqual([60, 59, 76_950]);
++  });
++  it('GE-AC9b guard: cash switch at 20,015,998,342, eggs_cash at 15,011,998,757; disagreeing value; 1e12', () => {
++    expect([20_015_998_342, 20_015_998_343, 20_015_998_344].map(x => rewardCents(x, 450_000))).toEqual([9_007_199_254, 9_007_199_254, 9_007_199_255]);
++    expect([15_011_998_757, 15_011_998_758].map(x => rewardCents(x, 600_000))).toEqual([9_007_199_254, 9_007_199_255]);
++    expect(rewardCents(3_313_552_582_910, 450_000)).toBe(1_491_098_662_310);
++    expect([rewardCents(1e12, 450_000), rewardCents(1e12, 600_000)]).toEqual([450_000_000_000, 600_000_000_000]);
++    for (const [x, bp] of [[20_015_998_343, 450_000], [3_313_552_582_910, 450_000], [15_011_998_758, 600_000], [1e12, 600_000], [128_250, 450_000]])
++      expect(rewardCents(x, bp)).toBe(big(x, bp));
++  });
++  it('GE-AC9b spy: the BigInt path runs exactly above the switch (cash and eggs_cash)', () => {
++    const n = vi.spyOn(GOLDEN_MATH, 'num'), g = vi.spyOn(GOLDEN_MATH, 'big');
++    rewardCents(20_015_998_342, 450_000); expect([n.mock.calls.length, g.mock.calls.length]).toEqual([1, 0]);
++    rewardCents(20_015_998_343, 450_000); expect([n.mock.calls.length, g.mock.calls.length]).toEqual([1, 1]);
++    rewardCents(15_011_998_757, 600_000); expect([n.mock.calls.length, g.mock.calls.length]).toEqual([2, 1]);
++    rewardCents(15_011_998_758, 600_000); expect([n.mock.calls.length, g.mock.calls.length]).toEqual([2, 2]);
++  });
++  it('rewardCents of 0 / negative input is 0', () => { expect([rewardCents(0, 450_000), rewardCents(-5, 450_000), rewardCents(100, 0)]).toEqual([0, 0, 0]); });
++});
++
++describe('#1 golden rewards: baseScaled and grants (GE-AC8, GE-AC9)', () => {
++  it('GE-AC8: baseScaled = Math.round(E x P_cents x 100) from goldenEEggsPerSec and priceDollars (Grader in, streak and Frenzy out)', () => {
++    const s = farm(), E = goldenEEggsPerSec(s, G), P = priceDollars(s, G);
++    expect(baseScaled(s, G)).toBe(Math.round(E * (P * 100) * 100));
++    expect(baseScaled({ ...s, streakS: 0.28, frenzyRemainingS: 20 }, G)).toBe(baseScaled(s, G));
++  });
++  it('GE-AC8: E = 9.5, P = $1.35 -> 57,713 cents of cash', () => { expect(rewardCents(Math.round(9.5 * (1.35 * 100) * 100), cashBp(G))).toBe(57_713); });
++  it('GE-AC8: cash grant adds exactly rewardCents(baseScaled, cashBp) to coins; nothing else changes', () => {
++    const s = farm(), o = grantGolden(s, 'cash', G);
++    expect(o).toEqual({ ...s, coinsCents: s.coinsCents + rewardCents(baseScaled(s, G), 450_000) });
++  });
++  it('GE-AC9: F = 19 eggs: Basket += floor(60 x E), coop unchanged, coop cap ignored', () => {
++    const s = farm({ farmLevel: 19, basket: 5, coop: 1e6 }), E = goldenEEggsPerSec(s, G), o = grantGolden(s, 'eggs', G);
++    expect(o).toEqual({ ...s, basket: 5 + Math.floor(60 * E) });
++  });
++  it('GE-AC9: F = 20 eggs_cash: coins += rewardCents(baseScaled, 600000), Basket unchanged', () => {
++    const s = farm({ farmLevel: 20, basket: 5 }), o = grantGolden(s, 'eggs_cash', G);
++    expect(o).toEqual({ ...s, coinsCents: s.coinsCents + rewardCents(baseScaled(s, G), 600_000) });
++  });
++  it('frenzy grant sets frenzyRemainingS = tc_frenzy_s; a second one resets to 30, never stacks (R23)', () => {
++    expect(grantGolden(farm(), 'frenzy', G).frenzyRemainingS).toBe(tc.frenzy_s);
++    expect(grantGolden(farm({ frenzyRemainingS: 12 }), 'frenzy', G).frenzyRemainingS).toBe(30);
++  });
++  it('flag off: grantGolden is the identity', () => {
++    const s = farm(); for (const t of ['cash', 'frenzy', 'eggs', 'eggs_cash'] as const) expect(grantGolden(s, t, OFF)).toBe(s);
++    expect(goldenOn(OFF)).toBe(false); expect(goldenOn(G)).toBe(true); expect(goldenOn(b)).toBe(false);
++  });
++});
++
++describe('#1 golden rewards: the roll (GE-AC7)', () => {
++  it('u in [0, w_cash) -> cash, [w_cash, w_cash + w_frenzy) -> frenzy, rest -> eggs (F < 20) / eggs_cash (F >= 20)', () => {
++    const wc = tc.egg_w_cash, wf = wc + tc.egg_w_frenzy;
++    expect([0, wc - 1e-9, wc, wf - 1e-9, wf, 0.999999].map(u => rollReward(u, 19, G))).toEqual(['cash', 'cash', 'frenzy', 'frenzy', 'eggs', 'eggs']);
++    expect(rollReward(0.9, 20, G)).toBe('eggs_cash'); expect(rollReward(0.9, tc.egg_eggs_as_cash_from_farm - 1, G)).toBe('eggs');
++  });
++  it('10,000 seeded evRng rolls: 45/35/20 within 1.5 pp; changed weights change the shares', () => {
++    const shares = (bb: B) => { let s = ensureEvRng(initialState(bb, 7)); const n: Record<string, number> = { cash: 0, frenzy: 0, eggs: 0 };
++      for (let i = 0; i < 10_000; i++) { let u: number; [s, u] = evDraw(s); n[rollReward(u, 10, bb)]++; } return n; };
++    const a = shares(G); expect(Math.abs(a.cash / 1e4 - 0.45)).toBeLessThan(0.015); expect(Math.abs(a.frenzy / 1e4 - 0.35)).toBeLessThan(0.015);
++    expect(Math.abs(a.eggs / 1e4 - 0.2)).toBeLessThan(0.015);
++    const c = shares(withTc({ egg_w_cash: 0.2, egg_w_frenzy: 0.2, egg_w_eggs: 0.6 }, G)); expect(Math.abs(c.eggs / 1e4 - 0.6)).toBeLessThan(0.015);
++  });
++});
++
++describe('#1 Frenzy (R22/R23/X7, GE-AC10, GE-AC10b sim part)', () => {
++  it('GE-AC10/X7: a live Frenzy multiplies every sale (player and Market Hand) by tc_frenzy_price_mult with the streak; rounded once', () => {
++    const s = farm({ frenzyRemainingS: 20, streakS: 0.28 }), unit = salePriceCents(s, G), g = graderMult(s.workers, s.graderTier, G);
++    expect(frenzyFactor(s, G)).toBe(tc.frenzy_price_mult);
++    for (const by of ['player', 'market_hand'] as const) expect(saleValueCents(s, 10, G, { by })).toBe(Math.round(10 * unit * g * 1.28 * 2));
++    expect(saleMultipliers(s, G)).toEqual([g, 1.28, 2]);
++  });
++  it('GE-AC10b: a suspended sale (menu / hide) pays 1x: no Frenzy, no streak', () => {
++    const s = farm({ frenzyRemainingS: 20, streakS: 0.28 });
++    expect(saleValueCents(s, 10, G, { by: 'market_hand', suspended: true })).toBe(saleValueCents({ ...s, frenzyRemainingS: undefined, streakS: 0 }, 10, G, { by: 'market_hand' }));
++  });
++  it('golden off or no Frenzy: factor 1', () => {
++    const s = farm({ frenzyRemainingS: 20 });
++    expect(saleValueCents(s, 10, OFF, { by: 'player' })).toBe(saleValueCents({ ...s, frenzyRemainingS: undefined }, 10, OFF, { by: 'player' }));
++    expect(frenzyFactor(farm(), G)).toBe(1); expect(frenzyFactor(farm({ frenzyRemainingS: 0 }), G)).toBe(1);
++  });
++  it('R23: counts down on the focus clock only; frozen on unfocused ticks; ends (field absent) after 30.0 s of focus +- 1 tick', () => {
++    let s = grantGolden(farm(), 'frenzy', G);
++    for (let i = 0; i < 40 * PER_S; i++) s = step(s, DT, G, undefined, { focus: false });
++    expect(s.frenzyRemainingS).toBe(30);
++    for (let i = 0; i < 10 * PER_S; i++) s = step(s, DT, G, undefined, { focus: true });
++    expect(s.frenzyRemainingS).toBeCloseTo(20, 9);
++    let t = 0; while (s.frenzyRemainingS !== undefined && t < 40 * PER_S) { s = step(s, DT, G, undefined, { focus: true }); t++; }
++    expect(Math.abs(t - 20 * PER_S)).toBeLessThanOrEqual(1); expect('frenzyRemainingS' in s).toBe(false);
++  });
++  it('flag off: a stray frenzyRemainingS never ticks or pays', () => {
++    let s = farm({ frenzyRemainingS: 20 }); for (let i = 0; i < 5 * PER_S; i++) s = step(s, DT, OFF, undefined, { focus: true });
++    expect(s.frenzyRemainingS).toBe(20);
++  });
++});
++
++describe('#1 golden rewards: validateBalance (GE-AC26 / D-HOP-2026-11-05-11)', () => {
++  it('tc_frenzy_all_sales must be 1 (0 is invalid, no alternate branch)', () => {
++    expect(() => validateBalance(withTc({ frenzy_all_sales: 0 }, G))).toThrow(/frenzy_all_sales/);
++    expect(() => validateBalance(withTc({ frenzy_all_sales: 0 }, OFF))).toThrow(/frenzy_all_sales/);
++    expect(() => validateBalance(withTc({ frenzy_all_sales: 2 }, G))).toThrow(/frenzy_all_sales/);
++    expect(() => validateBalance(G)).not.toThrow();
++    expect(() => validateBalance(withTc({ frenzy_all_sales: 1 }, G))).not.toThrow();
++  });
++});

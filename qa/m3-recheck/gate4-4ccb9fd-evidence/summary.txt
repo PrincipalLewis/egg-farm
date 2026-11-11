@@ -1,0 +1,37 @@
+2026-10-19 03:21:04 CEST === GATE4 4ccb9fde8251b371c6ee6444b735990e488e2aae steps=[pre unit saves release browser] engines=[firefox webkit chromium]
+2026-10-19 03:21:09 CEST own npm ci exit=0
+2026-10-19 03:21:09 CEST pushed on: origin/rc/m4-retune-t3   origin/main=dd52bfdc1c695cfc7695b3d63ba6a7883c5fd49b
+2026-10-19 03:21:10 CEST m4.enabled at SHA: 1 (want 1)
+2026-10-19 03:21:51 CEST build exit=0
+2026-10-19 03:21:51 CEST static build-id: dist-html/egg-farm.html:m3-rc1-pre+4ccb9fd dist-qa/index.html:m3-rc1-pre+4ccb9fd dist/index.html:m3-rc1-pre+4ccb9fd  (want m3-rc1-pre+4ccb9fd, no +dirty)
+2026-10-19 03:22:00 CEST tsc exit=0
+2026-10-19 03:22:02 CEST sync --check exit=0
+2026-10-19 03:38:10 CEST unit exit=1 979s       Tests  2 failed | 862 passed (864)
+2026-10-19 03:49:02 CEST test:slow exit=0 652s       Tests  16 passed | 1 skipped (17)
+2026-10-19 03:49:04 CEST R1-R5 + M1 + F1-F5 unit exit=0       Tests  16 passed (16)
+2026-10-19 03:49:04 CEST check-release-build exit=0
+2026-10-19 03:49:04 CEST --- firefox
+2026-10-19 03:54:00 CEST runtime build-id firefox exit=0 runtime build ids [firefox]: ["m3-rc1-pre+4ccb9fd"]
+2026-10-19 03:58:33 CEST check-globals firefox exit=0 PASS [firefox] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; 
+2026-10-19 04:06:19 CEST rc0 firefox exit=0 249/249 passed
+2026-10-19 04:08:39 CEST dist-html file:// firefox exit=0
+2026-10-19 04:12:02 CEST hidden-tab M4 firefox exit=0 33/33 (
+2026-10-19 04:12:49 CEST offline/clock/reload M4 firefox exit=0 16/17 (
+2026-10-19 04:13:37 CEST browser v6 load F1-F5+M1 firefox exit=0 154/154
+2026-10-19 04:13:37 CEST --- webkit
+2026-10-19 04:13:44 CEST runtime build-id webkit exit=0 runtime build ids [webkit]: ["m3-rc1-pre+4ccb9fd"]
+2026-10-19 04:13:54 CEST check-globals webkit exit=0 PASS [webkit] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; e
+2026-10-19 04:18:45 CEST rc0 webkit exit=0 249/249 passed
+2026-10-19 04:18:52 CEST dist-html file:// webkit exit=0
+2026-10-19 04:20:05 CEST hidden-tab M4 webkit exit=0 33/33 (
+2026-10-19 04:21:28 CEST offline/clock/reload M4 webkit exit=0 17/17 (
+2026-10-19 04:22:03 CEST browser v6 load F1-F5+M1 webkit exit=0 154/154
+2026-10-19 04:22:03 CEST --- chromium
+2026-10-19 04:22:10 CEST runtime build-id chromium exit=0 runtime build ids [chromium]: ["m3-rc1-pre+4ccb9fd"]
+2026-10-19 04:22:20 CEST check-globals chromium exit=0 PASS [chromium] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false;
+2026-10-19 04:25:59 CEST rc0 chromium exit=0 249/249 passed
+2026-10-19 04:26:05 CEST dist-html file:// chromium exit=0
+2026-10-19 04:27:00 CEST hidden-tab M4 chromium exit=0 33/33 (
+2026-10-19 04:27:32 CEST offline/clock/reload M4 chromium exit=0 17/17 (
+2026-10-19 04:28:02 CEST browser v6 load F1-F5+M1 chromium exit=0 154/154
+2026-10-19 04:28:02 CEST ALL_DONE 4018s

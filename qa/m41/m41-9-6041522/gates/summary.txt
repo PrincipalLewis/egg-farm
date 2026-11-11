@@ -1,0 +1,13 @@
+HEAD 604152226a21150a1d03dee44da72c049184b342 porcelain=0 2026-10-22 21:02:25 CEST
+npm-ci exit=0 2s
+sync-check exit=0 1s
+tsc exit=0 5s
+vitest exit=0 191s
+build exit=0 5s
+build-html exit=0 5s
+build-qa exit=0 5s
+check-globals exit=0 62s
+dist name="build-id" content="m3-rc1-pre+6041522" 25f826f5443cfb39d2f6d00c1e8a90476ea15f6141b461df561684e6686da916  dist/index.html
+dist-html name="build-id" content="m3-rc1-pre+6041522" 980f63d71f417b68a420dc4da7a771c508a2b7f7127ecf1502a8810a411b7b35  dist-html/egg-farm.html
+dist-qa name="build-id" content="m3-rc1-pre+6041522" c2bcace98b58cdfe07d84926e05ae5b611a49fb18b15eabbd3e7d2f6cb605c12  dist-qa/index.html
+porcelain-after=

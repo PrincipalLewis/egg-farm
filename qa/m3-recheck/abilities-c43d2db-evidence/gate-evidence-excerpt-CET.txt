@@ -1,0 +1,18 @@
+raw line 120: 2026-11-05 22:59:53 CET (Europe/Belgrade) HEAD is now at 60801ae Merge c43d2db5dd56f90096a6ba5c509d33ccef69117d into 844f8e15774daeb1c0a855cb69b1fabd2f0ab820
+raw line 140: 2026-11-05 22:59:57 CET (Europe/Belgrade) node: v20.20.2
+raw line 290: 2026-11-05 23:01:42 CET (Europe/Belgrade) GOLDEN2 {"m1-rc2-v4-12min":"b1e07c13a21b6059ececdc898a4ddfe03b5286ea9133a4def6ae25992ec139dc","m2-rc1-v5-12min":"a425f0135a78b44615468a81fc99f955032e046a6003a9c180b973d51d346297","m2-rc1-v5-40min":"48b1fa43497a912c700461ddd4a2cf0abe59ba685977e7841c012ce8f7e6f1ef","m2-rc1-v5-40min-edge":"78b97634d0bbc3b4a174751917ad573889ec57bc22cc3163deb4c6fec0e4a4bc"}
+raw line 293: 2026-11-05 23:01:42 CET (Europe/Belgrade) GOLDEN1 a54c9cf9d6a4c967ef8fc9d2cb741ba2deab042b8cad5097b38d5c192339fda5
+raw line 302: 2026-11-05 23:01:46 CET (Europe/Belgrade) GOLDEN2 {"m1-rc2-v4-12min":"b69c5783ba5b54dd663b56b898e2595cca59c6e03fc692b515af993634224ee9","m2-rc1-v5-12min":"2ac7070d0c5e7ea2d8fcdd1642732cf44871fe9c5b126d1b5873fcd8244f3a00","m2-rc1-v5-40min":"4fd4675956da96efa92f5eb48d979f132ad628c1e76e616076eb041ae311b431","m2-rc1-v5-40min-edge":"652d1b266de55a11ecc4faef9816eca0cfb803da3c7a7c14af85f88e4bb9f0bb"}
+raw line 305: 2026-11-05 23:01:46 CET (Europe/Belgrade) GOLDEN1 f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544
+raw line 362: 2026-11-05 23:02:14 CET (Europe/Belgrade)    ✓ verify: goldens > the copy in scripts/verify/golden.ts reproduces both pinned GOLDEN1 hashes on this tree 3280ms
+raw line 570: 2026-11-05 23:06:18 CET (Europe/Belgrade)  Test Files  148 passed (148)
+raw line 571: 2026-11-05 23:06:18 CET (Europe/Belgrade)       Tests  2140 passed | 1 skipped (2141)
+raw line 625: 2026-11-05 23:14:02 CET (Europe/Belgrade)  Test Files  4 passed (4)
+raw line 626: 2026-11-05 23:14:02 CET (Europe/Belgrade)       Tests  17 passed | 1 skipped (18)
+raw line 659: 2026-11-05 23:14:10 CET (Europe/Belgrade) ##[group]Run npm run check-globals -- chromium
+raw line 660: 2026-11-05 23:14:10 CET (Europe/Belgrade) npm run check-globals -- chromium
+raw line 664: 2026-11-05 23:14:10 CET (Europe/Belgrade) > egg-farm@0.1.0 check-globals
+raw line 668: 2026-11-05 23:14:12 CET (Europe/Belgrade) check-globals: dist m4.1+60801ae on port 34973
+raw line 669: 2026-11-05 23:14:19 CET (Europe/Belgrade) PASS [chromium] B-4 release ?perf=1: eggfarm* globals ["eggfarmExportTelemetry"], no perf overlay
+raw line 670: 2026-11-05 23:14:20 CET (Europe/Belgrade) PASS [chromium] refused newer-save boot window globals vs blank page: []
+raw line 671: 2026-11-05 23:14:20 CET (Europe/Belgrade) PASS [chromium] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]

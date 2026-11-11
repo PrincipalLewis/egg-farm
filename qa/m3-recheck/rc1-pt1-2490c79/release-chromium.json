@@ -1,0 +1,80 @@
+[
+ {
+  "n": "tag rc1-pt1 is marked Latest on GitHub",
+  "pass": true,
+  "i": {
+   "latest": "rc1-pt1",
+   "draft": false,
+   "prerelease": false
+  }
+ },
+ {
+  "n": "tag rc1-pt1 commit == checked SHA",
+  "pass": true,
+  "i": {
+   "tag": "2490c793caed92c5e5d9df1a7296ff3465c061b8",
+   "sha": "2490c793caed92c5e5d9df1a7296ff3465c061b8"
+  }
+ },
+ {
+  "n": "in-game build hash (Settings) == SHA, not dirty",
+  "pass": true,
+  "i": {
+   "ver": "Egg Farm m3-rc1-pre+2490c79",
+   "sha": "2490c793caed"
+  }
+ },
+ {
+  "n": "collect -> sell -> upgrade on a fresh release game",
+  "pass": true,
+  "i": {
+   "collected": 60,
+   "sold": true,
+   "upgraded": true,
+   "s0": {
+    "coins": 0,
+    "F": 0,
+    "C": 0,
+    "basket": 0
+   },
+   "s1": {
+    "coins": 900,
+    "F": 0,
+    "C": 1,
+    "basket": 4
+   },
+   "secs": 21.74
+  }
+ },
+ {
+  "n": "save/reload keeps levels and money",
+  "pass": true,
+  "i": {
+   "s1": {
+    "coins": 900,
+    "F": 0,
+    "C": 1,
+    "basket": 4
+   },
+   "s2": {
+    "coins": 900,
+    "F": 0,
+    "C": 1,
+    "basket": 4
+   },
+   "hdr": "$9.00"
+  }
+ },
+ {
+  "n": "release globals only eggfarmExportTelemetry",
+  "pass": true,
+  "i": [
+   "eggfarmExportTelemetry"
+  ]
+ },
+ {
+  "n": "no page errors",
+  "pass": true,
+  "i": []
+ }
+]

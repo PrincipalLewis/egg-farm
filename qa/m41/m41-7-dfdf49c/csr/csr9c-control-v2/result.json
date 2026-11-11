@@ -1,0 +1,731 @@
+{
+ "port": "5961",
+ "N": 12000,
+ "cases": {
+  "M1-preM4--dismiss-then-reload": {
+   "checks": [
+    {
+     "n": "M1 recovery dialog shown",
+     "pass": true,
+     "x": "M1"
+    },
+    {
+     "n": "(1) never under the recovery dialog / Welcome back (every frame)",
+     "pass": false,
+     "x": {
+      "violations": 379,
+      "first": {
+       "t": 556,
+       "layer": true,
+       "modal": false,
+       "notice": "M1"
+      },
+      "frames": 352
+     }
+    },
+    {
+     "n": "card shown after the dialog/modal closed",
+     "pass": true,
+     "x": {
+      "inserts": 1,
+      "firstVisible": 3652
+     }
+    },
+    {
+     "n": "(2) no auto-dismiss: card still visible 12 s after it appeared",
+     "pass": false,
+     "x": {
+      "still": false,
+      "cardGone": 8555
+     }
+    },
+    {
+     "n": "(3) seen still false in mem, LS and IDB before the dismiss click",
+     "pass": false,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true,
+      "seenTrueAt": {
+       "mem": 556,
+       "ls": 554,
+       "idb": 572
+      }
+     }
+    },
+    {
+     "n": "exactly 1 card inserted this load",
+     "pass": true,
+     "x": 1
+    },
+    {
+     "n": "card still present for the player to dismiss",
+     "pass": false,
+     "x": {
+      "present": 0
+     }
+    },
+    {
+     "n": "(3) seen=true written only AFTER the dismiss click (mem/LS timestamps >= click)",
+     "pass": false,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true,
+      "seenTrueAt": {
+       "mem": 556,
+       "ls": 554,
+       "idb": 572
+      },
+      "dismissAt": 18057
+     }
+    },
+    {
+     "n": "after dismiss: seen=true in mem and LS",
+     "pass": true,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "n": "after dismiss + autosave: seen=true in IDB main",
+     "pass": true,
+     "x": true
+    },
+    {
+     "n": "(5) after dismissal, a reload shows 0 cards",
+     "pass": true,
+     "x": {
+      "inserts": 0,
+      "load": 2
+     }
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": []
+    }
+   ],
+   "cardUnderDialog": true,
+   "seenWhileDialog": {
+    "mem": true,
+    "ls": true,
+    "idb": true
+   },
+   "welcome": true,
+   "seenBeforeDismiss": {
+    "mem": true,
+    "ls": true,
+    "idb": true,
+    "seenTrueAt": {
+     "mem": 556,
+     "ls": 554,
+     "idb": 572
+    }
+   },
+   "cardPresentAtDismiss": false,
+   "seenAfterDismiss": {
+    "mem": true,
+    "ls": true,
+    "idb": true,
+    "seenTrueAt": {
+     "mem": 556,
+     "ls": 554,
+     "idb": 572
+    },
+    "dismissAt": 18057
+   }
+  },
+  "M1-preM4--reload-before-dismiss": {
+   "checks": [
+    {
+     "n": "M1 recovery dialog shown",
+     "pass": true,
+     "x": "M1"
+    },
+    {
+     "n": "(1) never under the recovery dialog / Welcome back (every frame)",
+     "pass": false,
+     "x": {
+      "violations": 378,
+      "first": {
+       "t": 489,
+       "layer": true,
+       "modal": false,
+       "notice": "M1"
+      },
+      "frames": 351
+     }
+    },
+    {
+     "n": "card shown after the dialog/modal closed",
+     "pass": true,
+     "x": {
+      "inserts": 1,
+      "firstVisible": 3580
+     }
+    },
+    {
+     "n": "(2) no auto-dismiss: card still visible 12 s after it appeared",
+     "pass": false,
+     "x": {
+      "still": false,
+      "cardGone": 8488
+     }
+    },
+    {
+     "n": "(3) seen still false in mem, LS and IDB before the dismiss click",
+     "pass": false,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true,
+      "seenTrueAt": {
+       "mem": 489,
+       "ls": 487,
+       "idb": 508
+      }
+     }
+    },
+    {
+     "n": "exactly 1 card inserted this load",
+     "pass": true,
+     "x": 1
+    },
+    {
+     "n": "(4) reload BEFORE dismissal shows it again",
+     "pass": false,
+     "x": {
+      "again": false,
+      "inserts": 0,
+      "load": 2
+     }
+    },
+    {
+     "n": "(1) after reload: never under a dialog/modal",
+     "pass": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": []
+    }
+   ],
+   "cardUnderDialog": true,
+   "seenWhileDialog": {
+    "mem": true,
+    "ls": true,
+    "idb": true
+   },
+   "welcome": true,
+   "seenBeforeDismiss": {
+    "mem": true,
+    "ls": true,
+    "idb": true,
+    "seenTrueAt": {
+     "mem": 489,
+     "ls": 487,
+     "idb": 508
+    }
+   }
+  },
+  "M2-preM4--dismiss-then-reload": {
+   "checks": [
+    {
+     "n": "M2 recovery dialog shown",
+     "pass": true,
+     "x": "M2"
+    },
+    {
+     "n": "(1) never under the recovery dialog / Welcome back (every frame)",
+     "pass": false,
+     "x": {
+      "violations": 378,
+      "first": {
+       "t": 488,
+       "layer": true,
+       "modal": false,
+       "notice": "M2"
+      },
+      "frames": 350
+     }
+    },
+    {
+     "n": "card shown after the dialog/modal closed",
+     "pass": true,
+     "x": {
+      "inserts": 1,
+      "firstVisible": 3578
+     }
+    },
+    {
+     "n": "(2) no auto-dismiss: card still visible 12 s after it appeared",
+     "pass": false,
+     "x": {
+      "still": false,
+      "cardGone": 8488
+     }
+    },
+    {
+     "n": "(3) seen still false in mem, LS and IDB before the dismiss click",
+     "pass": false,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true,
+      "seenTrueAt": {
+       "mem": 488,
+       "ls": 487,
+       "idb": 502
+      }
+     }
+    },
+    {
+     "n": "exactly 1 card inserted this load",
+     "pass": true,
+     "x": 1
+    },
+    {
+     "n": "card still present for the player to dismiss",
+     "pass": false,
+     "x": {
+      "present": 0
+     }
+    },
+    {
+     "n": "(3) seen=true written only AFTER the dismiss click (mem/LS timestamps >= click)",
+     "pass": false,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true,
+      "seenTrueAt": {
+       "mem": 488,
+       "ls": 487,
+       "idb": 502
+      },
+      "dismissAt": 17951
+     }
+    },
+    {
+     "n": "after dismiss: seen=true in mem and LS",
+     "pass": true,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true
+     }
+    },
+    {
+     "n": "after dismiss + autosave: seen=true in IDB main",
+     "pass": true,
+     "x": true
+    },
+    {
+     "n": "(5) after dismissal, a reload shows 0 cards",
+     "pass": true,
+     "x": {
+      "inserts": 0,
+      "load": 2
+     }
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": []
+    }
+   ],
+   "cardUnderDialog": true,
+   "seenWhileDialog": {
+    "mem": true,
+    "ls": true,
+    "idb": true
+   },
+   "welcome": true,
+   "seenBeforeDismiss": {
+    "mem": true,
+    "ls": true,
+    "idb": true,
+    "seenTrueAt": {
+     "mem": 488,
+     "ls": 487,
+     "idb": 502
+    }
+   },
+   "cardPresentAtDismiss": false,
+   "seenAfterDismiss": {
+    "mem": true,
+    "ls": true,
+    "idb": true,
+    "seenTrueAt": {
+     "mem": 488,
+     "ls": 487,
+     "idb": 502
+    },
+    "dismissAt": 17951
+   }
+  },
+  "M2-preM4--reload-before-dismiss": {
+   "checks": [
+    {
+     "n": "M2 recovery dialog shown",
+     "pass": true,
+     "x": "M2"
+    },
+    {
+     "n": "(1) never under the recovery dialog / Welcome back (every frame)",
+     "pass": false,
+     "x": {
+      "violations": 378,
+      "first": {
+       "t": 489,
+       "layer": true,
+       "modal": false,
+       "notice": "M2"
+      },
+      "frames": 351
+     }
+    },
+    {
+     "n": "card shown after the dialog/modal closed",
+     "pass": true,
+     "x": {
+      "inserts": 1,
+      "firstVisible": 3578
+     }
+    },
+    {
+     "n": "(2) no auto-dismiss: card still visible 12 s after it appeared",
+     "pass": false,
+     "x": {
+      "still": false,
+      "cardGone": 8488
+     }
+    },
+    {
+     "n": "(3) seen still false in mem, LS and IDB before the dismiss click",
+     "pass": false,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true,
+      "seenTrueAt": {
+       "mem": 489,
+       "ls": 487,
+       "idb": 511
+      }
+     }
+    },
+    {
+     "n": "exactly 1 card inserted this load",
+     "pass": true,
+     "x": 1
+    },
+    {
+     "n": "(4) reload BEFORE dismissal shows it again",
+     "pass": false,
+     "x": {
+      "again": false,
+      "inserts": 0,
+      "load": 2
+     }
+    },
+    {
+     "n": "(1) after reload: never under a dialog/modal",
+     "pass": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": []
+    }
+   ],
+   "cardUnderDialog": true,
+   "seenWhileDialog": {
+    "mem": true,
+    "ls": true,
+    "idb": true
+   },
+   "welcome": true,
+   "seenBeforeDismiss": {
+    "mem": true,
+    "ls": true,
+    "idb": true,
+    "seenTrueAt": {
+     "mem": 489,
+     "ls": 487,
+     "idb": 511
+    }
+   }
+  },
+  "WELCOME-preM4--dismiss-then-reload": {
+   "checks": [
+    {
+     "n": "'Welcome back!' modal appeared",
+     "pass": true,
+     "x": true,
+     "info": false
+    },
+    {
+     "n": "(1) never under the recovery dialog / Welcome back (every frame)",
+     "pass": true,
+     "x": {
+      "violations": 0,
+      "frames": 244
+     },
+     "info": false
+    },
+    {
+     "n": "card shown after the dialog/modal closed",
+     "pass": true,
+     "x": {
+      "inserts": 1,
+      "firstVisible": 3496
+     },
+     "info": false
+    },
+    {
+     "n": "(2) no auto-dismiss: card still visible 12 s after it appeared",
+     "pass": false,
+     "x": {
+      "still": false,
+      "cardGone": 11496
+     },
+     "info": true
+    },
+    {
+     "n": "(3) seen still false in mem, LS and IDB before the dismiss click",
+     "pass": false,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true,
+      "seenTrueAt": {
+       "mem": 3496,
+       "ls": 3495,
+       "idb": 3496
+      }
+     },
+     "info": true
+    },
+    {
+     "n": "exactly 1 card inserted this load",
+     "pass": true,
+     "x": 1,
+     "info": false
+    },
+    {
+     "n": "card still present for the player to dismiss",
+     "pass": false,
+     "x": {
+      "present": 0
+     },
+     "info": true
+    },
+    {
+     "n": "(3) seen=true written only AFTER the dismiss click (mem/LS timestamps >= click)",
+     "pass": false,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true,
+      "seenTrueAt": {
+       "mem": 3496,
+       "ls": 3495,
+       "idb": 3496
+      },
+      "dismissAt": 16139
+     },
+     "info": true
+    },
+    {
+     "n": "after dismiss: seen=true in mem and LS",
+     "pass": true,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true
+     },
+     "info": true
+    },
+    {
+     "n": "after dismiss + autosave: seen=true in IDB main",
+     "pass": true,
+     "x": true,
+     "info": true
+    },
+    {
+     "n": "(5) after dismissal, a reload shows 0 cards",
+     "pass": true,
+     "x": {
+      "inserts": 0,
+      "load": 2
+     },
+     "info": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "info": false
+    }
+   ],
+   "welcome": true,
+   "seenBeforeDismiss": {
+    "mem": true,
+    "ls": true,
+    "idb": true,
+    "seenTrueAt": {
+     "mem": 3496,
+     "ls": 3495,
+     "idb": 3496
+    }
+   },
+   "cardPresentAtDismiss": false,
+   "seenAfterDismiss": {
+    "mem": true,
+    "ls": true,
+    "idb": true,
+    "seenTrueAt": {
+     "mem": 3496,
+     "ls": 3495,
+     "idb": 3496
+    },
+    "dismissAt": 16139
+   }
+  },
+  "WELCOME-preM4--reload-before-dismiss": {
+   "checks": [
+    {
+     "n": "'Welcome back!' modal appeared",
+     "pass": true,
+     "x": true,
+     "info": false
+    },
+    {
+     "n": "(1) never under the recovery dialog / Welcome back (every frame)",
+     "pass": true,
+     "x": {
+      "violations": 0,
+      "frames": 243
+     },
+     "info": false
+    },
+    {
+     "n": "card shown after the dialog/modal closed",
+     "pass": true,
+     "x": {
+      "inserts": 1,
+      "firstVisible": 3464
+     },
+     "info": false
+    },
+    {
+     "n": "(2) no auto-dismiss: card still visible 12 s after it appeared",
+     "pass": false,
+     "x": {
+      "still": false,
+      "cardGone": 11464
+     },
+     "info": true
+    },
+    {
+     "n": "(3) seen still false in mem, LS and IDB before the dismiss click",
+     "pass": false,
+     "x": {
+      "mem": true,
+      "ls": true,
+      "idb": true,
+      "seenTrueAt": {
+       "mem": 3464,
+       "ls": 3463,
+       "idb": 3465
+      }
+     },
+     "info": true
+    },
+    {
+     "n": "exactly 1 card inserted this load",
+     "pass": true,
+     "x": 1,
+     "info": false
+    },
+    {
+     "n": "(4) reload BEFORE dismissal shows it again",
+     "pass": false,
+     "x": {
+      "again": false,
+      "inserts": 0,
+      "load": 2
+     },
+     "info": true
+    },
+    {
+     "n": "(1) after reload: never under a dialog/modal",
+     "pass": true,
+     "info": false
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "info": false
+    }
+   ],
+   "welcome": true,
+   "seenBeforeDismiss": {
+    "mem": true,
+    "ls": true,
+    "idb": true,
+    "seenTrueAt": {
+     "mem": 3464,
+     "ls": 3463,
+     "idb": 3465
+    }
+   }
+  },
+  "M3-fresh--single": {
+   "checks": [
+    {
+     "n": "M3 recovery dialog shown",
+     "pass": true,
+     "x": "M3"
+    },
+    {
+     "n": "(1) never under the recovery dialog / Welcome back (every frame)",
+     "pass": true,
+     "x": {
+      "violations": 0,
+      "frames": 616
+     }
+    },
+    {
+     "n": "M3/fresh: 0 cards (fresh M4 farm never shows it)",
+     "pass": true,
+     "x": 0
+    },
+    {
+     "n": "M3/fresh: seen not set",
+     "pass": true,
+     "x": null
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": []
+    }
+   ],
+   "cardUnderDialog": false,
+   "seenWhileDialog": {
+    "mem": null,
+    "ls": null,
+    "idb": null
+   },
+   "welcome": false
+  }
+ },
+ "buildId": "m3-rc1-pre+dfdf49c",
+ "fails": 18
+}

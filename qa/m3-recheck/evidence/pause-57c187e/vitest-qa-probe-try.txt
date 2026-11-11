@@ -1,0 +1,27 @@
+LOCK+START 2026-11-06T00:21:55+01:00 loadavg=0.28 0.49 0.76 1/2173 1514064
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/pause-57c187e/wt
+
+ ✓ ../probe/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > m4 on in shipping balance (grant path)
+ ✓ ../probe/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag1 gap u59.9s(<min): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+ ✓ ../probe/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag1 gap 60s: applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+ ✓ ../probe/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag1 gap 600s(under-cap): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+ ✓ ../probe/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag1 gap 2h(=cap): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+ ✓ ../probe/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag1 gap 3h(over-cap): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+ ✓ ../probe/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag0 gap u59.9s(<min): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+ ✓ ../probe/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag0 gap 60s: applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+ ✓ ../probe/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag0 gap 600s(under-cap): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+ ✓ ../probe/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag0 gap 2h(=cap): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+ ✓ ../probe/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag0 gap 3h(over-cap): applyOffline / hide-show / reload grants equal across all-paused, mixed, none-hired, and equal the unpaused grant
+ ✓ ../probe/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > flag0 grant == flag1 grant per gap; cap clamps (2h == 3h > 600s > 60s)
+ ✓ ../probe/pause-offline-parity.qa.test.ts > QA probe: offline grant parity (D-HOP-2026-11-06-01 a / AC-P13) > hidden >= 60 s while paused (flag1): recovery +0, lockout frozen, paused kept; 59.9 s hidden: +1.66% ±0.05
+ ✓ ../probe/pause-offline-parity.qa.test.ts > QA probe: online freeze, resume no double-pay, save/load > online paused 30 s: wage 0, no wage/collect/sell events, cdS frozen, energy +0.25x recovery (rule 3), lockout counts down (rule 7)
+ ✓ ../probe/pause-offline-parity.qa.test.ts > QA probe: online freeze, resume no double-pay, save/load > resume after a paused 2h hide: no back-pay; next 5 s equals an open twin; MH lockout = 45
+ ✓ ../probe/pause-offline-parity.qa.test.ts > QA probe: online freeze, resume no double-pay, save/load > paused + callLockoutS survive save/load (<60 s reload and 2h reload); legacy fixture loads unpaused
+
+ Test Files  1 passed (1)
+      Tests  16 passed (16)
+   Start at  00:21:55
+   Duration  492ms (transform 222ms, setup 0ms, collect 276ms, tests 63ms, environment 0ms, prepare 48ms)
+
+EXIT=0 END 2026-11-06T00:21:56+01:00 loadavg=0.28 0.49 0.76 1/2173 1514136

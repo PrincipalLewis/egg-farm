@@ -1,0 +1,12 @@
+#107 mergefwd (feat/v5-golden-rewards) onto rc/v5 71375901de8b72acfaa49c695c5c18f0d0088080
+Result: CLEAN (ort, no conflicts)
+Prior tip: 27660196a081f379f467499d667fbe4f5ef3bda3 (tree 1dcd12ec)
+New tip:  a5f8e3c916833eae0a68aca03940e2fd08e01725
+New tree: 92a3dbf8c0c14723609717adb9d8a47b2a48facc
+Parents:  27660196a081f379f467499d667fbe4f5ef3bda3 71375901de8b72acfaa49c695c5c18f0d0088080
+Author/committer: Senior Engineer, Features & Economy Wiring / Senior Engineer, Features & Economy Wiring
+Files from rc/v5: src/config/m5-rules.ts src/econ/income.ts src/sim/offline.ts src/sim/pause.ts src/sim/tick.ts src/sim/workers.ts tests/fixtures/saves/m5-pause-committed-hired.json tests/v5-f3-config.test.ts tests/v5-pause-sim.test.ts 
+Local gates: sync-economy-cli --check PASS; tsc --noEmit PASS; vitest run (lane-run features) 153 files / 2240 passed, 1 skipped, exit 0
+Pushed (no force): 2766019..a5f8e3c. PR #107 Ready (isDraft=false), base rc/v5.
+Hosted runs @ a5f8e3c (in_progress at 02:39 CET): ci 42145282654; pacing-x1-stack 42145282651; k10-breeds-offset 42145282660
+Note: prior-head runs 42139828781 (pacing) and 42139828824 (k10) concluded failure @ 27660196; ci 42139828949 success.

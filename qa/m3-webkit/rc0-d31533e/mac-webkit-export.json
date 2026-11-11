@@ -1,0 +1,117 @@
+{
+  "exportedAt": 1792102791450,
+  "events": [
+    {
+      "install_id": "c7d707b1-ea94-4560-bd20-3a4b0a1e5acf",
+      "build": "m3-rc0+d31533e",
+      "type": "session_start",
+      "ts": 1792102777767,
+      "sessionMs": 0
+    },
+    {
+      "step": 1,
+      "name": "collect",
+      "type": "onboarding_step",
+      "ts": 1792102777771,
+      "sessionMs": 4
+    },
+    {
+      "atStep": 1,
+      "type": "onboarding_skip",
+      "ts": 1792102778470,
+      "sessionMs": 703
+    },
+    {
+      "type": "tap",
+      "ts": 1792102781807,
+      "sessionMs": 4040,
+      "count": 1,
+      "eggs": 5
+    },
+    {
+      "id": 1,
+      "N": 8,
+      "type": "customer_arrive",
+      "ts": 1792102787772,
+      "sessionMs": 10005
+    },
+    {
+      "id": 1,
+      "k": 5,
+      "N": 8,
+      "price": 100,
+      "value": 500,
+      "by": "player",
+      "type": "sell",
+      "ts": 1792102788103,
+      "sessionMs": 10336
+    },
+    {
+      "upgrade": "collection",
+      "newLevel": 1,
+      "cost": 1000,
+      "coinsBefore": 10500,
+      "type": "upgrade",
+      "ts": 1792102788508,
+      "sessionMs": 10741
+    },
+    {
+      "type": "session_end",
+      "ts": 1792102788830,
+      "sessionMs": 11063
+    },
+    {
+      "install_id": "c7d707b1-ea94-4560-bd20-3a4b0a1e5acf",
+      "build": "m3-rc0+d31533e",
+      "type": "session_start",
+      "ts": 1792102788974,
+      "sessionMs": 0
+    },
+    {
+      "install_id": "c7d707b1-ea94-4560-bd20-3a4b0a1e5acf",
+      "build": "m3-rc0+d31533e",
+      "type": "session_start",
+      "ts": 1792102789557,
+      "sessionMs": 0
+    },
+    {
+      "step": 6,
+      "name": "workers_hire_tip",
+      "action": "shown",
+      "type": "onboarding_step",
+      "ts": 1792102789561,
+      "sessionMs": 4
+    },
+    {
+      "step": 6,
+      "name": "workers_hire_tip",
+      "action": "open",
+      "type": "onboarding_step",
+      "ts": 1792102790025,
+      "sessionMs": 468
+    },
+    {
+      "step": 7,
+      "name": "workers_coach",
+      "action": "shown",
+      "type": "onboarding_step",
+      "ts": 1792102790367,
+      "sessionMs": 810
+    },
+    {
+      "worker": "market_hand",
+      "cost": 4000,
+      "farm": 3,
+      "type": "worker_hire",
+      "ts": 1792102790367,
+      "sessionMs": 810
+    },
+    {
+      "wage_market_hand_cents": 1,
+      "type": "worker_summary",
+      "ts": 1792102790462,
+      "sessionMs": 905,
+      "windowMs": 988
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+ "id": "CSR1-parse-TRIG-parse-truncated",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-1",
+  "CSR-6",
+  "CSR-15"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/TRIG-parse-truncated.raw"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "recovery": true,
+  "reason": "parse",
+  "store": "ls",
+  "recovered_from": "none",
+  "notice": "M3",
+  "corruptLsMin": 1
+ }
+}

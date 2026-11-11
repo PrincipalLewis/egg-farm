@@ -1,0 +1,22 @@
+{
+ "farmLevel": 30,
+ "collectionLevel": 30,
+ "hensLevel": 30,
+ "eggValueLevel": 30,
+ "coinsCents": 99996000000000,
+ "basket": 0,
+ "customers": [],
+ "workers": {},
+ "nextCustomerInS": 9999,
+ "celebratedMilestones": [
+  "hens:10",
+  "hens:20",
+  "hens:30",
+  "grade:5",
+  "grade:10",
+  "grade:20",
+  "balanced:1",
+  "balanced:2",
+  "balanced:3"
+ ]
+}

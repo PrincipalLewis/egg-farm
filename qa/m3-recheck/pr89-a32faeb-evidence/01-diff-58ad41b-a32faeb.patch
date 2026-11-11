@@ -1,0 +1,1319 @@
+diff --git a/scripts/artux-shots.mjs b/scripts/artux-shots.mjs
+index 5e5b2a7..18846af 100644
+--- a/scripts/artux-shots.mjs
++++ b/scripts/artux-shots.mjs
+@@ -1,13 +1,14 @@
+ // Art & UX rc0 review shots + rotate-prompt checks (art-ux/m3-rotate-portrait-prompt.md §6.2/§6.3). Usage: node scripts/artux-shots.mjs [webkit|chromium]
+ import { chromium, webkit } from 'playwright-core';
+-import { spawn } from 'node:child_process'; import { mkdirSync, existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
++import { spawnRecorded, stopOrReport } from './recorded-pid.mjs';
++import { mkdirSync, existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+ const eng = process.argv[2] || 'chromium'; const port = 5100 + Math.floor(Math.random() * 200);
+-const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
++const { child: srv, rec: srvRec } = spawnRecorded('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
+ for (let i = 0; i < 40; i++) { try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
+ // Output folder comes from the served build's version string: engineering/screenshots/artux-<release>-<hash>/.
+ // Refuses a +dirty build, and any existing folder whose README names a different commit (or has no README).
+ // OUT= is allowed only if that folder's README names the served build's hash.
+-const die = m => { console.error(`artux-shots: ${m}`); process.kill(-srv.pid); process.exit(2); };
++const die = m => { console.error(`artux-shots: ${m}`); stopOrReport(srv, srvRec, 'artux-shots'); process.exit(2); };
+ const html = await (await fetch(`http://127.0.0.1:${port}/`)).text();
+ const srcs = [...html.matchAll(/src="([^"]+\.js)"/g)].map(m => m[1]);
+ let ver = null; for (const u of srcs) { const m = (await (await fetch(`http://127.0.0.1:${port}${u}`)).text()).match(/["'`](m\d+-[a-z0-9-]+)\+([0-9a-f]{7,40})(\+dirty)?["'`]/); if (m) { ver = m; break; } }
+@@ -102,4 +103,4 @@ for (const [name, opt, want] of [['640x360 touch phone', { viewport: { width: 64
+   ok('D1 OFL link inline-block >=44px, no overlap with Reset save, corner taps land on it', d1.display === 'inline-block' && d1.box[3] >= 44 && !d1.overlap && d1.hits.every(Boolean), d1);
+   const lic = await (await fetch(`http://127.0.0.1:${port}/fonts/OFL.txt`)).text();
+   ok('R2/R4 font credits: one <p>, link with >=44px tap target, OFL ships', /Fonts: Fredoka © 2016 The Fredoka Project Authors; Nunito © 2014 The Nunito Project Authors\. SIL Open Font License 1\.1\./.test(r.text ?? '') && r.h >= 44 && r.tag === 'P' && r.blocks === 0 && !r.authorsAlone && /SIL OPEN FONT LICENSE/i.test(lic), r); await ctx.close(); }
+-await br.close(); process.kill(-srv.pid); process.exit(bad ? 1 : 0);
++await br.close(); const stopped = stopOrReport(srv, srvRec, 'artux-shots'); process.exit(bad ? 1 : stopped ? 0 : 3);
+diff --git a/scripts/d2-guard.mjs b/scripts/d2-guard.mjs
+new file mode 100644
+index 0000000..6f7f568
+--- /dev/null
++++ b/scripts/d2-guard.mjs
+@@ -0,0 +1,88 @@
++// UI QA #89 F4 (+F5 b): halt-and-report guard for scripts/d2-kill-browser.mjs. After the recorded browser group is
++// SIGKILLed (or that signal is refused), the group is re-checked for leftovers from the launch-time snapshot plus a signal-0
++// probe of OUR recorded group (recorded-pid.mjs). Leftovers or a refusal HALT the run: nothing is signalled again, the
++// recorded and surviving PIDs go to STOP-LIST-for-HoO.txt, the evidence JSON says halted, and d2 exits non-zero.
++import fs from 'node:fs'; import path from 'node:path';
++import { survivors, readStat, bootId } from './recorded-pid.mjs';
++export class Halt extends Error { constructor(reason) { super(`HALT: ${reason}`); this.reason = reason; } }
++const sleep = ms => new Promise(r => setTimeout(r, ms));
++/** Survivors of a recorded group, polled until the leader is reaped and the snapshot members are gone (or waitMs). */
++export async function leftovers(rec, members = [], { waitMs = 3000 } = {}) {
++  let s = survivors(rec, members);
++  for (let t = 0; t < waitMs && (s.live.length || s.probe === 'leader-unreaped' || s.probe === 'members'); t += 100) { await sleep(100); s = survivors(rec, members); }
++  return { ...s, clean: s.live.length === 0 && s.probe === 'empty' };
++}
++export function createRunGuard({ engine, evidenceDir, log = console.log, leftoverWaitMs = 3000 }) {
++  fs.mkdirSync(evidenceDir, { recursive: true });
++  const stopListPath = path.join(evidenceDir, 'STOP-LIST-for-HoO.txt'), evidencePath = path.join(evidenceDir, 'd2-evidence.json');
++  const state = { engine, halted: false, reasons: [], stopList: [], rows: [] };
++  const writeEvidence = () => fs.writeFileSync(evidencePath, JSON.stringify(state, null, 1) + '\n');
++  writeEvidence();
++  const entry = (pid, role, starttime) => { const st = readStat(pid); return { pid, role, recordedStart: starttime ?? null, nowStart: st?.starttime ?? null, alive: !!st && st.state !== 'Z' && (starttime == null || st.starttime === starttime) }; };
++  /** Halt: leftover check (report-only), stop list + evidence, then throw Halt. Never signals anything. */
++  async function halt(reason, launch) {
++    state.halted = true; state.reasons.push(reason);
++    const rec = launch?.rec ?? null, members = launch?.members ?? [];
++    const s = rec ? await leftovers(rec, members, { waitMs: leftoverWaitMs }) : { live: [], probe: 'no record', clean: false };
++    const lines = [];
++    if (rec) lines.push(entry(rec.pid, 'recorded browser leader', rec.starttime));
++    else if (launch?.pid) lines.push(entry(launch.pid, 'unrecorded browser pid (from launch.sh, identity NOT verified)'));
++    for (const pid of s.live) if (!rec || pid !== rec.pid) lines.push(entry(pid, 'group member', members.find(m => m.pid === pid)?.starttime));
++    state.stopList.push(...lines.map(l => ({ ...l, reason })));
++    fs.appendFileSync(stopListPath, `# ${new Date().toISOString()} d2-kill [${engine}] HALT: ${reason}; boot ${bootId()}; group probe ${s.probe}${s.probe === 'members' && !s.live.length ? ' (members not in the snapshot: pids unknown)' : ''}\n`
++      + lines.map(l => `${l.pid} ${l.recordedStart ?? '-'} ${l.alive ? 'ALIVE' : 'gone'} ${l.role}\n`).join(''));
++    writeEvidence();
++    log(`HALT [${engine}] ${reason}; stop list ${stopListPath} (${lines.filter(l => l.alive).length} alive); evidence ${evidencePath}`);
++    throw new Halt(reason);
++  }
++  /** F4: after the SIGKILL of the recorded group: the group must be verifiably empty, else halt. */
++  async function afterKill(k, launch) {
++    if (!k.ok) return halt(`SIGKILL refused for browser group ${k.pid}: ${k.reason}`, launch);
++    const s = await leftovers(launch.rec, launch.members, { waitMs: leftoverWaitMs });
++    if (!s.clean) return halt(`group leftovers after SIGKILL of ${launch.rec.pid}: pids ${s.live.join(' ') || '(none in the snapshot)'}, probe ${s.probe}`, launch);
++    return s;
++  }
++  // ---- F5 (HoO ruling on Playwright's own group kill) -----------------------------------------------------------------
++  // (a) d2 never asks Playwright to force-kill: no forced-kill API, no close() options, no patched timeouts (source check
++  //     in tests/d2-guard.test.ts). (b) If Playwright's own group SIGKILL may have fired anyway (our close() watchdog expired, close()
++  //     failed, or the browser exited/disconnected while we did not expect it), the run HALTS with the leftover check and
++  //     the stop list. The watchdog only observes; it never shortens or replaces Playwright's own close.
++  const unexpected = [];
++  /** Watch a launch: a 'close' (browser exit/disconnect) that we did not announce with expectExit is recorded. */
++  function watch(launch) { launch.expectedExit = false; launch.ctx.on('close', () => { if (!launch.expectedExit) unexpected.push({ pid: launch.rec?.pid ?? null, at: new Date().toISOString(), launch }); }); return launch; }
++  const expectExit = launch => { launch.expectedExit = true; };
++  const pwHalt = (reason, launch) => { state.playwrightKillPossible = true; return halt(reason, launch); };
++  /** Halts if any watched browser exited or disconnected unexpectedly. */
++  async function checkpoint() { if (unexpected.length) { const u = unexpected[0]; return pwHalt(`browser ${u.pid} exited/disconnected unexpectedly at ${u.at} (Playwright may have group-killed it)`, u.launch); } }
++  /** ctx.close() under an observing watchdog (default 90 s); a timeout or a failure halts. */
++  async function closeCtx(launch, { watchdogMs = 90000 } = {}) {
++    expectExit(launch); let timer;
++    const r = await Promise.race([launch.ctx.close().then(() => 'closed', e => `failed: ${String(e?.message ?? e).split('\n')[0]}`), new Promise(res => { timer = setTimeout(() => res('timeout'), watchdogMs); })]);
++    clearTimeout(timer);
++    if (r === 'timeout') return pwHalt(`close() of browser ${launch.rec?.pid} did not finish in ${watchdogMs} ms (Playwright's force-kill may fire)`, launch);
++    if (r !== 'closed') return pwHalt(`close() of browser ${launch.rec?.pid} ${r} (Playwright's force-kill may have fired)`, launch);
++  }
++  /** Reason for a non-Halt error: an unexpected exit/disconnect wins over the raw error text. */
++  function haltFor(e, launch) {
++    if (unexpected.length) return checkpoint();
++    return halt(`error: ${String(e?.message ?? e).split('\n')[0]}`, launch);
++  }
++  return { state, halt, afterKill, writeEvidence, stopListPath, evidencePath, watch, expectExit, checkpoint, closeCtx, haltFor };
++}
++/** F5 (c): the installed playwright-core (and @playwright/test, if used) must be exactly the lockfile version, and the
++ *  package.json spec must name that same version. null when pinned, else the problem. */
++export function playwrightPinProblem(root) {
++  const rd = f => JSON.parse(fs.readFileSync(path.join(root, f), 'utf8'));
++  const pkg = rd('package.json'), lock = rd('package-lock.json'), deps = { ...pkg.dependencies, ...pkg.devDependencies };
++  const names = ['playwright-core', '@playwright/test'].filter(n => deps[n] || lock.packages?.[`node_modules/${n}`]);
++  if (!names.includes('playwright-core')) return 'playwright-core is not in package.json/package-lock.json';
++  for (const n of names) {
++    const spec = deps[n], lockV = lock.packages?.[`node_modules/${n}`]?.version, rootSpec = { ...lock.packages?.['']?.dependencies, ...lock.packages?.['']?.devDependencies }[n];
++    let inst = null; try { inst = rd(`node_modules/${n}/package.json`).version; } catch {}
++    if (!spec || !lockV) return `${n}: package.json spec ${spec ?? '(none)'} / lockfile ${lockV ?? '(none)'}`;
++    if (spec.replace(/^[\^~=]/, '') !== lockV) return `${n}: package.json spec ${spec} does not name the lockfile version ${lockV}`;
++    if (rootSpec !== spec) return `${n}: package-lock.json root spec ${rootSpec} != package.json ${spec}`;
++    if (inst !== lockV) return `${n}: installed ${inst ?? '(missing)'} != lockfile ${lockV}`;
++  }
++  return null;
++}
+diff --git a/scripts/d2-kill-browser.mjs b/scripts/d2-kill-browser.mjs
+index eb62926..01e8422 100644
+--- a/scripts/d2-kill-browser.mjs
++++ b/scripts/d2-kill-browser.mjs
+@@ -9,60 +9,74 @@
+ // 2. ?debug=1 / ?perf=1 do nothing in release (no panel, no overlay, no chunk request).
+ // Usage: npm run build && npm run build:qa && ENGINE=chromium|firefox|webkit [DELAYS=0,100,500,1000,2000,3000] [REPS=3] node scripts/d2-kill-browser.mjs
+ // Based on QA's qa/m3-scripts/rc0-ac14f-kill.mjs. Linux only (/proc/<pid>/stat of the recorded pid).
+-import pw from 'playwright-core'; import { spawn } from 'node:child_process'; import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
++import pw from 'playwright-core'; import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
+ const ENGINE = process.argv[2] ?? process.env.ENGINE ?? 'chromium', port = +(process.env.PORT ?? 4720), REPS = +(process.env.REPS ?? 3);
+ const DELAYS = (process.env.DELAYS ?? '0,100,500,1000,2000,3000').split(',').map(Number);
+-import { serveOwn } from './serve-own.mjs'; import { recordPid, killRecorded } from './recorded-pid.mjs';
+-const s1 = await serveOwn('dist-qa', port), s2 = await serveOwn('dist', port + 1); const srv = { pid: 0 }, srvRel = { pid: 0 };
++import { serveOwn } from './serve-own.mjs'; import { recordPid, killRecorded, groupMembers } from './recorded-pid.mjs'; import { createRunGuard, Halt, playwrightPinProblem } from './d2-guard.mjs';
++{ const why = playwrightPinProblem(new URL('..', import.meta.url).pathname); if (why) { console.error(`d2-kill: Playwright not pinned (F5 c): ${why}`); process.exit(2); } }
++// F4: evidence + STOP-LIST-for-HoO.txt go here (D2_EVIDENCE_DIR, else a fresh dir under the OS tmpdir, printed at start)
++const EVID = process.env.D2_EVIDENCE_DIR || fs.mkdtempSync(path.join(os.tmpdir(), `d2-evidence-${ENGINE}-`));
++const guard = createRunGuard({ engine: ENGINE, evidenceDir: EVID }); console.log(`d2-kill [${ENGINE}]: evidence ${guard.evidencePath}`);
++let s1 = null, s2 = null, fails = 0, halted = false, current = null; // current = the latest launch, for a halt's stop list
++const rows = guard.state.rows;
++try { // F7: whatever happens below, both vite servers are stopped in finally
++s1 = await serveOwn('dist-qa', port); s2 = await serveOwn('dist', port + 1);
+ for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${port + 1}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
+ for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
+ const URL0 = `http://127.0.0.1:${port}/`, URLREL = `http://127.0.0.1:${port + 1}/`, fx = fs.readFileSync(new URL('../tests/fixtures/saves/m2-rc1-v5-40min.json', import.meta.url), 'utf8');
+ const T = pw[ENGINE]; const opts = ENGINE === 'chromium' ? { args: ['--no-sandbox'] } : {};
+ const REAL_EXE = ENGINE === 'chromium' ? (process.env.CHROME ?? '/usr/bin/google-chrome') : T.executablePath();
+ const sq = s => `'${String(s).replace(/'/g, `'\\''`)}'`;
+-/** `root` is our own mkdtemp dir: profile in root/profile, wrapper and pid file beside it. Returns { ctx, rec }. */
++/** `root` is our own mkdtemp dir: profile in root/profile, wrapper and pid file beside it. Returns { ctx, rec, members }. */
+ async function launch(root) {
+   const wrap = path.join(root, 'launch.sh'), pidFile = path.join(root, 'browser.pid'); fs.rmSync(pidFile, { force: true });
+   fs.writeFileSync(wrap, `#!/bin/sh\necho $$ > ${sq(pidFile)}\nexec ${sq(REAL_EXE)} "$@"\n`, { mode: 0o700 });
+   const ctx = await T.launchPersistentContext(path.join(root, 'profile'), { ...opts, executablePath: wrap, viewport: { width: 390, height: 844 } });
+   const pid = +fs.readFileSync(pidFile, 'utf8').trim(), rec = recordPid(pid);
+-  if (!rec) { await ctx.close().catch(() => {}); throw new Error(`d2-kill: browser pid ${pid} from ${pidFile} is not a live child of this process`); }
+-  return { ctx, rec };
++  if (!rec) await guard.halt(`browser pid ${pid} from ${pidFile} is not a live child of this process (not recorded)`, { pid });
++  return (current = guard.watch({ ctx, rec, members: groupMembers(rec) })); // F5 b: an unannounced close halts
+ }
+ async function start(ctx, q = '') { const p = ctx.pages()[0] ?? await ctx.newPage(); await p.goto(URL0 + q); await p.getByText('Tap to start').click(); await p.waitForFunction(() => window.eggfarm); await p.waitForTimeout(500);
+   const wb = p.locator('#wbCollect'); if (await wb.isVisible().catch(() => false)) { await wb.click(); await p.waitForTimeout(300); } return p; }
+-const rows = []; let fails = 0;
+ for (const D of DELAYS) for (let rep = 0; rep < REPS; rep++) {
+   const dir = fs.mkdtempSync(path.join(os.tmpdir(), `d2kill-${ENGINE}-`));
+-  let { ctx, rec } = await launch(dir); const p = await ctx.newPage(); await p.goto(URL0);
++  let L = await launch(dir), { ctx } = L; const p = await ctx.newPage(); await p.goto(URL0);
+   await p.evaluate(([r]) => { localStorage.setItem('eggfarm.save', r); localStorage.setItem('eggfarm.ui', JSON.stringify({ onboardingDone: true, sessions: 3, workersIntroA: true, workersIntroB: true })); }, [fx]);
+-  await p.close(); const pg = await start(ctx);
++  await p.close(); const pg = await start(ctx); await guard.checkpoint();
+   await pg.evaluate(() => { window.eggfarm.state.coinsCents = 1e12; });
+   await pg.evaluate(() => document.querySelector('nav [data-nav=upgrades]').click()); await pg.waitForTimeout(300);
+   const lv = () => window.eggfarm.state.farmLevel + 100 * window.eggfarm.state.collectionLevel;
+   const L0 = await pg.evaluate(lv);
+   await pg.waitForSelector('button.buy[aria-disabled=false]', { state: 'attached', timeout: 10000 }); await pg.evaluate(() => document.querySelector('button.buy[aria-disabled=false]').click());
+   const L1 = await pg.evaluate(lv); await new Promise(r => setTimeout(r, D));
+-  const k = killRecorded(rec, 'SIGKILL', { group: true }); const n = k.ok ? 1 : 0; // groups signalled: only the recorded one
++  L.members = [...L.members, ...groupMembers(L.rec)]; // refresh the snapshot (renderers etc.) right before the SIGKILL
++  await guard.checkpoint(); guard.expectExit(L); // our own SIGKILL is the announced exit
++  const k = killRecorded(L.rec, 'SIGKILL', { group: true }); const n = k.ok ? 1 : 0; // groups signalled: only the recorded one
+   if (!k.ok) console.log(`d2-kill: REFUSED browser group ${k.pid}: ${k.reason}`);
+-  await ctx.close().catch(() => {}); await new Promise(r => setTimeout(r, 500));
+-  ({ ctx, rec } = await launch(dir)); const p2 = await start(ctx);
++  await guard.afterKill(k, L); // F4: halts (stop list, non-zero) on a refusal or on any leftover in the group
++  await guard.closeCtx(L); await new Promise(r => setTimeout(r, 500));
++  L = await launch(dir); ({ ctx } = L); const p2 = await start(ctx);
+   const after = await p2.evaluate(() => ({ L: window.eggfarm.state.farmLevel + 100 * window.eggfarm.state.collectionLevel, recovery: document.querySelectorAll('.recovery-card').length }));
+   const pass = n > 0 && L1 > L0 && after.L === L1 && after.recovery === 0; if (!pass) fails++;
+-  rows.push({ D, rep, pass, L0, L1, after: after.L, killed: n });
+-  console.log(`${pass ? 'PASS' : 'FAIL'} [${ENGINE}] kill ${D} ms rep ${rep}: ${L0}->${L1}, reopen ${after.L}, SIGKILLed recorded browser group ${k.pid} (${n ? 'ok' : 'refused'})`);
+-  await ctx.close().catch(() => {}); fs.rmSync(dir, { recursive: true, force: true });
++  rows.push({ D, rep, pass, L0, L1, after: after.L, killed: n, pid: k.pid }); guard.writeEvidence();
++  console.log(`${pass ? 'PASS' : 'FAIL'} [${ENGINE}] SIGKILL at ${D} ms rep ${rep}: ${L0}->${L1}, reopen ${after.L}, SIGKILLed recorded browser group ${k.pid} (${n ? 'ok' : 'refused'})`);
++  await guard.checkpoint(); await guard.closeCtx(L); fs.rmSync(dir, { recursive: true, force: true });
+ }
+ // D3/D4: query params inert in release
+-{ const dir = fs.mkdtempSync(path.join(os.tmpdir(), `d2flags-${ENGINE}-`)); const { ctx } = await launch(dir); const reqs = [];
++{ const dir = fs.mkdtempSync(path.join(os.tmpdir(), `d2flags-${ENGINE}-`)); const LF = await launch(dir), { ctx } = LF; const reqs = [];
+   ctx.on('request', r => reqs.push(r.url()));
+   const p = await ctx.newPage(); await p.goto(URLREL + '?debug=1&perf=1'); await p.getByText('Tap to start').click(); await p.waitForSelector('#collect'); await p.waitForTimeout(1500);
+   const r = await p.evaluate(() => ({ dbg: !!document.querySelector('.dbg'), perf: !!document.querySelector('.perf-ov'), perfObj: 'eggfarmPerf' in window, eggfarm: 'eggfarm' in window }));
+   const chunk = reqs.filter(u => /frame-sampler|panel-/.test(u));
+   const pass = !r.dbg && !r.perf && !r.perfObj && !r.eggfarm && !chunk.length; if (!pass) fails++;
+   console.log(`${pass ? 'PASS' : 'FAIL'} [${ENGINE}] ?debug=1&perf=1 inert and no window.eggfarm in release ${JSON.stringify({ ...r, chunk })}`);
+-  await ctx.close(); fs.rmSync(dir, { recursive: true, force: true }); }
++  await guard.checkpoint(); await guard.closeCtx(LF); fs.rmSync(dir, { recursive: true, force: true }); }
+ const by = {}; for (const r of rows) { by[r.D] ??= [0, 0]; by[r.D][1]++; if (r.pass) by[r.D][0]++; }
+ console.log(`SUMMARY [${ENGINE}] ` + Object.entries(by).map(([d, [a, n]]) => `${d}ms ${a}/${n}`).join(', '));
+-s1.stop(); s2.stop();
+-process.exit(fails ? 1 : 0);
++} catch (e) {
++  halted = true;
++  if (!(e instanceof Halt)) await guard.haltFor(e, current).catch(() => {}); // any other throw halts too (F5 b: unexpected exit wins)
++} finally {
++  s1?.stop(); s2?.stop(); guard.writeEvidence();
++}
++process.exit(halted ? 3 : fails ? 1 : (process.exitCode || 0)); // 3 = halted (or a vite group not cleanly stopped)
+diff --git a/scripts/m41-9-bignum-shots.mjs b/scripts/m41-9-bignum-shots.mjs
+index fedb776..70bb366 100644
+--- a/scripts/m41-9-bignum-shots.mjs
++++ b/scripts/m41-9-bignum-shots.mjs
+@@ -11,12 +11,13 @@
+ // balance.farm.costTable / the curve and can never reach $1e35, so the upgrade-row cost uses a SEEDED BALANCE OVERRIDE:
+ // g.b is replaced by a copy whose farm.costTable is the target dollars at every level (UI reads g.balance live).
+ import { chromium, webkit, firefox } from 'playwright-core';
+-import { spawn, execSync } from 'node:child_process'; import { mkdirSync, existsSync, readFileSync, writeFileSync } from 'node:fs'; import { basename } from 'node:path';
++import { spawnRecorded, stopOrReport } from './recorded-pid.mjs';
++import { execSync } from 'node:child_process'; import { mkdirSync, existsSync, readFileSync, writeFileSync } from 'node:fs'; import { basename } from 'node:path';
+ const [eng = 'chromium', OUT_ARG] = process.argv.slice(2); if (!['chromium', 'firefox', 'webkit'].includes(eng)) { console.error(`unknown engine ${eng}`); process.exit(2); }
+ const port = 5300 + Math.floor(Math.random() * 200);
+-const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
++const { child: srv, rec: srvRec } = spawnRecorded('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
+ for (let i = 0; i < 40; i++) { try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
+-const die = m => { console.error(`m41-9-bignum-shots: ${m}`); process.kill(-srv.pid); process.exit(2); };
++const die = m => { console.error(`m41-9-bignum-shots: ${m}`); stopOrReport(srv, srvRec, 'm41-9-bignum-shots'); process.exit(2); };
+ const html = await (await fetch(`http://127.0.0.1:${port}/`)).text();
+ const srcs = [...html.matchAll(/src="([^"]+\.js)"/g)].map(m => m[1]);
+ let ver = null; for (const u of srcs) { const m = (await (await fetch(`http://127.0.0.1:${port}${u}`)).text()).match(/["'`](m\d+[a-z0-9.-]*)\+([0-9a-f]{7,40})(\+dirty)?["'`]/); if (m) { ver = m; break; } }
+@@ -127,4 +128,4 @@ writeFileSync(`${OUT}/manifest-${eng}.json`, JSON.stringify(manifest, null, 1));
+ { const MF = `${OUT}/manifest.json`, m = existsSync(MF) ? JSON.parse(readFileSync(MF, 'utf8')) : { script: 'scripts/m41-9-bignum-shots.mjs', sha, buildId, shots: [] };
+   m.shots = [...m.shots.filter(x => x.engine !== eng), ...index]; writeFileSync(MF, JSON.stringify(m, null, 1) + '\n'); }
+ console.log(`m41-9-bignum-shots ${eng}: ${bad ? `${bad} CLIP/DROP/FAIL` : 'all ok'}`);
+-await br.close(); process.kill(-srv.pid); process.exit(bad ? 1 : 0);
++await br.close(); const stopped = stopOrReport(srv, srvRec, 'm41-9-bignum-shots'); process.exit(bad ? 1 : stopped ? 0 : 3);
+diff --git a/scripts/mk24-1-overflow.mjs b/scripts/mk24-1-overflow.mjs
+index c301641..864f5fe 100644
+--- a/scripts/mk24-1-overflow.mjs
++++ b/scripts/mk24-1-overflow.mjs
+@@ -1,13 +1,13 @@
+ /** MK-24-1 v4 (delivered eggs) + v3 layout: always two-line Sell, shared width, money never truncates; shots + checks at 360/375/390/430/1280. */
+ import { chromium } from 'playwright-core';
+-import { spawn } from 'node:child_process';
++import { spawnRecorded, stopOrReport } from './recorded-pid.mjs';
+ import { mkdirSync, readFileSync } from 'node:fs';
+ const OUT = new URL('../../engineering/screenshots/', import.meta.url).pathname;
+ mkdirSync(OUT, { recursive: true });
+ const port = 4190, base = `http://127.0.0.1:${port}/`;
+-const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
+-const kill = () => { try { process.kill(-srv.pid, 'SIGTERM'); } catch {} };
+-setTimeout(() => { kill(); process.exit(2); }, 180_000).unref();
++const { child: srv, rec: srvRec } = spawnRecorded('npx', ['vite', 'preview', '--outDir', 'dist', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
++const stopSrv = () => stopOrReport(srv, srvRec, 'mk24-1-overflow');
++setTimeout(() => { stopSrv(); process.exit(2); }, 180_000).unref();
+ await new Promise(r => setTimeout(r, 2500));
+ const html = readFileSync('dist/index.html', 'utf8');
+ const jsName = (html.match(/assets\/(index-[^"]+\.js)/) || [])[1];
+@@ -149,6 +149,6 @@ for (const w of widths) {
+   }
+   await ctx.close();
+ }
+-await browser.close(); kill();
++await browser.close(); stopSrv();
+ console.log(ok ? 'MK-24-1-v4 PASS' : 'MK-24-1-v4 FAIL', buildId);
+ process.exit(ok ? 0 : 1);
+diff --git a/scripts/perf-ab.mjs b/scripts/perf-ab.mjs
+index b5d4c58..735e114 100644
+--- a/scripts/perf-ab.mjs
++++ b/scripts/perf-ab.mjs
+@@ -1,9 +1,9 @@
+ // F24 Market perf A/B (one change per variant) with the SM-9 sampler (?perf=1).
+ // Usage: [HEADED=1] [SEC=15] node scripts/perf-ab.mjs [webkit|chromium] [variant,...]   (expects dist-qa)
+ import { webkit, chromium } from 'playwright-core';
+-import { spawn } from 'node:child_process';
++import { spawnRecorded, stopOrReport } from './recorded-pid.mjs';
+ const eng = process.argv[2] || 'webkit'; const port = 4900 + Math.floor(Math.random() * 90);
+-const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
++const { child: srv, rec: srvRec } = spawnRecorded('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
+ for (let i = 0; i < 40; i++) { try { await fetch(`http://127.0.0.1:${port}/`); break; } catch { await new Promise(r => setTimeout(r, 250)); } }
+ const V = {
+   base: '',
+@@ -42,4 +42,4 @@ for (const name of pick) {
+   await p.waitForFunction(() => window.eggfarmPerf?.done, null, { timeout: 120000 }); const s = await p.evaluate(() => window.eggfarmPerf.result);
+   const cb = await p.evaluate(() => window.__cb); console.log(name.padEnd(16), 'rafJS/frame', (cb.ms / Math.max(1, cb.n)).toFixed(2), 'max', cb.max.toFixed(1), 'p50', s.p50.toFixed(1), 'p95', s.p95.toFixed(1), 'over20%', s.over20Pct.toFixed(1)); await ctx.close();
+ }
+-await br.close(); process.kill(-srv.pid);
++await br.close(); stopOrReport(srv, srvRec, 'perf-ab');
+diff --git a/scripts/perf-sm9.mjs b/scripts/perf-sm9.mjs
+index de692d2..0c274ea 100644
+--- a/scripts/perf-sm9.mjs
++++ b/scripts/perf-sm9.mjs
+@@ -1,10 +1,10 @@
+ // SM-9: F20+ save, all 4 workers hired, scripted collect/sell/Manage loop; ?perf=1 sampler (10 s warm-up + 60 s by default).
+ // Usage: node scripts/perf-sm9.mjs [--headed] [--short]   (headless numbers are informational per the smoke plan)
+ import { chromium } from 'playwright-core';
+-import { spawn } from 'node:child_process';
++import { spawnRecorded, stopOrReport } from './recorded-pid.mjs';
+ import { readFileSync } from 'node:fs';
+ const headed = process.argv.includes('--headed'), short = process.argv.includes('--short');
+-const port = 4176; const srv = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
++const port = 4176; const { child: srv, rec: srvRec } = spawnRecorded('npx', ['vite', 'preview', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
+ await new Promise(r => setTimeout(r, 1500));
+ const fx = JSON.parse(readFileSync(new URL('../tests/fixtures/saves/m2-rc1-v5-40min.json', import.meta.url), 'utf8'));
+ fx.state.farmLevel = Math.max(20, fx.state.farmLevel); fx.state.coinsCents = 5e9; fx.savedAt = Date.now();
+@@ -27,5 +27,5 @@ while (!res) {
+ }
+ await page.screenshot({ path: '../engineering/screenshots/m3-rc0-sm9-overlay.png' });
+ console.log(JSON.stringify({ mode: headed ? 'headed' : 'headless', ...res, errors }));
+-await browser.close(); srv.kill();
++await browser.close(); stopOrReport(srv, srvRec, 'perf-sm9');
+ if (errors.length) process.exitCode = 1;
+diff --git a/scripts/pt1-13-webkit.mjs b/scripts/pt1-13-webkit.mjs
+index c5e858f..42f1b55 100644
+--- a/scripts/pt1-13-webkit.mjs
++++ b/scripts/pt1-13-webkit.mjs
+@@ -1,9 +1,10 @@
+ // PT1-13: WebKit narrow phones: farm column, Collect bar and next-goal chip right edges <= viewport width (no clipped UI).
+ // Usage: [SHOTS=dir] node scripts/pt1-13-webkit.mjs [gameDir=.]  (expects <gameDir>/dist-qa). Exit 1 on overflow.
+ import { webkit, devices } from 'playwright-core';
+-import { spawn } from 'node:child_process'; import { mkdirSync } from 'node:fs';
++import { spawnRecorded, stopOrReport } from './recorded-pid.mjs';
++import { mkdirSync } from 'node:fs';
+ const dir = process.argv[2] || '.'; const port = 4600 + Math.floor(Math.random() * 300);
+-const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true, cwd: dir });
++const { child: srv, rec: srvRec } = spawnRecorded('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', cwd: dir });
+ await new Promise(r => setTimeout(r, 2500));
+ const br = await webkit.launch(); let bad = 0; const shots = process.env.SHOTS; if (shots) mkdirSync(shots, { recursive: true });
+ const ph = (w, h) => ({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true, deviceScaleFactor: 2, userAgent: devices['iPhone SE (3rd gen)'].userAgent });
+@@ -22,4 +23,4 @@ for (const [name, prof] of Object.entries(profiles)) for (const F of [0, 25]) {
+   if (!ok) bad++; console.log(name, 'F' + F, JSON.stringify(r), ok ? 'ok' : 'OVERFLOW');
+   await ctx.close();
+ }
+-await br.close(); process.kill(-srv.pid); process.exit(bad ? 1 : 0);
++await br.close(); const stopped = stopOrReport(srv, srvRec, 'pt1-13-webkit'); process.exit(bad ? 1 : stopped ? 0 : 3);
+diff --git a/scripts/queue-qa.mjs b/scripts/queue-qa.mjs
+index 4b0d6ba..3d61a99 100644
+--- a/scripts/queue-qa.mjs
++++ b/scripts/queue-qa.mjs
+@@ -1,9 +1,10 @@
+ // art-ux/m3-customer-queue-spec.md §7 QA checks 13-20 (+ F24 frame-sampler stress) against dist-qa. Exit 1 if any check fails.
+ // Usage: node scripts/queue-qa.mjs [webkit]   -> qa-out/queue-qa-<engine>.json + screenshots
+ import { chromium, webkit } from 'playwright-core';
+-import { spawn } from 'node:child_process'; import { writeFileSync } from 'node:fs';
++import { spawnRecorded, stopOrReport } from './recorded-pid.mjs';
++import { writeFileSync } from 'node:fs';
+ const eng = process.argv[2] === 'webkit' ? 'webkit' : 'chromium'; const port = 4800 + Math.floor(Math.random() * 400);
+-const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
++const { child: srv, rec: srvRec } = spawnRecorded('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
+ await new Promise(r => setTimeout(r, 2500));
+ const br = eng === 'webkit' ? await webkit.launch() : await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] });
+ const res = {}; const ok = (k, pass, data) => { res[k] = { pass: !!pass, ...data }; console.log(k, pass ? 'PASS' : 'FAIL', JSON.stringify(data)); };
+@@ -87,5 +88,5 @@ try {
+   { const { ctx, p } = await page(360, 640, '?perf=1&perfS=30&perfWarmS=5'); await openMarket(p);
+     await p.waitForFunction(() => window.eggfarmPerf?.done, null, { timeout: 60000 }); const s = await p.evaluate(() => window.eggfarmPerf.result);
+     await p.screenshot({ path: `qa-out/perf-f24-360-${eng}.png` }); ok('F24_frame_sampler', s.pass, s); await ctx.close(); }
+-} finally { writeFileSync(`qa-out/queue-qa-${eng}.json`, JSON.stringify(res, null, 1)); await br.close(); process.kill(-srv.pid); }
++} finally { writeFileSync(`qa-out/queue-qa-${eng}.json`, JSON.stringify(res, null, 1)); await br.close(); stopOrReport(srv, srvRec, 'queue-qa'); }
+ process.exit(Object.values(res).every(r => r.pass) ? 0 : 1);
+diff --git a/scripts/recorded-pid.mjs b/scripts/recorded-pid.mjs
+index 91cbb6e..297e323 100644
+--- a/scripts/recorded-pid.mjs
++++ b/scripts/recorded-pid.mjs
+@@ -4,36 +4,44 @@
+ // /proc/<pid>/stat for that ONE pid and refuse if anything differs: gone or zombie, another boot, another start time (a
+ // reused PID), not our child, or (for a group signal) not the leader of its own process group.
+ // There is no /proc walk and no name or pattern matching here, by design. Linux only.
+-import fs from 'node:fs';
++import fs from 'node:fs'; import { spawn } from 'node:child_process';
+ const BOOT_ID = '/proc/sys/kernel/random/boot_id';
+ const PID_MAX = 4194304; // kernel ceiling for pid_max
+ export const bootId = () => fs.readFileSync(BOOT_ID, 'utf8').trim();
+ /** /proc/<pid>/stat of exactly this pid, or null when it does not exist. The comm field may hold spaces or ')', so
+  *  fields are counted from the LAST ')'. */
+ export function readStat(pid) {
+-  let s; try { s = fs.readFileSync(`/proc/${pid}/stat`, 'utf8'); } catch { return null; }
++  let s; try { s = fs.readFileSync(`/proc/${pid}/stat`, 'utf8'); } catch { return null; } // rule-21 guarded site: one pid
+   const f = s.slice(s.lastIndexOf(')') + 2).split(' '); // f[0] = field 3 (state) ... f[19] = field 22 (starttime)
+   return { state: f[0], ppid: +f[1], pgrp: +f[2], starttime: f[19] };
+ }
+ const pidProblem = pid => !Number.isInteger(pid) || pid <= 1 || pid > PID_MAX ? `invalid pid ${JSON.stringify(pid)}` : pid === process.pid ? 'own pid' : null;
+ /** Record a process right after we spawned it. Returns null (nothing may ever be signalled) unless `pid` is a live
+- *  child of `parent` (default: this process). */
+-export function recordPid(pid, { parent = process.pid } = {}) {
++ *  child of THIS process. There is deliberately no parent option (UI QA #89 F1): "ours" always means process.pid. */
++export function recordPid(pid) {
+   if (pidProblem(pid)) return null;
+   const st = readStat(pid);
+-  if (!st || st.state === 'Z' || st.ppid !== parent) return null;
+-  return Object.freeze({ pid, starttime: st.starttime, bootId: bootId(), parent });
++  if (!st || st.state === 'Z' || st.ppid !== process.pid) return null;
++  return Object.freeze({ pid, starttime: st.starttime, bootId: bootId(), parent: process.pid });
++}
++/** Shape check of a record (UI QA #89 F6): a non-object or a missing or ill-typed field is refused outright. */
++function malformed(rec) {
++  if (typeof rec !== 'object' || Array.isArray(rec)) return `malformed record (${Array.isArray(rec) ? 'array' : typeof rec})`;
++  if (typeof rec.starttime !== 'string' || !/^\d+$/.test(rec.starttime)) return 'malformed record (starttime)';
++  if (typeof rec.bootId !== 'string' || !rec.bootId) return 'malformed record (bootId)';
++  return null;
+ }
+ /** null when `rec` still names the process we recorded, else the reason to refuse. */
+ export function recordProblem(rec, { group = true } = {}) {
+-  if (!rec) return 'no record (not started by us, or it exited before it was recorded)';
+-  const bad = pidProblem(rec.pid); if (bad) return bad;
++  if (rec === null || rec === undefined) return 'no record (not started by us, or it exited before it was recorded)';
++  const bad = pidProblem(rec?.pid) ?? malformed(rec); if (bad) return bad;
++  if (rec.parent !== process.pid) return `recorded parent ${rec.parent} is not this process ${process.pid} (not our record)`;
+   if (rec.bootId !== bootId()) return 'recorded on another boot';
+   const st = readStat(rec.pid);
+   if (!st) return 'gone';
+   if (st.state === 'Z') return 'exited (zombie)';
+   if (st.starttime !== rec.starttime) return `start time ${st.starttime} != recorded ${rec.starttime} (reused pid)`;
+-  if (st.ppid !== rec.parent) return `parent ${st.ppid} != recorded ${rec.parent} (not our child)`;
++  if (st.ppid !== process.pid) return `parent ${st.ppid} != this process ${process.pid} (not our child)`;
+   if (group && st.pgrp !== rec.pid) return `not a process-group leader (pgrp ${st.pgrp})`;
+   return null;
+ }
+@@ -42,7 +50,8 @@ export function recordProblem(rec, { group = true } = {}) {
+ export function killRecorded(rec, signal = 'SIGTERM', { group = true } = {}) {
+   const reason = recordProblem(rec, { group });
+   if (reason) return { ok: false, pid: rec?.pid ?? null, reason };
+-  try { process.kill(group ? -rec.pid : rec.pid, signal); } catch (e) { return { ok: false, pid: rec.pid, reason: `kill failed (${e?.code ?? e})` }; }
++  try { process.kill(group ? -rec.pid : rec.pid, signal); } catch (e) { // rule-21 guarded site: after recordProblem
++    return { ok: false, pid: rec.pid, reason: `signal failed (${e?.code ?? e})` }; }
+   return { ok: true, pid: rec.pid, reason: null };
+ }
+ /** killRecorded for a ChildProcess we hold: also refused once Node has seen it exit (so a reaped and reused pid is
+@@ -51,3 +60,68 @@ export function stopChild(child, rec, signal = 'SIGTERM', opts = {}) {
+   if (child.exitCode !== null || child.signalCode !== null) return { ok: false, pid: rec?.pid ?? null, reason: 'exited' };
+   return killRecorded(rec, signal, opts);
+ }
++
++// ---- process groups (UI QA #89 F2) ---------------------------------------------------------------------------------
++/** Spawn `cmd` detached (a new process group led by the child) and record it at once. The only detached spawn the
++ *  repo scripts may use; `rec` is null if it could not be recorded (then nothing is ever signalled). */
++export function spawnRecorded(cmd, args = [], opts = {}) {
++  const child = spawn(cmd, args, { ...opts, detached: true }); // rule-21 guarded site: detached spawn, recorded below
++  return { child, rec: child.pid ? recordPid(child.pid) : null };
++}
++/** Direct children of ONE pid, from its own /proc/<pid>/task/<tid>/children files (no /proc scan). */
++function childrenOf(pid) {
++  let tids = []; try { tids = fs.readdirSync(`/proc/${pid}/task`); } catch { return []; } // rule-21 guarded site: one recorded pid
++  const out = [];
++  for (const t of tids) { try { out.push(...fs.readFileSync(`/proc/${pid}/task/${t}/children`, 'utf8').trim().split(/\s+/).filter(Boolean).map(Number)); } catch {} } // rule-21 guarded site
++  return out;
++}
++/** Snapshot of the recorded leader's live descendants, each with its own start time (taken while the leader is still
++ *  ours; [] otherwise). Survivors are later identified against this list, never by name or pattern. */
++export function groupMembers(rec) {
++  if (recordProblem(rec, { group: true })) return [];
++  const out = [], seen = new Set([rec.pid]), todo = [rec.pid];
++  while (todo.length && out.length < 512) for (const k of childrenOf(todo.shift())) {
++    if (seen.has(k)) continue; seen.add(k);
++    const st = readStat(k); if (st && st.state !== 'Z') { out.push(Object.freeze({ pid: k, starttime: st.starttime, pgrp: st.pgrp })); todo.push(k); }
++  }
++  return out;
++}
++/** Does the recorded process group still have members? Signal 0 only (nothing is delivered), and only for our own,
++ *  same-boot record. 'empty' | 'members' | 'foreign' (EPERM: someone else's group) | 'refused' | 'error'. */
++export function groupProbe(rec) {
++  if (rec === null || rec === undefined || pidProblem(rec?.pid) || malformed(rec) || rec.parent !== process.pid || rec.bootId !== bootId()) return 'refused';
++  try { process.kill(-rec.pid, 0); return 'members'; } // rule-21 guarded site: signal 0 probe
++  catch (e) { return e?.code === 'ESRCH' ? 'empty' : e?.code === 'EPERM' ? 'foreign' : 'error'; }
++}
++/** Who of the recorded leader + snapshot is still alive (same start time), plus a group probe once the leader is
++ *  reaped. While the leader is an unreaped zombie it still counts as a group member, so then the snapshot is the
++ *  evidence (probe 'leader-unreaped'). If the leader's pid now has another start time it was reused, which the kernel
++ *  only allows once no process group with that id exists any more: our group is empty, and -pid is never probed then.
++ *  `probe: false` = snapshot only, no signal at all (used after an identity refusal). */
++export function survivors(rec, members = [], { probe = true } = {}) {
++  const alive = m => { const st = readStat(m.pid); return !!st && st.state !== 'Z' && st.starttime === m.starttime; };
++  const live = members.filter(alive).map(m => m.pid);
++  const lst = rec ? readStat(rec.pid) : null, leaderHere = !!lst && lst.starttime === rec.starttime;
++  if (leaderHere && lst.state !== 'Z') live.unshift(rec.pid);
++  return { live, probe: !probe ? 'not probed' : leaderHere ? 'leader-unreaped' : lst ? 'empty' : groupProbe(rec) };
++}
++const nap = ms => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms); // sync: also usable in 'exit' handlers
++/** Stop a recorded group and verify it is empty. Synchronous. Signals only the recorded group (once, after the identity
++ *  check); survivors are REPORTED, never signalled again and never dropped: { ok, signalled, reason, survivors, probe }.
++ *  ok is true only when the group is verifiably gone. */
++export function stopGroup(child, rec, { signal = 'SIGTERM', graceMs = 3000, members = [] } = {}) {
++  const exitedBefore = child.exitCode !== null || child.signalCode !== null;
++  const snap = [...members, ...(exitedBefore ? [] : groupMembers(rec))].filter((m, i, a) => a.findIndex(x => x.pid === m.pid && x.starttime === m.starttime) === i);
++  const r = exitedBefore ? { ok: false, reason: 'leader exited before stop' } : stopChild(child, rec, signal);
++  if (!exitedBefore && !r.ok) { const s = survivors(rec, snap, { probe: false }); return { ok: false, signalled: false, reason: `refused: ${r.reason}`, survivors: s.live, probe: s.probe }; }
++  let s = survivors(rec, snap);
++  for (let t = 0; t < graceMs && s.live.length; t += 50) { nap(50); s = survivors(rec, snap); }
++  const clean = s.live.length === 0 && (s.probe === 'empty' || s.probe === 'leader-unreaped');
++  return { ok: clean, signalled: r.ok, reason: clean ? (r.ok ? null : r.reason) : 'group members remain', survivors: s.live, probe: s.probe };
++}
++/** For the plain browser scripts: stopGroup + one loud line when the group is not verifiably gone. Returns ok. */
++export function stopOrReport(child, rec, tag) {
++  const r = stopGroup(child, rec); if (r.ok) return true;
++  console.error(`${tag}: SURVIVORS vite group ${rec?.pid ?? child.pid ?? '?'}: ${r.reason}; surviving pids: ${r.survivors.length ? r.survivors.join(' ') : 'none in the snapshot'} (group probe ${r.probe}); not signalled again`);
++  if (!process.exitCode) process.exitCode = 3; return false;
++}
+diff --git a/scripts/screenshot.mjs b/scripts/screenshot.mjs
+index 7f210c1..77c8684 100644
+--- a/scripts/screenshot.mjs
++++ b/scripts/screenshot.mjs
+@@ -1,9 +1,9 @@
+ // Portrait-phone screenshots of the built game (npm run build && npm run screenshot). Uses system Chrome, headless.
+ import { chromium } from 'playwright-core';
+-import { spawn } from 'node:child_process';
++import { spawnRecorded, stopOrReport } from './recorded-pid.mjs';
+ const OUT = new URL('../../engineering/screenshots/', import.meta.url).pathname;
+ const port = 4173, url = `http://127.0.0.1:${port}/?marketSeed=7`;
+-const srv = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
++const { child: srv, rec: srvRec } = spawnRecorded('npx', ['vite', 'preview', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
+ await new Promise(r => setTimeout(r, 1500));
+ const browser = await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'] });
+ const errors = [];
+@@ -25,5 +25,5 @@ await shot('m1-welcome-back-portrait-390x844', t => base(t - 4_320_000), async p
+ { const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+   const page = await ctx.newPage(); await page.goto(url); await page.getByText('Tap to start').click(); await page.waitForTimeout(500);
+   await page.screenshot({ path: `${OUT}m1-onboarding-portrait-390x844.png` }); console.log('saved onboarding'); await ctx.close(); }
+-await browser.close(); srv.kill();
++await browser.close(); stopOrReport(srv, srvRec, 'screenshot');
+ if (errors.length) { console.error('page errors:\n' + errors.join('\n')); process.exit(1); }
+diff --git a/scripts/serve-own.mjs b/scripts/serve-own.mjs
+index 2466a41..0520320 100644
+--- a/scripts/serve-own.mjs
++++ b/scripts/serve-own.mjs
+@@ -3,8 +3,8 @@
+ // from another worktree on the same port once made a run test the wrong build.)
+ // port 0 / undefined (the default for callers without PORT set): probe a free port from the OS, so parallel worktrees don't
+ // collide on a fixed default; the chosen port is printed to stderr and returned. An explicit port is used as-is.
+-import { spawn, execSync } from 'node:child_process'; import fs from 'node:fs'; import path from 'node:path'; import net from 'node:net';
+-import { recordPid, stopChild } from './recorded-pid.mjs';
++import { execSync } from 'node:child_process'; import fs from 'node:fs'; import path from 'node:path'; import net from 'node:net';
++import { spawnRecorded, stopGroup, groupMembers } from './recorded-pid.mjs';
+ export const freePort = () => new Promise((res, rej) => { const s = net.createServer(); s.unref(); s.on('error', rej);
+   s.listen(0, '127.0.0.1', () => { const { port } = s.address(); s.close(() => res(port)); }); });
+ const FETCH_MS = 10000; // CCR n4: no fetch may hang a run
+@@ -12,18 +12,24 @@ const FETCH_MS = 10000; // CCR n4: no fetch may hang a run
+  *  serveOwn resolves) still kills it. Only these process groups are ever killed.
+  *  D-HOE-20261030-04 M1: each is recorded with its start time, parent and boot id (recorded-pid.mjs), and its group is
+  *  signalled only while it is still that unexited child of ours and leads its own group; anything else is refused. */
+-const children = new Map(); // ChildProcess -> record (null if it exited before it could be recorded: never signalled)
++const children = new Map(); // ChildProcess -> { rec (null if it exited before it was recorded: never signalled), members }
+ export const liveChildren = () => children.size;
++/** UI QA #89 F2: one loud line for a stop that did not verifiably empty the group (null when it did). */
++export function stopReport(res, pid) {
++  if (res.ok) return null;
++  return `serveOwn: SURVIVORS vite group ${pid ?? '?'}: ${res.reason}; surviving pids: ${res.survivors.length ? res.survivors.join(' ') : 'none in the snapshot'} (group probe ${res.probe}); not signalled again - stop them through a stop list`;
++}
+ function stopOne(c) {
+-  const r = stopChild(c, children.get(c)); children.delete(c);
+-  if (!r.ok && r.reason !== 'exited' && r.reason !== 'gone') console.error(`serveOwn: not signalling vite group ${r.pid ?? '?'}: ${r.reason}`);
+-  return r;
++  const e = children.get(c); children.delete(c);
++  const res = stopGroup(c, e.rec, { members: e.members }), line = stopReport(res, e.rec?.pid ?? c.pid);
++  if (line) { console.error(line); if (!process.exitCode) process.exitCode = 3; } // never dropped silently, never exit 0
++  return res;
+ }
+ export function stopAllChildren() { for (const c of [...children.keys()]) stopOne(c); }
+ async function serveOnce(outDir, port, cwd) {
+-  const srv = spawn('npx', ['vite', 'preview', '--outDir', outDir, '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true, cwd });
++  const { child: srv, rec } = spawnRecorded('npx', ['vite', 'preview', '--outDir', outDir, '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', cwd });
+   let spawnErr = null; srv.on('error', e => { spawnErr = e; }); // CCR delta n5: e.g. npx missing -> one-line error, not a crash
+-  if (srv.pid) children.set(srv, recordPid(srv.pid));
++  const entry = { rec, members: [] }; if (srv.pid) children.set(srv, entry);
+   const stop = () => { if (children.has(srv)) stopOne(srv); };
+   try { // CCR n4: vite is stopped on ANY failure here, not only on a mismatch
+     let html = '';
+@@ -34,6 +40,7 @@ async function serveOnce(outDir, port, cwd) {
+     if (srv.exitCode !== null || !own.length || !own.every(f => html.includes(f)))
+       throw new Error(`serveOwn: port ${port} is not serving ${outDir} from ${cwd} (vite exit ${srv.exitCode}; expected ${own.join(',')}). Pick another PORT.`);
+   } catch (e) { stop(); throw e; }
++  entry.members = groupMembers(rec); // F2: vite (npx's child) and anything else in the group, by pid + start time
+   return { port, cwd, outDir, url: `http://127.0.0.1:${port}/`, stop };
+ }
+ export async function serveOwn(outDir, port = 0, cwd = process.cwd()) {
+diff --git a/scripts/smoke.mjs b/scripts/smoke.mjs
+index 34ac1d4..d42ae37 100644
+--- a/scripts/smoke.mjs
++++ b/scripts/smoke.mjs
+@@ -1,7 +1,7 @@
+ // Headless smoke test of the built game: start, collect, sell, buy, queue-full cue, no page errors.
+ import { chromium } from 'playwright-core';
+-import { spawn } from 'node:child_process';
+-const port = 4174; const srv = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
++import { spawnRecorded, stopOrReport } from './recorded-pid.mjs';
++const port = 4174; const { child: srv, rec: srvRec } = spawnRecorded('npx', ['vite', 'preview', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
+ await new Promise(r => setTimeout(r, 1500));
+ const browser = await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] });
+ const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, acceptDownloads: true })).newPage();
+@@ -75,5 +75,5 @@ if (await page.locator('.dbg').count()) fail('debug panel visible without ?debug
+   if (id !== await page.evaluate(() => localStorage.getItem('eggfarm.install_id'))) fail('install_id changed after Reset save');
+ }
+ if (errors.length) fail('page errors: ' + errors.join(' | '));
+-await browser.close(); srv.kill();
++await browser.close(); stopOrReport(srv, srvRec, 'smoke');
+ console.log(process.exitCode ? 'smoke: FAILED' : 'smoke: OK');
+diff --git a/tests/d2-guard.test.ts b/tests/d2-guard.test.ts
+new file mode 100644
+index 0000000..80e049f
+--- /dev/null
++++ b/tests/d2-guard.test.ts
+@@ -0,0 +1,126 @@
++// UI QA #89 F4 (+F5 b later): d2-kill-browser's halt guard. The "browser" here is our own recorded `sleep`
++// (spawnRecorded); every test cleans up its own children by their recorded PIDs. Nothing outside our group is touched.
++import { describe, it, expect, afterEach } from 'vitest';
++import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
++// @ts-expect-error plain .mjs helper without types
++import { spawnRecorded, recordPid, killRecorded, groupMembers, readStat } from '../scripts/recorded-pid.mjs';
++// @ts-expect-error plain .mjs helper without types
++import { createRunGuard, leftovers, Halt, playwrightPinProblem } from '../scripts/d2-guard.mjs';
++import { EventEmitter } from 'node:events';
++
++const mine: any[] = [], dirs: string[] = [];
++const exited = (c: any) => c.exitCode !== null || c.signalCode !== null ? Promise.resolve() : new Promise<void>(r => c.once('exit', () => r()));
++afterEach(async () => {
++  for (const c of mine.splice(0)) if (c.exitCode === null && c.signalCode === null) { expect(killRecorded(recordPid(c.pid), 'SIGKILL', { group: true }).ok).toBe(true); await exited(c); }
++  for (const d of dirs.splice(0)) fs.rmSync(d, { recursive: true, force: true }); // our own mkdtemp dirs, by exact path
++});
++const evDir = () => { const d = fs.mkdtempSync(path.join(os.tmpdir(), 'd2guard-test-')); dirs.push(d); return d; };
++const browserLike = async (cmd = 'sleep 30 & wait') => {
++  const { child, rec } = spawnRecorded('sh', ['-c', cmd], { stdio: 'ignore' }); mine.push(child);
++  await new Promise(r => setTimeout(r, 100)); return { child, rec, members: groupMembers(rec) };
++};
++const quiet = { log: () => {} };
++
++describe('F4: d2 checks the group after its kill and halts on leftovers or a refusal', () => {
++  it('clean kill: group SIGKILLed, leftovers clean, no halt, no stop list', async () => {
++    const L = await browserLike(); const g = createRunGuard({ engine: 't', evidenceDir: evDir(), ...quiet });
++    const k = killRecorded(L.rec, 'SIGKILL', { group: true }); expect(k.ok).toBe(true);
++    const s = await g.afterKill(k, L); expect(s).toMatchObject({ live: [], probe: 'empty', clean: true });
++    expect(fs.existsSync(g.stopListPath)).toBe(false); expect(JSON.parse(fs.readFileSync(g.evidencePath, 'utf8')).halted).toBe(false);
++  });
++  it('leftover member after the kill (a member that left the group) -> HALT, its PID ALIVE in STOP-LIST-for-HoO.txt, evidence halted', async () => {
++    // stand-in for a member the group SIGKILL did not reach: only the leader is killed (group:false). The member is a
++    // `sleep 2` that expires on its own (it is no longer our child, so it is never signalled here).
++    const L = await browserLike('sleep 2 & wait'); const g = createRunGuard({ engine: 't', evidenceDir: evDir(), leftoverWaitMs: 300, ...quiet });
++    const member = L.members[0]; expect(member).toBeTruthy();
++    const k = killRecorded(L.rec, 'SIGKILL', { group: false }); expect(k.ok).toBe(true);
++    await expect(g.afterKill(k, L)).rejects.toBeInstanceOf(Halt);
++    const list = fs.readFileSync(g.stopListPath, 'utf8');
++    expect(list).toMatch(/HALT: group leftovers after SIGKILL/); expect(list).toContain(`${member.pid} ${member.starttime} ALIVE group member`);
++    expect(list).toMatch(new RegExp(`^${L.rec.pid} ${L.rec.starttime} gone recorded browser leader$`, 'm'));
++    const ev = JSON.parse(fs.readFileSync(g.evidencePath, 'utf8')); expect(ev.halted).toBe(true); expect(ev.stopList.map((x: any) => x.pid)).toContain(member.pid);
++    expect(await leftovers(L.rec, L.members, { waitMs: 0 })).toMatchObject({ live: [member.pid], probe: 'members' });
++    expect(await leftovers(L.rec, L.members, { waitMs: 5000 })).toMatchObject({ live: [], probe: 'empty', clean: true }); // expired
++  });
++  it('refused kill (reused pid record) -> HALT with the recorded PID on the stop list, nothing signalled', async () => {
++    const L = await browserLike(); const g = createRunGuard({ engine: 't', evidenceDir: evDir(), leftoverWaitMs: 200, ...quiet });
++    const bad = { ...L.rec, starttime: String(+L.rec.starttime - 1) };
++    const k = killRecorded(bad, 'SIGKILL', { group: true }); expect(k.ok).toBe(false);
++    await expect(g.afterKill(k, L)).rejects.toThrow(/HALT: SIGKILL refused for browser group \d+: start time/);
++    expect(fs.readFileSync(g.stopListPath, 'utf8')).toContain(`${L.rec.pid} ${L.rec.starttime} ALIVE recorded browser leader`);
++    expect(readStat(L.child.pid)).toBeTruthy(); expect(L.child.exitCode).toBeNull();
++  });
++});
++
++// F5 (HoO ruling): Playwright's own group kill is accepted only if d2 never triggers it on purpose (a), halts when it
++// may have fired (b), and Playwright stays pinned (c).
++const fakeCtx = (close: () => Promise<void>) => Object.assign(new EventEmitter(), { close });
++describe('F5 (a): d2 never asks Playwright to force-kill', () => {
++  const PW_FORCE: [string, RegExp][] = [
++    ['browser.process()', /\.process\s*\(/], ['launchServer', /\blaunchServer\b/], ['signal-handler options', /\bhandleSIG(INT|TERM|HUP)\b/],
++    ['close() with options (timeout/reason)', /\.close\s*\(\s*[^)\s]/], ['Playwright internals', /\bgracefullyClose\b|\bkillProcess\b|\bkillAndWait\b|processLauncher|coreBundle|playwright-core\/lib/],
++    ['timeout env/patch', /PLAYWRIGHT_\w*TIMEOUT|PW_\w*TIMEOUT|\bsetDefault(Navigation)?Timeout\s*\(\s*\d{1,3}\s*\)/],
++    ['patching Playwright objects', /\b(pw|T|chromium|firefox|webkit|ctx|browser)\s*\.\s*(close|kill|_\w+)\s*=[^=]/],
++    ['private Playwright fields', /\.\s*_(browser|connection|channel|process|initializer)\b/],
++  ];
++  const NEG = ["browser.process().kill('SIGKILL')", "ctx.browser().process()", "await ctx.close({ reason: 'x' })", "await browser.close({timeout:1})",
++    "pw.chromium.launchServer({})", "T.launchPersistentContext(d, { handleSIGTERM: false })", "process.env.PW_TEST_TIMEOUT = '1'",
++    "ctx.close = async () => {}", "ctx._browser._connection.close()", "import x from 'playwright-core/lib/server/utils/processLauncher.js'", "page.setDefaultTimeout(1)"];
++  it('negative fixtures: every forced-kill or timeout-tampering form is caught', () => { for (const l of NEG) expect(PW_FORCE.some(([, re]) => re.test(l)), l).toBe(true); });
++  for (const f of ['scripts/d2-kill-browser.mjs', 'scripts/d2-guard.mjs']) it(`${f}: no forced-kill API, no close() options, no patched timeouts`, () => {
++    const lines = fs.readFileSync(f, 'utf8').split('\n');
++    expect(lines.flatMap((l, i) => PW_FORCE.filter(([, re]) => re.test(l)).map(([id]) => `${f}:${i + 1} [${id}] ${l.trim()}`))).toEqual([]);
++  });
++  it("d2's only SIGKILL is the guarded killRecorded of the recorded group", () => {
++    const l = fs.readFileSync('scripts/d2-kill-browser.mjs', 'utf8').split('\n').filter(x => /['"`]SIGKILL['"`]/.test(x));
++    expect(l).toHaveLength(1); expect(l[0]).toMatch(/killRecorded\(L\.rec, 'SIGKILL', \{ group: true \}\)/);
++  });
++});
++describe('F5 (b): a close() timeout or an unexpected exit/disconnect halts with the leftover check and the stop list', () => {
++  it('close() never finishes -> HALT after the observing watchdog; leader ALIVE on STOP-LIST-for-HoO.txt; evidence halted + playwrightKillPossible', async () => {
++    const B = await browserLike(); const g = createRunGuard({ engine: 't', evidenceDir: evDir(), leftoverWaitMs: 200, ...quiet });
++    const L = g.watch({ ...B, ctx: fakeCtx(() => new Promise<void>(() => {})) });
++    await expect(g.closeCtx(L, { watchdogMs: 200 })).rejects.toThrow(/HALT: close\(\) of browser \d+ did not finish in 200 ms/);
++    expect(fs.readFileSync(g.stopListPath, 'utf8')).toContain(`${B.rec.pid} ${B.rec.starttime} ALIVE recorded browser leader`);
++    expect(fs.readFileSync(g.stopListPath, 'utf8')).toContain(`${B.members[0].pid} ${B.members[0].starttime} ALIVE group member`);
++    expect(JSON.parse(fs.readFileSync(g.evidencePath, 'utf8'))).toMatchObject({ halted: true, playwrightKillPossible: true });
++  });
++  it('close() rejects -> HALT', async () => {
++    const B = await browserLike(); const g = createRunGuard({ engine: 't', evidenceDir: evDir(), leftoverWaitMs: 100, ...quiet });
++    const L = g.watch({ ...B, ctx: fakeCtx(() => Promise.reject(new Error('Target closed'))) });
++    await expect(g.closeCtx(L)).rejects.toThrow(/HALT: close\(\) of browser \d+ failed: Target closed/);
++  });
++  it('unexpected disconnect (close event we did not announce) -> checkpoint HALTs; surviving PIDs listed; an error after it is attributed to it', async () => {
++    const B = await browserLike(); const g = createRunGuard({ engine: 't', evidenceDir: evDir(), leftoverWaitMs: 100, ...quiet });
++    const L = g.watch({ ...B, ctx: fakeCtx(async () => {}) });
++    await g.checkpoint(); // nothing yet
++    L.ctx.emit('close');
++    await expect(g.haltFor(new Error('page.goto: Target page, context or browser has been closed'), L)).rejects.toThrow(/HALT: browser \d+ exited\/disconnected unexpectedly/);
++    const list = fs.readFileSync(g.stopListPath, 'utf8'); expect(list).toContain(`${B.rec.pid} ${B.rec.starttime} ALIVE`);
++    expect(JSON.parse(fs.readFileSync(g.evidencePath, 'utf8')).playwrightKillPossible).toBe(true);
++  });
++  it('an announced exit (our own SIGKILL / closeCtx) is not a halt', async () => {
++    const B = await browserLike(); const g = createRunGuard({ engine: 't', evidenceDir: evDir(), ...quiet });
++    const L = g.watch({ ...B, ctx: fakeCtx(async () => {}) });
++    g.expectExit(L); L.ctx.emit('close'); await g.checkpoint(); await g.closeCtx(L);
++    expect(fs.existsSync(g.stopListPath)).toBe(false); expect(JSON.parse(fs.readFileSync(g.evidencePath, 'utf8')).halted).toBe(false);
++  });
++});
++describe('F5 (c): Playwright stays pinned', () => {
++  it('installed playwright-core == package-lock.json version == the version package.json names (and @playwright/test, if present)', () => {
++    expect(playwrightPinProblem(process.cwd())).toBeNull();
++    const lockV = JSON.parse(fs.readFileSync('package-lock.json', 'utf8')).packages['node_modules/playwright-core'].version;
++    expect(JSON.parse(fs.readFileSync('node_modules/playwright-core/package.json', 'utf8')).version).toBe(lockV);
++  });
++  const fake = (installed: string, spec = '^1.64.1', lockV = '1.64.1', extra: Record<string, any> = {}) => {
++    const d = evDir(); fs.mkdirSync(path.join(d, 'node_modules/playwright-core'), { recursive: true });
++    fs.writeFileSync(path.join(d, 'package.json'), JSON.stringify({ devDependencies: { 'playwright-core': spec, ...extra.deps } }));
++    fs.writeFileSync(path.join(d, 'package-lock.json'), JSON.stringify({ packages: { '': { devDependencies: { 'playwright-core': spec, ...extra.deps } }, 'node_modules/playwright-core': { version: lockV }, ...extra.lock } }));
++    fs.writeFileSync(path.join(d, 'node_modules/playwright-core/package.json'), JSON.stringify({ version: installed })); return d;
++  };
++  it('fails on an installed version that differs from the lockfile', () => expect(playwrightPinProblem(fake('1.65.0'))).toMatch(/installed 1\.65\.0 != lockfile 1\.64\.1/));
++  it('fails when the lockfile moved but package.json still names the old version', () => expect(playwrightPinProblem(fake('1.65.0', '^1.64.1', '1.65.0'))).toMatch(/spec \^1\.64\.1 does not name the lockfile version 1\.65\.0/));
++  it('fails when @playwright/test is used but not installed at its lockfile version', () =>
++    expect(playwrightPinProblem(fake('1.64.1', '^1.64.1', '1.64.1', { deps: { '@playwright/test': '1.64.1' }, lock: { 'node_modules/@playwright/test': { version: '1.64.1' } } }))).toMatch(/@playwright\/test: installed \(missing\)/));
++  it('passes for a consistent fake tree', () => expect(playwrightPinProblem(fake('1.64.1'))).toBeNull());
++});
+diff --git a/tests/fixtures/rule21-negative/01.fixture b/tests/fixtures/rule21-negative/01.fixture
+new file mode 100644
+index 0000000..4cd616f
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/01.fixture
+@@ -0,0 +1 @@
++kill -9 $pid
+diff --git a/tests/fixtures/rule21-negative/02.fixture b/tests/fixtures/rule21-negative/02.fixture
+new file mode 100644
+index 0000000..1bf2d7e
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/02.fixture
+@@ -0,0 +1 @@
++kill -TERM -$pgid
+diff --git a/tests/fixtures/rule21-negative/03.fixture b/tests/fixtures/rule21-negative/03.fixture
+new file mode 100644
+index 0000000..8e70e44
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/03.fixture
+@@ -0,0 +1 @@
++kill -- -$pgid
+diff --git a/tests/fixtures/rule21-negative/04.fixture b/tests/fixtures/rule21-negative/04.fixture
+new file mode 100644
+index 0000000..959b333
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/04.fixture
+@@ -0,0 +1 @@
++/bin/kill $p
+diff --git a/tests/fixtures/rule21-negative/05.fixture b/tests/fixtures/rule21-negative/05.fixture
+new file mode 100644
+index 0000000..81af4f0
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/05.fixture
+@@ -0,0 +1 @@
++command kill $p
+diff --git a/tests/fixtures/rule21-negative/06.fixture b/tests/fixtures/rule21-negative/06.fixture
+new file mode 100644
+index 0000000..e3529af
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/06.fixture
+@@ -0,0 +1 @@
++env kill $p
+diff --git a/tests/fixtures/rule21-negative/07.fixture b/tests/fixtures/rule21-negative/07.fixture
+new file mode 100644
+index 0000000..1349138
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/07.fixture
+@@ -0,0 +1 @@
++builtin kill $p
+diff --git a/tests/fixtures/rule21-negative/08.fixture b/tests/fixtures/rule21-negative/08.fixture
+new file mode 100644
+index 0000000..fef1195
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/08.fixture
+@@ -0,0 +1 @@
++echo $p | xargs kill
+diff --git a/tests/fixtures/rule21-negative/09.fixture b/tests/fixtures/rule21-negative/09.fixture
+new file mode 100644
+index 0000000..6922871
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/09.fixture
+@@ -0,0 +1 @@
++trap 'kill 0' EXIT
+diff --git a/tests/fixtures/rule21-negative/10.fixture b/tests/fixtures/rule21-negative/10.fixture
+new file mode 100644
+index 0000000..cad9794
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/10.fixture
+@@ -0,0 +1 @@
++kill %1
+diff --git a/tests/fixtures/rule21-negative/11.fixture b/tests/fixtures/rule21-negative/11.fixture
+new file mode 100644
+index 0000000..547f802
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/11.fixture
+@@ -0,0 +1 @@
++timeout 10m npm test
+diff --git a/tests/fixtures/rule21-negative/12.fixture b/tests/fixtures/rule21-negative/12.fixture
+new file mode 100644
+index 0000000..332b18f
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/12.fixture
+@@ -0,0 +1 @@
++ps axo pid,ppid
+diff --git a/tests/fixtures/rule21-negative/13.fixture b/tests/fixtures/rule21-negative/13.fixture
+new file mode 100644
+index 0000000..b60a9f1
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/13.fixture
+@@ -0,0 +1 @@
++process.kill (pid)
+diff --git a/tests/fixtures/rule21-negative/14.fixture b/tests/fixtures/rule21-negative/14.fixture
+new file mode 100644
+index 0000000..7af637c
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/14.fixture
+@@ -0,0 +1 @@
++process.kill(-srv.pid)
+diff --git a/tests/fixtures/rule21-negative/15.fixture b/tests/fixtures/rule21-negative/15.fixture
+new file mode 100644
+index 0000000..eccdab6
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/15.fixture
+@@ -0,0 +1 @@
++loginctl kill-session 3
+diff --git a/tests/fixtures/rule21-negative/16.fixture b/tests/fixtures/rule21-negative/16.fixture
+new file mode 100644
+index 0000000..b86f559
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/16.fixture
+@@ -0,0 +1 @@
++fuser -k 5185/tcp
+diff --git a/tests/fixtures/rule21-negative/17.fixture b/tests/fixtures/rule21-negative/17.fixture
+new file mode 100644
+index 0000000..f6dc2ee
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/17.fixture
+@@ -0,0 +1 @@
++timeout --signal=TERM 600 node x.mjs
+diff --git a/tests/fixtures/rule21-negative/18.fixture b/tests/fixtures/rule21-negative/18.fixture
+new file mode 100644
+index 0000000..b7947be
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/18.fixture
+@@ -0,0 +1 @@
++timeout -k 5 600 node x.mjs
+diff --git a/tests/fixtures/rule21-negative/19.fixture b/tests/fixtures/rule21-negative/19.fixture
+new file mode 100644
+index 0000000..7f0b8a1
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/19.fixture
+@@ -0,0 +1 @@
++pidof node
+diff --git a/tests/fixtures/rule21-negative/20.fixture b/tests/fixtures/rule21-negative/20.fixture
+new file mode 100644
+index 0000000..dab73d7
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/20.fixture
+@@ -0,0 +1 @@
++ps aux | grep vite
+diff --git a/tests/fixtures/rule21-negative/21.fixture b/tests/fixtures/rule21-negative/21.fixture
+new file mode 100644
+index 0000000..c611fe2
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/21.fixture
+@@ -0,0 +1 @@
++for f in /proc/[0-9]*/stat; do :; done
+diff --git a/tests/fixtures/rule21-negative/22.fixture b/tests/fixtures/rule21-negative/22.fixture
+new file mode 100644
+index 0000000..0600bfd
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/22.fixture
+@@ -0,0 +1 @@
++skill -TERM node
+diff --git a/tests/fixtures/rule21-negative/23.fixture b/tests/fixtures/rule21-negative/23.fixture
+new file mode 100644
+index 0000000..0d7f0aa
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/23.fixture
+@@ -0,0 +1 @@
++K=ki""ll; $K $p
+diff --git a/tests/fixtures/rule21-negative/24.fixture b/tests/fixtures/rule21-negative/24.fixture
+new file mode 100644
+index 0000000..cc42abf
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/24.fixture
+@@ -0,0 +1 @@
++os.killpg(os.getpgid(p), 15)
+diff --git a/tests/fixtures/rule21-negative/25.fixture b/tests/fixtures/rule21-negative/25.fixture
+new file mode 100644
+index 0000000..0ee86c9
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/25.fixture
+@@ -0,0 +1 @@
++signal.pthread_kill(t, 15)
+diff --git a/tests/fixtures/rule21-negative/26.fixture b/tests/fixtures/rule21-negative/26.fixture
+new file mode 100644
+index 0000000..f60c666
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/26.fixture
+@@ -0,0 +1 @@
++p.terminate()
+diff --git a/tests/fixtures/rule21-negative/27.fixture b/tests/fixtures/rule21-negative/27.fixture
+new file mode 100644
+index 0000000..2f8dc50
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/27.fixture
+@@ -0,0 +1 @@
++p.send_signal(15)
+diff --git a/tests/fixtures/rule21-negative/28.fixture b/tests/fixtures/rule21-negative/28.fixture
+new file mode 100644
+index 0000000..4fee6d8
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/28.fixture
+@@ -0,0 +1 @@
++os.listdir('/proc')
+diff --git a/tests/fixtures/rule21-negative/29.fixture b/tests/fixtures/rule21-negative/29.fixture
+new file mode 100644
+index 0000000..7c438a9
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/29.fixture
+@@ -0,0 +1 @@
++fs.readdirSync('/proc')
+diff --git a/tests/fixtures/rule21-negative/30.fixture b/tests/fixtures/rule21-negative/30.fixture
+new file mode 100644
+index 0000000..c9e9122
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/30.fixture
+@@ -0,0 +1 @@
++nohup node server.mjs &
+diff --git a/tests/fixtures/rule21-negative/31.fixture b/tests/fixtures/rule21-negative/31.fixture
+new file mode 100644
+index 0000000..dc8efca
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/31.fixture
+@@ -0,0 +1 @@
++setsid -f vite preview
+diff --git a/tests/fixtures/rule21-negative/32.fixture b/tests/fixtures/rule21-negative/32.fixture
+new file mode 100644
+index 0000000..f8bb337
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/32.fixture
+@@ -0,0 +1 @@
++node x.mjs & disown
+diff --git a/tests/fixtures/rule21-negative/33.fixture b/tests/fixtures/rule21-negative/33.fixture
+new file mode 100644
+index 0000000..92a2300
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/33.fixture
+@@ -0,0 +1 @@
++spawn('vite',['preview'],{detached: true})
+diff --git a/tests/fixtures/rule21-negative/34.fixture b/tests/fixtures/rule21-negative/34.fixture
+new file mode 100644
+index 0000000..0f08817
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/34.fixture
+@@ -0,0 +1 @@
++start-stop-daemon --stop --name vite
+diff --git a/tests/fixtures/rule21-negative/35.fixture b/tests/fixtures/rule21-negative/35.fixture
+new file mode 100644
+index 0000000..5dfa2c3
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/35.fixture
+@@ -0,0 +1 @@
++ls /proc | grep -E '^[0-9]+$'
+diff --git a/tests/fixtures/rule21-negative/36.fixture b/tests/fixtures/rule21-negative/36.fixture
+new file mode 100644
+index 0000000..85e7558
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/36.fixture
+@@ -0,0 +1 @@
++for d in /proc/[0-9]*; do cat $d/cmdline; done
+diff --git a/tests/fixtures/rule21-negative/37.fixture b/tests/fixtures/rule21-negative/37.fixture
+new file mode 100644
+index 0000000..ec543bc
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/37.fixture
+@@ -0,0 +1 @@
++process['kill'](pid, 'SIGTERM')
+diff --git a/tests/fixtures/rule21-negative/38.fixture b/tests/fixtures/rule21-negative/38.fixture
+new file mode 100644
+index 0000000..eae895a
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/38.fixture
+@@ -0,0 +1 @@
++const { kill } = process; kill(pid)
+diff --git a/tests/fixtures/rule21-negative/39.fixture b/tests/fixtures/rule21-negative/39.fixture
+new file mode 100644
+index 0000000..324bf15
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/39.fixture
+@@ -0,0 +1 @@
++child.kill('SIGTERM')
+diff --git a/tests/fixtures/rule21-negative/40.fixture b/tests/fixtures/rule21-negative/40.fixture
+new file mode 100644
+index 0000000..debc2ba
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/40.fixture
+@@ -0,0 +1 @@
++execSync('kill -9 ' + pid)
+diff --git a/tests/fixtures/rule21-negative/41.fixture b/tests/fixtures/rule21-negative/41.fixture
+new file mode 100644
+index 0000000..5a2ff64
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/41.fixture
+@@ -0,0 +1 @@
++spawn('kill', ['-TERM', String(pid)])
+diff --git a/tests/fixtures/rule21-negative/42.fixture b/tests/fixtures/rule21-negative/42.fixture
+new file mode 100644
+index 0000000..bbd0d8f
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/42.fixture
+@@ -0,0 +1 @@
++fs.readdir('/proc', cb)
+diff --git a/tests/fixtures/rule21-negative/43.fixture b/tests/fixtures/rule21-negative/43.fixture
+new file mode 100644
+index 0000000..8f48aae
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/43.fixture
+@@ -0,0 +1 @@
++await fs.promises.readdir('/proc')
+diff --git a/tests/fixtures/rule21-negative/44.fixture b/tests/fixtures/rule21-negative/44.fixture
+new file mode 100644
+index 0000000..7840229
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/44.fixture
+@@ -0,0 +1 @@
++fs.opendirSync('/proc')
+diff --git a/tests/fixtures/rule21-negative/45.fixture b/tests/fixtures/rule21-negative/45.fixture
+new file mode 100644
+index 0000000..22582d7
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/45.fixture
+@@ -0,0 +1 @@
++fs.readdirSync(`/proc`)
+diff --git a/tests/fixtures/rule21-negative/46.fixture b/tests/fixtures/rule21-negative/46.fixture
+new file mode 100644
+index 0000000..f59fc45
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/46.fixture
+@@ -0,0 +1 @@
++execFileSync('/bin/kill', [String(pid)])
+diff --git a/tests/fixtures/rule21-negative/47.fixture b/tests/fixtures/rule21-negative/47.fixture
+new file mode 100644
+index 0000000..2b8fd05
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/47.fixture
+@@ -0,0 +1 @@
++spawnSync('pkill', ['-f', 'vite'])
+diff --git a/tests/fixtures/rule21-negative/48.fixture b/tests/fixtures/rule21-negative/48.fixture
+new file mode 100644
+index 0000000..bb1e8ad
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/48.fixture
+@@ -0,0 +1 @@
++process [ 'kill' ] (pid)
+diff --git a/tests/fixtures/rule21-negative/49.fixture b/tests/fixtures/rule21-negative/49.fixture
+new file mode 100644
+index 0000000..ce19280
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/49.fixture
+@@ -0,0 +1 @@
++srv.kill ()
+diff --git a/tests/fixtures/rule21-negative/README.md b/tests/fixtures/rule21-negative/README.md
+new file mode 100644
+index 0000000..ad1c4d4
+--- /dev/null
++++ b/tests/fixtures/rule21-negative/README.md
+@@ -0,0 +1,4 @@
++Rule-21 negative fixtures (UI QA #89 F3). Data only, never executed: one forbidden form per file; tests/rule21-source.test.ts
++requires every one to be flagged by tests/rule21-rules.ts. 01-36 = UI QA's harness list
++(artifacts/v5-ui/harness/tests/fixtures/audit-negative/forms, Architect review 8bd8fb46 M2 + N-m4); 37-49 = the JS forms named in
++qa/m3-recheck/pr89-58ad41b-static.md (3).
+diff --git a/tests/recorded-pid.test.ts b/tests/recorded-pid.test.ts
+index 246e4ec..b292639 100644
+--- a/tests/recorded-pid.test.ts
++++ b/tests/recorded-pid.test.ts
+@@ -5,15 +5,17 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
+ import { spawn, type ChildProcess } from 'node:child_process';
+ import fs from 'node:fs';
+ // @ts-expect-error plain .mjs helper without types
+-import { recordPid, recordProblem, killRecorded, stopChild, readStat, bootId } from '../scripts/recorded-pid.mjs';
++import { recordPid, recordProblem, killRecorded, stopChild, readStat, bootId, spawnRecorded, groupMembers, groupProbe, survivors, stopGroup } from '../scripts/recorded-pid.mjs';
++// @ts-expect-error plain .mjs helper without types
++import { stopReport } from '../scripts/serve-own.mjs';
+ 
+ const mine: ChildProcess[] = [];
+-function sleeper(detached = true): ChildProcess { const c = spawn('sleep', ['30'], { stdio: 'ignore', detached }); mine.push(c); return c; }
++function sleeper(detached = true): ChildProcess { const c = detached ? spawnRecorded('sleep', ['30'], { stdio: 'ignore' }).child : spawn('sleep', ['30'], { stdio: 'ignore' }); mine.push(c); return c; }
+ const exited = (c: ChildProcess) => c.exitCode !== null || c.signalCode !== null ? Promise.resolve() : new Promise<void>(r => c.once('exit', () => r()));
+ function noSignal() { return vi.spyOn(process, 'kill').mockImplementation(() => { throw new Error('process.kill must not be called'); }); }
+ afterEach(async () => {
+   vi.restoreAllMocks();
+-  for (const c of mine.splice(0)) if (c.exitCode === null && c.signalCode === null && c.pid) { process.kill(c.pid, 'SIGKILL'); await exited(c); }
++  for (const c of mine.splice(0)) if (c.exitCode === null && c.signalCode === null && c.pid) { expect(killRecorded(recordPid(c.pid), 'SIGKILL', { group: false }).ok).toBe(true); await exited(c); } // N2: own children, guarded API
+ });
+ 
+ describe('M1/m7: the recorded process is stopped', () => {
+@@ -44,6 +46,25 @@ describe('M1/m7: a foreign or reused pid is refused and nothing is signalled', (
+   it('foreign pids are never recorded: init (1), our own parent, ourselves, invalid values', () => {
+     for (const pid of [1, process.ppid, process.pid, 0, -1, NaN, 1.5, 4194305, '123' as any]) expect(recordPid(pid)).toBeNull();
+   });
++  it("F1: a forged record naming a foreign process's REAL parent is refused (sleep spawned by a child shell)", async () => {
++    // our detached sh is the parent of a `sleep 3`; that sleep is NOT our child. A record that names its real parent passes
++    // every check except "ours", which is now always process.pid.
++    const { child: sh } = spawnRecorded('sh', ['-c', 'sleep 3 & echo $!; wait'], { stdio: ['ignore', 'pipe', 'ignore'] }); mine.push(sh);
++    const g = +(await new Promise<string>(r => sh.stdout!.once("data", (d: Buffer) => r(String(d))))).trim();
++    const st = readStat(g); expect(st.ppid).toBe(sh.pid);
++    expect(recordPid(g)).toBeNull();
++    expect((recordPid as any)(g, { parent: sh.pid })).toBeNull(); // the old parent option is gone and ignored
++    const spy = noSignal();
++    for (const group of [false, true]) {
++      const r = killRecorded({ pid: g, starttime: st.starttime, bootId: bootId(), parent: sh.pid }, 'SIGTERM', { group });
++      expect(r.ok).toBe(false); expect(r.reason).toMatch(/not this process .* \(not our record\)/);
++    }
++    // even with parent: process.pid written into the forged record, the live ppid check refuses it
++    const r2 = killRecorded({ pid: g, starttime: st.starttime, bootId: bootId(), parent: process.pid }, 'SIGTERM', { group: false });
++    expect(r2.reason).toMatch(/parent \d+ != this process \d+ \(not our child\)/);
++    expect(spy).not.toHaveBeenCalled(); spy.mockRestore();
++    const shRec = recordPid(sh.pid); expect(killRecorded(shRec, 'SIGTERM').ok).toBe(true); await exited(sh); // group TERM: sh + its sleep
++  });
+   it('a forged record for a foreign process (our own parent) is refused: not our child', () => {
+     const spy = noSignal(); const st = readStat(process.ppid);
+     const r = killRecorded({ pid: process.ppid, starttime: st.starttime, bootId: bootId(), parent: process.pid }, 'SIGTERM', { group: false });
+@@ -64,8 +85,24 @@ describe('M1/m7: a foreign or reused pid is refused and nothing is signalled', (
+     const c = sleeper(false); const rec = recordPid(c.pid); const spy = noSignal();
+     const r = killRecorded(rec); expect(r.ok).toBe(false); expect(r.reason).toMatch(/not a process-group leader/); expect(spy).not.toHaveBeenCalled();
+   });
++  it('F6: invalid, own and malformed records are refused by killRecorded and stopChild themselves, with no signal', () => {
++    const c = sleeper(); const rec = recordPid(c.pid); const spy = noSignal();
++    const cases: [any, RegExp][] = [
++      ...[0, 1, -1, NaN, 1.5, 4194305, '123', undefined].map(pid => [{ ...rec, pid }, /^invalid pid/] as [any, RegExp]),
++      [{ ...rec, pid: process.pid }, /^own pid$/],
++      [5, /^invalid pid/], ['x', /^invalid pid/], [[c.pid], /^invalid pid/], [{ pid: c.pid }, /^malformed record \(starttime\)/],
++      [{ ...rec, starttime: undefined }, /^malformed record \(starttime\)/], [{ ...rec, starttime: +rec.starttime }, /^malformed record \(starttime\)/],
++      [{ ...rec, bootId: undefined }, /^malformed record \(bootId\)/], [{ ...rec, bootId: '' }, /^malformed record \(bootId\)/],
++      [{ ...rec, parent: undefined }, /not our record/], [{ ...rec, parent: process.ppid }, /not our record/],
++    ];
++    for (const [r, why] of cases) for (const group of [true, false]) {
++      expect(killRecorded(r, 'SIGKILL', { group }).reason, JSON.stringify(r)).toMatch(why);
++      expect(stopChild(c, r, 'SIGKILL', { group }).reason).toMatch(why);
++    }
++    expect(spy).not.toHaveBeenCalled(); expect(c.exitCode).toBeNull(); expect(c.signalCode).toBeNull();
++  });
+   it('an exited child is refused by stopChild and by killRecorded (gone or zombie), and no record means no signal', async () => {
+-    const c = sleeper(); const rec = recordPid(c.pid); process.kill(c.pid!, 'SIGKILL'); await exited(c);
++    const c = sleeper(); const rec = recordPid(c.pid); expect(killRecorded(rec, 'SIGKILL').ok).toBe(true); await exited(c);
+     const spy = noSignal();
+     expect(stopChild(c, rec)).toMatchObject({ ok: false, reason: 'exited' });
+     expect(killRecorded(rec).reason).toMatch(/^(gone|exited \(zombie\)|start time .* \(reused pid\))$/);
+@@ -74,10 +111,63 @@ describe('M1/m7: a foreign or reused pid is refused and nothing is signalled', (
+   });
+ });
+ 
+-describe('m7/M1: no /proc walk or pattern kill left in the two scripts', () => {
+-  for (const f of ['scripts/d2-kill-browser.mjs', 'scripts/serve-own.mjs', 'scripts/recorded-pid.mjs']) it(f, () => {
+-    const src = fs.readFileSync(f, 'utf8');
+-    expect(src).not.toMatch(/readdirSync\(\s*['"]\/proc/); expect(src).not.toMatch(/\/cmdline/); expect(src).not.toMatch(/pkill|killall|pgrep/);
+-    expect(src.match(/process\.kill\(/g) ?? []).toHaveLength(f.endsWith('recorded-pid.mjs') ? 1 : 0);
++// The source check (no /proc walk, no pattern or raw kill) lives in tests/rule21-source.test.ts (UI QA #89 F3).
++
++// UI QA #89 F2: a TERM-ignoring grandchild survives the group TERM; it must be found (by the spawn-time snapshot, no
++// /proc scan), reported with its PID and a non-ok result, and never signalled again. It is a `sleep 2` that expires on
++// its own; each test waits for that by its own PID + start time.
++const gone = async (m: { pid: number; starttime: string }) => { for (let i = 0; i < 100; i++) { const st = readStat(m.pid); if (!st || st.starttime !== m.starttime) return true; await new Promise(r => setTimeout(r, 50)); } return false; };
++async function termIgnoringGroup() {
++  const { child, rec } = spawnRecorded('sh', ['-c', '(trap "" TERM; exec sleep 2) & echo $!; wait'], { stdio: ['ignore', 'pipe', 'ignore'] }); mine.push(child);
++  const g = +(await new Promise<string>(r => child.stdout!.once("data", (d: Buffer) => r(String(d))))).trim();
++  await new Promise(r => setTimeout(r, 100)); // let the subshell exec sleep (TERM stays ignored across exec)
++  const members = groupMembers(rec); return { child, rec, g, members, gm: members.find((m: any) => m.pid === g) };
++}
++describe('F2: group survivors are found and reported, never dropped', () => {
++  it('spawnRecorded: a detached, recorded group leader; groupMembers snapshots its descendants with start times', async () => {
++    const { child, rec, g, members } = await termIgnoringGroup();
++    expect(rec).toMatchObject({ pid: child.pid, parent: process.pid }); expect(readStat(child.pid).pgrp).toBe(child.pid);
++    expect(members).toEqual([{ pid: g, starttime: readStat(g).starttime, pgrp: child.pid }]);
++    expect(groupProbe(rec)).toBe('members');
++    expect(stopGroup(child, rec, { graceMs: 200 }).survivors).toEqual([g]); await exited(child); expect(await gone({ pid: g, starttime: members[0].starttime })).toBe(true);
++  });
++  it('stopGroup: TERM reaches the group, the TERM-ignoring grandchild survives -> ok false, its PID reported, no second signal', async () => {
++    const { child, rec, g, gm } = await termIgnoringGroup(); const spy = vi.spyOn(process, 'kill');
++    const res = stopGroup(child, rec, { graceMs: 300 });
++    expect(res).toMatchObject({ ok: false, signalled: true, reason: 'group members remain', survivors: [g] });
++    expect(spy.mock.calls.filter(c => c[1] !== 0)).toEqual([[-child.pid!, 'SIGTERM']]); // one real signal, the recorded group
++    await exited(child); expect(child.signalCode).toBe('SIGTERM');
++    expect(survivors(rec, [gm])).toEqual({ live: [g], probe: 'members' }); // leader reaped: the group probe confirms it
++    expect(stopReport(res, child.pid)).toMatch(new RegExp(`^serveOwn: SURVIVORS vite group ${child.pid}: group members remain; surviving pids: ${g} `));
++    expect(await gone(gm)).toBe(true); expect(survivors(rec, [gm])).toEqual({ live: [], probe: 'empty' });
++  });
++  it('leader already exited before stop while a member lives -> ok false with that PID, nothing signalled (signal-0 probe only)', async () => {
++    const { child, rec, g, members, gm } = await termIgnoringGroup();
++    expect(killRecorded(rec, 'SIGTERM', { group: false }).ok).toBe(true); await exited(child); // only the leader dies
++    const spy = vi.spyOn(process, 'kill');
++    const res = stopGroup(child, rec, { members, graceMs: 200 });
++    expect(res).toMatchObject({ ok: false, signalled: false, reason: 'group members remain', survivors: [g], probe: 'members' });
++    expect(spy.mock.calls.every(c => c[0] === -child.pid! && c[1] === 0)).toBe(true); expect(spy).toHaveBeenCalled();
++    expect(stopReport(res, child.pid)).toMatch(/SURVIVORS .*surviving pids: \d+ \(group probe members\)/);
++    expect(await gone(gm)).toBe(true);
++  });
++  it('clean stop: the whole group exits on TERM -> ok true, no survivors, stopReport null; afterwards the probe is empty', async () => {
++    const { child, rec } = spawnRecorded('sh', ['-c', 'sleep 30 & wait'], { stdio: 'ignore' }); mine.push(child);
++    await new Promise(r => setTimeout(r, 100)); const members = groupMembers(rec); expect(members).toHaveLength(1);
++    const res = stopGroup(child, rec); expect(res).toMatchObject({ ok: true, signalled: true, survivors: [] }); expect(stopReport(res, child.pid)).toBeNull();
++    await exited(child); expect(survivors(rec, members)).toEqual({ live: [], probe: 'empty' });
++  });
++  it('groupProbe and groupMembers refuse records that are not ours (no signal, not even 0)', () => {
++    const c = sleeper(); const rec = recordPid(c.pid); const spy = noSignal();
++    for (const r of [null, undefined, 7, { ...rec, pid: 1 }, { ...rec, parent: process.ppid }, { ...rec, bootId: 'x' }, { ...rec, starttime: 'x' }]) {
++      expect(groupProbe(r)).toBe('refused'); expect(groupMembers(r)).toEqual([]);
++    }
++    expect(spy).not.toHaveBeenCalled();
++  });
++  it('an identity refusal (reused pid) is not a silent stop: ok false, refused, nothing signalled', () => {
++    const c = sleeper(); const rec = recordPid(c.pid); const spy = noSignal();
++    const res = stopGroup(c, { ...rec, starttime: String(+rec.starttime - 1) });
++    expect(res.ok).toBe(false); expect(res.reason).toMatch(/^refused: .*reused pid/); expect(spy).not.toHaveBeenCalled();
++    expect(stopReport(res, c.pid)).toMatch(/^serveOwn: SURVIVORS/);
+   });
+ });
+diff --git a/tests/rule21-rules.ts b/tests/rule21-rules.ts
+new file mode 100644
+index 0000000..78ecafc
+--- /dev/null
++++ b/tests/rule21-rules.ts
+@@ -0,0 +1,24 @@
++// UI QA #89 F3: rule-21 source check. Every form in UI QA's harness negative-fixture list (36 forms, plus the JS forms
++// the #89 report names) is a rule here. Shared by tests/rule21-source.test.ts; the rules are data, nothing runs them.
++export type Rule = { id: string; re: RegExp };
++export const RULES: Rule[] = [
++  // shell kill words: kill -9, kill -TERM -$g, kill -- -$g, /bin/kill, command/env/builtin kill, xargs kill, 'kill 0', kill %1, skill
++  { id: 'shell-kill', re: /(^|[^A-Za-z0-9_.$-])(\/(usr\/)?bin\/)?s?kill(\s|['"`]|$)/ },
++  { id: 'kill-assigned', re: /=\s*['"`]?s?kill\b/ },                                   // K=kill (after "" removal: K=ki""ll)
++  { id: 'loginctl-kill', re: /\bkill-session\b|\bkill-user\b|\bloginctl\s+kill/ },
++  { id: 'kill-tools', re: /\b(pidof|pgrep|pkill|killall|fuser|snice|start-stop-daemon)\b/ },
++  { id: 'timeout-cmd', re: /(^|[\s;|&(`'"])timeout\s+(-[-a-zA-Z]|\d)/ },                  // timeout 10m, --signal, -k
++  { id: 'ps', re: /(^|[\s;|&(`'"])ps\s+(-[a-zA-Z]+|[auxwo]{2,})\b/ },              // ps aux, ps axo, ps -ef
++  { id: 'proc-enum', re: /\/proc\/(\[|\*|\$)|\bls\s+\/proc\b|\/cmdline\b/ },
++  { id: 'proc-readdir', re: /\b(readdir|readdirSync|opendir|opendirSync|listdir|scandir|walk|glob|globSync)\s*\(\s*['"`]\/proc/ },
++  { id: 'js-kill-call', re: /\.\s*kill\s*\(/ },                                         // process.kill(, process.kill (, child.kill(
++  { id: 'js-kill-index', re: /\[\s*['"`]kill['"`]\s*\]/ },                               // process['kill']
++  { id: 'js-kill-destructure', re: /\{[^}]*\bkill\b[^}]*\}\s*=\s*process\b/ },          // const { kill } = process
++  { id: 'exec-kill', re: /\b(exec|execSync|execFile|execFileSync|spawn|spawnSync)\s*\(\s*['"`]\s*(\/(usr\/)?bin\/)?s?kill\b/ },
++  { id: 'py-signal', re: /\bkillpg\b|\bpthread_kill\b|\.terminate\s*\(|\bsend_signal\s*\(|\bos\.kill\b/ },
++  { id: 'detach', re: /\bnohup\b|\bsetsid\b|\bdisown\b|\bdetached\s*:\s*true\b/ },
++];
++/** Rules that hit `line` (also checked with empty-string concatenations removed, so ki""ll reads as kill). */
++export const hits = (line: string) => { const n = line.replace(/""|''/g, ''); return RULES.filter(r => r.re.test(line) || r.re.test(n)).map(r => r.id); };
++/** The ONLY allowed hits: lines of scripts/recorded-pid.mjs that carry this marker. */
++export const GUARD_MARK = '// rule-21 guarded site';
+diff --git a/tests/rule21-source.test.ts b/tests/rule21-source.test.ts
+new file mode 100644
+index 0000000..3fa8868
+--- /dev/null
++++ b/tests/rule21-source.test.ts
+@@ -0,0 +1,47 @@
++// UI QA #89 F3: rule-21 source check over ALL of scripts/ and the test helper modules (tests/*.ts that are not
++// *.test.ts; tests/rule21-rules.ts is the rule data itself). Every forbidden form in tests/fixtures/rule21-negative/
++// must be caught, and the only allowed hits are the marked guarded sites in scripts/recorded-pid.mjs.
++import { describe, it, expect } from 'vitest';
++import fs from 'node:fs'; import path from 'node:path';
++import { RULES, hits, GUARD_MARK } from './rule21-rules';
++
++const CODE = /\.(mjs|cjs|js|ts|sh|bash|py)$/;
++function filesUnder(dir: string): string[] {
++  const out: string[] = [];
++  for (const e of fs.readdirSync(dir, { withFileTypes: true })) { const p = path.join(dir, e.name); if (e.isDirectory()) out.push(...filesUnder(p)); else if (CODE.test(e.name)) out.push(p); }
++  return out;
++}
++const SCOPE = [...filesUnder('scripts'), ...fs.readdirSync('tests').filter(f => CODE.test(f) && !/\.test\.ts$/.test(f) && f !== 'rule21-rules.ts').map(f => path.join('tests', f))];
++const GUARDED = 'scripts/recorded-pid.mjs';
++const scan = () => SCOPE.flatMap(f => fs.readFileSync(f, 'utf8').split('\n').map((l, i) => ({ f, n: i + 1, l, h: hits(l) })).filter(x => x.h.length));
++
++describe('F3: rule-21 source check', () => {
++  it('scope covers every scripts/ code file and the test helpers', () => {
++    expect(SCOPE).toContain('scripts/serve-own.mjs'); expect(SCOPE).toContain('scripts/d2-kill-browser.mjs'); expect(SCOPE).toContain(GUARDED);
++    expect(SCOPE).toContain('tests/helpers.ts'); expect(SCOPE.length).toBeGreaterThan(30);
++  });
++  it('no forbidden form anywhere in scope except the marked guarded sites in scripts/recorded-pid.mjs', () => {
++    const bad = scan().filter(x => !(x.f === GUARDED && x.l.includes(GUARD_MARK))).map(x => `${x.f}:${x.n} [${x.h}] ${x.l.trim()}`);
++    expect(bad).toEqual([]);
++  });
++  it('the allowlist is exactly the 6 guarded sites (stat read, kill, detached spawn, task readdir, children read, signal-0 probe)', () => {
++    const g = scan().filter(x => x.f === GUARDED).map(x => x.h.join(','));
++    expect(g).toHaveLength(6); expect(scan().filter(x => x.f === GUARDED && !x.l.includes(GUARD_MARK))).toEqual([]);
++    expect(fs.readFileSync(GUARDED, 'utf8').split(GUARD_MARK).length - 1).toBe(6); // no unused marker that could hide a future hit
++  });
++  const dir = 'tests/fixtures/rule21-negative', fixtures = fs.readdirSync(dir).filter(f => f.endsWith('.fixture')).sort();
++  it('there are 49 negative fixtures (UI QA harness 01-36 + #89 report JS forms 37-49)', () => expect(fixtures).toHaveLength(49));
++  for (const f of fixtures) {
++    const line = fs.readFileSync(path.join(dir, f), 'utf8').trim();
++    it(`negative fixture ${f} is caught: ${line}`, () => expect(hits(line).length).toBeGreaterThan(0));
++  }
++  it('ordinary code that merely looks similar is not flagged (keeps the check usable, not weakened)', () => {
++    for (const l of ['AbortSignal.timeout(FETCH_MS)', 'await p.waitForSelector(x, { timeout: 10000 })', 'for (const ps of [null, "::before"])',
++      '// 2/5 sold then timeout -> card collapses', 'killRecorded(rec, "SIGKILL", { group: true })', 'skillful', 'const procs = 3', 'SIGKILLed recorded browser group'])
++      expect(hits(l), l).toEqual([]);
++  });
++  it('every rule has at least one fixture that only it would need (each rule is exercised)', () => {
++    const all = fixtures.map(f => fs.readFileSync(path.join(dir, f), 'utf8').trim());
++    for (const r of RULES) expect(all.some(l => r.re.test(l) || r.re.test(l.replace(/""|''/g, ''))), r.id).toBe(true);
++  });
++});

@@ -1,0 +1,12 @@
+a32faeb34585db0d62c0c559e09e112b1a301e7d 2026-10-30 09:03:39 +0100 Senior Software Architect
+  d2-kill-browser: HoO F5 conditions for Playwright's own group kill (UI QA #89 F5 a/b/c)
+9a05af16b5e4dde01b44b79e6c037002a2ad433f 2026-10-30 09:00:47 +0100 Senior Software Architect
+  d2-kill-browser: leftover check, halt + STOP-LIST-for-HoO.txt, try/finally (UI QA #89 F4, F7, N1)
+2a8d90a26b3d159224f6e447a3f8cebb4c0573f1 2026-10-30 08:58:32 +0100 Senior Software Architect
+  tests: rule-21 source check over scripts/ + test helpers, 49 negative fixtures (UI QA #89 F3, N2)
+568784eb2f66b93e8f28fb35cf11cde3db420688 2026-10-30 08:58:32 +0100 Senior Software Architect
+  scripts: route every vite preview through spawnRecorded/stopOrReport (UI QA #89 F3 prerequisite)
+6c5919f047afd88943ea486c09ea625b7d36716c 2026-10-30 08:55:41 +0100 Senior Software Architect
+  serve-own: find and report group survivors, never drop them (UI QA #89 F2)
+cf00e620fbb047224e6d9ce1fd7b4419f2baab40 2026-10-30 08:53:13 +0100 Senior Software Architect
+  recorded-pid: 'ours' is always process.pid; refuse malformed records (UI QA #89 F1, F6)

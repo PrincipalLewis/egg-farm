@@ -1,0 +1,21 @@
+Gate file: product/m5-gate-acs.md sha1 e485f7624b9760a0b8a54b2472dd2b955b20077e (verified)
+Cases draft: qa/v5-saves/m5-save-cases-DRAFT.md sha256 12fe292400eaf18b27d5010c86d7175fdd316a7b879cdcb5d8aa3d9e949f55a5 (prefix 12fe2924 verified)
+
+Head d4b5fdcd parent = baf410ff (#124) → contains #124 D1–D6 fix → G2b cases APPLY (not skip).
+
+Gate Card #3 (Breeds) pins spec ea922eb8. The gate card's named BRD-ACs do NOT list familyClamp/familyActiveBp by name.
+Coverage for this PR's getters/bc keys is via the pinned breeds spec ACs/examples (gate Card #3 Spec pin):
+
+| ID | source | what | tip evidence |
+|---|---|---|---|
+| BR-AC18 | spec ea922eb8 (gate Card #3 pin) | Present clamp 1575→1500 @F24; 975→700 @F17; Leghorn 375 @F12; F18 boundary | tests/v5-breeds-family-caps.test.ts [BR-AC18]* |
+| E8 | spec ea922eb8 examples | family sum over clamp → sheet "max" (atCap) | family-caps [E8]/[BR-AC18][E8] |
+| E9 | spec ea922eb8 examples | Farm crosses F18 → Present clamp 700→1500 | family-caps [E9] + [BR-AC18][E9] |
+| §4.3 L365–368 | spec | bc_lay_cap_bp_lt18=700, lay_cap_bp=1500, away=3000, broody=2000 | family-caps BC_SPEC_DEFAULTS via bc() keys |
+| BRD-AC1 | gate Card #3 | flag-0 byte-identical goldens | item 5 bar (GOLDEN1 / m4on) |
+
+Note: bc() keys omit the bc_ prefix by design (bc('lay_cap_bp_lt18') ↔ spec bc_lay_cap_bp_lt18). lay_cap_farm=18 is the E9 boundary (not a CSV column).
+
+G2b (from m5-save-cases-DRAFT 12fe2924) — expected PASS at tip because ancestry includes baf410ff:
+M5S-BR-D1-TEL-VALIDATE, D2-ROOT-{NULL,ARRAY,NUMBER,STRING}, D2-TICK-NOTHROW, D3-SHAPE-REPAIRS, D4-LOCKED-NORAW, D5-TICKHZ-MOD, D6-RARITY-ENUM
+Covered by tip suites tests/v5-breeds-state.test.ts + tests/telemetry-schema.test.ts (same as #124 bar).

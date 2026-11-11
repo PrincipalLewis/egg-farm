@@ -1,0 +1,46 @@
+ok   01 pass: == ship-set, cap 0.27 in balance+CSV, CSV path+sha from ship-set, expected sha (rc=0) ship-set match: m4.enabled=1,m4.flags.streak=1,m4.flags.tapCoins=1,m4.flags.golden=1,m4.flags.breeds=1,m4.flags.abilities=1,m4.flags.pause=1,m4.flags.rc2Refill=1,m4.flags.autoRefil
+ok   01b both cap values logged
+ok   01c pass: ECONOMY_CSV override equal to ship-set path (rc=0) ship-set match: m4.enabled=1,m4.flags.streak=1,m4.flags.tapCoins=1,m4.flags.golden=1,m4.flags.breeds=1,m4.flags.abilities=1,m4.flags.pause=1,m4.flags.rc2Refill=1,m4.flags.autoRefil
+ok   02 fail: one flipped key (pause=0) (rc=1) m4.flags.pause=0 != ship-set 1 || ship-set sha256 4cba7b56e89363e39d21c58cef1e75a7a91685403afdd6188ae2c5519c2c8c44; balance.json sha256 898c87f6063c94fabd9b569e45da1620c957b01c451d
+ok   02b fail: m4.zeroGain.confirm=1 (rc=1) m4.zeroGain.confirm=1 != ship-set 0 || ship-set sha256 4cba7b56e89363e39d21c58cef1e75a7a91685403afdd6188ae2c5519c2c8c44; balance.json sha256 1a21f7804c2681bb99769d3aa6eea15d3609f51
+ok   02c fail: m4.enabled=0 (rc=1) m4.enabled=0 != ship-set 1 || ship-set sha256 4cba7b56e89363e39d21c58cef1e75a7a91685403afdd6188ae2c5519c2c8c44; balance.json sha256 afcd7fa7025e2110f01c15d7da15ab53a7b1e128922d653f
+ok   03 fail: ship-set file missing (rc=1) ship-set missing: /tmp/g1st.2KxT/nope.md (fail closed)
+ok   03b fail: ship-set unparseable (rc=1) ship-set unparseable: missing "Exact config keys" or "Tunables of record" section (fail closed) | sha256 cbba0bd5f29a22f10423feb8d27fa8cf5ffa10991630463e5e4f794638c21272
+ok   04 fail: REAL rev 2 file (CSV path+sha placeholder), real pin (rc=1) economy CSV path missing/placeholder in ship-set ("the post-L10 plus breeds bc_* PR, sha recorded here on merge (needs HoP approval and Vadim's go)") - fail closed | economy CSV sh
+ok   04b fail: CSV path missing in ship-set (sha present) (rc=1) economy CSV path missing/placeholder in ship-set ("the post-L10 plus breeds bc_* PR, sha256 796ae3dd8c98ccad640ac6044a911f064c36fa3ea0dd4f0151a05b5001e1c223 (needs HoP approval and
+ok   04c fail: CSV path placeholder <tbd> (rc=1) economy CSV path missing/placeholder in ship-set ("the post-L10 plus breeds bc_* PR, sha256 796ae3dd8c98ccad640ac6044a911f064c36fa3ea0dd4f0151a05b5001e1c223 path <tbd> (needs HoP a
+ok   04d fail: CSV path present, sha placeholder (rc=1) economy CSV sha256 missing/placeholder in ship-set ("the post-L10 plus breeds bc_* PR, path data/economy.csv, sha TBD (needs HoP approval and Vadim's go)") - fail closed || ship-se
+ok   04e fail: ECONOMY_CSV override != ship-set path (rc=1) ECONOMY_CSV override data/economy.f1.csv != ship-set path data/economy.csv || ship-set sha256 4cba7b56e89363e39d21c58cef1e75a7a91685403afdd6188ae2c5519c2c8c44; balance.json sha256 
+ok   04f fail: ship-set names data/economy.f1.csv (test-only) (rc=1) ship-set CSV path data/economy.f1.csv != data/economy.csv (only source; economy.f1.csv is test-only) || ship-set sha256 b645dd7b58dba1b61860aaaa47978b31cab7751574d1b52a3711855246b2
+ok   04g fail: CSV sha != committed CSV (rc=1) economy CSV data/economy.csv sha256 796ae3dd8c98ccad640ac6044a911f064c36fa3ea0dd4f0151a05b5001e1c223 != ship-set 0000000000000000000000000000000000000000000000000000000000000000 ||
+ok   05 fail: expected balance sha missing (rc=1) expected balance.json sha256 not supplied (HoE pins it at the RC cut) - fail closed || ship-set sha256 4cba7b56e89363e39d21c58cef1e75a7a91685403afdd6188ae2c5519c2c8c44; balance.jso
+ok   06 fail: expected balance sha wrong (rc=1) balance.json sha256 2e636a170021df4d72c9e8cf71d238947280f864467049b21dc5e62b4951e6c4 != expected 9a73bd8a6ebb936792c9c5fc667f37d295ecb9f8b74149112d50b297d228bb89 || ship-set sha256
+ok   07 fail: extra m4.flags key (rc=1) m4.flags keys not in ship-set: newFlag || ship-set sha256 4cba7b56e89363e39d21c58cef1e75a7a91685403afdd6188ae2c5519c2c8c44; balance.json sha256 c58830860b005c5ed31ee220deec2b87a9d6
+ok   07b fail: missing m4.flags key (rc=1) m4.flags.breeds missing in balance.json || ship-set sha256 4cba7b56e89363e39d21c58cef1e75a7a91685403afdd6188ae2c5519c2c8c44; balance.json sha256 6ec0d14ad70451da40a875d97abedeacbe5
+ok   07c fail: missing m4.zeroGain.confirm (rc=1) m4.zeroGain.confirm missing in balance.json || ship-set sha256 4cba7b56e89363e39d21c58cef1e75a7a91685403afdd6188ae2c5519c2c8c44; balance.json sha256 df32f80659d529147319f89c2f35e0d
+ok   08 fail: real 3f582db balance (all 0 AND cap 0.28) (rc=1) m4.flags.streak=0 != ship-set 1 | m4.flags.tapCoins=0 != ship-set 1 | m4.flags.golden=0 != ship-set 1 | m4.flags.breeds=0 != ship-set 1 | m4.flags.abilities=0 != ship-set 1 | m4.fl
+ok   08b fails for both reasons (flags + cap)
+ok   09 fail: changed ship-set (sha != pinned) (rc=1) ship-set sha256 9a67c955decb324cba5110c62982e594fd279ff89cd778e54dd094178b6ccaba != pinned 4cba7b56e89363e39d21c58cef1e75a7a91685403afdd6188ae2c5519c2c8c44 (changed file needs a ne
+ok   10 pass: telemetry listed as a key is excluded, not encoded (rc=0) ship-set match: m4.enabled=1,m4.flags.streak=1,m4.flags.tapCoins=1,m4.flags.golden=1,m4.flags.breeds=1,m4.flags.abilities=1,m4.flags.pause=1,m4.flags.rc2Refill=1,m4.flags.autoRefil
+ok   11 fail: cap 0.28 in balance AND CSV (rc=1) m4.tc.streak_cap=0.28 != ship-set 0.27 | economy CSV tc_streak_cap=0.28 != ship-set 0.27 || ship-set sha256 87b0e591f1a438b985339427cb2de88fd005cd44b5c204cb3afca73a4939c75e; balanc
+ok   11 fail: cap 0.30 in balance AND CSV (rc=1) m4.tc.streak_cap=0.3 != ship-set 0.27 | economy CSV tc_streak_cap=0.30 != ship-set 0.27 || ship-set sha256 252a915487e032cbf4bb7f9103c0f7c606531d9b7ab9b6de45294ecf59da48d9; balance
+ok   12a fail: CSV 0.27, balance 0.28 (disagree) (rc=1) m4.tc.streak_cap=0.28 != ship-set 0.27 || ship-set sha256 4cba7b56e89363e39d21c58cef1e75a7a91685403afdd6188ae2c5519c2c8c44; balance.json sha256 d02b5d2f56f81d8f67933510732ac5da8443
+ok   12b fail: CSV 0.28, balance 0.27 (disagree) (rc=1) economy CSV tc_streak_cap=0.28 != ship-set 0.27 || ship-set sha256 87b0e591f1a438b985339427cb2de88fd005cd44b5c204cb3afca73a4939c75e; balance.json sha256 2e636a170021df4d72c9e8cf71d
+ok   12c fail: CSV rows mixed 0.27/0.28 (rc=1) economy CSV tc_streak_cap=0.27|0.28 != ship-set 0.27 || ship-set sha256 bab111ce46b747cdd2682c3c09522b12ac011dd82352fe440daac4d2ca679d98; balance.json sha256 2e636a170021df4d72c9e8
+ok   12d fail: CSV has no tc_streak_cap column (rc=1) economy CSV has no column tc_streak_cap || ship-set sha256 d06f85ef6a8ad25e6edad7868a2729cb65772b8a1a51e39816098e3c7c890380; balance.json sha256 2e636a170021df4d72c9e8cf71d23894728
+ok   13 fail (CSV placeholder only): REAL file parses; Not in v5 adds no key (rc=1) economy CSV path missing/placeholder in ship-set ("the post-L10 plus breeds bc_* PR, sha recorded here on merge (needs HoP approval and Vadim's go)") - fail closed | economy CSV sh
+ok   13b real file: no sha failure, 16 keys + 1 tunable, no via_nudge/first_worker_hired key
+ok   13c pass-parse: key-like lines under Not in v5 are ignored (fixture) (rc=1) economy CSV path missing/placeholder in ship-set ("the post-L10 plus breeds bc_* PR, sha recorded here on merge (needs HoP approval and Vadim's go)") - fail closed | economy CSV sh
+ok   13d Not-in-v5 key-like lines not in expected keys
+ok   14a fail (CSV placeholder only): REAL d71ed8cf file with the real pin (rc=1) economy CSV path missing/placeholder in ship-set ("the post-L10 plus breeds bc_* PR, sha recorded here on merge (needs HoP approval and Vadim's go)") - fail closed | economy CSV sh
+ok   14 real d71ed8cf: L23 stays under Not flags; no telemetry/d170eb09/errata/#T key; 16 keys + 1 tunable
+ok   14b fail closed: L23-style text inside Exact config keys is unparseable, never encoded (rc=1) ship-set unparseable line in Exact config keys: - telemetry v0.6.2 (telemetry-spec.md d170eb09) + telemetry-spec-errata-v5.md: no flag, #T card
+ok   14c reason = unparseable line
+ok   G-a gate: fixture match passes (pin = fixture sha, no override) (HF=0; 3 sha lines + cap line in status.log)
+ok   G-b gate: REAL ship-set + real pin fails closed (HF=1; 3 sha lines + cap line in status.log)
+ok   G-c gate: fixture ship-set vs real pin fails (sha != d71ed8cf) (HF=1; 3 sha lines + cap line in status.log)
+ok   G-d gate: ship-set missing fails closed (HF=1; 3 sha lines + cap line in status.log)
+ok   G-e gate: no expected sha, no pinned file fails closed (HF=1; 3 sha lines + cap line in status.log)
+ok   G-f gate: ECONOMY_CSV override != ship-set path fails (HF=1; 3 sha lines + cap line in status.log)
+ok   G-g gate: ECONOMY_CSV override == ship-set path passes (HF=0; 3 sha lines + cap line in status.log)
+RESULT pass=45 fail=0

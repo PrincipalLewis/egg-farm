@@ -1,0 +1,1 @@
+Pacing run 42139828781 intentionally NOT observed this turn per HoQA schedule (only after 02:30 slot / after #100 check). Status recorded as PENDING/NOT READ. No polling.

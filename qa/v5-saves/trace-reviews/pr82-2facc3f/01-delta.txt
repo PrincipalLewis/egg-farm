@@ -1,0 +1,27 @@
+== 665bfba
+665bfbab0a0169ac0ba2fae3c503d90e9dde0ec3 v5 F3: [F3-no-literal] allowlist BROODY_NEST_MAX_CENTS + BROODY_SLOTS (src/save/m5-fields.ts) as named save-schema constants from F2 #81 (D-HOE-20261030-01); test-only
+
+ tests/v5-f3-config.test.ts | 6 ++++++
+ 1 file changed, 6 insertions(+)
+== 36c67de
+36c67defa3565d8aec00d7a1c9a7651ba1694899 v5 F3: relax tc.rest_recovery_mult guard to >= 0 (pause spec §6; 0 is valid, AC-P17; D-HOE-20261030-02, supersedes 10d1e28's > 0)
+
+ src/config/m5-rules.ts     |  3 ++-
+ tests/v5-f3-config.test.ts | 16 ++++++++++++----
+ 2 files changed, 14 insertions(+), 5 deletions(-)
+== b0b5c7c..2facc3f stat
+ src/config/m5-rules.ts       |  3 ++-
+ tests/v5-f1c-effects.test.ts |  4 ++--
+ tests/v5-f3-config.test.ts   | 22 ++++++++++++++++++----
+ 3 files changed, 22 insertions(+), 7 deletions(-)
+== 174286e..2facc3f (vs #80 head)
+ tests/v5-f3-qa-seam.test.ts      |  63 +++++++++++++++++++
+ tests/verify.test.ts             |   8 ++-
+ 19 files changed, 403 insertions(+), 19 deletions(-)
+== tree eq
+dda39fc tree d78a97f5a00b0a404fc5e919fb4889252d32ea24 p1 d78a97f5a00b0a404fc5e919fb4889252d32ea24 p2 924223853eaf119a1fe6faab7f34971c426c4c39
+f4648e1 tree 817e693eaf45841b2d6f9237c3cc800c11b9976c p1 d78a97f5a00b0a404fc5e919fb4889252d32ea24 p2 088814e5f2fa4e9268af03abc8de7afaf36698d7
+2facc3f tree 817e693eaf45841b2d6f9237c3cc800c11b9976c p1 817e693eaf45841b2d6f9237c3cc800c11b9976c p2 088814e5f2fa4e9268af03abc8de7afaf36698d7
+== merge-base 2fa7318 vs pr80-174286e
+088814e5f2fa4e9268af03abc8de7afaf36698d7
+088814e5f2fa4e9268af03abc8de7afaf36698d7

@@ -1,0 +1,52 @@
+{
+ "id": "CSR11-all-sources-invalid",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-11",
+  "CSR-7",
+  "CSR-10"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-OQ1-abc.json"
+  },
+  "eggfarm.save.bak": {
+   "ref": "raw/BAK-invalid-neg1.json"
+  },
+  "eggfarm.save.v6_backup": {
+   "ref": "raw/V6B-invalid-raw-abc.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": [
+   {
+    "key": "main",
+    "ref": "raw/IDB-invalid-truncated.raw"
+   }
+  ]
+ },
+ "expect": {
+  "recovered_from": "none",
+  "notice": "M3",
+  "store": "ls",
+  "triedPairs": [
+   [
+    "bak",
+    "invalid"
+   ],
+   [
+    "idb",
+    "invalid"
+   ],
+   [
+    "v6_backup",
+    "invalid"
+   ]
+  ],
+  "corruptLsExact": 2,
+  "idbCorruptExact": 1,
+  "idbBytesNotInLs": true,
+  "v6bUnchanged": true
+ }
+}

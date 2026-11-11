@@ -1,0 +1,21 @@
+{
+  "head": "27660196a081f379f467499d667fbe4f5ef3bda3",
+  "base": "19121b75b44199beebf44fdb34a69b1120035cb0",
+  "bound_tree": "1dcd12ec1045ba955d255b38aef4273ed9868591",
+  "actual_tree": "1dcd12ec1045ba955d255b38aef4273ed9868591",
+  "tree_match": true,
+  "merge_tree_exit": 1,
+  "computed_merge_tree": "274c6bc334e84f2ef89d9c15e4c09ea65200baac",
+  "file_count": 6,
+  "files": [
+    "src/config/formulas.ts",
+    "src/config/m5-rules.ts",
+    "src/sim/effects.ts",
+    "src/sim/golden.ts",
+    "src/sim/timers.ts",
+    "tests/v5-golden-rewards.test.ts"
+  ],
+  "ancestry": "0\t3",
+  "head_ref": "feat/v5-golden-rewards",
+  "clean_merge_matches": false
+}

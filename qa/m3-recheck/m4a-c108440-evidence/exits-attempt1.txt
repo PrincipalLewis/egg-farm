@@ -1,0 +1,2 @@
+buildid firefox exit=1 fails=0 summary="" 04:49:02
+globals firefox exit=1 fails=0 summary="" 04:55:15

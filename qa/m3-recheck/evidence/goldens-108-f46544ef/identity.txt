@@ -1,0 +1,28 @@
+# identity #108 @ 2026-11-06 03:56:35 CET
+f46544efaae907217126491b29588d77258ab28a	refs/heads/feat/v5-golden-spawn
+eed62687db4aa05167e5e7f8b14e1674715dfc4a	refs/heads/rc/v5
+f46544efaae907217126491b29588d77258ab28a	refs/pull/108/head
+--- tip
+f46544efaae907217126491b29588d77258ab28a
+parents: 00552332a5ef8436a878246f70dd102cd849433f eed62687db4aa05167e5e7f8b14e1674715dfc4a
+tree: 891f1f93f98dc786ac586487c91b795ad8cf8d4f
+author: Senior Engineer, Features & Economy Wiring Fri Nov 6 03:41:14 2026 +0100
+subject: Merge rc/v5 into feat/v5-golden-spawn (#108 mergefwd onto eed62687)
+parent 00552332a5ef8436a878246f70dd102cd849433f: tree 891f1f93f98dc786ac586487c91b795ad8cf8d4f | Merge feat/v5-golden-rewards into feat/v5-golden-spawn (#108 mergefwd onto a5f8e3c)
+parent eed62687db4aa05167e5e7f8b14e1674715dfc4a: tree 92a3dbf8c0c14723609717adb9d8a47b2a48facc | Merge pull request #107 from PrincipalLewis/feat/v5-golden-rewards
+--- 00552332
+00552332a5ef8436a878246f70dd102cd849433f
+parents: 647a4f0c6d4c80c8dd49e1f6d3d776e42a949dec a5f8e3c916833eae0a68aca03940e2fd08e01725
+tree: 891f1f93f98dc786ac586487c91b795ad8cf8d4f
+subject: Merge feat/v5-golden-rewards into feat/v5-golden-spawn (#108 mergefwd onto a5f8e3c)
+--- rc/v5
+eed62687db4aa05167e5e7f8b14e1674715dfc4a tree 92a3dbf8c0c14723609717adb9d8a47b2a48facc Merge pull request #107 from PrincipalLewis/feat/v5-golden-rewards
+--- contains rc/v5: YES
+--- merge-base(00552332, rc/v5): a5f8e3c916833eae0a68aca03940e2fd08e01725
+--- merge-tree --write-tree 00552332 origin/rc/v5:
+891f1f93f98dc786ac586487c91b795ad8cf8d4f
+--- merge-tree --write-tree origin/rc/v5 00552332:
+891f1f93f98dc786ac586487c91b795ad8cf8d4f
+--- git diff 00552332 f46544efaae907217126491b29588d77258ab28a --stat (empty = same tree):
+eed62687db4aa05167e5e7f8b14e1674715dfc4a	refs/heads/rc/v5
+f46544efaae907217126491b29588d77258ab28a	refs/pull/108/head

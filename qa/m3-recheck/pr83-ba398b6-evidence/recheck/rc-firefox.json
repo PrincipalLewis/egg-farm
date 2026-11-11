@@ -1,0 +1,270 @@
+[
+ {
+  "check": "Art-c2 C2 card cooldown",
+  "engine": "firefox",
+  "W": 1024,
+  "H": 474,
+  "mode": "full",
+  "bid": "m4.1+ba398b6",
+  "pre": {
+   "activeTabs": [
+    "workers"
+   ],
+   "btn": [
+    428.5,
+    476.5
+   ],
+   "barBottom": 423,
+   "hitIsBtn": true
+  },
+  "m": {
+   "cls": "btn secondary manage is-cooldown shake",
+   "anim": "shake",
+   "dur": "0.24s",
+   "tf": "matrix(1, 0, 0, 1, 0, 0)",
+   "shadow": "none",
+   "cd": 20
+  },
+  "pass": true,
+  "shot": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/recheck/rc-firefox-c2card-full-1024x474.png"
+ },
+ {
+  "check": "Art-c2 C2 card cooldown",
+  "engine": "firefox",
+  "W": 1024,
+  "H": 474,
+  "mode": "emulated-rm",
+  "bid": "m4.1+ba398b6",
+  "pre": {
+   "activeTabs": [
+    "workers"
+   ],
+   "btn": [
+    428.5,
+    476.5
+   ],
+   "barBottom": 423,
+   "hitIsBtn": true
+  },
+  "m": {
+   "cls": "btn secondary manage is-cooldown shake",
+   "anim": "refusedFlash",
+   "dur": "0.3s",
+   "tf": "none",
+   "shadow": "rgb(184, 59, 55) 0px 0px 0px 2px inset",
+   "cd": 20
+  },
+  "pass": true,
+  "shot": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/recheck/rc-firefox-c2card-emulated-rm-1024x474.png"
+ },
+ {
+  "check": "Art-c2 C2 card cooldown",
+  "engine": "firefox",
+  "W": 1024,
+  "H": 474,
+  "mode": "in-app-rm",
+  "bid": "m4.1+ba398b6",
+  "pre": {
+   "activeTabs": [
+    "workers"
+   ],
+   "btn": [
+    428.5,
+    476.5
+   ],
+   "barBottom": 423,
+   "hitIsBtn": true
+  },
+  "m": {
+   "cls": "btn secondary manage is-cooldown shake",
+   "anim": "refusedFlash",
+   "dur": "0.3s",
+   "tf": "none",
+   "shadow": "rgb(184, 59, 55) 0px 0px 0px 2px inset",
+   "cd": 20
+  },
+  "pass": true,
+  "shot": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/recheck/rc-firefox-c2card-in-app-rm-1024x474.png"
+ },
+ {
+  "check": "Art-c2 C2 card cooldown",
+  "engine": "firefox",
+  "W": 1280,
+  "H": 720,
+  "mode": "full",
+  "bid": "m4.1+ba398b6",
+  "pre": {
+   "activeTabs": [
+    "workers"
+   ],
+   "btn": [
+    613,
+    661
+   ],
+   "barBottom": 549,
+   "hitIsBtn": true
+  },
+  "m": {
+   "cls": "btn secondary manage is-cooldown shake",
+   "anim": "shake",
+   "dur": "0.24s",
+   "tf": "matrix(1, 0, 0, 1, -1.13919, 0)",
+   "shadow": "none",
+   "cd": 20
+  },
+  "pass": true,
+  "shot": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/recheck/rc-firefox-c2card-full-1280x720.png"
+ },
+ {
+  "check": "Art-c2 C2 card cooldown",
+  "engine": "firefox",
+  "W": 1280,
+  "H": 720,
+  "mode": "emulated-rm",
+  "bid": "m4.1+ba398b6",
+  "pre": {
+   "activeTabs": [
+    "workers"
+   ],
+   "btn": [
+    613,
+    661
+   ],
+   "barBottom": 549,
+   "hitIsBtn": true
+  },
+  "m": {
+   "cls": "btn secondary manage is-cooldown shake",
+   "anim": "refusedFlash",
+   "dur": "0.3s",
+   "tf": "none",
+   "shadow": "rgb(184, 59, 55) 0px 0px 0px 2px inset",
+   "cd": 20
+  },
+  "pass": true,
+  "shot": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/recheck/rc-firefox-c2card-emulated-rm-1280x720.png"
+ },
+ {
+  "check": "Art-c2 C2 card cooldown",
+  "engine": "firefox",
+  "W": 1280,
+  "H": 720,
+  "mode": "in-app-rm",
+  "bid": "m4.1+ba398b6",
+  "pre": {
+   "activeTabs": [
+    "workers"
+   ],
+   "btn": [
+    613,
+    661
+   ],
+   "barBottom": 549,
+   "hitIsBtn": true
+  },
+  "m": {
+   "cls": "btn secondary manage is-cooldown shake",
+   "anim": "refusedFlash",
+   "dur": "0.3s",
+   "tf": "none",
+   "shadow": "rgb(184, 59, 55) 0px 0px 0px 2px inset",
+   "cd": 20
+  },
+  "pass": true,
+  "shot": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/recheck/rc-firefox-c2card-in-app-rm-1280x720.png"
+ },
+ {
+  "check": "Market order button height settled",
+  "engine": "firefox",
+  "W": 360,
+  "H": 640,
+  "bid": "m4.1+ba398b6",
+  "m": {
+   "vis": true,
+   "btns": [
+    {
+     "t": "Sell 41+$41.00",
+     "rectH": 44,
+     "offH": 44,
+     "minH": "44px",
+     "boxSizing": "border-box",
+     "tf": "none",
+     "anims": [
+      "btn:glow:running"
+     ]
+    },
+    {
+     "t": "Sell 44+$44.00",
+     "rectH": 44,
+     "offH": 44,
+     "minH": "44px",
+     "boxSizing": "border-box",
+     "tf": "none",
+     "anims": [
+      "btn:glow:running"
+     ]
+    },
+    {
+     "t": "Sell 35+$35.00",
+     "rectH": 44,
+     "offH": 44,
+     "minH": "44px",
+     "boxSizing": "border-box",
+     "tf": "none",
+     "anims": [
+      "btn:glow:running"
+     ]
+    }
+   ]
+  },
+  "pass": true,
+  "shot": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/recheck/rc-firefox-market-360x640.png"
+ },
+ {
+  "check": "Market order button height settled",
+  "engine": "firefox",
+  "W": 390,
+  "H": 844,
+  "bid": "m4.1+ba398b6",
+  "m": {
+   "vis": true,
+   "btns": [
+    {
+     "t": "Sell 55+$55.00",
+     "rectH": 44,
+     "offH": 44,
+     "minH": "44px",
+     "boxSizing": "border-box",
+     "tf": "none",
+     "anims": [
+      "btn:glow:running"
+     ]
+    },
+    {
+     "t": "Sell 51+$51.00",
+     "rectH": 44,
+     "offH": 44,
+     "minH": "44px",
+     "boxSizing": "border-box",
+     "tf": "none",
+     "anims": [
+      "btn:glow:running"
+     ]
+    },
+    {
+     "t": "Sell 53+$53.00",
+     "rectH": 44,
+     "offH": 44,
+     "minH": "44px",
+     "boxSizing": "border-box",
+     "tf": "none",
+     "anims": [
+      "btn:glow:running"
+     ]
+    }
+   ]
+  },
+  "pass": true,
+  "shot": "/workspace/egg-farm-studio/qa/m3-recheck/pr83-ba398b6-evidence/recheck/rc-firefox-market-390x844.png"
+ }
+]

@@ -1,0 +1,6 @@
+tsc=0
+vitest=0
+slow=0
+sync=0
+build=0
+done

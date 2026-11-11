@@ -1,0 +1,11 @@
+c7bb783f cols 123 rows 31 | b48be8a4 cols 125 | b.csv cols 133 rows 56
+cols in b48be8a4 not in c7bb783f: ['guard_heartbeat_s', 'guard_stale_s']  cols in c7bb783f not in b48be8a4: []
+c7bb783f col order == b48be8a4 order minus removed: True
+kept cols missing from b.csv: []
+c7bb783f vs b48be8a4 value diffs on 123 kept cols: 0
+b.csv extra cols vs c7bb783f: ['guard_heartbeat_s', 'guard_stale_s', 'farm_ms_price_mult', 'feed_mill_price_mult', 'auto_collect_every_s', 'contracts_manual_bonus', 'hv_extra_cost_farm_share', 'farm_max_level', 'hv_extra_second_markup', 'start_coop_eggs']
+G7 (c7bb783f, 123 kept cols, L0-30): FAIL, 3 cell diffs; L0-11 PASS
+  L30 farm_cost 624316 -> 330194
+  L30 hens_cost 94319 -> 74005
+  L30 egg_value_cost 249339 -> 133856
+rows not byte-identical after projection to 123 kept cols: [30]

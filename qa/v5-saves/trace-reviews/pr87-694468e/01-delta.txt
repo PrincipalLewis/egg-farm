@@ -1,0 +1,54 @@
+694468eaad069cd58d48108c1dca11a8c6f57158
+parents 22b6db41a7424285f10aa003ada774a415d4e9c5 1a61b36091e634aef87ec6d02866323130a3a7cc
+Senior Engineer, Saves & Persistence 2026-10-30 09:01:15 +0100
+Merge origin/rc/v5 1a61b36 (#82 F3) into feat/saves-v5-streak-sim-2
+
+Conflict: src/config/balance.ts. Kept both: #82's validateM5(b.m4, W) (flag names/0-1, zeroGain, M5 tunable
+bounds) runs first, then the streak's M5_TC_KEYS check (tcNum throws on a missing/non-finite tc key while
+its flag is on). Imports: formulas (M5_TC_KEYS, m4On, tcNum) + m5-rules (validateM5).
+
+Semantic fix: tests/v5-f2-helpers.ts ON spreads b.m4.flags (F3's full all-0 block) before setting the
+four flags on; without it tsc rejects the `as typeof b` cast (TS2352). Same values at runtime.
+
+balance.json unchanged vs rc/v5. No SAVE_VERSION change.
+
+== vs p1 22b6db4
+ scripts/m41-p1-income-states.ts  |   7 ++-
+ scripts/sync-economy.ts          |  29 ++++++++-
+ scripts/verify/cli.ts            |   1 +
+ src/config/balance.json          |  23 ++++++-
+ src/config/balance.ts            |   2 +
+ src/config/flags.ts              |   2 +
+ src/config/formulas.ts           |   3 +
+ src/config/m5-rules.ts           |  55 +++++++++++++++++
+ src/econ/income.ts               |   7 ++-
+ src/sim/pause.ts                 |  10 +++
+ tests/m41-p1-live-income.test.ts |  11 ++--
+ tests/v5-f1a-fields.test.ts      |   2 +-
+ tests/v5-f1b-clock-rng.test.ts   |   2 +-
+ tests/v5-f1c-effects.test.ts     |   2 +-
+ tests/v5-f2-helpers.ts           |   2 +-
+ tests/v5-f2-m5-fields.test.ts    |   5 +-
+ tests/v5-f3-config.test.ts       | 129 +++++++++++++++++++++++++++++++++++++++
+ tests/v5-f3-is-paused.test.ts    |  61 ++++++++++++++++++
+ tests/v5-f3-qa-seam.test.ts      |  63 +++++++++++++++++++
+ tests/verify.test.ts             |   8 ++-
+ 20 files changed, 404 insertions(+), 20 deletions(-)
+== vs rc/v5 1a61b36
+ src/config/balance.ts          |   4 +-
+ src/config/formulas.ts         |  10 +++
+ src/game.ts                    |   5 +-
+ src/save/m5-fields.ts          |  20 +++---
+ src/sim/actions.ts             |  14 +++-
+ src/sim/effects.ts             |   4 +-
+ src/sim/state.ts               |   3 +
+ src/sim/streak.ts              |  68 ++++++++++++++++++
+ src/sim/timers.ts              |   5 +-
+ tests/v5-f1b-clock-rng.test.ts |   4 +-
+ tests/v5-f1c-effects.test.ts   |   4 +-
+ tests/v5-f2-helpers.ts         |   8 ++-
+ tests/v5-f2-m5-fields.test.ts  |   4 +-
+ tests/v5-streak-sim.test.ts    | 156 +++++++++++++++++++++++++++++++++++++++++
+ 14 files changed, 286 insertions(+), 23 deletions(-)
+== 1a61b36 vs 6bcc194 (what #82 brought)
+ 19 files changed, 403 insertions(+), 19 deletions(-)

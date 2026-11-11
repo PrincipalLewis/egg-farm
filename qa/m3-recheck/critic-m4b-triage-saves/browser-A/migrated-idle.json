@@ -1,0 +1,643 @@
+{
+ "MODE": "migrated",
+ "bid": {
+  "meta": "m3-rc1-pre+246de09",
+  "app": "m3-rc1-pre+246de09"
+ },
+ "globals": [
+  "eggfarmExportTelemetry"
+ ],
+ "errs": [],
+ "saved0": {
+  "coinsCents": 923,
+  "farmLevel": 6,
+  "tracksV7": 1,
+  "v6BackupId": "a4a62552ea0c06d5",
+  "workers": {
+   "market_hand": {
+    "energy": 86.4666666666732,
+    "cdS": 0.30000000000000016
+   }
+  }
+ },
+ "saved1": {
+  "coinsCents": 610,
+  "workers": {
+   "market_hand": {
+    "energy": 72.58888888890213,
+    "cdS": 0.40000000000000013
+   }
+  }
+ },
+ "coinsFirst": "$9.15",
+ "coinsLast": "$6.13",
+ "deltaDollars": -3.02,
+ "perSec": -0.0252,
+ "rows": [
+  {
+   "sec": 0,
+   "coins": "$9.15",
+   "basket": "0"
+  },
+  {
+   "sec": 1,
+   "coins": "$9.13",
+   "basket": "0"
+  },
+  {
+   "sec": 2,
+   "coins": "$9.10",
+   "basket": "0"
+  },
+  {
+   "sec": 3,
+   "coins": "$9.08",
+   "basket": "0"
+  },
+  {
+   "sec": 4,
+   "coins": "$9.05",
+   "basket": "0"
+  },
+  {
+   "sec": 5,
+   "coins": "$9.03",
+   "basket": "0"
+  },
+  {
+   "sec": 6,
+   "coins": "$9.00",
+   "basket": "0"
+  },
+  {
+   "sec": 7,
+   "coins": "$8.98",
+   "basket": "0"
+  },
+  {
+   "sec": 8,
+   "coins": "$8.95",
+   "basket": "0"
+  },
+  {
+   "sec": 9,
+   "coins": "$8.93",
+   "basket": "0"
+  },
+  {
+   "sec": 10,
+   "coins": "$8.90",
+   "basket": "0"
+  },
+  {
+   "sec": 11,
+   "coins": "$8.88",
+   "basket": "0"
+  },
+  {
+   "sec": 12,
+   "coins": "$8.85",
+   "basket": "0"
+  },
+  {
+   "sec": 13,
+   "coins": "$8.83",
+   "basket": "0"
+  },
+  {
+   "sec": 14,
+   "coins": "$8.80",
+   "basket": "0"
+  },
+  {
+   "sec": 15,
+   "coins": "$8.78",
+   "basket": "0"
+  },
+  {
+   "sec": 16,
+   "coins": "$8.75",
+   "basket": "0"
+  },
+  {
+   "sec": 17,
+   "coins": "$8.73",
+   "basket": "0"
+  },
+  {
+   "sec": 18,
+   "coins": "$8.70",
+   "basket": "0"
+  },
+  {
+   "sec": 19,
+   "coins": "$8.68",
+   "basket": "0"
+  },
+  {
+   "sec": 20,
+   "coins": "$8.65",
+   "basket": "0"
+  },
+  {
+   "sec": 21,
+   "coins": "$8.63",
+   "basket": "0"
+  },
+  {
+   "sec": 22,
+   "coins": "$8.60",
+   "basket": "0"
+  },
+  {
+   "sec": 23,
+   "coins": "$8.58",
+   "basket": "0"
+  },
+  {
+   "sec": 24,
+   "coins": "$8.55",
+   "basket": "0"
+  },
+  {
+   "sec": 25,
+   "coins": "$8.53",
+   "basket": "0"
+  },
+  {
+   "sec": 26,
+   "coins": "$8.50",
+   "basket": "0"
+  },
+  {
+   "sec": 27,
+   "coins": "$8.48",
+   "basket": "0"
+  },
+  {
+   "sec": 28,
+   "coins": "$8.45",
+   "basket": "0"
+  },
+  {
+   "sec": 29,
+   "coins": "$8.43",
+   "basket": "0"
+  },
+  {
+   "sec": 30,
+   "coins": "$8.40",
+   "basket": "0"
+  },
+  {
+   "sec": 31,
+   "coins": "$8.38",
+   "basket": "0"
+  },
+  {
+   "sec": 32,
+   "coins": "$8.35",
+   "basket": "0"
+  },
+  {
+   "sec": 33,
+   "coins": "$8.33",
+   "basket": "0"
+  },
+  {
+   "sec": 34,
+   "coins": "$8.30",
+   "basket": "0"
+  },
+  {
+   "sec": 35,
+   "coins": "$8.28",
+   "basket": "0"
+  },
+  {
+   "sec": 36,
+   "coins": "$8.25",
+   "basket": "0"
+  },
+  {
+   "sec": 37,
+   "coins": "$8.23",
+   "basket": "0"
+  },
+  {
+   "sec": 38,
+   "coins": "$8.20",
+   "basket": "0"
+  },
+  {
+   "sec": 39,
+   "coins": "$8.18",
+   "basket": "0"
+  },
+  {
+   "sec": 40,
+   "coins": "$8.15",
+   "basket": "0"
+  },
+  {
+   "sec": 41,
+   "coins": "$8.13",
+   "basket": "0"
+  },
+  {
+   "sec": 42,
+   "coins": "$8.10",
+   "basket": "0"
+  },
+  {
+   "sec": 43,
+   "coins": "$8.08",
+   "basket": "0"
+  },
+  {
+   "sec": 44,
+   "coins": "$8.05",
+   "basket": "0"
+  },
+  {
+   "sec": 45,
+   "coins": "$8.03",
+   "basket": "0"
+  },
+  {
+   "sec": 46,
+   "coins": "$8.00",
+   "basket": "0"
+  },
+  {
+   "sec": 47,
+   "coins": "$7.98",
+   "basket": "0"
+  },
+  {
+   "sec": 48,
+   "coins": "$7.95",
+   "basket": "0"
+  },
+  {
+   "sec": 49,
+   "coins": "$7.93",
+   "basket": "0"
+  },
+  {
+   "sec": 50,
+   "coins": "$7.90",
+   "basket": "0"
+  },
+  {
+   "sec": 51,
+   "coins": "$7.88",
+   "basket": "0"
+  },
+  {
+   "sec": 52,
+   "coins": "$7.85",
+   "basket": "0"
+  },
+  {
+   "sec": 53,
+   "coins": "$7.83",
+   "basket": "0"
+  },
+  {
+   "sec": 54,
+   "coins": "$7.80",
+   "basket": "0"
+  },
+  {
+   "sec": 55,
+   "coins": "$7.78",
+   "basket": "0"
+  },
+  {
+   "sec": 56,
+   "coins": "$7.75",
+   "basket": "0"
+  },
+  {
+   "sec": 57,
+   "coins": "$7.73",
+   "basket": "0"
+  },
+  {
+   "sec": 58,
+   "coins": "$7.68",
+   "basket": "0"
+  },
+  {
+   "sec": 59,
+   "coins": "$7.65",
+   "basket": "0"
+  },
+  {
+   "sec": 60,
+   "coins": "$7.63",
+   "basket": "0"
+  },
+  {
+   "sec": 61,
+   "coins": "$7.60",
+   "basket": "0"
+  },
+  {
+   "sec": 62,
+   "coins": "$7.58",
+   "basket": "0"
+  },
+  {
+   "sec": 63,
+   "coins": "$7.55",
+   "basket": "0"
+  },
+  {
+   "sec": 64,
+   "coins": "$7.53",
+   "basket": "0"
+  },
+  {
+   "sec": 65,
+   "coins": "$7.50",
+   "basket": "0"
+  },
+  {
+   "sec": 66,
+   "coins": "$7.48",
+   "basket": "0"
+  },
+  {
+   "sec": 67,
+   "coins": "$7.45",
+   "basket": "0"
+  },
+  {
+   "sec": 68,
+   "coins": "$7.43",
+   "basket": "0"
+  },
+  {
+   "sec": 69,
+   "coins": "$7.40",
+   "basket": "0"
+  },
+  {
+   "sec": 70,
+   "coins": "$7.38",
+   "basket": "0"
+  },
+  {
+   "sec": 71,
+   "coins": "$7.35",
+   "basket": "0"
+  },
+  {
+   "sec": 72,
+   "coins": "$7.33",
+   "basket": "0"
+  },
+  {
+   "sec": 73,
+   "coins": "$7.30",
+   "basket": "0"
+  },
+  {
+   "sec": 74,
+   "coins": "$7.28",
+   "basket": "0"
+  },
+  {
+   "sec": 75,
+   "coins": "$7.25",
+   "basket": "0"
+  },
+  {
+   "sec": 76,
+   "coins": "$7.23",
+   "basket": "0"
+  },
+  {
+   "sec": 77,
+   "coins": "$7.20",
+   "basket": "0"
+  },
+  {
+   "sec": 78,
+   "coins": "$7.18",
+   "basket": "0"
+  },
+  {
+   "sec": 79,
+   "coins": "$7.15",
+   "basket": "0"
+  },
+  {
+   "sec": 80,
+   "coins": "$7.13",
+   "basket": "0"
+  },
+  {
+   "sec": 81,
+   "coins": "$7.10",
+   "basket": "0"
+  },
+  {
+   "sec": 82,
+   "coins": "$7.08",
+   "basket": "0"
+  },
+  {
+   "sec": 83,
+   "coins": "$7.05",
+   "basket": "0"
+  },
+  {
+   "sec": 84,
+   "coins": "$7.03",
+   "basket": "0"
+  },
+  {
+   "sec": 85,
+   "coins": "$7.00",
+   "basket": "0"
+  },
+  {
+   "sec": 86,
+   "coins": "$6.98",
+   "basket": "0"
+  },
+  {
+   "sec": 87,
+   "coins": "$6.95",
+   "basket": "0"
+  },
+  {
+   "sec": 88,
+   "coins": "$6.93",
+   "basket": "0"
+  },
+  {
+   "sec": 89,
+   "coins": "$6.90",
+   "basket": "0"
+  },
+  {
+   "sec": 90,
+   "coins": "$6.88",
+   "basket": "0"
+  },
+  {
+   "sec": 91,
+   "coins": "$6.85",
+   "basket": "0"
+  },
+  {
+   "sec": 92,
+   "coins": "$6.83",
+   "basket": "0"
+  },
+  {
+   "sec": 93,
+   "coins": "$6.80",
+   "basket": "0"
+  },
+  {
+   "sec": 94,
+   "coins": "$6.78",
+   "basket": "0"
+  },
+  {
+   "sec": 95,
+   "coins": "$6.75",
+   "basket": "0"
+  },
+  {
+   "sec": 96,
+   "coins": "$6.73",
+   "basket": "0"
+  },
+  {
+   "sec": 97,
+   "coins": "$6.70",
+   "basket": "0"
+  },
+  {
+   "sec": 98,
+   "coins": "$6.68",
+   "basket": "0"
+  },
+  {
+   "sec": 99,
+   "coins": "$6.65",
+   "basket": "0"
+  },
+  {
+   "sec": 100,
+   "coins": "$6.63",
+   "basket": "0"
+  },
+  {
+   "sec": 101,
+   "coins": "$6.60",
+   "basket": "0"
+  },
+  {
+   "sec": 102,
+   "coins": "$6.58",
+   "basket": "0"
+  },
+  {
+   "sec": 103,
+   "coins": "$6.55",
+   "basket": "0"
+  },
+  {
+   "sec": 104,
+   "coins": "$6.53",
+   "basket": "0"
+  },
+  {
+   "sec": 105,
+   "coins": "$6.50",
+   "basket": "0"
+  },
+  {
+   "sec": 106,
+   "coins": "$6.48",
+   "basket": "0"
+  },
+  {
+   "sec": 107,
+   "coins": "$6.45",
+   "basket": "0"
+  },
+  {
+   "sec": 108,
+   "coins": "$6.43",
+   "basket": "0"
+  },
+  {
+   "sec": 109,
+   "coins": "$6.40",
+   "basket": "0"
+  },
+  {
+   "sec": 110,
+   "coins": "$6.38",
+   "basket": "0"
+  },
+  {
+   "sec": 111,
+   "coins": "$6.35",
+   "basket": "0"
+  },
+  {
+   "sec": 112,
+   "coins": "$6.33",
+   "basket": "0"
+  },
+  {
+   "sec": 113,
+   "coins": "$6.30",
+   "basket": "0"
+  },
+  {
+   "sec": 114,
+   "coins": "$6.28",
+   "basket": "0"
+  },
+  {
+   "sec": 115,
+   "coins": "$6.25",
+   "basket": "0"
+  },
+  {
+   "sec": 116,
+   "coins": "$6.23",
+   "basket": "0"
+  },
+  {
+   "sec": 117,
+   "coins": "$6.20",
+   "basket": "0"
+  },
+  {
+   "sec": 118,
+   "coins": "$6.18",
+   "basket": "0"
+  },
+  {
+   "sec": 119,
+   "coins": "$6.15",
+   "basket": "0"
+  },
+  {
+   "sec": 120,
+   "coins": "$6.13",
+   "basket": "0"
+  }
+ ]
+}

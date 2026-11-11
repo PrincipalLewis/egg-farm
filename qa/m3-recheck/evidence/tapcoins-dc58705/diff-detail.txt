@@ -1,0 +1,313 @@
+diff --git a/src/config/formulas.ts b/src/config/formulas.ts
+index cb25219..69935f5 100644
+--- a/src/config/formulas.ts
++++ b/src/config/formulas.ts
+@@ -145,7 +145,7 @@ export const m4On = (p: EconomyParams) => !!p.m4?.enabled;
+ export const M5_TC_KEYS: Record<string, readonly string[]> = {
+   golden: ['egg_gap_min_s', 'egg_gap_max_s', 'frenzy_s'], abilities: ['ability_s', 'ability_cd_s'],
+   streak: ['streak_unlock_farm', 'streak_per_tap', 'tap_credit_min_s', 'streak_hold_s', 'streak_decay_per_s', 'streak_cap', 'streak_tier_count'],
+-  tapCoins: ['tap_bonus_income_window_s'], // #3 I_ref window (sim/income-ref.ts)
++  tapCoins: ['streak_unlock_farm', 'tap_credit_min_s', 'tap_income_share', 'tap_bonus_income_window_s'], // #3: R1 unlock, R2 window, A1 share, I_ref window
+ };
+ /** A tc_* tunable; throws when missing or non-finite (never a silent 0; F3's flags.ts helpers replace this on merge). */
+ export function tcNum(p: EconomyParams, k: string): number {
+diff --git a/src/config/m5-rules.ts b/src/config/m5-rules.ts
+index 54f5f6b..11c85d6 100644
+--- a/src/config/m5-rules.ts
++++ b/src/config/m5-rules.ts
+@@ -40,6 +40,7 @@ export function validateM5(m4: any, workers: any): void {
+   if (has(tc, 'streak_tier_count') && !(Number.isInteger(tc.streak_tier_count) && tc.streak_tier_count >= 1)) fail('tc.streak_tier_count must be an integer >= 1');
+   if (has(tc, 'tap_bonus_income_window_s') && !(Number.isInteger(tc.tap_bonus_income_window_s) && tc.tap_bonus_income_window_s >= 1)) fail('tc.tap_bonus_income_window_s must be an integer >= 1 (1 s I_ref buckets, sim/income-ref.ts)');
+   if (has(tc, 'tap_income_share') && !(tc.tap_income_share <= 1)) fail('tc.tap_income_share must be <= 1');
++  if (has(tc, 'tap_income_share') && !(Math.abs(tc.tap_income_share * 10000 - Math.round(tc.tap_income_share * 10000)) < 1e-6)) fail('tc.tap_income_share must have at most 4 decimals (basis points, streak spec §4.1b)');
+   // #5 Broody (cap > 0; shares in (0, 1])
+   if (has(tc, 'broody_cap_s') && !(tc.broody_cap_s > 0)) fail('tc.broody_cap_s must be > 0');
+   for (const k of ['broody_income_share', 'broody_ready_share']) if (has(tc, k) && !(tc[k] > 0 && tc[k] <= 1)) fail(`tc.${k} must be in (0, 1]`);
+diff --git a/src/sim/actions.ts b/src/sim/actions.ts
+index 6fb0063..ae24719 100644
+--- a/src/sim/actions.ts
++++ b/src/sim/actions.ts
+@@ -8,6 +8,7 @@ import { saleValueCents } from './payout';
+ import { creditTap, streakSaleFactor, addStreakExtra } from './streak';
+ import { playerSaleCtx } from './effects';
+ import { incomeRefOn, recordSale } from './income-ref';
++import { tapCoinsOn, tapCoinsFor } from './tap-coins';
+ import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
+ export type Action =
+   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
+@@ -65,11 +66,14 @@ function withMilestones(before: GameState, after: GameState, b: Balance, ev?: Si
+  *  passes suspended for the sheet. Default true keeps every existing caller (tests, bots, verify) unchanged. */
+ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true): GameState {
+   switch (a.type) {
+-    case 'collect': { // v5 #2: the only credited-tap source (R3); `credited` only while the streak is on
++    case 'collect': { // v5 #2/#3: the only credited-tap source (R3); `credited` only while streak or tapCoins is on
+       const n = Math.min(Math.floor(s.coop), eggsPerTap(s.collectionLevel, b)), c = creditTap(s, b);
+-      ev?.push(c.credited === undefined ? { type: 'collect', eggs: n } : { type: 'collect', eggs: n, credited: c.credited });
++      // #3 A1 (R14/R15): a credited tap under tapCoins pays floor((refCents x tapBp + 5000) / 10000) to coins (0 allowed, R15)
++      const bonus = c.credited && tapCoinsOn(b) ? tapCoinsFor(s, b) : undefined;
++      ev?.push(c.credited === undefined ? { type: 'collect', eggs: n } : bonus === undefined ? { type: 'collect', eggs: n, credited: c.credited }
++        : { type: 'collect', eggs: n, credited: c.credited, bonus_cents: bonus });
+       if (c.started) ev?.push({ type: 'streak_started', farm_level: s.farmLevel, collection_level: s.collectionLevel });
+-      return { ...c.s, coop: s.coop - n, basket: s.basket + n };
++      return { ...c.s, coop: s.coop - n, basket: s.basket + n, ...(bonus ? { coinsCents: c.s.coinsCents + bonus } : {}) };
+     }
+     case 'sell': return sellTo(s, a.customerId, b, ev, 'player', !attended);
+     case 'sellAll': { let r = s; for (const c of s.customers) { if (r.basket < 1) break; r = sellTo(r, c.id, b, ev, 'player', !attended); } return r; }
+diff --git a/src/sim/events.ts b/src/sim/events.ts
+index f65a534..88c6fbe 100644
+--- a/src/sim/events.ts
++++ b/src/sim/events.ts
+@@ -8,7 +8,7 @@ export type SimEvent =
+   | { type: 'customer_lost'; reason: 'timeout' | 'full_queue'; id?: number; N?: number }
+   | { type: 'sell'; id: number; k: number; N: number; price: number; value: number; by: 'player' | 'market_hand' }
+   | { type: 'upgrade'; upgrade: 'collection' | 'farm' | 'hens' | 'eggValue'; newLevel: number; cost: number; coinsBefore: number; track?: 'farm' | 'hens' | 'egg_value' | 'collection' }
+-  | { type: 'collect'; eggs: number; credited?: boolean; bonus_cents?: number } // M5: credited/bonus_cents only with m4.flags.streak/tapCoins
++  | { type: 'collect'; eggs: number; credited?: boolean; bonus_cents?: number } // M5: credited with m4.flags.streak or tapCoins; bonus_cents only on a credited tap with tapCoins (#3)
+   | { type: 'worker_collect'; eggs: number }
+   | { type: 'worker_hire'; worker: WorkerId; cost: number; farm: number }
+   | { type: 'worker_manage'; worker: WorkerId; energyBefore: number }
+diff --git a/src/sim/streak.ts b/src/sim/streak.ts
+index 4add4ac..33fdad2 100644
+--- a/src/sim/streak.ts
++++ b/src/sim/streak.ts
+@@ -14,6 +14,8 @@ import type { SimEvent, Sink } from './events';
+ export interface StreakRun { peak: number; durationS: number; creditedTaps: number; timeAtCapS: number; extraCents: number; frenzyOverlapS: number; }
+ const EPS = 1e-9, r12 = (x: number) => Math.round(x * 1e12) / 1e12, r2 = (x: number) => Math.round(x * 100) / 100;
+ export const streakOn = (b: Balance) => m4On(b) && b.m4?.flags?.streak === 1;
++/** R13a: credited-tap detection runs while the streak OR tap coins (#3 A1) is on; the 1.0 s window is shared. */
++const creditedTapsOn = (b: Balance) => streakOn(b) || (m4On(b) && b.m4?.flags?.tapCoins === 1);
+ /** Streak hold, then decay, over `dtFocus` focus seconds in ONE step (spec §6 formula; dt < 0 counts as 0). */
+ export function streakAfter(sv: number, holdS: number, dtFocus: number, b: Balance): { s: number; holdS: number } {
+   const dt = Math.max(0, dtFocus); if (dt <= holdS) return { s: sv, holdS: holdS - dt };
+@@ -29,10 +31,12 @@ export function streakTier(sv: number, b: Balance): number {
+ export const streakSaleFactor = (s: GameState, b: Balance, suspended?: boolean) =>
+   !suspended && (s.streakS ?? 0) > 0 && streakOn(b) ? 1 + s.streakS! : 1;
+ const newRun = (peak: number): StreakRun => ({ peak, durationS: 0, creditedTaps: 0, timeAtCapS: 0, extraCents: 0, frenzyOverlapS: 0 });
+-/** R2/R3/R5/R6: a player Collect (the 'collect' action only). credited = undefined while off (rc1 event shape). */
++/** R2/R3/R5/R6: a player Collect (the 'collect' action only). credited = undefined while streak and tapCoins are both off (rc1
++ *  event shape). With tapCoins alone the tap is credited (same unlock and window) but s, hold and the run are untouched (ST-AC29). */
+ export function creditTap(s: GameState, b: Balance): { s: GameState; credited?: boolean; started?: boolean } {
+-  if (!streakOn(b)) return { s };
++  if (!creditedTapsOn(b)) return { s };
+   if (s.farmLevel < tc(b, 'streak_unlock_farm') || (s.tapCreditCdS ?? 0) > EPS) return { s, credited: false };
++  if (!streakOn(b)) return { s: { ...s, tapCreditCdS: tc(b, 'tap_credit_min_s') }, credited: true };
+   const prev = s.streakS ?? 0, v = r12(Math.min(tc(b, 'streak_cap'), prev + tc(b, 'streak_per_tap'))), run = s.streakRun ?? newRun(v);
+   const streakRun = { ...run, peak: Math.max(run.peak, v), creditedTaps: run.creditedTaps + 1 };
+   return { s: { ...s, streakS: v, streakHoldS: tc(b, 'streak_hold_s'), tapCreditCdS: tc(b, 'tap_credit_min_s'), streakRun }, credited: true, started: !(prev > 0) };
+@@ -54,7 +58,7 @@ export function endStreak(s: GameState, reason: 'decay' | 'offline', b: Balance,
+ /** Per tick: the credit window counts down in sim time (R2, hidden ticks too); hold/decay and run stats use focus seconds
+  *  only (frozen otherwise, R10/R12). K18: s clamps to a lowered cap. Reaching 0 ends the run (reason "decay"). */
+ export function streakTick(s: GameState, dt: number, focusS: number, b: Balance, ev?: Sink): GameState {
+-  if (!streakOn(b)) return s;
++  if (!streakOn(b)) { const cd = s.tapCreditCdS ?? 0; return creditedTapsOn(b) && cd > 0 ? { ...s, tapCreditCdS: Math.max(0, r12(cd - dt)) } : s; } // tapCoins alone: window only
+   const cd = s.tapCreditCdS ?? 0, sv0 = s.streakS ?? 0; if (!(sv0 > 0) && !(cd > 0)) return s;
+   const o: GameState = cd > 0 ? { ...s, tapCreditCdS: Math.max(0, r12(cd - dt)) } : s;
+   if (!(sv0 > 0)) return o;
+diff --git a/src/sim/tap-coins.ts b/src/sim/tap-coins.ts
+new file mode 100644
+index 0000000..d83503f
+--- /dev/null
++++ b/src/sim/tap-coins.ts
+@@ -0,0 +1,32 @@
++/**
++ * v5 Wave A #3: A1 tap coins (product/collection/m5-streak-tap-coins-spec.md v1.3.2 §3.4 R14/R15/R17, §4.1b; HoE ST-11 and
++ * money-math rulings). Each CREDITED tap (sim/streak.ts creditTap, the one R2 definition shared with the streak) pays
++ *   tapCoinsCents = floor((refCents x tapBp + 5000) / 10000)   (half up, integers only)
++ * with tapBp = Math.round(tc_tap_income_share x 10000) and refCents from sim/income-ref.ts (§4.1/§4.1a). Paid straight to coins
++ * (not the Basket, not a sale), so it never enters I_ref, and no streak / Frenzy / effect multiplies it (R9/R14).
++ * BigInt guard: when refCents x bp + 5000 > Number.MAX_SAFE_INTEGER the multiply-and-floor runs in BigInt (exact to 2^53 - 1 cents).
++ * Live only with m4.flags.tapCoins (default 0, needs m4.enabled). No UI, sound or telemetry here.
++ */
++import type { Balance } from '../config/balance';
++import { m4On, tcNum } from '../config/formulas';
++import { refCents } from './income-ref';
++import type { GameState } from './state';
++/** Basis-point denominator and its half (round half up): units of the §4.1b formula, not tunables. */
++export const BP_DENOM = 10_000; const BP_HALF = BP_DENOM / 2;
++const BP_DENOM_N = BigInt(BP_DENOM), BP_HALF_N = BigInt(BP_HALF);
++export const tapCoinsOn = (b: Balance) => m4On(b) && b.m4?.flags?.tapCoins === 1;
++/** §4.1b: the share in basis points (0.03 -> 300). validateBalance keeps the CSV rate to <= 4 decimals. */
++export const tapBp = (b: Balance) => Math.round(tcNum(b, 'tap_income_share') * BP_DENOM);
++/** The two integer paths, on an object so a test can spy which one ran (ST-AC2c). */
++export const TAP_COINS_MATH = {
++  num: (r: number, bp: number) => Math.floor((r * bp + BP_HALF) / BP_DENOM),
++  big: (r: number, bp: number) => Number((BigInt(r) * BigInt(bp) + BP_HALF_N) / BP_DENOM_N),
++};
++/** floor((refCents x bp + 5000) / 10000) for integer refCents, bp >= 0. The float test `r * bp + 5000 > MAX_SAFE` is exact here:
++ *  a true value <= MAX_SAFE is computed exactly, and a true value above it can only round to >= 2^53. */
++export function tapCoinsCents(r: number, bp: number): number {
++  if (!(r > 0) || !(bp > 0)) return 0;
++  return r * bp + BP_HALF > Number.MAX_SAFE_INTEGER ? TAP_COINS_MATH.big(r, bp) : TAP_COINS_MATH.num(r, bp);
++}
++/** One credited tap's pay at the current sim time (refCents read once, from the state before the tap). 0 when off. */
++export const tapCoinsFor = (s: GameState, b: Balance) => (tapCoinsOn(b) ? tapCoinsCents(refCents(s, b), tapBp(b)) : 0);
+diff --git a/tests/v5-tap-coins.test.ts b/tests/v5-tap-coins.test.ts
+new file mode 100644
+index 0000000..bf39309
+--- /dev/null
++++ b/tests/v5-tap-coins.test.ts
+@@ -0,0 +1,164 @@
++// v5 Wave A #3 A1 tap coins sim (product/collection/m5-streak-tap-coins-spec.md v1.3.2 §3.1 R1-R4, §3.4 R14/R15/R17, §4.1b;
++// ST-AC1, ST-AC2, ST-AC2b, ST-AC2c, ST-AC3, ST-AC4, ST-AC8, ST-AC15, ST-AC16, ST-AC16d (a), ST-AC16e, ST-AC18, ST-AC29).
++// Pure sim only: no pop, sound or telemetry here (UI row 17). Same credited taps as the streak (sim/streak.ts creditTap).
++import { describe, it, expect, vi, afterEach } from 'vitest';
++import { balance as b, validateBalance } from '../src/config/balance';
++import { initialState, type GameState } from '../src/sim/state';
++import { apply } from '../src/sim/actions';
++import { step } from '../src/sim/tick';
++import { SALE_EFFECTS, type SaleEffect } from '../src/sim/effects';
++import { incomePerSec, wagesPerSec } from '../src/econ/income';
++import { refCents, recordSale, incomeRefTick } from '../src/sim/income-ref';
++import { tapBp, tapCoinsCents, tapCoinsOn, TAP_COINS_MATH } from '../src/sim/tap-coins';
++import { M5_TC_KEYS } from '../src/config/formulas';
++import { ON } from './v5-f2-helpers';
++type B = typeof b;
++const flags = (f: Record<string, number>, bb: B = ON) => ({ ...bb, m4: { ...bb.m4!, flags: { ...bb.m4!.flags, ...f } } }) as B;
++const TC = flags({ tapCoins: 1 }), TC_ONLY = flags({ tapCoins: 1, streak: 0 }), ST_ONLY = flags({ tapCoins: 0, streak: 1 }), NONE = flags({ tapCoins: 0, streak: 0 });
++const tc = TC.m4!.tc!, DT = 1 / TC.tickHz, PER_S = Math.round(TC.tickHz), CREDIT_TICKS = Math.round(tc.tap_credit_min_s / DT);
++const working = { energy: 100, cdS: 0 };
++const farm = (extra: Partial<GameState> = {}): GameState => ({ ...initialState(TC, 9), farmLevel: 10, collectionLevel: 8, hensLevel: 10, eggValueLevel: 10,
++  coinsCents: 50_000_000, coop: 30, basket: 0, graderTier: 1,
++  workers: { market_hand: { ...working }, coop_hand: { ...working }, hawker: { ...working }, grader: { ...working } }, ...extra });
++const issCents = (s: GameState, bb = TC) => Math.round(100 * Math.max(0, incomePerSec(s, bb) + wagesPerSec(s, bb)));
++const ref = (rc: number, bp = 300) => Number((BigInt(rc) * BigInt(bp) + 5000n) / 10000n); // the HoE BigInt reference
++const tap = (s: GameState, bb = TC) => { const ev: any[] = []; return { s: apply(s, { type: 'collect' }, bb, ev), ev }; };
++/** n unfocused ticks (no streak hold/decay, sim time still runs for the credit window). */
++const run = (s: GameState, n: number, bb = TC, ev?: any[]) => { for (let i = 0; i < n; i++) s = step(s, DT, bb, ev, { focus: false }); return s; };
++afterEach(() => { (SALE_EFFECTS as SaleEffect[]).splice(1); vi.restoreAllMocks(); });
++
++describe('#3 tap coins: exact integer arithmetic (§4.1b, ST-AC2b, ST-AC2c)', () => {
++  it('tapBp = Math.round(tc_tap_income_share x 10000): 0.03 -> 300; follows config (ST-AC18)', () => {
++    expect(tapBp(TC)).toBe(300);
++    expect(tapBp({ ...TC, m4: { ...TC.m4!, tc: { ...tc, tap_income_share: 0.05 } } } as B)).toBe(500);
++  });
++  it('ST-AC2b: refCents 1260 / 1650 / 7750 pay exactly 38 / 50 / 233 cents (F30 $2.33, not 232); 16 -> 0, 17 -> 1 (integer inputs only)', () => {
++    expect([1260, 1650, 7750, 16, 17, 0].map(r => tapCoinsCents(r, 300))).toEqual([38, 50, 233, 0, 1, 0]);
++    for (let r = 0; r < 5000; r += 7) expect(tapCoinsCents(r, 300)).toBe(Math.floor((r * 300 + 5000) / 10000));
++  });
++  it('ST-AC2c: large refCents equal the BigInt reference (1e12, 1e12 + 7, the last safe value and just above it)', () => {
++    for (const r of [1e12, 1_000_000_000_007, 30_023_997_515_786, 30_023_997_515_787, 30_023_997_515_788]) expect(tapCoinsCents(r, 300)).toBe(ref(r));
++    expect(tapCoinsCents(1e12, 300)).toBe(30_000_000_000); expect(tapCoinsCents(1_000_000_000_007, 300)).toBe(30_000_000_000);
++    expect(tapCoinsCents(30_023_997_515_787, 300)).toBe(900_719_925_474);
++  });
++  it('ST-AC2c: where the paths disagree, the BigInt result is used: 6,425,135,468,379,916 -> 192,754,064,051,397 (Number path ...398)', () => {
++    const r = 6_425_135_468_379_916; expect(Math.floor((r * 300 + 5000) / 10000)).toBe(192_754_064_051_398);
++    expect(tapCoinsCents(r, 300)).toBe(192_754_064_051_397); expect(tapCoinsCents(r, 300)).toBe(ref(r));
++  });
++  it('ST-AC2c: a spy shows the BigInt path runs exactly when refCents x bp + 5000 > Number.MAX_SAFE_INTEGER (bp 300 and 10,000)', () => {
++    const spy = vi.spyOn(TAP_COINS_MATH, 'big');
++    for (const [bp, last] of [[300, 30_023_997_515_786], [10_000, 900_719_925_473]] as const) {
++      for (const r of [last - 1, last, last + 1, last + 2]) {
++        spy.mockClear(); const got = tapCoinsCents(r, bp);
++        expect(spy).toHaveBeenCalledTimes(BigInt(r) * BigInt(bp) + 5000n > BigInt(Number.MAX_SAFE_INTEGER) ? 1 : 0); expect(got).toBe(ref(r, bp));
++      }
++    }
++    spy.mockClear(); tapCoinsCents(1650, 300); expect(spy).not.toHaveBeenCalled();
++  });
++  it('validateBalance: tap_income_share must have <= 4 decimals (|rate x 10000 - bp| < 1e-6); tapCoins on requires its tc keys', () => {
++    const withShare = (v: number) => ({ ...TC, m4: { ...TC.m4!, tc: { ...tc, tap_income_share: v } } }) as B;
++    expect(() => validateBalance(TC, false)).not.toThrow(); expect(() => validateBalance(withShare(0.0301), false)).not.toThrow();
++    expect(() => validateBalance(withShare(0.03005), false)).toThrow(/tap_income_share/);
++    expect([...M5_TC_KEYS.tapCoins].sort()).toEqual(['streak_unlock_farm', 'tap_bonus_income_window_s', 'tap_credit_min_s', 'tap_income_share']);
++    for (const k of M5_TC_KEYS.tapCoins) { const t: any = { ...tc }; delete t[k];
++      expect(() => validateBalance({ ...TC_ONLY, m4: { ...TC_ONLY.m4!, tc: t } } as B, false), k).toThrow(new RegExp(`tc_${k}`));
++      expect(() => validateBalance({ ...NONE, m4: { ...NONE.m4!, tc: t } } as B, false), k).not.toThrow(); }
++  });
++});
++
++describe('#3 tap coins: credited taps pay (R2, R14, R15)', () => {
++  it('ST-AC2: one credited Collect at F >= 8 pays exactly floor((refCents x tapBp + 5000) / 10000) to coins, with bonus_cents on the event', () => {
++    const s = farm(), want = tapCoinsCents(refCents(s, TC), tapBp(TC)); expect(want).toBeGreaterThan(0);
++    const r = tap(s); expect(r.s.coinsCents - s.coinsCents).toBe(want);
++    expect(r.ev[0]).toEqual({ type: 'collect', eggs: expect.any(Number), credited: true, bonus_cents: want });
++    expect(r.s.streakS).toBeCloseTo(tc.streak_per_tap, 12); // the same tap also builds the streak
++  });
++  it('ST-AC16d (a): a warm-up tap (reload / fresh start) pays from I_ss: floor((Math.round(100 x I_ss) x 300 + 5000) / 10000)', () => {
++    const s = run(farm(), 1); expect(s.refWarmS!).toBeLessThan(tc.tap_bonus_income_window_s);
++    expect(tap(s).s.coinsCents - s.coinsCents).toBe(ref(issCents(s)));
++  });
++  it('R2: a tap inside the 1.0 s sim window is not credited and pays nothing; the next one after the window pays (K1/ST-AC16c)', () => {
++    let s = tap(farm()).s; s = run(s, CREDIT_TICKS - 1);
++    const r = tap(s); expect(r.ev[0]).toEqual({ type: 'collect', eggs: expect.any(Number), credited: false }); expect(r.s.coinsCents).toBe(s.coinsCents);
++    s = run(r.s, 1); const r2 = tap(s); expect(r2.ev[0].credited).toBe(true); expect(r2.s.coinsCents - s.coinsCents).toBe(r2.ev[0].bonus_cents);
++  });
++  it('ST-AC3: 10 taps/s for 10 s: credited = 10 (+-1), tap coins = Σ bonus_cents of credited taps, every tap still moves eggs per rc1', () => {
++    let s = farm({ coop: 1000, workers: {} }); const ev: any[] = []; let paid = 0;
++    for (let i = 0; i < 10 * PER_S; i++) { const before = s.coinsCents; s = apply(s, { type: 'collect' }, TC, ev); paid += s.coinsCents - before; s = run(s, 1); }
++    const collects = ev.filter(e => e.type === 'collect'), cr = collects.filter(e => e.credited);
++    expect(cr.length).toBeGreaterThanOrEqual(9); expect(cr.length).toBeLessThanOrEqual(11);
++    expect(paid).toBe(cr.reduce((a, e) => a + e.bonus_cents, 0)); expect(collects.every(e => e.eggs > 0)).toBe(true);
++    expect(collects.filter(e => !e.credited).every(e => !('bonus_cents' in e))).toBe(true);
++  });
++  it('ST-AC4 / K2: an empty coop still credits and pays every credited tap', () => {
++    let s = farm({ coop: 0 }); let n = 0;
++    for (let i = 0; i < 28; i++) { const r = tap({ ...s, coop: 0 }); expect(r.ev[0]).toMatchObject({ eggs: 0, credited: true }); expect(r.ev[0].bonus_cents).toBeGreaterThan(0); n++; s = run(r.s, CREDIT_TICKS); }
++    expect(n).toBe(28); expect(s.streakS).toBeCloseTo(tc.streak_cap, 12);
++  });
++  it('ST-AC16 / R15 / K13: I_ref = 0 after a warm-up with no sales: the credited tap pays 0 (bonus_cents 0) and still builds s', () => {
++    let s = { ...farm({ workers: {}, customers: [] }) }; for (let i = 0; i < tc.tap_bonus_income_window_s; i++) s = incomeRefTick(s, 1, TC);
++    expect(refCents(s, TC)).toBe(0); const r = tap(s);
++    expect(r.ev[0]).toEqual({ type: 'collect', eggs: expect.any(Number), credited: true, bonus_cents: 0 }); expect(r.s.coinsCents).toBe(s.coinsCents); expect(r.s.streakS).toBeGreaterThan(0);
++  });
++  it('R15: refCents 16 -> 0 cents, 17 -> 1 cent through the collect path (ring of 16 / 17 cents/s)', () => {
++    for (const [perS, want] of [[16, 0], [17, 1]] as const) {
++      let s = farm({ workers: {}, customers: [] }); for (let i = 0; i < tc.tap_bonus_income_window_s; i++) { s = recordSale(s, perS, TC); s = incomeRefTick(s, 1, TC); }
++      expect(refCents(s, TC)).toBe(perS); const r = tap(s); expect(r.ev[0].bonus_cents).toBe(want); expect(r.s.coinsCents - s.coinsCents).toBe(want);
++    }
++  });
++  it('tap coins never feed I_ref: the ring is unchanged by a paying tap (§4.1 exclusions)', () => {
++    const s = run(farm(), 15 * PER_S), r = tap(s); expect(r.ev[0].bonus_cents).toBeGreaterThan(0); expect(r.s.irefRingCents).toEqual(s.irefRingCents);
++  });
++});
++
++describe('#3 tap coins: who pays, unlock and flags (R1, R3, R9, R17, R13a)', () => {
++  it('ST-AC1: at F = 7 (below tc_streak_unlock_farm) 60 s of tapping: no credit, no tap coins, s = 0, coins move only by sales', () => {
++    let s = farm({ farmLevel: 7, workers: {}, customers: [] }); const ev: any[] = [];
++    for (let i = 0; i < 60 * PER_S; i++) { const c0 = s.coinsCents; s = apply(s, { type: 'collect' }, TC, ev); expect(s.coinsCents).toBe(c0); s = run(s, 1, TC, ev); }
++    const collects = ev.filter(e => e.type === 'collect'); expect(collects.every(e => e.credited === false && !('bonus_cents' in e))).toBe(true);
++    expect(s.streakS ?? 0).toBe(0);
++  });
++  it('ST-AC8 / R9: the streak (s = 0.28) and a live x2 sale effect leave the tap coin unchanged', () => {
++    (SALE_EFFECTS as SaleEffect[]).push({ id: 'fixture2x', flag: 'golden', factor: () => 2 });
++    const s = run(farm(), 15 * PER_S), hot = { ...s, streakS: 0.28, streakHoldS: 3 };
++    expect(tap(hot).ev[0].bonus_cents).toBe(tap(s).ev[0].bonus_cents); expect(tap(hot).ev[0].bonus_cents).toBeGreaterThan(0);
++  });
++  it('ST-AC15 / R17: Coop Hand asleep or unpaid: taps still pay (> 0 while refCents >= 17)', () => {
++    for (const ch of [{ energy: 0, cdS: 0 }, { energy: 50, cdS: 0, unpaid: true }]) {
++      const s = farm({ workers: { ...farm().workers, coop_hand: ch } }); expect(refCents(s, TC)).toBeGreaterThanOrEqual(17);
++      const r = tap(s); expect(r.ev[0].bonus_cents).toBe(ref(refCents(s, TC))); expect(r.ev[0].bonus_cents).toBeGreaterThan(0);
++    }
++  });
++  it('ST-AC16e: Market Hand Asleep during a warm-up: credited taps pay 0 (no coins) while s builds; working again pays from I_ss on that tick', () => {
++    const s = run(farm({ coinsCents: 0, workers: { ...farm().workers, market_hand: { energy: 0, cdS: 0 } } }), 1), r = tap(s);
++    expect(r.ev[0]).toMatchObject({ credited: true, bonus_cents: 0 }); expect(r.s.streakS).toBeGreaterThan(0);
++    const w = { ...run(r.s, CREDIT_TICKS), coinsCents: 50_000_000 }, back = { ...w, workers: { ...w.workers, market_hand: { ...working } } };
++    expect(tap(back).ev[0].bonus_cents).toBe(ref(issCents(back))); expect(tap(back).ev[0].bonus_cents).toBeGreaterThan(0);
++  });
++  it('R3 / ST-AC14: Coop Hand collection and the welcome-back Collect are never credited and pay nothing', () => {
++    let s = farm({ pendingOfflineEggs: 12 }); const ev: any[] = [];
++    const c0 = s.coinsCents; s = apply(s, { type: 'collectOffline' }, TC, ev); expect(s.coinsCents).toBe(c0); expect(ev).toEqual([]);
++    expect(s.tapCreditCdS ?? 0).toBe(0); // the next real tap is still credited
++    const w: any[] = []; run(farm({ customers: [] }), 3 * PER_S, TC, w);
++    expect(w.filter(e => e.type === 'worker_collect').length).toBeGreaterThan(0); expect(w.some(e => e.type === 'collect')).toBe(false);
++  });
++  it('ST-AC29: tapCoins = 1, streak = 0: taps pay coins and s stays absent (no meter state); the credit window still applies', () => {
++    expect(tapCoinsOn(TC_ONLY)).toBe(true);
++    let s = farm(); const r = tap(s, TC_ONLY); expect(r.ev).toEqual([{ type: 'collect', eggs: expect.any(Number), credited: true, bonus_cents: tapCoinsCents(refCents(s, TC_ONLY), 300) }]);
++    expect(r.s.coinsCents - s.coinsCents).toBe(r.ev[0].bonus_cents); expect('streakS' in r.s).toBe(false); expect('streakRun' in r.s).toBe(false);
++    expect(tap(r.s, TC_ONLY).ev[0]).toEqual({ type: 'collect', eggs: expect.any(Number), credited: false });
++    s = run(r.s, CREDIT_TICKS, TC_ONLY); expect(s.tapCreditCdS).toBe(0); expect(tap(s, TC_ONLY).ev[0].credited).toBe(true);
++    expect('streakS' in s).toBe(false);
++  });
++  it('ST-AC29: tapCoins = 0, streak = 1: s builds and no coins are paid (no bonus_cents, no ring)', () => {
++    const s = farm(), r = tap(s, ST_ONLY); expect(r.ev[0]).toEqual({ type: 'collect', eggs: expect.any(Number), credited: true });
++    expect(r.s.coinsCents).toBe(s.coinsCents); expect(r.s.streakS).toBeGreaterThan(0); expect('irefRingCents' in run(r.s, 10, ST_ONLY)).toBe(false);
++  });
++  it('ST-AC29: both 0, or m4.enabled = 0, or the shipping balance: Collect is rc1 exactly (event shape, coins, no M5 field)', () => {
++    for (const bb of [NONE, { ...TC, m4: { ...TC.m4!, enabled: 0 } } as B, b]) {
++      expect(tapCoinsOn(bb)).toBe(false);
++      const s = farm(), r = tap(s, bb); expect(r.ev).toEqual([{ type: 'collect', eggs: expect.any(Number) }]); expect(r.s.coinsCents).toBe(s.coinsCents);
++      for (const k of ['tapCreditCdS', 'streakS', 'irefRingCents', 'refWarmS']) expect(k in run(r.s, 5, bb)).toBe(false);
++    }
++  });
++});

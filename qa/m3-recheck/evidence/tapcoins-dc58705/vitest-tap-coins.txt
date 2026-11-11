@@ -1,0 +1,33 @@
+LOCK+START 2026-11-05T23:49:12+01:00 loadavg=0.63 1.11 1.52 1/2083 1436363
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/tapcoins-dc58705/wt
+
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: exact integer arithmetic (§4.1b, ST-AC2b, ST-AC2c) > tapBp = Math.round(tc_tap_income_share x 10000): 0.03 -> 300; follows config (ST-AC18)
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: exact integer arithmetic (§4.1b, ST-AC2b, ST-AC2c) > ST-AC2b: refCents 1260 / 1650 / 7750 pay exactly 38 / 50 / 233 cents (F30 $2.33, not 232); 16 -> 0, 17 -> 1 (integer inputs only)
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: exact integer arithmetic (§4.1b, ST-AC2b, ST-AC2c) > ST-AC2c: large refCents equal the BigInt reference (1e12, 1e12 + 7, the last safe value and just above it)
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: exact integer arithmetic (§4.1b, ST-AC2b, ST-AC2c) > ST-AC2c: where the paths disagree, the BigInt result is used: 6,425,135,468,379,916 -> 192,754,064,051,397 (Number path ...398)
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: exact integer arithmetic (§4.1b, ST-AC2b, ST-AC2c) > ST-AC2c: a spy shows the BigInt path runs exactly when refCents x bp + 5000 > Number.MAX_SAFE_INTEGER (bp 300 and 10,000)
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: exact integer arithmetic (§4.1b, ST-AC2b, ST-AC2c) > validateBalance: tap_income_share must have <= 4 decimals (|rate x 10000 - bp| < 1e-6); tapCoins on requires its tc keys
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: credited taps pay (R2, R14, R15) > ST-AC2: one credited Collect at F >= 8 pays exactly floor((refCents x tapBp + 5000) / 10000) to coins, with bonus_cents on the event
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: credited taps pay (R2, R14, R15) > ST-AC16d (a): a warm-up tap (reload / fresh start) pays from I_ss: floor((Math.round(100 x I_ss) x 300 + 5000) / 10000)
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: credited taps pay (R2, R14, R15) > R2: a tap inside the 1.0 s sim window is not credited and pays nothing; the next one after the window pays (K1/ST-AC16c)
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: credited taps pay (R2, R14, R15) > ST-AC3: 10 taps/s for 10 s: credited = 10 (+-1), tap coins = Σ bonus_cents of credited taps, every tap still moves eggs per rc1
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: credited taps pay (R2, R14, R15) > ST-AC4 / K2: an empty coop still credits and pays every credited tap
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: credited taps pay (R2, R14, R15) > ST-AC16 / R15 / K13: I_ref = 0 after a warm-up with no sales: the credited tap pays 0 (bonus_cents 0) and still builds s
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: credited taps pay (R2, R14, R15) > R15: refCents 16 -> 0 cents, 17 -> 1 cent through the collect path (ring of 16 / 17 cents/s)
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: credited taps pay (R2, R14, R15) > tap coins never feed I_ref: the ring is unchanged by a paying tap (§4.1 exclusions)
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: who pays, unlock and flags (R1, R3, R9, R17, R13a) > ST-AC1: at F = 7 (below tc_streak_unlock_farm) 60 s of tapping: no credit, no tap coins, s = 0, coins move only by sales
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: who pays, unlock and flags (R1, R3, R9, R17, R13a) > ST-AC8 / R9: the streak (s = 0.28) and a live x2 sale effect leave the tap coin unchanged
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: who pays, unlock and flags (R1, R3, R9, R17, R13a) > ST-AC15 / R17: Coop Hand asleep or unpaid: taps still pay (> 0 while refCents >= 17)
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: who pays, unlock and flags (R1, R3, R9, R17, R13a) > ST-AC16e: Market Hand Asleep during a warm-up: credited taps pay 0 (no coins) while s builds; working again pays from I_ss on that tick
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: who pays, unlock and flags (R1, R3, R9, R17, R13a) > R3 / ST-AC14: Coop Hand collection and the welcome-back Collect are never credited and pay nothing
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: who pays, unlock and flags (R1, R3, R9, R17, R13a) > ST-AC29: tapCoins = 1, streak = 0: taps pay coins and s stays absent (no meter state); the credit window still applies
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: who pays, unlock and flags (R1, R3, R9, R17, R13a) > ST-AC29: tapCoins = 0, streak = 1: s builds and no coins are paid (no bonus_cents, no ring)
+ ✓ tests/v5-tap-coins.test.ts > #3 tap coins: who pays, unlock and flags (R1, R3, R9, R17, R13a) > ST-AC29: both 0, or m4.enabled = 0, or the shipping balance: Collect is rc1 exactly (event shape, coins, no M5 field)
+
+ Test Files  1 passed (1)
+      Tests  22 passed (22)
+   Start at  23:49:13
+   Duration  355ms (transform 133ms, setup 0ms, collect 168ms, tests 37ms, environment 0ms, prepare 43ms)
+
+EXIT=0 END 2026-11-05T23:49:13+01:00 loadavg=0.63 1.11 1.52 1/2082 1436561

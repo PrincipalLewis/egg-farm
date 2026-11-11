@@ -1,0 +1,62 @@
+[
+ {
+  "e": "webkit",
+  "n": "360 off build ID",
+  "p": true,
+  "i": "m3-rc1-pre+7e70a2e"
+ },
+ {
+  "e": "webkit",
+  "n": "360 main build ID",
+  "p": true,
+  "i": "m3-rc1-pre+dfd53b9"
+ },
+ {
+  "e": "webkit",
+  "n": "360 flag-off: no nudge, no dot, no pulse",
+  "p": true,
+  "i": {
+   "nudge": 0,
+   "dots": 0,
+   "pulse": 0
+  }
+ },
+ {
+  "e": "webkit",
+  "n": "360 flag-off tab/pill/nav/Farm-Buy geometry identical to main",
+  "p": true,
+  "i": {
+   "diff": []
+  }
+ },
+ {
+  "e": "webkit",
+  "n": "1280 off build ID",
+  "p": true,
+  "i": "m3-rc1-pre+7e70a2e"
+ },
+ {
+  "e": "webkit",
+  "n": "1280 main build ID",
+  "p": true,
+  "i": "m3-rc1-pre+dfd53b9"
+ },
+ {
+  "e": "webkit",
+  "n": "1280 flag-off: no nudge, no dot, no pulse",
+  "p": true,
+  "i": {
+   "nudge": 0,
+   "dots": 0,
+   "pulse": 0
+  }
+ },
+ {
+  "e": "webkit",
+  "n": "1280 flag-off tab/pill/nav/Farm-Buy geometry identical to main",
+  "p": true,
+  "i": {
+   "diff": []
+  }
+ }
+]

@@ -1,0 +1,55 @@
+﻿2026-11-06T01:44:40.5214613Z ##[group]Run npm run test:slow
+2026-11-06T01:44:40.5214891Z [36;1mnpm run test:slow[0m
+2026-11-06T01:44:40.5232928Z shell: /usr/bin/bash -e {0}
+2026-11-06T01:44:40.5233159Z ##[endgroup]
+2026-11-06T01:44:40.6175091Z 
+2026-11-06T01:44:40.6175725Z > egg-farm@0.1.0 test:slow
+2026-11-06T01:44:40.6176872Z > node scripts/check-vendor-pins.mjs && vitest run --config vitest.slow.config.ts --poolOptions.forks.maxForks=2 --poolOptions.forks.minForks=1
+2026-11-06T01:44:40.6178218Z 
+2026-11-06T01:44:40.6513722Z check-vendor-pins: 4 vendored file(s) match SHA256SUMS, no unlisted files
+2026-11-06T01:44:40.9128516Z 
+2026-11-06T01:44:40.9149182Z [1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/home/runner/work/egg-farm/egg-farm[39m
+2026-11-06T01:44:40.9151186Z 
+2026-11-06T01:47:03.0199965Z [90mstdout[2m | tests/seller-variance.slow.test.ts[2m > [22m[2mold deterministic bot (variance off) = Python var=None[2m > [22m[2mm2: per-seed level at 30:00 equal, every reach time within 15 s, 100 seeds
+2026-11-06T01:47:03.0201175Z [22m[39mm2 old: 87/100 seeds bit-exact
+2026-11-06T01:47:03.0201489Z 
+2026-11-06T01:47:03.0202303Z [90mstdout[2m | tests/seller-variance.slow.test.ts[2m > [22m[2mm1 variance bot vs Python, 100 seeds (distribution)[2m > [22m[2mAC7 quantiles match; proposal targets 1-2 hold
+2026-11-06T01:47:03.0203385Z [22m[39mm1 variance t18 P5/P50/P95 TS 20.03/20.61/22.07 PY 20.04/20.63/22.05; spread TS 7.1% PY 6.8%; L@30 P5/P95 20/20
+2026-11-06T01:47:03.0203877Z 
+2026-11-06T01:47:03.0204636Z [90mstdout[2m | tests/seller-variance.slow.test.ts[2m > [22m[2mm2 variance bot vs Python, 100 seeds (distribution)[2m > [22m[2mAC7 quantiles match; proposal targets 1-2 hold
+2026-11-06T01:47:03.0205657Z [22m[39mm2 variance t18 P5/P50/P95 TS 20.63/21.11/22.61 PY 20.56/21.06/22.39; spread TS 7.1% PY 6.3%; L@30 P5/P95 20/21
+2026-11-06T01:47:03.0206107Z 
+2026-11-06T01:47:03.0207280Z  [32m✓[39m tests/seller-variance.slow.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 141613[2mms[22m[39m
+2026-11-06T01:47:03.0208644Z    [33m[2m✓[22m[39m variance stream = CPython random.Random (exact)[2m > [22mm1: full action trace equals Python (seeds 1,2,3,4,5) [33m959[2mms[22m[39m
+2026-11-06T01:47:03.0209872Z    [33m[2m✓[22m[39m variance stream = CPython random.Random (exact)[2m > [22mm2: full action trace equals Python (seeds 1,2,3,4,5) [33m1758[2mms[22m[39m
+2026-11-06T01:47:03.0211617Z    [33m[2m✓[22m[39m old deterministic bot (variance off) = Python var=None[2m > [22mm1: per-seed reach times exact, 100 seeds [33m14320[2mms[22m[39m
+2026-11-06T01:47:03.0213339Z    [33m[2m✓[22m[39m old deterministic bot (variance off) = Python var=None[2m > [22mm2: per-seed level at 30:00 equal, every reach time within 15 s, 100 seeds [33m26862[2mms[22m[39m
+2026-11-06T01:47:03.0215238Z    [33m[2m✓[22m[39m m1 variance bot vs Python, 100 seeds (distribution)[2m > [22mAC7 quantiles match; proposal targets 1-2 hold [33m13142[2mms[22m[39m
+2026-11-06T01:47:03.0216615Z    [33m[2m✓[22m[39m m2 variance bot vs Python, 100 seeds (distribution)[2m > [22mAC7 quantiles match; proposal targets 1-2 hold [33m26073[2mms[22m[39m
+2026-11-06T01:47:03.0218130Z    [33m[2m✓[22m[39m AC7 band, variance bot (data/economy.csv a8c4e268)[2m > [22mband per CSV sha a8c4e268 (F1: hard band) [33m58479[2mms[22m[39m
+2026-11-06T01:49:09.9789141Z [90mstdout[2m | tests/ac7-worst-seed.slow.test.ts[2m > [22m[2mAC7 worst-seed guards, workers variance bot (data/economy.csv a8c4e268)[2m > [22m[2mF1 variance bot: L18-25 slowest-level P95/worst within bounds; P95 time-to-L20 warn (F1 6dca24cd or T3 b48be8a4; skipped on pre-F1 57d964d5)
+2026-11-06T01:49:09.9791682Z [22m[39mvariance L18-25 slowest level P95 236.4s (<= 390) worst 255.9s (<= 480); t20 P5/P50/P95/worst 1413/1476/1555/1583s (warn P95 > 1740)
+2026-11-06T01:49:09.9792659Z 
+2026-11-06T01:49:09.9800127Z [90mstdout[2m | tests/ac7-worst-seed.slow.test.ts[2m > [22m[2mAC7 worst-seed guards, workers variance bot (data/economy.csv a8c4e268)[2m > [22m[2mF1 fixed bot: every seed's slowest L18-25 level <= l18_25_step_p95_max_s (F1 6dca24cd or T3 b48be8a4; skipped on pre-F1 57d964d5)
+2026-11-06T01:49:09.9805336Z [22m[39mfixed L18-25 slowest level P95 180.0s worst 180.0s (<= 360)
+2026-11-06T01:49:09.9805888Z 
+2026-11-06T01:49:09.9806638Z  [32m✓[39m tests/ac7-worst-seed.slow.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 126771[2mms[22m[39m
+2026-11-06T01:49:09.9809030Z    [33m[2m✓[22m[39m AC7 worst-seed guards, workers variance bot (data/economy.csv a8c4e268)[2m > [22mF1 variance bot: L18-25 slowest-level P95/worst within bounds; P95 time-to-L20 warn (F1 6dca24cd or T3 b48be8a4; skipped on pre-F1 57d964d5) [33m63012[2mms[22m[39m
+2026-11-06T01:49:09.9811484Z    [33m[2m✓[22m[39m AC7 worst-seed guards, workers variance bot (data/economy.csv a8c4e268)[2m > [22mF1 fixed bot: every seed's slowest L18-25 level <= l18_25_step_p95_max_s (F1 6dca24cd or T3 b48be8a4; skipped on pre-F1 57d964d5) [33m63757[2mms[22m[39m
+2026-11-06T01:50:14.8393145Z [90mstdout[2m | tests/ac7-dceo-04.slow.test.ts[2m > [22m[2mAC7 D-CEO-20261019-04 final-SHA gate[2m > [22m[2mseeds 1-200, both paths: L10 P95 <= 12.1 min, fastest-seed L10 >= 7.8 min
+2026-11-06T01:50:14.8394146Z [22m[39mD-CEO-04 1-200 L10 nw P95 12.02 fastest 7.87 | w P95 12.08 fastest 8.32
+2026-11-06T01:50:14.8394522Z 
+2026-11-06T01:50:14.8398176Z [90mstdout[2m | tests/ac7-dceo-04.slow.test.ts[2m > [22m[2mAC7 D-CEO-20261019-04 final-SHA gate[2m > [22m[2mseeds 201-300 pass all original gates strictly
+2026-11-06T01:50:14.8399397Z [22m[39mD-CEO-04 201-300 L10 nw P95 11.81 fastest 8.13 | w P95 11.81 fastest 8.76; L@30 nw P5/P95 19/20 w 21/22
+2026-11-06T01:50:14.8399948Z 
+2026-11-06T01:50:14.8400953Z  [32m✓[39m tests/ac7-dceo-04.slow.test.ts [2m([22m[2m3 tests[22m[2m | [22m[33m1 skipped[39m[2m)[22m[33m 333429[2mms[22m[39m
+2026-11-06T01:50:14.8414455Z    [33m[2m✓[22m[39m AC7 D-CEO-20261019-04 final-SHA gate[2m > [22mseeds 1-200, both paths: L10 P95 <= 12.1 min, fastest-seed L10 >= 7.8 min [33m179671[2mms[22m[39m
+2026-11-06T01:50:14.8415840Z    [33m[2m✓[22m[39m AC7 D-CEO-20261019-04 final-SHA gate[2m > [22mseeds 201-300 pass all original gates strictly [33m153756[2mms[22m[39m
+2026-11-06T01:50:32.7981525Z  [32m✓[39m tests/bot-m5-trace.slow.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 17710[2mms[22m[39m
+2026-11-06T01:50:32.7983354Z    [33m[2m✓[22m[39m verify m5x-casual: pinned trace and checkpoint counters (CCR N-5)[2m > [22m[VER-1h N-5] 24 h seed 1: trace 07139bdd, and eggs.collected/sold at each checkpoint equal sums over bot-m5 events [33m17709[2mms[22m[39m
+2026-11-06T01:50:32.8127683Z 
+2026-11-06T01:50:32.8133801Z [2m Test Files [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+2026-11-06T01:50:32.8134855Z [2m      Tests [22m [1m[32m17 passed[39m[22m[2m | [22m[33m1 skipped[39m[90m (18)[39m
+2026-11-06T01:50:32.8135566Z [2m   Start at [22m 01:44:40
+2026-11-06T01:50:32.8136582Z [2m   Duration [22m 351.90s[2m (transform 357ms, setup 0ms, collect 827ms, tests 619.52s, environment 1ms, prepare 195ms)[22m
+2026-11-06T01:50:32.8137252Z 

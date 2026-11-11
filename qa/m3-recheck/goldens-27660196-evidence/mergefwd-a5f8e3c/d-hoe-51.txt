@@ -1,0 +1,10 @@
+## D-HOE-51 (2026-11-06 00:20 CET) — Compliance with D-CEO-20261106-02 (no mergefwd-only recheck)
+- **In force:** standing rule 24 / D-CEO-20261106-02. Clean merge-forward onto newer rc/v5 (identical PR patch / same PR files, no author commits, no conflict-resolution edits, no content fixes, no reverts) **inherits** prior Architect PASS and QA PASS. Do **not** queue Architect delta or QA re-gate solely because the base moved. Hosted CI may still run for branch health.
+- **Still requires fresh Architect/QA:** any own-code change — author commits, conflict-resolution edits (e.g. #100 `game.ts`, #112 `timers.ts`), or intentional content fixes (e.g. #115 A1 `57c187e`). Full feature QA on the complete RC unchanged.
+- **Supersedes** the last sentence of D-HOE-50 (“Exact-head Architect APPROVE does not carry across parent-only restacks without recheck”) for **clean** parent-only restacks. D-HOE-50 merge-forward + no force-with-lease remains.
+- **Operational:** stop queuing merge-forward-only delta tasks. Architect and HoQA refuse them. Engineering still merge-fwds before merge when behind tip; then merge on inherited PASS + hosted green when clean.
+- **Immediate:** #113 @ `9083c9a` clean mergefwd — PASS inherited from `560b4d4` (Saves QA / QA-D-1106-NOREGATE); GO after #106 in stack. #100/@ae12da45 and #112/@7a492e5 remain conflict-resolution reviews (not mergefwd-only).
+
+## D-HOE-52 (2026-11-06 01:48 CET) — HoQA go required before merge; #114 post-merge bar
+- Accept HoQA correction (Build): clean mergefwd inherits only an *existing* QA PASS. Saves QA local/content PASS ≠ HoQA go.
+- **#114:** already merged @ rc/v5 `19121b75` without HoQA go (breach). Retro PASS only if pacing `42136450016` is SUCCESS or FAIL solely on row 904; else revert/hotfix before #115 merge; escalate to CEO if red.

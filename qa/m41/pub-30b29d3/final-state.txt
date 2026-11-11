@@ -1,0 +1,21 @@
+== 2026-10-24T21:07:04+02:00
+{"assets":[{"digest":"sha256:dd919d616fe0138a89c362b1db269458558a0a2c85827b3e4fc104d36b22979b","name":"egg-farm.html","size":547466}],"draft":true,"published_at":null,"tag_name":"m4.1-p1-30b29d3","target_commitish":"30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134"}
+m4.1-5d9efa6
+[{"conclusion":"success","databaseId":40107345648,"headBranch":"m4.1-5d9efa6","updatedAt":"2026-10-24T15:31:27Z"},{"conclusion":"failure","databaseId":39212260477,"headBranch":"m4b-dd223f5","updatedAt":"2026-10-19T06:50:37Z"}]
+-- 30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134
+release-html	completed	success	2026-10-24T18:58:35Z
+release-globals (webkit)	completed	success	2026-10-24T18:59:24Z
+release-globals (chromium)	completed	success	2026-10-24T18:58:53Z
+slow	completed	success	2026-10-24T19:06:35Z
+release-globals (firefox)	completed	success	2026-10-24T18:59:13Z
+unit	completed	success	2026-10-24T19:02:56Z
+release-globals	completed	skipped	2026-10-24T16:50:13Z
+gate	completed	success	2026-10-24T16:50:13Z
+release-globals (chromium)	completed	success	2026-10-24T16:38:17Z
+release-globals (firefox)	completed	success	2026-10-24T16:38:38Z
+unit	completed	success	2026-10-24T16:42:15Z
+release-html	completed	success	2026-10-24T16:38:05Z
+release-globals (webkit)	completed	success	2026-10-24T16:38:47Z
+slow	completed	success	2026-10-24T16:42:43Z
+-- d1fb206b8f59a1a1f19623526fdbf3003d12efce
+gate	in_progress	null	null

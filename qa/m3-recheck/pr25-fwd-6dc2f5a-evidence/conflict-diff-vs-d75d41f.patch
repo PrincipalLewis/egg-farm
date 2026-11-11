@@ -1,0 +1,672 @@
+diff --git a/src/config/balance.json b/src/config/balance.json
+index 6a683ba..0d5b6d4 100644
+--- a/src/config/balance.json
++++ b/src/config/balance.json
+@@ -157,7 +157,8 @@
+   "offline": {
+     "offlineCapSeconds": 7200,
+     "offlineRateMultiplier": 0.25,
+-    "offlineMinSeconds": 60
++    "offlineMinSeconds": 60,
++    "hiddenSimMaxSeconds": 60
+   },
+   "m4": {
+     "enabled": 0,
+diff --git a/src/config/formulas.ts b/src/config/formulas.ts
+index 14ec488..fb2a339 100644
+--- a/src/config/formulas.ts
++++ b/src/config/formulas.ts
+@@ -22,7 +22,7 @@ export interface EconomyParams {
+     costTable?: number[];
+   };
+   customers: { customer_patience_s: number; first_customer_s: number; queue_max_base: number; queue_max_step_levels: number; queue_max_cap: number };
+-  offline: { offlineCapSeconds: number; offlineRateMultiplier: number; offlineMinSeconds: number };
++  offline: { offlineCapSeconds: number; offlineRateMultiplier: number; offlineMinSeconds: number; hiddenSimMaxSeconds: number };
+   /** M4-A three tracks (product/m4-manage-proposal.md §2.1-2.2). Optional so pre-M4 params stay valid. */
+   m4?: M4Params;
+ }
+diff --git a/src/game.ts b/src/game.ts
+index 632015f..9ad9630 100644
+--- a/src/game.ts
++++ b/src/game.ts
+@@ -5,6 +5,7 @@ import { coopCap } from './sim/tracks';
+ import { advance } from './sim/tick';
+ import { apply, Action, isUpgrade } from './sim/actions';
+ import { applyOffline } from './sim/offline';
++import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
+ import type { SimEvent } from './sim/events';
+ import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
+ import type { IdbBoot } from './save/idb-mirror';
+@@ -118,7 +119,9 @@ export class Game {
+   /** Called once when the guard first blocks a write. */
+   onInactive: (() => void) | null = null;
+   /** Stop sim + saving (another tab took the save). */
+-  deactivate() { if (this.inactive) return; this.inactive = true; this.onInactive?.(); }
++  deactivate() { if (this.inactive) return; this.inactive = true; this.endHiddenOnFreeze(); this.onInactive?.(); }
++  /** CCR m1: a tab frozen (tab guard / newer save) while hidden ends its hidden period now (mode 'none'), so it can never stay open. */
++  private endHiddenOnFreeze() { if (this.hidden) this.onShown(this.now()); }
+   /** Hand-over hold (another tab asked us to flush): no sim, no saves until the claim arrives or the hold expires. */
+   holdUntil = 0;
+   private held() { return this.now() < this.holdUntil; }
+@@ -134,12 +137,12 @@ export class Game {
+   /** The balance this session runs on right now (flag off until the migration commits); the UI reads it live. */
+   get balance(): Balance { return this.b; }
+   get tracksMigrationPending() { return this.tracksPending !== null; }
+-  private persisted(): GameState {
++  private persisted(st: GameState = this.state): GameState {
+     const p = this.tracksPending;
+     if (!p) {
+-      return flagOffShape(this.state, this.b); // HoE flag-off rule (save.ts)
++      return flagOffShape(st, this.b); // HoE flag-off rule (save.ts)
+     }
+-    const o: any = {}; for (const k of p.v6Keys) if (k in this.state) o[k] = (this.state as any)[k]; return o;
++    const o: any = {}; for (const k of p.v6Keys) if (k in st) o[k] = (st as any)[k]; return o;
+   }
+   private pausedMirror: Game['mirror'] = null;
+   /** migrationId of this session's aborted attempt (N2 quota cleanup scope). */
+@@ -219,27 +222,28 @@ export class Game {
+   }
+   /** M4-23: after an abort, a normal save that hits quota first removes the leftover (uncommitted) LS backup record, then
+    *  retries once. A committed record is never removed. */
+-  private saveWithQuotaRetry(t: number): string {
+-    try { return save(this.kv, this.persisted(), t, this.b, this.bakAllowed); }
++  private saveWithQuotaRetry(t: number, st: GameState = this.state): string {
++    try { return save(this.kv, this.persisted(st), t, this.b, this.bakAllowed); }
+     catch (e) {
+       if (e instanceof NewerSaveError || (e as Error)?.name !== 'QuotaExceededError') throw e;
+       // N2 (doc v0.3.2): remove ONLY the record of this session's aborted migrationId, never the one main's v6BackupId points to.
+       const rec = this.kv.getItem(V6_BACKUP_KEY), id = rec === null ? undefined : decodeBackup(rec)?.migrationId;
+       // N2 (HoE): never the only pre-M4 backup: only while main itself is still the unmigrated v6 (else fail visibly below).
+       if (!id || id !== this.abortedMigrationId || this.state.tracksV7 === 1 || id === this.state.v6BackupId || isCommittedBackup(rec!, this.state.v6BackupId)) throw e;
+-      this.kv.removeItem?.(V6_BACKUP_KEY); return save(this.kv, this.persisted(), t, this.b, this.bakAllowed);
++      this.kv.removeItem?.(V6_BACKUP_KEY); return save(this.kv, this.persisted(st), t, this.b, this.bakAllowed);
+     }
+   }
+   save() {
+     if (this.resetting || this.readOnly || this.inactive || this.held()) return;
+     if (this.canWrite && !this.canWrite()) { this.telemetry.track('tab_guard_blocked_write'); this.deactivate(); return; }
+     if (this.newerGuard()) return;
+-    const t = this.now();
++    // S2 (#25): while hidden, persist the state as of the hide, stamped at the hide (C-AC36); the provisional hidden sim is never saved.
++    const t = this.hidden ? this.hidden.at : this.now(), base = this.hidden ? this.hidden.state : this.state;
+     if (this.mirrorResumeOnSave) { this.mirrorResumeOnSave = false; this.mirror = this.pausedMirror; this.pausedMirror = null; } // N6
+-    try { const raw = this.saveWithQuotaRetry(t); this.lastMainRaw = raw; this.mirror?.write(raw); }
++    try { const raw = this.saveWithQuotaRetry(t, base); this.lastMainRaw = raw; this.mirror?.write(raw); }
+     catch (e) {
+       if (e instanceof NewerSaveError) { this.refuseNewer(e.version); return; } /* localStorage failed: the IndexedDB copy still gets this save */
+-      if (this.mirror) try { let q: string | null = null; try { q = this.kv.getItem(SAVE_KEY); } catch { /* blocked */ } const st = this.persisted(); this.mirror.write(serialize(st, t, m4SaveSeq(st, this.b, q))); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
++      if (this.mirror) try { let q: string | null = null; try { q = this.kv.getItem(SAVE_KEY); } catch { /* blocked */ } const st = this.persisted(base); this.mirror.write(serialize(st, t, m4SaveSeq(st, this.b, q))); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
+       if (!this.storageFailed) { this.storageFailed = true; this.telemetry.track('save_failed', { reason: (e as Error)?.name || 'error' }); this.onStorageFail?.(); } }
+     this.telemetry.flush();
+   }
+@@ -256,7 +260,7 @@ export class Game {
+   /** Stop all writes for good (sim too), drop the mirror and hand control to main.ts (release lease, .newer-save layer). */
+   private refuseNewer(v: number) {
+     if (this.newerSave !== null && this.readOnly) return;
+-    this.newerSave = v; this.readOnly = true; this.inactive = true; this.mirror = null;
++    this.newerSave = v; this.readOnly = true; this.inactive = true; this.mirror = null; this.endHiddenOnFreeze();
+     this.telemetry.track('save_newer_version', { version: v, build: this.build, live: true });
+     this.onNewerSave?.(v);
+   }
+@@ -272,7 +276,8 @@ export class Game {
+    * Wall-clock driven (robust to rAF/timer throttling). Hidden/background tabs use the same rule on the next frame:
+    *  - gap < offlineMinSeconds (60 s): simulate the whole gap online (coop cap applies, customers arrive/leave).
+    *  - gap >= 60 s (hidden/throttled tab): simulate the FIRST 60 s online (coop cap applies, customers arrive/leave),
+-   *    then freeze for the rest. No in-session offline grant.
++   *    then freeze for the rest (visible but throttled). A HIDDEN page (onHidden/onShown) instead gets a cumulative
++   *    budget of offline.hiddenSimMaxSeconds, and a hide >= offlineMinSeconds is paid on return via the offline grant.
+    *  - negative gap: nothing.
+    *  Closed/unloaded game: last save -> next load >= 60 s goes through the offline grant (AC11), in the constructor.
+    * See engineering/sim-rules.md.
+@@ -291,10 +296,76 @@ export class Game {
+   /** Progress made after a fresh start: the next save (main is valid by then) may rotate into `.bak`. */
+   private allowBackup() { this.bakAllowed = true; }
+   get backupAllowed() { return this.bakAllowed; }
++  /** S2 hidden tab: state + accMs at the hide, online ms simulated since, and the events of that provisional sim. */
++  private hidden: { at: number; periodId: number; state: GameState; accMs: number; simMs: number; ev: SimEvent[] } | null = null;
++  /** Monotonic counter for hidden periods (B1: never key idempotency by startAt ms). */
++  private nextHiddenPeriodId = 1;
++  get isHidden() { return this.hidden !== null; }
++  /** Page hidden (platform/visibility). Frames keep coming at the throttled rate but simulate at most
++   *  offline.hiddenSimMaxSeconds in TOTAL, then the sim freezes until onShown. */
++  onHidden(at = this.now()) {
++    if (this.hidden) return;
++    this.frame(); // bring the sim up to the hide
++    this.hidden = { at, periodId: this.nextHiddenPeriodId++, state: this.state, accMs: this.accMs, simMs: 0, ev: [] };
++  }
++  /** Page shown again after `span`. Hidden >= offlineMinSeconds: drop the provisional hidden sim and pay the whole
++   *  absence through the normal offline grant, exactly as a close at the hide + reload now would (C-AC36): pending
++   *  settled first, same applyOffline clamp/cap, same validSavedAt clock-tamper rule. Shorter (or clock went back):
++   *  keep the <= 60 s of online sim (M1: also credit uncovered gap with no frames, up to the 60 s budget).
++   *  Returns the eggs granted (caller shows the welcome popup). */
++  onShown(at = this.now()): number {
++    const h = this.hidden; if (!h) return 0;
++    return accountHiddenPeriod(this, { startAt: h.at, endAt: at })?.eggsGranted ?? 0;
++  }
++  /** Start of the open hidden period, or null when visible. */
++  get hiddenSince(): number | null { return this.hidden?.at ?? null; }
++  /** Open hidden period token for save/hidden-time.ts (at + monotonic periodId). */
++  get openHiddenPeriod(): { at: number; periodId: number } | null {
++    return this.hidden ? { at: this.hidden.at, periodId: this.hidden.periodId } : null;
++  }
++  /** @internal Only save/hidden-time.ts calls this (via accountHiddenPeriod, which guarantees once per period). */
++  settleHiddenPeriod(at: number): HiddenSettlement {
++    const h = this.hidden; if (!h) return { mode: 'none', simulatedMs: 0, grantedMs: 0, eggs: 0, coins: 0, capped: false };
++    this.hidden = null; this.lastFrameAt = at;
++    const gap = at - h.at, budgetMs = this.b.offline.hiddenSimMaxSeconds * 1000;
++    if (this.inactive || this.readOnly || !validSavedAt(h.at, at)) {
++      this.emit(h.ev); this.checkCoopFull(); return { mode: 'none', simulatedMs: h.simMs, grantedMs: 0, eggs: 0, coins: this.state.coinsCents - h.state.coinsCents, capped: false };
++    }
++    if (gap < this.b.offline.offlineMinSeconds * 1000) {
++      // M1: credit (show - hide) - already simulated, capped so total simMs <= budget (60 s).
++      const uncover = Math.max(0, Math.min(gap, budgetMs) - h.simMs);
++      if (uncover > 0) {
++        h.simMs += uncover;
++        const r = advance(this.state, uncover, this.accMs, this.b, h.ev);
++        this.state = r.state; this.accMs = r.accMs;
++        if (!this.bakAllowed) { this.playedMs += uncover; if (this.playedMs >= 60_000) this.allowBackup(); }
++      }
++      this.emit(h.ev); this.checkCoopFull();
++      // n2: capped when the 60 s budget limited credit (gap > budget); false while budget == offlineMin and gap < offlineMin.
++      return { mode: 'online', simulatedMs: h.simMs, grantedMs: h.simMs, eggs: 0, coins: this.state.coinsCents - h.state.coinsCents, capped: gap > budgetMs };
++    }
++    this.state = h.state; this.accMs = 0;
++    if (this.state.pendingOfflineEggs > 0) this.state = { ...this.state, basket: this.state.basket + this.state.pendingOfflineEggs, pendingOfflineEggs: 0 };
++    const eggs = this.grantOffline(gap);
++    if (eggs > 0) this.notify({ type: 'offline_grant', eggs, awayS: this.offline.awayS });
++    this.checkCoopFull(); this.save();
++    const capS = this.b.offline.offlineCapSeconds;
++    return { mode: 'offline-grant', simulatedMs: 0, grantedMs: Math.min(gap, capS * 1000), eggs, coins: 0, capped: gap > capS * 1000 };
++  }
+   frame() {
+     if (this.inactive || this.held()) { this.lastFrameAt = this.now(); return; }
+-    const t = this.now(), gap = t - this.lastFrameAt; this.lastFrameAt = t;
++    const t = this.now(); let gap = t - this.lastFrameAt; this.lastFrameAt = t;
+     const maxMs = this.b.offline.offlineMinSeconds * 1000;
++    const h = this.hidden;
++    if (h) { // S2: cumulative hidden budget, then freeze; events held until we know the sim is kept (onShown)
++      const step = Math.max(0, Math.min(gap, maxMs, this.b.offline.hiddenSimMaxSeconds * 1000 - h.simMs));
++      if (step > 0) {
++        h.simMs += step; const r = advance(this.state, step, gap >= maxMs ? 0 : this.accMs, this.b, h.ev); this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs;
++        // m2: kept hidden play counts toward the .bak 60 s enable, same as visible play.
++        if (!this.bakAllowed) { this.playedMs += step; if (this.playedMs >= 60_000) this.allowBackup(); }
++      }
++      this.telemetry.poll(); return;
++    }
+     if (gap > 0) {
+       if (!this.bakAllowed) { this.playedMs += Math.min(gap, maxMs); if (this.playedMs >= 60_000) this.allowBackup(); }
+       const ev: SimEvent[] = []; const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev);
+diff --git a/src/sim/actions.ts b/src/sim/actions.ts
+index 2e9c7e7..d260440 100644
+--- a/src/sim/actions.ts
++++ b/src/sim/actions.ts
+@@ -3,28 +3,22 @@ import { GameState, eggsPerTap, collectionCost, farmCost } from './state';
+ import { m4On } from '../config/formulas';
+ import { Track, salePriceCents, trackLock, trackCost, trackLevel, reachedMilestones } from './tracks';
+ import type { Sink } from './events';
+-import { WorkerId, hireCostCents, unlockFarm, graderMult, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
++import { saleValueCents } from './payout';
++import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
+ export type Action =
+   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
+   | { type: 'buyCollection' } | { type: 'buyFarm' } | { type: 'collectOffline' } | { type: 'dismissOffline' } | { type: 'markCelebrated'; tier: number }
+   | { type: 'hire'; worker: WorkerId } | { type: 'manage'; worker: WorkerId } | { type: 'manageAll' } | { type: 'buyGraderTier' }
+   | { type: 'buyTrack'; track: Track } | { type: 'markMilestones'; ids: string[] };
+-/** Grader: sale value = round(k x price x mult) cents (exact k x price when no Grader). Shared by sellTo and the Sell all label. */
+-export const saleValueCents = (k: number, base: number, gm: number) => gm === 1 ? k * base : Math.round(k * base * gm);
+-/** What a 'sellAll' would sell and pay right now: walks customers like the action (basket floored, per-order rounding). Pure. */
+-export function sellAllPreview(s: GameState, b: Balance): { eggs: number; cents: number } {
+-  const base = salePriceCents(s, b), gm = graderMult(s.workers, s.graderTier, b);
+-  let left = Math.floor(s.basket), eggs = 0, cents = 0;
+-  for (const c of s.customers) { if (left < 1) break; const k = Math.min(left, c.demand - c.filled); if (k <= 0) continue; left -= k; eggs += k; cents += saleValueCents(k, base, gm); }
+-  return { eggs, cents };
+-}
++/** Sell all preview lives in sim/payout.ts (the one payout fn, #25; M4 sale price via salePriceCents); re-exported for #28 callers. */
++export { sellAllPreview } from './payout';
+ export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm' || a.type === 'buyTrack';
+ /** Sells k=min(basket, remaining) at the price at sale time (current Farm + Collection level). Removed only when filled. Unknown id => no-op (MK-11). */
+ export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'player' | 'market_hand' = 'player'): GameState {
+   const c = s.customers.find(c => c.id === id); if (!c) return s;
+   const k = Math.min(Math.floor(s.basket), c.demand - c.filled); if (k <= 0) return s;
+-  const base = salePriceCents(s, b), gm = graderMult(s.workers, s.graderTier, b);
+-  const price = base, value = saleValueCents(k, base, gm), filled = c.filled + k, done = filled >= c.demand;
++  // One payout function (sim/payout.ts) for credit and every UI preview.
++  const price = salePriceCents(s, b), value = saleValueCents(s, k, b), filled = c.filled + k, done = filled >= c.demand;
+   ev?.push({ type: 'sell', id, k, N: c.demand, price, value, by });
+   if (done) ev?.push({ type: 'customer_served', id, N: c.demand, partial: c.filled > 0 });
+   const customers = done ? s.customers.filter(x => x.id !== id) : s.customers.map(x => x.id === id ? { ...x, filled } : x);
+diff --git a/src/sim/payout.ts b/src/sim/payout.ts
+new file mode 100644
+index 0000000..548b456
+--- /dev/null
++++ b/src/sim/payout.ts
+@@ -0,0 +1,21 @@
++/** The one sale-payout function (QA BUG-1/2, Product rule: every money preview == amount credited, to the cent).
++ *  sellTo credits it; the Sell all label, '+$X' popup and order cards preview it. */
++import type { Balance } from '../config/balance';
++import type { GameState } from './state';
++import { salePriceCents } from './tracks';
++import { graderMult } from './workers';
++/** Price multipliers applied to a sale, in order. M4 adds streak / frenzy entries here (one place for credit + previews). */
++export function saleMultipliers(s: GameState, b: Balance): number[] {
++  return [graderMult(s.workers, s.graderTier, b)];
++}
++/** Cents credited for selling k eggs now: exact k x price with no multiplier, else round(k x price x mult). */
++export function saleValueCents(s: GameState, k: number, b: Balance): number {
++  const base = salePriceCents(s, b), m = saleMultipliers(s, b).reduce((a, x) => a * x, 1);
++  return m === 1 ? k * base : Math.round(k * base * m);
++}
++/** Preview of Sell all: same per-customer walk as the 'sellAll' action. */
++export function sellAllPreview(s: GameState, b: Balance): { eggs: number; cents: number } {
++  let left = Math.floor(s.basket), eggs = 0, cents = 0;
++  for (const c of s.customers) { if (left < 1) break; const k = Math.min(left, c.demand - c.filled); if (k <= 0) continue; left -= k; eggs += k; cents += saleValueCents(s, k, b); }
++  return { eggs, cents };
++}
+diff --git a/src/ui/app.ts b/src/ui/app.ts
+index 1ee5b4b..9d4dcd1 100644
+--- a/src/ui/app.ts
++++ b/src/ui/app.ts
+@@ -6,7 +6,7 @@ import type { Balance } from '../config/balance';
+ import type { Game, GameEvent } from '../game';
+ import * as S from '../sim/state';
+ import { fmtMoneyShort } from './format';
+-import { fmtCount, fmtMoney, fmtAway, fmtTimeToAfford, fmtAffordableIn, IncomeRate } from './format';
++import { fmtCount, fmtMoney, fmtMoneyExact, fmtAway, fmtTimeToAfford, fmtAffordableIn, IncomeRate } from './format';
+ import { TapFx, Throttle } from './fx';
+ import type { Audio, SfxName } from './audio';
+ import { resetProgress, keepPrefsOnly } from '../save/save';
+@@ -15,12 +15,12 @@ import { oldSaveForSession, exportOldSave, exportName, OK_MSG, FAIL_MSG, showRec
+ import { visibleOrders, stripSplit, stripSplitAt, slotPreview, slotAdded, sellAllLabel, Coalesce } from './orders';
+ const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
+ import { OrderList } from './order-list';
++import { saleValueCents, sellAllPreview } from '../sim/payout';
+ import { graderMult } from '../sim/workers';
+ import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hensMilestone, gradeMult } from '../config/formulas';
+ import { salePriceCents, coopCap, trackLevel, trackCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
+ import { DualPicker, ROW_OF_KEY, type SharedPick } from './pick-hysteresis';
+ import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, hensMilestoneEffect, gradeEffect } from './tracks-ui';
+-import { sellAllPreview } from '../sim/actions';
+ import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
+ import type { Recovery } from '../save/save';
+ import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
+@@ -114,9 +114,15 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+   const spawn = (el: HTMLElement, ms: number) => {
+     if (live.length >= 30) live.shift()?.remove();
+     fxLayer.append(el); live.push(el);
+-    setTimeout(() => { el.remove(); const i = live.indexOf(el); if (i >= 0) live.splice(i, 1); }, ms);
++    expire(el, ms);
+     return el;
+   };
++  // BUG-5: one removal timer per element; re-arming it (merged '+N' floater) cancels the old one so it can finish its rise.
++  const timers = new WeakMap<HTMLElement, number>();
++  function expire(el: HTMLElement, ms: number) {
++    clearTimeout(timers.get(el));
++    timers.set(el, window.setTimeout(() => { el.remove(); const i = live.indexOf(el); if (i >= 0) live.splice(i, 1); }, ms));
++  }
+   const center = (el: Element) => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
+   const fly = (src: string, from: Element, to: Element, i: number, size: number, onArrive?: () => void) => {
+     const a = center(from), z = center(to), el = h(`<img class="flyer" src="${src}" alt="" style="width:${size}px;height:${size}px">`);
+@@ -129,7 +135,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+   let floater: { el: HTMLElement; until: number } | null = null;
+   const floatText = (text: string, at: Element, cls = '', merge = false) => {
+     const t = now();
+-    if (merge && floater && floater.until > t && floater.el.isConnected) { floater.el.textContent = text; retrigger(floater.el, 'floater'); floater.until = t + 700; return; }
++    if (merge && floater && floater.until > t && floater.el.isConnected) { floater.el.textContent = text; retrigger(floater.el, 'floater'); expire(floater.el, 750); floater.until = t + 700; return; }
+     const c = center(at), el = h(`<div class="floater ${cls}" style="left:${c.x}px;top:${c.y - 40}px;translate:-50% 0">${text}</div>`);
+     spawn(el, 750); if (!cls) floater = { el, until: t + 700 };
+   };
+@@ -201,7 +207,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+   const chipBorn = new WeakMap<Element, number>(); let downChip: Element | null = null;
+   const custChip = (t: EventTarget | null) => (t as HTMLElement | null)?.closest?.('.chip:not(.empty):not(.served)') ?? null;
+   queueEl.addEventListener('pointerdown', e => { downChip = custChip(e.target); });
+-  queueEl.addEventListener('click', e => { const c = custChip(e.target); const ok = queueTapOpens(downChip, c, c ? now() - (chipBorn.get(c) ?? -Infinity) : 0); downChip = null; if (ok) openPanel('market'); });
++  queueEl.addEventListener('click', e => { const c = custChip(e.target); const ok = queueTapOpens(downChip, c, c ? now() - (chipBorn.get(c) ?? -Infinity) : 0); downChip = null; if (!ok) return; openPanel('market');
++    // QA TUT-1: docked, the Market panel is always visible (openPanel keeps open=null), so a card tap highlights its order row.
++    if (docked.matches && c) { const id = [...chips].find(([, el]) => el === c)?.[0]; const row = (id !== undefined ? mRows.querySelector<HTMLElement>(`.order[data-row="${id}"]`) : null) ?? mRows.querySelector<HTMLElement>('.order:not([hidden])');
++      if (row) { row.scrollIntoView({ block: 'nearest', behavior: rm() ? 'auto' : 'smooth' }); delete row.dataset.hl; void row.offsetWidth; row.dataset.hl = '1'; clearTimeout(Number(row.dataset.hlT)); row.dataset.hlT = String(setTimeout(() => { delete row.dataset.hl; }, 1200)); } } });
+   let lastSellSource: Element | null = null;
+   mRows.addEventListener('click', e => {
+     if ((e.target as HTMLElement).closest('.queue-more')) { ordersExpanded = !ordersExpanded; dirty = true; render(); return; }
+@@ -311,7 +320,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+     for (const [id, el] of [...dwellEls]) if (!lay.shown.some(d => d.id === id)) { dwellEls.delete(id); el.remove(); }
+     for (const d of lay.shown) {
+       let el = dwellEls.get(d.id);
+-      if (!el) { el = h(`<div class="chip served${rm() ? ' rm' : ''}" aria-hidden="true"><span class="cust-wrap"><img class="cust" src="${A('icon-customer.svg')}" alt=""><svg class="smile" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7.5" fill="#3D7F33"/><path d="M4.6 8.3l2.3 2.3 4.5-4.6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="thx">Thanks!</span><span class="amt num">+${fmtMoneyShort(d.cents)}</span></div>`); dwellEls.set(d.id, el); }
++      if (!el) { el = h(`<div class="chip served${rm() ? ' rm' : ''}" aria-hidden="true"><span class="cust-wrap"><img class="cust" src="${A('icon-customer.svg')}" alt=""><svg class="smile" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7.5" fill="#3D7F33"/><path d="M4.6 8.3l2.3 2.3 4.5-4.6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="thx">Thanks!</span><span class="amt num">+${fmtMoneyExact(d.cents)}</span></div>`); dwellEls.set(d.id, el); }
+       kids.push(el);
+     }
+     const empties = [...queueEl.querySelectorAll('.chip.empty')] as HTMLElement[];
+@@ -354,7 +363,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+   const queuePop = (cents: number, at?: HTMLElement) => {
+     const from = (at?.isConnected ? at : queueEl.querySelector('.chip.more') ?? queueEl.lastElementChild ?? queueEl) as HTMLElement, c = center(from);
+     const x = Math.min(Math.max(c.x, 48), innerWidth - 48), y = Math.max(c.y - 20, 40);
+-    spawn(h(`<div class="qpop num" style="left:${x}px;top:${y}px">+${fmtMoneyShort(cents)}</div>`), 650);
++    spawn(h(`<div class="qpop num" style="left:${x}px;top:${y}px">+${fmtMoneyExact(cents)}</div>`), 650);
+     if (!rm()) for (let i = 0; i < 3; i++) fly(A('icon-coin.svg'), from, coinsEl.parentElement!, i, 20, i === 0 ? () => pulse(coinsEl.parentElement!) : undefined);
+   };
+ 
+@@ -363,11 +372,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+     switch (e.type) {
+       case 'sell': {
+         dwell.sold(e.id, e.value);
+-        income.add(now(), e.k * e.price); sfx('sell');
++        income.add(now(), e.value); sfx('sell');
+         const src = lastSellSource ?? sellAllBtn;
+         if (!rm()) for (let i = 0; i < Math.min(e.k, 6); i++) fly(A('icon-coin.svg'), src, coinsEl.parentElement!, i, 20, i === 0 ? () => pulse(coinsEl.parentElement!) : undefined);
+         else pulse(coinsEl.parentElement!);
+-        floatText(`+${fmtMoney(e.k * e.price)}`, src, 'coin'); break;
++        floatText(`+${fmtMoneyExact(e.value)}`, src, 'coin'); break;
+       }
+       case 'customer_arrive': sfx('customerArrive'); break;
+       case 'customer_served': dwell.served(e.id, now()); break;
+@@ -542,7 +551,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+     // market panel
+     if (open === 'market' || docked.matches) {
+       const basket = Math.floor(s.basket), patience = S.patienceS(F, b);
+-      const unit = salePriceCents(s, b) * graderMult(s.workers, s.graderTier, b);
++      const unit = (k: number) => saleValueCents(s, k, b);
+       const vis = visibleOrders(innerHeight, docked.matches, s.customers.length);
+       if (s.customers.length <= vis) ordersExpanded = false;
+       orderList.update({ customers: s.customers, basket, unit, visible: vis, expanded: ordersExpanded, rm: rm(), waitingLen: waiting.read(s.customers.length) });
+@@ -643,7 +652,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+     onbUpdate = mountOnboarding(flow, (st) => {
+       if (modalKind) return null;
+       if (st === 0) return collectBtn;
+-      if (st === 1) return open === 'market' ? mRows.querySelector('button[data-id]') ?? sellAllBtn : queueEl.querySelector('.chip:not(.empty)') ?? queueEl;
++      if (st === 1) return open === 'market' || docked.matches ? mRows.querySelector('button[data-id]') ?? sellAllBtn : queueEl.querySelector('.chip:not(.empty)') ?? queueEl;
+       if (docked.matches) { tab = 'collection'; return uRow.querySelector('.btn.buy'); }
+       return open === 'upgrades' ? uRow.querySelector('.btn.buy') : nav.querySelector('[data-nav=upgrades]');
+     }, st => st === 0 ? 'Tap <b>Collect</b> to gather the eggs.'
+diff --git a/src/ui/format.ts b/src/ui/format.ts
+index 9ab4668..ae46cbf 100644
+--- a/src/ui/format.ts
++++ b/src/ui/format.ts
+@@ -49,17 +49,25 @@ export class IncomeRate {
+ }
+ /** Art & UX compact money for pops/cards: "$12.50" under $1,000, then "$1.2K" / "$3.4M" / "$1.2T" (1 decimal, half-up on whole
+  * cents like fmtCount/fmtMoney; a tier that rounds to 1000 rolls up: $999,950 -> "$1M"; thousands separator above 1,000T). */
+-export const fmtMoneyShort = (cents: number) => {
++export const fmtMoneyShort = (cents: number, opts?: { round?: 'nearest' | 'floor' }) => {
++  const rnd = opts?.round === 'floor' ? Math.floor : Math.round; // floor: never above the true amount (Sell preview, HoP 15:14)
+   if (!Number.isFinite(cents)) return '—';
+   const c = Math.round(cents); if (c < 100_000) return fmtMoney(c);
+   for (let i = 0; i < TIERS.length; i++) {
+     const [base, u] = TIERS[i]; if (c < base * 100) continue;
+-    const v = Math.round(c / (base * 10)) / 10; // base*10 cents = 0.1 unit, an exact integer
+-    if (v >= 1000 && i > 0) return '$' + Math.round(c / (TIERS[i - 1][0] * 10)) / 10 + TIERS[i - 1][1];
++    const v = rnd(c / (base * 10)) / 10; // base*10 cents = 0.1 unit, an exact integer
++    if (v >= 1000 && i > 0) return '$' + rnd(c / (TIERS[i - 1][0] * 10)) / 10 + TIERS[i - 1][1];
+     return '$' + v.toLocaleString('en-US', { maximumFractionDigits: 1 }) + u;
+   }
+   return fmtMoney(c);
+ };
++/** Sell-button preview only (HoP 15:14): exact under $1K; at $1K+ short form floored so the button never shows more than the credit. */
++export const fmtMoneyPreview = (cents: number) => fmtMoneyShort(cents, { round: 'floor' });
++/** Always exact (aria / popup / Thanks): full dollars, thousands separators, 2 decimals. '—' for NaN/Infinity. */
++export const fmtMoneyExact = (cents: number) => {
++  if (!Number.isFinite(cents)) return '—';
++  return '$' + (cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
++};
+ /** Upgrade-card ETA (Product copy, Oct 16; same as rc1/ux-clarity format.ts): "Affordable in a moment" under 10 s; "Affordable in ~m:ss"; "~h:mm:ss" from 1 h; no income "Affordable in —". */
+ export const fmtAffordableIn = (seconds: number | null) => {
+   if (seconds === null || !isFinite(seconds)) return 'Affordable in —';
+diff --git a/src/ui/styles.css b/src/ui/styles.css
+index b9cb142..1f10f34 100644
+--- a/src/ui/styles.css
++++ b/src/ui/styles.css
+@@ -338,25 +338,26 @@ html,body{overflow-x:hidden;max-width:100%}
+ @media (min-width:960px){.tabs button{min-width:44px}}
+ /* P1q/P2 order cards + "+N waiting" (art-ux/m3-customer-queue-spec.md v1.0); visibility is set in JS (same 384px rule) */
+ .order-list{display:flex;flex-direction:column;gap:var(--s-2)}
+-.order{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:var(--s-2);align-items:center;min-height:60px;padding:var(--s-2) var(--s-3);background:#fff;border:2px solid #6B5D52;border-radius:var(--r-md)}
++.order{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:var(--s-2);align-items:center;min-height:60px;padding:var(--s-2) var(--s-3);background:#fff;border:2px solid #6B5D52;border-radius:var(--r-md);container-type:inline-size;container-name:order}
+ .order[hidden]{display:none}
+ .order>.txt{min-width:0}.order .av{width:40px;height:40px}.order .av img{width:100%;height:100%}
+ .order .l1{display:flex;font:800 16px/1.2 var(--f-body);white-space:nowrap;font-variant-numeric:tabular-nums;color:#3E2C23;min-width:0}
+-.order .l1 .e{flex:none}.order .l1 .v{color:#6B5D52;font-weight:700;overflow:hidden;text-overflow:ellipsis;min-width:0}
++.order .l1 .n{flex:0 0 auto;flex-shrink:0}.order .l1 .egg{min-width:0;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}.order .l1 .v{color:#6B5D52;font-weight:700;overflow:visible;text-overflow:clip;flex:0 0 auto;flex-shrink:0}
+ .order .bar{width:auto;box-sizing:border-box;height:8px;margin-top:6px;border-radius:4px;background:#fff;border:1px solid #6B5D52;overflow:hidden}
+ .order .bar>i{display:block;height:100%;background:#3D7F33;transition:width .24s}
+-.order .sell{min-width:88px;max-width:42%;min-height:44px;border-radius:22px;padding:0 var(--s-3)}
++.order .sell{min-height:44px;border-radius:22px}
++.order[data-hl]{outline:3px solid var(--c-focus);outline-offset:2px;animation:hlpulse 600ms 2}
+ .order.ready{border:3px solid #3D7F33}
+ .order.wait .sell{background:#fff;color:#6B5D52;border:2px solid #6B5D52;box-shadow:none}
+ .queue-more{align-self:center;min-height:44px;padding:0 16px;border-radius:22px;background:#3E2C23;color:#fff;font:800 16px var(--f-body);border:0;cursor:pointer}
+ .queue-more:focus-visible{outline:2px solid #2B79A8;outline-offset:2px}
+-@media (min-width:960px) and (orientation:landscape){#p-market .body{overflow:auto}.order .sell{min-width:112px}}
++@media (min-width:960px) and (orientation:landscape){#p-market .body{overflow:auto}}
+ .reduced-motion .order .bar>i{transition:none}
+ /* farm strip "+N" chip (5th slot) */
+ .chip.more{display:grid;place-items:center;background:#3E2C23;color:#fff;font:800 16px var(--f-body);border:0}
+ /* v1.1 §5 anti-churn: fixed heights/widths, transform/opacity-only animations */
+ .order{height:60px;min-height:0;contain:layout paint;overflow:hidden}
+-.order .sell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
++.order .sell{overflow:visible}
+ .order-list{overflow-anchor:auto}
+ .queue-more{min-width:9ch;font-variant-numeric:tabular-nums;transition:none;flex:none}
+ #sellAll{min-width:min(100%,280px);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@@ -372,8 +373,12 @@ html,body{overflow-x:hidden;max-width:100%}
+ @media (max-height:699px){.queue{min-height:64px}}
+ /* §5.1/§5.8 (QA 15/16): cards never flex-shrink when a leaving card is still in the list; Sell button width fixed so "Sell 3" -> "Sell" never moves the target */
+ .order-list .order{flex:none;box-sizing:border-box}
+-.order .btn.sell{width:88px;min-width:88px;padding-inline:0;justify-content:center;font-variant-numeric:tabular-nums}
+-.order .btn.sell{max-width:none}
++/* MK-24-1 v3 / Art & UX: always two-line Sell ('Sell k' 14px over '+$X' 12px); shared width via --sell-w on .order-list (min 88, max 45cqw); never ellipsis the button. */
++.order .btn.sell{width:var(--sell-w,88px);min-width:88px;max-width:45cqw;min-height:44px;height:auto;padding:4px 10px;padding-inline:10px;justify-content:center;align-items:center;font-variant-numeric:tabular-nums;flex-direction:column;flex-wrap:nowrap;gap:0;white-space:normal;line-height:1.15;font-size:14px;font:800 14px var(--f-display);overflow:visible}
++.order .btn.sell .sk,.order .btn.sell .sy{display:block;flex-shrink:0;overflow:visible;text-overflow:clip;max-width:none;white-space:nowrap;text-align:center}
++.order .btn.sell .sk{font:800 14px var(--f-display)}
++.order .btn.sell .sk::after{content:none}
++.order .btn.sell .sy{font:800 12px var(--f-display)}
+ .order.ready{border-width:2px;box-shadow:inset 0 0 0 1px #3D7F33;border-color:#3D7F33}
+ /* PT1-13 (WebKit 375/SE overflow; layout-spec §9, bug9-375.css): single mobile column can never grow past the viewport */
+ #app{width:100%;max-width:100vw;box-sizing:border-box}
+@@ -382,7 +387,7 @@ html,body{overflow-x:hidden;max-width:100%}
+ #app>*,.farm,.collectbar,.collectbar>*,.goal,.goal>*,.hud>*,.queue,.row>*,.order>*{min-width:0}
+ .goal-label,.goal-status{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .collectbar{box-sizing:border-box}
+-@media (max-width:375px){#collect,.collectbar .btn,.order .sell,.order .btn.sell,.row .btn{min-width:0;max-width:96px}.order .btn.sell{width:80px}#collect{max-width:none}}
++@media (max-width:375px){#collect,.collectbar .btn,.row .btn{min-width:0;max-width:96px}#collect{max-width:none}}
+ /* PT1-14: greyed Manage all = #5A4C42 on #CFC6BA (4.88:1); focus ring unchanged */
+ .btn.manage-all[aria-disabled=true],nav.actions button.btn.farm-manage-all[aria-disabled=true],.sheet header button.btn.desk-manage-all[aria-disabled=true]{color:#5A4C42;background:#CFC6BA}
+ /* Rotate-to-portrait prompt (art-ux/m3-rotate-portrait-prompt.md §5); shown/hidden in JS from the same media query */
+@@ -450,6 +455,7 @@ html,body{overflow-x:hidden;max-width:100%}
+ @media (prefers-reduced-motion:reduce){.tab-guard .recovery-card{animation:none}}
+ .reduced-motion .tab-guard .recovery-card{animation:none}
+ .tab-guard #tgPlay:focus{outline:3px solid #2B79A8;outline-offset:3px}
++.tab-guard #tgPlay{min-height:48px} /* art-ux/single-tab-guard/dialog.html .btn (was 44px via .rc-primary) */
+ 
+ /* M4-A 3-row Farm screen (Option A) */
+ .tracks{display:flex;flex-direction:column;gap:var(--s-3)}
+diff --git a/tests/qa-rc1-bugs.test.ts b/tests/qa-rc1-bugs.test.ts
+new file mode 100644
+index 0000000..106097b
+--- /dev/null
++++ b/tests/qa-rc1-bugs.test.ts
+@@ -0,0 +1,186 @@
++/** QA rc1-pt1 pass 1 (qa/claude-qa/rc1-pt1-pass1.md): BUG-1/2 money previews == credit, BUG-3 suffix boundaries, BUG-4/5 FX. */
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { balance as b } from '../src/config/balance';
++import { initialState, type GameState } from '../src/sim/state';
++import { apply } from '../src/sim/actions';
++import type { SimEvent as GameEvent } from '../src/sim/events';
++import { saleValueCents, sellAllPreview, saleMultipliers } from '../src/sim/payout';
++import { orderView, sellAllLabel } from '../src/ui/orders';
++import { fmtCount, fmtMoney, fmtMoneyShort, fmtMoneyPreview, fmtMoneyExact } from '../src/ui/format';
++
++const graded = (tier: number, basket: number, demands: [number, number][]): GameState => ({
++  ...initialState(b), farmLevel: 20, collectionLevel: 7, basket, coinsCents: 500_000,
++  workers: { grader: { energy: 100, cdS: 0 } } as GameState['workers'], graderTier: tier,
++  customers: demands.map(([demand, filled], i) => ({ id: i + 1, demand, filled, waitedS: 0 })),
++});
++
++describe('BUG-1/2: every money preview equals the amount credited, to the cent', () => {
++  for (const tier of [0, 1, 2]) for (const basket of [58, 37, 3, 500]) it(`tier ${tier}, basket ${basket}`, () => {
++    const s = graded(tier, basket, [[29, 0], [17, 4], [21, 0], [11, 0]]);
++    if (tier > 0) expect(saleMultipliers(s, b)[0]).toBeGreaterThan(1);
++    const pre = sellAllPreview(s, b), label = sellAllLabel(pre.eggs, pre.cents, fmtCount, fmtMoney);
++    const cards = s.customers.map(c => orderView(c, s.basket, k => saleValueCents(s, k, b)));
++    const ev: GameEvent[] = []; const r = apply(s, { type: 'sellAll' }, b, ev);
++    const sells = ev.filter((e): e is Extract<GameEvent, { type: 'sell' }> => e.type === 'sell');
++    const delta = r.coinsCents - s.coinsCents;
++    expect(pre.cents).toBe(delta);                                   // Sell all label total
++    expect(label).toContain(fmtMoney(delta));
++    expect(sells.reduce((a, e) => a + e.value, 0)).toBe(delta);      // '+$X' popups (fmtMoney(e.value)) sum to the delta
++    expect(pre.eggs).toBe(sells.reduce((a, e) => a + e.k, 0));
++    for (const e of sells) expect(e.value).toBe(saleValueCents(s, e.k, b)); // each '+$X' popup == its credit
++    // Per-card Sell button == what tapping THAT card credits (own basket, not the sellAll walk).
++    for (const card of cards) {
++      const c = s.customers.find(x => x.id === card.id)!;
++      expect(card.valueCents).toBe(saleValueCents(s, c.demand, b));  // card line keeps full order value
++      if (card.sell === 0) { expect(card.sellCents).toBe(0); expect(card.button).toMatch(/^Need /); continue; }
++      expect(card.sellCents).toBe(saleValueCents(s, card.sell, b));
++      const one: GameEvent[] = []; const r1 = apply(s, { type: 'sell', customerId: card.id }, b, one);
++      const e1 = one.find(e => e.type === 'sell') as Extract<GameEvent, { type: 'sell' }>;
++      expect(e1.k).toBe(card.sell);
++      expect(e1.value).toBe(card.sellCents);
++      expect(r1.coinsCents - s.coinsCents).toBe(card.sellCents);
++      expect(card.button).toContain(`+${fmtMoneyPreview(card.sellCents)}`);
++      expect(card.buttonAria).toContain(`+${fmtMoneyExact(card.sellCents)}`);
++    }
++  });
++  it('single-row Sell: popup == coin delta == Sell button with Grader (QA repro 58 eggs)', () => {
++    const s = graded(1, 58, [[58, 0]]), card = orderView(s.customers[0], 58, k => saleValueCents(s, k, b));
++    const ev: GameEvent[] = []; const r = apply(s, { type: 'sell', customerId: 1 }, b, ev);
++    const e = ev.find(e => e.type === 'sell') as Extract<GameEvent, { type: 'sell' }>;
++    expect(e.value).toBe(r.coinsCents - s.coinsCents);
++    expect(card.sellCents).toBe(e.value);
++    expect(card.valueCents).toBe(e.value); // full order == this Sell when filled=0 and k=demand
++    expect(e.value).toBeGreaterThan(58 * e.price);
++  });
++  it('partial order: card keeps full order value; Sell button == next Sell credit (Grader 0/1/2)', () => {
++    for (const tier of [0, 1, 2]) {
++      // Partly filled (4/17), basket 3 -> this Sell is 3 eggs; full order is 17.
++      const s = graded(tier, 3, [[17, 4]]);
++      const card = orderView(s.customers[0], s.basket, k => saleValueCents(s, k, b));
++      const ev: GameEvent[] = []; const r = apply(s, { type: 'sell', customerId: 1 }, b, ev);
++      const e = ev.find(e => e.type === 'sell') as Extract<GameEvent, { type: 'sell' }>;
++      expect(e.k).toBe(3);
++      expect(card.sell).toBe(3);
++      expect(card.sellCents).toBe(e.value);
++      expect(card.sellCents).toBe(r.coinsCents - s.coinsCents);
++      expect(card.valueCents).toBe(saleValueCents(s, 17, b));
++      expect(card.valueCents).toBeGreaterThan(card.sellCents); // card shows more than next Sell; button shows the Sell amount
++      expect(card.button).toBe(`Sell 3\u00a0· +${fmtMoneyPreview(e.value)}`);
++      expect(card.buttonAria).toBe(`Sell 3\u00a0· +${fmtMoneyExact(e.value)}`);
++      expect(card.line).toContain(fmtMoney(card.valueCents));
++    }
++  });
++  it('app.ts previews only through the payout function (no k x price money anywhere)', () => {
++    const src = readFileSync('src/ui/app.ts', 'utf8');
++    expect(src).not.toMatch(/e\.k \* e\.price/); expect(src).not.toMatch(/cents \+= k \* price/);
++    expect(src).toMatch(/sellAllPreview\(s, b\)/); expect(src).toMatch(/fmtMoneyExact\(e\.value\)/);
++  });
++});
++
++describe('BUG-3: round first, then pick the suffix', () => {
++  const cases: [number, string][] = [[9_999, '9,999'], [10_000, '10K'], [999_949, '999.9K'], [999_950, '1M'], [999_960, '1M'], [999_999, '1M'],
++    [1_000_000, '1M'], [9_994_999, '9.99M'], [9_996_000, '10M'], [999_949_999, '999.9M'], [999_950_000, '1B'], [999_999_999, '1B'],
++    [1e9, '1B'], [999_999_999_999, '1T'], [1e12, '1T'], [2.5e13, '25T']];
++  for (const [n, s] of cases) it(`${n} -> ${s}`, () => expect(fmtCount(n)).toBe(s));
++  it('never 1000K/M/B across a sweep', () => {
++    for (const base of [1e6, 1e9, 1e12]) for (let d = -100; d <= 100; d++) expect(fmtCount(base + d * base / 1e5)).not.toMatch(/^1000(\.\d)?[KMB]$/);
++  });
++  it('money', () => { expect(fmtMoney(99_996_000)).toBe('$1M'); expect(fmtMoney(1_234_500)).toBe('$12.3K'); expect(fmtMoneyShort(1e14)).toBe('$1T'); });
++  it('fmtMoneyExact: full dollars + thousands + 2 dp; — for non-finite', () => {
++    expect(fmtMoneyExact(999_900_000)).toBe('$9,999,000.00');
++    expect(fmtMoneyExact(1_234_567)).toBe('$12,345.67');
++    expect(fmtMoneyExact(50)).toBe('$0.50');
++    expect(fmtMoneyExact(100_000)).toBe('$1,000.00');
++    expect(fmtMoneyExact(NaN)).toBe('—');
++    expect(fmtMoneyExact(Infinity)).toBe('—');
++  });
++  it('fmtMoneyPreview floors at $1K+ and never exceeds credit', () => {
++    expect(fmtMoneyPreview(99_999)).toBe('$999.99');
++    expect(fmtMoneyPreview(100_000)).toBe('$1K');
++    expect(fmtMoneyPreview(129_999)).toBe('$1.2K'); // not $1.3K
++    expect(fmtMoneyPreview(999_999)).toBe('$9.9K');
++    expect(fmtMoneyPreview(123_000_000)).toBe('$1.2M');
++    // Displayed short value in dollars <= exact dollars
++    for (const c of [99_999, 100_000, 129_999, 999_999, 1_234_567, 123_000_000]) {
++      const shown = fmtMoneyPreview(c);
++      if (shown.endsWith('K')) expect(parseFloat(shown.slice(1)) * 1e3).toBeLessThanOrEqual(c / 100 + 1e-9);
++      else if (shown.endsWith('M')) expect(parseFloat(shown.slice(1)) * 1e6).toBeLessThanOrEqual(c / 100 + 1e-9);
++      else expect(shown).toBe(fmtMoney(c));
++    }
++  });
++});
++
++describe('BUG-4/5: FX lifetimes', () => {
++  const css = readFileSync('src/ui/styles.css', 'utf8'), app = readFileSync('src/ui/app.ts', 'utf8');
++  it('leaving customer waves then slides out, and reduced motion cuts the slide', () => {
++    expect(css).toMatch(/\.ghost\.leave\{animation:leave 240ms 300ms/); expect(css).toMatch(/@keyframes leave\{to\{transform:translateX\(-80px\);opacity:0\}/);
++    expect(css).toMatch(/\.rm \.ghost\.walkoff,\.rm \.ghost\.leave\{animation:none\}/);
++    expect(app).toMatch(/ghost\(r, rm\(\) \? '' : 'wave leave'\)/); expect(app).toMatch(/spawn\(el, 1500\)|live\.splice\(i, 1\); \}, 1500\)/);  /* #31: ghostHost + setTimeout 1500 */  // lives past 300 + 240 ms
++    expect(app).not.toMatch(/addEventListener\('animationend', kill/);                                       // no bubbled child animationend kill
++  });
++  it('merged +N floater re-arms its removal timer', () => {
++    expect(app).toMatch(/retrigger\(floater\.el, 'floater'\); expire\(floater\.el, 750\)/);
++    expect(app).toMatch(/clearTimeout\(timers\.get\(el\)\)/);
++  });
++});
++
++describe('MK-24-1 v3: always two-line Sell, shared width, money never truncates', () => {
++  const css = readFileSync('src/ui/styles.css', 'utf8');
++  const listSrc = readFileSync('src/ui/order-list.ts', 'utf8');
++  it('1: always two-line (column, 14px/12px); no one-line mode or sell-stack', () => {
++    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*flex-direction:column/);
++    expect(css).toMatch(/\.order \.btn\.sell \.sk\{[^}]*font:800 14px/);
++    expect(css).toMatch(/\.order \.btn\.sell \.sy\{[^}]*font:800 12px/);
++    expect(css).not.toMatch(/\.order \.btn\.sell\.sell-stack/);
++    expect(css).not.toMatch(/@media \(max-width:375px\)\{[^}]*\.order \.btn\.sell/);
++    expect(listSrc).not.toMatch(/sell-stack/);
++    expect(listSrc).toMatch(/syncSellWidth/);
++  });
++  it('2: shared --sell-w, min 88, max 45cqw, pad 10, no ellipsis on button', () => {
++    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*width:var\(--sell-w,88px\)/);
++    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*min-width:88px/);
++    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*max-width:45cqw/);
++    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*min-height:44px/);
++    expect(css).toMatch(/\.order \.btn\.sell\{[^}]*padding-inline:10px/);
++    expect(css).toMatch(/\.order \.btn\.sell \.sk,\.order \.btn\.sell \.sy\{[^}]*flex-shrink:0/);
++    expect(css).not.toMatch(/\.order \.btn\.sell \.sk,\.order \.btn\.sell \.sy\{[^}]*text-overflow:ellipsis/);
++    expect(listSrc).toMatch(/--sell-w/);
++  });
++  it('3: row count and $ never truncate; only .egg may ellipsize (Art & UX)', () => {
++    expect(css).toMatch(/\.order \.l1 \.n\{[^}]*flex-shrink:0/);
++    expect(css).toMatch(/\.order \.l1 \.v\{[^}]*flex-shrink:0/);
++    expect(css).toMatch(/\.order \.l1 \.v\{[^}]*overflow:visible/);
++    expect(css).not.toMatch(/\.order \.l1 \.v\{[^}]*text-overflow:ellipsis/);
++    expect(css).toMatch(/\.order \.l1 \.egg\{[^}]*text-overflow:ellipsis/);
++  });
++  it('≤375 does not cap the Sell button at 96px', () => {
++    expect(css).not.toMatch(/@media \(max-width:375px\)\{[^}]*\.order \.btn\.sell[^}]*max-width:96px/);
++  });
++});
++
++describe('S2-REL-1 / exact money wiring', () => {
++  const app = readFileSync('src/ui/app.ts', 'utf8');
++  const main = readFileSync('src/main.ts', 'utf8');
++  it('eggfarmOrderList and eggfarm are IOS_FLAG-only', () => {
++    expect(app).toMatch(/if \(IOS_FLAG_ENABLED\) \(window as any\)\.eggfarmOrderList/);
++    expect(app).not.toMatch(/^\s*\(window as any\)\.eggfarmOrderList/m);
++    expect(main).toMatch(/if \(IOS_FLAG_ENABLED\) \(window as any\)\.eggfarm =/);
++  });
++  it('sell popup and Thanks card use fmtMoneyExact', () => {
++    expect(app).toMatch(/fmtMoneyExact\(e\.value\)/);
++    expect(app).toMatch(/fmtMoneyExact\(d\.cents\)/);
++    expect(app).not.toMatch(/fmtMoneyShort\((?!trackPriceCents)/); // #31: unit Egg price row may use short form; sell money stays exact
++  });
++});
++
++describe('QA TUT-1: docked tutorial Sell step', () => {
++  const app = readFileSync('src/ui/app.ts', 'utf8');
++  it('step 1 targets the first Sell button when docked (openPanel keeps open=null there)', () => {
++    expect(app).toMatch(/if \(st === 1\) return open === 'market' \|\| docked\.matches \? mRows\.querySelector\('button\[data-id\]'\)/);
++  });
++  it('a docked card tap highlights its order row', () => {
++    expect(app).toMatch(/if \(docked\.matches && c\) \{[^\n]*\.order\[data-row=/);
++    expect(app).toMatch(/row\.dataset\.hl = '1'/);
++  });
++});

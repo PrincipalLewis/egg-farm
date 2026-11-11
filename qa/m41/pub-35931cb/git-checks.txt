@@ -1,0 +1,57 @@
+== origin/main
+35931cb7efa04e9ef57e8ab491cbf1017b849f29
+== contains
+  origin/main
+== cat 35931cb
+tree 31f66351ab8cd865b04848e4881d39cbcea940cd
+parent dd223f510e9acabf9b1915b56e39da8b88dcac63
+parent 5d9efa61c5e6ee31ca9ebdec20ee70167d31d463
+author Korshunov Vadim <dflz666@gmail.com> 1792855472 +0200
+committer GitHub <noreply@github.com> 1792855472 +0200
+gpgsig -----BEGIN PGP SIGNATURE-----
+ 
+ wsFcBAABCAAQBQJq3M2wCRC1aQ7uu5UhlAAAwuQQAFdRwfPYkcnfMP+Lb2KnTEIt
+ 5URnNxW/SLyRxwe9Kpk8LVN0LigTVFwkX+OT1a1/fxtztR6Qxg5s+JrCXbu+wke8
+ UEkQKojRoaZ7qEkb+k8DW1ZS3gUhdGrFI72adlSmtQo3uhuAQMLQeMepEOfSbDyO
+ PVJAOSHTaI968kLYq8/V5BcH34nch0U70MS2GWTmrckqMNgfIGDvXllL+bpu3BV2
+ e0dSDwxOVDBPUC0UW92DtUB2oJhk+YsrFu+blHcsjv3wICwxeaurC38kq5h65qsy
+ orshajYE/M2EqlzVZW6iXch4hMWVtOPMZcYFdAF+JmOGGHr2tc8jwf3+yA54QFth
+ A6FnhiG+/n64d8kuk5zgvqtVbRViYdLTAxO1CpAqkGYnYCjPabEd31aKcxmsXXZT
+ zpG7ilBz4+KI0dqcod2of9xL6Hjl6WUscUqTOubgsbZwXP3hHC1KxYjBJEw4D6+9
+ nJefZh8SH04wUXfCESXWknMMUeEFgxihaifclhLb9APobc8sUxaaB3Q8GQR46Dm5
+ 4PcOEGNYTj2eaM/cbiBA0szypKXPSkKNEqnxUz26ox058Glp3TjaldgFOH6LBDGK
+ ft9zIr0OJMZczENChiUuySxPyQZQlHqEGKHDmsB8zmKE1NRXel5tNP2RQil0FgiO
+ Z1ltGwOaLvcUagoK5u5F
+ =Armm
+ -----END PGP SIGNATURE-----
+ 
+
+Merge #67: M4.1 RC1 (5d9efa6) — CI green, Art PASS, HoQA PASS
+
+M4.1 RC1: unified release candidate (PRs #60, #61, #62, #63, #64, #65, #66)== tree
+31f66351ab8cd865b04848e4881d39cbcea940cd
+31f66351ab8cd865b04848e4881d39cbcea940cd
+== ancestor
+5d9efa6 IS ancestor of 35931cb
+== diff --stat 5d9efa6 35931cb
+(end diff, lines=0)
+== log origin/main
+35931cb Merge #67: M4.1 RC1 (5d9efa6) — CI green, Art PASS, HoQA PASS
+5d9efa6 Merge #65 into rc/m4.1-rc1 (c877f69a407ec844a4d10612030584be42e34bdf; unified M4.1 RC1: #60-#66)
+dd49fb8 Merge #66 into rc/m4.1-rc1 (8c568b0788ffd1371930c6db202b9e96e2655919)
+5d3ff6a Merge #64 into rc/m4.1-rc1 (3110e88226a5ee7e01c46f7bab4bd9f0d96208d3)
+ff2b234 Merge #63 into rc/m4.1-rc1 (3c867204c94aabf7f65c41e3ebfd0b9544a792aa)
+== tags
+89aebebd6ce62a472e2fe64a49c56eee58c0bef5	refs/tags/m1-rc1
+235dcc9b1d9567aa6baf1ad220e1ef5ceef12564	refs/tags/m1-rc1^{}
+921eac69c27eb19292395971cf0801f9535730e2	refs/tags/m2-rc1
+bf1962ab3960a3de4e73ff87ba685922287d7533	refs/tags/m2-rc1^{}
+dd15dbf10110cf9e5d6bdf82d2d88143f5e9c967	refs/tags/m2-rc1-play
+15ff3bf750e3c21b60ef969889f979a9ae8cd4e7	refs/tags/m3-rc1-dialog
+a01faea4097dd5a869be93343d65fd0e82e5255c	refs/tags/m3-rc1-dialog^{}
+dd52bfdc1c695cfc7695b3d63ba6a7883c5fd49b	refs/tags/m3-rc1-pre-dd52bfd
+a07d823ea4ba8a206732c43a47fc38d64cac3320	refs/tags/m3-rc1-qa-v4
+7d52952e197fd1bb264950acc9a2ca401b7abdfb	refs/tags/m3-rc1-qa-v4^{}
+ffb6cc331e4b3dd0b1b3f9b4ebaf23228f55832c	refs/tags/m3-rc1-save-v4
+aaaa91a3d0e73d41fa53cc2d80e92b5cb3c42106	refs/tags/m3-rc1-save-v4^{}
+2490c793caed92c5e5d9df1a7296ff3465c061b8	refs/tags/rc1-pt1

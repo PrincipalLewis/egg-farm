@@ -1,0 +1,7 @@
+ src/config/formulas.ts          |   2 +-
+ src/config/m5-rules.ts          |   2 +
+ src/sim/effects.ts              |   5 +-
+ src/sim/golden.ts               |  57 +++++++++++++++++
+ src/sim/timers.ts               |   5 +-
+ tests/v5-golden-rewards.test.ts | 136 ++++++++++++++++++++++++++++++++++++++++
+ 6 files changed, 204 insertions(+), 3 deletions(-)

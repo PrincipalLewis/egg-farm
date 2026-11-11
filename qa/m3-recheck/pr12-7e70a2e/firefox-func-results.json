@@ -1,0 +1,119 @@
+[
+ {
+  "e": "firefox",
+  "n": "ON build ID (+dirty = QA-only m4.enabled=1 edit)",
+  "p": true,
+  "i": "m3-rc1-pre+7e70a2e+dirty"
+ },
+ {
+  "e": "firefox",
+  "n": "ON live cap (maxLevel) = 30",
+  "p": true,
+  "i": 30
+ },
+ {
+  "e": "firefox",
+  "n": "ON F24: no nudge",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "ON F25, 0 workers: nudge within 1 s",
+  "p": true,
+  "i": {
+   "ms": 72
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "ON dismiss × 44x44 + aria-label",
+  "p": true,
+  "i": {
+   "w": 44,
+   "h": 44,
+   "aria": "Dismiss hire hint"
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "ON dismiss hides nudge",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "ON focus -> Farm Buy after dismiss",
+  "p": true,
+  "i": "<button class=\"btn buy affordable\" data-kind=\"farm\" aria-disabled=\"false\"><img s"
+ },
+ {
+  "e": "firefox",
+  "n": "ON stays hidden this session",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "ON dismiss does not persist hireNudgeDone",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "ON returns next session (reload)",
+  "p": true,
+  "i": 25
+ },
+ {
+  "e": "firefox",
+  "n": "ON first hire done via Workers tab",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "ON first hire clears nudge (Farm tab + dots)",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "ON hireNudgeDone:1 saved after hire",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "ON stays cleared after reload",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "OFF build ID",
+  "p": true,
+  "i": "m3-rc1-pre+7e70a2e"
+ },
+ {
+  "e": "firefox",
+  "n": "OFF flag off",
+  "p": true,
+  "i": null
+ },
+ {
+  "e": "firefox",
+  "n": "OFF F25: no nudge, no dots",
+  "p": true,
+  "i": {
+   "line": false,
+   "dots": 0
+  }
+ },
+ {
+  "e": "firefox",
+  "n": "OFF save has no hireNudgeDone",
+  "p": true,
+  "i": null
+ }
+]

@@ -1,0 +1,164 @@
+[
+ {
+  "n": "build-id 0470045 in served bundle",
+  "pass": true,
+  "i": {
+   "j": "assets/index-YMAwmIcC.js"
+  }
+ },
+ {
+  "n": "reload: period credited once, popup once",
+  "pass": true,
+  "i": {
+   "first": {
+    "pend": 9901,
+    "basket": 0,
+    "modal": true
+   },
+   "afterCollect": {
+    "pend": 0,
+    "basket": 9400,
+    "modal": false
+   },
+   "afterReload": {
+    "pend": 0,
+    "basket": 9371,
+    "modal": false
+   }
+  }
+ },
+ {
+  "n": "2nd tab: no 2nd popup / credit for the same period",
+  "pass": true,
+  "i": {
+   "modal": false,
+   "pend": 0,
+   "other": false
+  }
+ },
+ {
+  "n": "no page errors (dedupe)",
+  "pass": true,
+  "i": []
+ },
+ {
+  "n": "320x568 'Welcome back!' one line, no overflow",
+  "pass": true,
+  "i": {
+   "lines": 1,
+   "overflow": false,
+   "ws": "nowrap",
+   "fs": "22px",
+   "icon": true,
+   "headFits": true,
+   "worthWrap": "balance"
+  }
+ },
+ {
+  "n": "320x568 worth line text-wrap balance",
+  "pass": true,
+  "i": {
+   "worthWrap": "balance"
+  }
+ },
+ {
+  "n": "360x420 'Welcome back!' one line, no overflow",
+  "pass": true,
+  "i": {
+   "lines": 1,
+   "overflow": false,
+   "ws": "nowrap",
+   "fs": "23.04px",
+   "icon": true,
+   "headFits": true,
+   "worthWrap": "balance"
+  }
+ },
+ {
+  "n": "360x420 worth line text-wrap balance",
+  "pass": true,
+  "i": {
+   "worthWrap": "balance"
+  }
+ },
+ {
+  "n": "360x640 'Welcome back!' one line, no overflow",
+  "pass": true,
+  "i": {
+   "lines": 1,
+   "overflow": false,
+   "ws": "nowrap",
+   "fs": "23.04px",
+   "icon": true,
+   "headFits": true,
+   "worthWrap": "balance"
+  }
+ },
+ {
+  "n": "360x640 worth line text-wrap balance",
+  "pass": true,
+  "i": {
+   "worthWrap": "balance"
+  }
+ },
+ {
+  "n": "375x667 'Welcome back!' one line, no overflow",
+  "pass": true,
+  "i": {
+   "lines": 1,
+   "overflow": false,
+   "ws": "nowrap",
+   "fs": "24px",
+   "icon": true,
+   "headFits": true,
+   "worthWrap": "balance"
+  }
+ },
+ {
+  "n": "375x667 worth line text-wrap balance",
+  "pass": true,
+  "i": {
+   "worthWrap": "balance"
+  }
+ },
+ {
+  "n": "390x844 'Welcome back!' one line, no overflow",
+  "pass": true,
+  "i": {
+   "lines": 1,
+   "overflow": false,
+   "ws": "nowrap",
+   "fs": "24.96px",
+   "icon": true,
+   "headFits": true,
+   "worthWrap": "balance"
+  }
+ },
+ {
+  "n": "390x844 worth line text-wrap balance",
+  "pass": true,
+  "i": {
+   "worthWrap": "balance"
+  }
+ },
+ {
+  "n": "1280x800 'Welcome back!' one line, no overflow",
+  "pass": true,
+  "i": {
+   "lines": 1,
+   "overflow": false,
+   "ws": "nowrap",
+   "fs": "28px",
+   "icon": true,
+   "headFits": true,
+   "worthWrap": "balance"
+  }
+ },
+ {
+  "n": "1280x800 worth line text-wrap balance",
+  "pass": true,
+  "i": {
+   "worthWrap": "balance"
+  }
+ }
+]

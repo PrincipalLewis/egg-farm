@@ -1,0 +1,740 @@
+gate	Set up job	﻿2026-11-06T01:39:33.7088065Z Current runner version: '2.338.2'
+gate	Set up job	2026-11-06T01:39:33.7114047Z ##[group]Runner Image Provisioner
+gate	Set up job	2026-11-06T01:39:33.7114980Z Hosted Compute Agent
+gate	Set up job	2026-11-06T01:39:33.7115546Z Version: 20261028.624
+gate	Set up job	2026-11-06T01:39:33.7116114Z Commit: 54898b74c23fde5556c9b3c3a2290865feef0dfe
+gate	Set up job	2026-11-06T01:39:33.7116751Z Build Date: 2026-10-28T21:51:42Z
+gate	Set up job	2026-11-06T01:39:33.7117392Z Worker ID: {69066f85-b3e6-40c5-b079-f45f2d1f494d}
+gate	Set up job	2026-11-06T01:39:33.7118319Z Region: westus2
+gate	Set up job	2026-11-06T01:39:33.7118835Z Cloud: Azure
+gate	Set up job	2026-11-06T01:39:33.7119323Z ##[endgroup]
+gate	Set up job	2026-11-06T01:39:33.7121004Z ##[group]Operating System
+gate	Set up job	2026-11-06T01:39:33.7121660Z Ubuntu
+gate	Set up job	2026-11-06T01:39:33.7122416Z 24.04.5
+gate	Set up job	2026-11-06T01:39:33.7122855Z LTS
+gate	Set up job	2026-11-06T01:39:33.7123616Z ##[endgroup]
+gate	Set up job	2026-11-06T01:39:33.7124230Z ##[group]Runner Image
+gate	Set up job	2026-11-06T01:39:33.7124818Z Image: ubuntu-24.04
+gate	Set up job	2026-11-06T01:39:33.7125361Z Version: 20261101.360.1
+gate	Set up job	2026-11-06T01:39:33.7126248Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261101.360/images/ubuntu/Ubuntu2404-Readme.md
+gate	Set up job	2026-11-06T01:39:33.7128159Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261101.360
+gate	Set up job	2026-11-06T01:39:33.7129011Z ##[endgroup]
+gate	Set up job	2026-11-06T01:39:33.7130014Z ##[group]GITHUB_TOKEN Permissions
+gate	Set up job	2026-11-06T01:39:33.7132166Z Contents: read
+gate	Set up job	2026-11-06T01:39:33.7132709Z Metadata: read
+gate	Set up job	2026-11-06T01:39:33.7133176Z ##[endgroup]
+gate	Set up job	2026-11-06T01:39:33.7135272Z Secret source: Actions
+gate	Set up job	2026-11-06T01:39:33.7136104Z Cache mode: write
+gate	Set up job	2026-11-06T01:39:33.7136840Z Prepare workflow directory
+gate	Set up job	2026-11-06T01:39:33.7432241Z Prepare all required actions
+gate	Set up job	2026-11-06T01:39:33.7474794Z Getting action download info
+gate	Set up job	2026-11-06T01:39:34.0934400Z Download action repository 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+gate	Set up job	2026-11-06T01:39:34.2060965Z Download action repository 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+gate	Set up job	2026-11-06T01:39:34.4005334Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+gate	Set up job	2026-11-06T01:39:34.7662609Z Complete job name: gate
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	﻿2026-11-06T01:39:34.8462895Z ##[group]Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:34.8463859Z with:
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:34.8464275Z   repository: PrincipalLewis/egg-farm
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:34.8468140Z   token: ***
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:34.8468533Z   ssh-strict: true
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:34.8468929Z   ssh-user: git
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:34.8469325Z   persist-credentials: true
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:34.8469764Z   clean: true
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:34.8470170Z   sparse-checkout-cone-mode: true
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:34.8470652Z   fetch-depth: 1
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:34.8471046Z   fetch-tags: false
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:34.8471441Z   show-progress: true
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:34.8471850Z   lfs: false
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:34.8472225Z   submodules: false
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:34.8472699Z   set-safe-directory: true
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:34.8473142Z   allow-unsafe-pr-checkout: false
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:34.8473849Z ##[endgroup]
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.4984115Z Syncing repository: PrincipalLewis/egg-farm
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.4987720Z ##[group]Getting Git version info
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.4988746Z Working directory is '/home/runner/work/egg-farm/egg-farm'
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.4990003Z [command]/usr/bin/git version
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5044667Z git version 2.56.0
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5064282Z ##[endgroup]
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5078334Z Temporarily overriding HOME='/home/runner/work/_temp/72cd195e-a67a-4624-867a-4dfc410e7767' before making global git config changes
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5083188Z Adding repository directory to the temporary git global config as a safe directory
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5085308Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/egg-farm/egg-farm
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5140845Z Deleting the contents of '/home/runner/work/egg-farm/egg-farm'
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5150854Z ##[group]Initializing the repository
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5153865Z [command]/usr/bin/git init /home/runner/work/egg-farm/egg-farm
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5242405Z hint: Using 'master' as the name for the initial branch. This default branch name
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5245048Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5247349Z hint: to use in all of your new repositories, which will suppress this warning,
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5249291Z hint: call:
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5250555Z hint:
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5252047Z hint: 	git config --global init.defaultBranch <name>
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5253635Z hint:
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5255283Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5257730Z hint: 'development'. The just-created branch can be renamed via this command:
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5259489Z hint:
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5260400Z hint: 	git branch -m <name>
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5261417Z hint:
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.5262761Z hint: Disable this message with "git config set advice.defaultBranchName false"
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.6585921Z Initialized empty Git repository in /home/runner/work/egg-farm/egg-farm/.git/
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.6595402Z [command]/usr/bin/git remote add origin https://github.com/PrincipalLewis/egg-farm
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.6650802Z ##[endgroup]
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.6652600Z ##[group]Disabling automatic garbage collection
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.6654277Z [command]/usr/bin/git config --local gc.auto 0
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.6693046Z ##[endgroup]
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.6694844Z ##[group]Setting up auth
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.6698849Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.6741083Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.7059284Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.7100002Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.7320071Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.7363133Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.7579845Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.7647366Z ##[endgroup]
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.7649329Z ##[group]Fetching the repository
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:35.7660795Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +69f9c6194e405a94866c513645541765c6852cd4:refs/remotes/pull/107/merge
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.1788993Z From https://github.com/PrincipalLewis/egg-farm
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.1790705Z  * [new ref]         69f9c6194e405a94866c513645541765c6852cd4 -> pull/107/merge
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.1794897Z ##[endgroup]
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.1796482Z ##[group]Determining the checkout info
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.1798580Z ##[endgroup]
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.1806904Z [command]/usr/bin/git sparse-checkout disable
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.1862837Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.1901477Z ##[group]Checking out the ref
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.1902929Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/107/merge
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2224283Z Note: switching to 'refs/remotes/pull/107/merge'.
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2225517Z 
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2226427Z You are in 'detached HEAD' state. You can look around, make experimental
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2228914Z changes and commit them, and you can discard any commits you make in this
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2231101Z state without impacting any branches by switching back to a branch.
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2232093Z 
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2232815Z If you want to create a new branch to retain commits you create, you may
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2234846Z do so (now or later) by using -c with the switch command. Example:
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2235801Z 
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2236211Z   git switch -c <new-branch-name>
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2236831Z 
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2237206Z Or undo this operation with:
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2238031Z 
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2238435Z   git switch -
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2238916Z 
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2239679Z Turn off this advice by setting config variable advice.detachedHead to false
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2240733Z 
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2241947Z HEAD is now at 69f9c61 Merge a5f8e3c916833eae0a68aca03940e2fd08e01725 into 71375901de8b72acfaa49c695c5c18f0d0088080
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2245400Z ##[endgroup]
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2283248Z [command]/usr/bin/git log -1 --format=%H
+gate	Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:39:36.2314837Z 69f9c6194e405a94866c513645541765c6852cd4
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	﻿2026-11-06T01:39:36.3071429Z ##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:36.3072850Z with:
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:36.3073644Z   node-version: 20
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:36.3074481Z   cache: npm
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:36.3075263Z   always-auth: false
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:36.3076119Z   check-latest: false
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:36.3084281Z   token: ***
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:36.3085070Z ##[endgroup]
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:36.4395731Z Attempting to download 20...
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:36.4623017Z (node:2127) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:36.4624963Z (Use `node --trace-deprecation ...` to show where the warning was created)
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:37.2375280Z Acquiring 20.20.2 - x64 from https://github.com/actions/node-versions/releases/download/20.20.2-23521894959/node-20.20.2-linux-x64.tar.gz
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:38.1114212Z Extracting ...
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:38.1222873Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/11a2b385-f639-41a6-95b9-9ab716289667 -f /home/runner/work/_temp/7564cbca-76b8-4848-8da3-9f0a74910386
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:38.9976525Z Adding to the cache ...
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:40.7074987Z ##[group]Environment details
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:40.9073704Z node: v20.20.2
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:40.9074019Z npm: 10.8.2
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:40.9074228Z yarn: 1.22.22
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:40.9074672Z ##[endgroup]
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:40.9089332Z [command]/opt/hostedtoolcache/node/20.20.2/x64/bin/npm config get cache
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:40.9987053Z /home/runner/.npm
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:41.2335387Z Cache hit for: node-cache-Linux-x64-npm-570ff3660310d24e3be09c9ec0ca06ee18b34fdf834293b38f8aa5f6d204e898
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:41.2426580Z (node:2127) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:42.5293835Z Received 5913334 of 22690550 (26.1%), 5.6 MBs/sec
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:42.7433066Z Received 22690550 of 22690550 (100.0%), 17.8 MBs/sec
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:42.7433656Z Cache Size: ~22 MB (22690550 B)
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:42.7532240Z [command]/usr/bin/tar -xf /home/runner/work/_temp/f83015f2-3b35-4c36-b86b-29be9ff2eba0/cache.tzst -P -C /home/runner/work/egg-farm/egg-farm --use-compress-program unzstd
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:42.8071703Z Cache restored successfully
+gate	Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:39:42.8089081Z Cache restored from key: node-cache-Linux-x64-npm-570ff3660310d24e3be09c9ec0ca06ee18b34fdf834293b38f8aa5f6d204e898
+gate	npm ci	﻿2026-11-06T01:39:42.8290726Z ##[group]Run npm ci
+gate	npm ci	2026-11-06T01:39:42.8291014Z ^[[36;1mnpm ci^[[0m
+gate	npm ci	2026-11-06T01:39:42.8313892Z shell: /usr/bin/bash -e {0}
+gate	npm ci	2026-11-06T01:39:42.8314160Z ##[endgroup]
+gate	npm ci	2026-11-06T01:39:43.5708578Z npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+gate	npm ci	2026-11-06T01:39:44.4127296Z 
+gate	npm ci	2026-11-06T01:39:44.4128342Z added 87 packages, and audited 88 packages in 2s
+gate	npm ci	2026-11-06T01:39:44.4128754Z 
+gate	npm ci	2026-11-06T01:39:44.4128981Z 21 packages are looking for funding
+gate	npm ci	2026-11-06T01:39:44.4129710Z   run `npm fund` for details
+gate	npm ci	2026-11-06T01:39:44.4335048Z 
+gate	npm ci	2026-11-06T01:39:44.4336648Z 6 vulnerabilities (3 moderate, 1 high, 2 critical)
+gate	npm ci	2026-11-06T01:39:44.4336907Z 
+gate	npm ci	2026-11-06T01:39:44.4337118Z To address all issues (including breaking changes), run:
+gate	npm ci	2026-11-06T01:39:44.4337426Z   npm audit fix --force
+gate	npm ci	2026-11-06T01:39:44.4337795Z 
+gate	npm ci	2026-11-06T01:39:44.4337916Z Run `npm audit` for details.
+gate	Unit tests (npm test; includes sync-economy --check)	﻿2026-11-06T01:39:44.4518815Z ##[group]Run npm test
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:44.4519073Z ^[[36;1mnpm test^[[0m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:44.4540336Z shell: /usr/bin/bash -e {0}
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:44.4540572Z ##[endgroup]
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:44.5451658Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:44.5452294Z > egg-farm@0.1.0 test
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:44.5452755Z > vite-node scripts/sync-economy-cli.ts -- --check && vitest run
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:44.5453003Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:44.8512459Z balance.json up to date with economy.csv
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:45.1162883Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:45.1169784Z ^[[1m^[[7m^[[36m RUN ^[[39m^[[27m^[[22m ^[[36mv2.1.9 ^[[39m^[[90m/home/runner/work/egg-farm/egg-farm^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:45.1178978Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:45.7675020Z ^[[90mstdout^[[2m | tests/telemetry-schema.test.ts^[[2m > ^[[22m^[[2m[G-8] worst-case pinned size <= 200 KB (D-HOE-19 G-1, D-HOE-31, D-HOE-32 M-2)^[[2m > ^[[22m^[[2m[G-8] worst-case 1 h session: every event valid and pinned; serialized <= 200 KB
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:45.7676448Z ^[[22m^[[39mG-8 pinned bytes (base): 155374
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:45.7676733Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:45.7678517Z ^[[90mstdout^[[2m | tests/telemetry-schema.test.ts^[[2m > ^[[22m^[[2m[G-8] worst-case pinned size <= 200 KB (D-HOE-19 G-1, D-HOE-31, D-HOE-32 M-2)^[[2m > ^[[22m^[[2m[G-8] worst-case 1 h session + buy-spam fixture: every event valid and pinned; serialized <= 200 KB
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:45.7679880Z ^[[22m^[[39mG-8 pinned bytes (buy-spam): 175905
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:45.7680168Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:45.7700624Z  ^[[32m✓^[[39m tests/telemetry-schema.test.ts ^[[2m(^[[22m^[[2m50 tests^[[22m^[[2m)^[[22m^[[90m 82^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:46.0191253Z  ^[[32m✓^[[39m tests/m4a-v3-backup.test.ts ^[[2m(^[[22m^[[2m32 tests^[[22m^[[2m)^[[22m^[[90m 232^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:46.8136782Z  ^[[32m✓^[[39m tests/v5-breeds-hatch.test.ts ^[[2m(^[[22m^[[2m37 tests^[[22m^[[2m)^[[22m^[[33m 485^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:47.4779797Z  ^[[32m✓^[[39m tests/csr-loadsafe.test.ts ^[[2m(^[[22m^[[2m64 tests^[[22m^[[2m)^[[22m^[[90m 287^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:48.0651024Z  ^[[32m✓^[[39m tests/m41-p2-ui-minors.test.ts ^[[2m(^[[22m^[[2m32 tests^[[22m^[[2m)^[[22m^[[90m 140^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:48.5769613Z  ^[[32m✓^[[39m tests/v5-abilities-sim.test.ts ^[[2m(^[[22m^[[2m29 tests^[[22m^[[2m)^[[22m^[[90m 104^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:49.0409638Z  ^[[32m✓^[[39m tests/v5-pause-sim.test.ts ^[[2m(^[[22m^[[2m21 tests^[[22m^[[2m)^[[22m^[[90m 36^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:49.5989333Z  ^[[32m✓^[[39m tests/m41-p1-asleep-signal.test.ts ^[[2m(^[[22m^[[2m26 tests^[[22m^[[2m)^[[22m^[[90m 67^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:51.4113225Z  ^[[32m✓^[[39m tests/pacing-x1.test.ts ^[[2m(^[[22m^[[2m22 tests^[[22m^[[2m)^[[22m^[[33m 1430^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:51.4119453Z    ^[[33m^[[2m✓^[[22m^[[39m QA-D-1030-SHIPFLAGS: the run records balance.json sha256 + m4 flags (results/ and SHA256SUMS)^[[2m > ^[[22m`pacing-x1-stack.ts -- inputs` writes balance.txt (sha256 first, every m4 flag) and a byte copy whose sha256 is the tree file ^[[33m1316^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:52.6419627Z  ^[[32m✓^[[39m tests/m41-8-f4-label.test.ts ^[[2m(^[[22m^[[2m27 tests^[[22m^[[2m)^[[22m^[[33m 903^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:52.6421979Z    ^[[33m^[[2m✓^[[22m^[[39m F4-7 length property: no rendered label over 27, level + suffix intact, aria untruncated^[[2m > ^[[22mHens / Egg value / Collection × levels 0..maxLevel and 0..55 × X × milestone × ★ ^[[33m412^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:53.0912598Z  ^[[32m✓^[[39m tests/m41-7-csr8b-race.test.ts ^[[2m(^[[22m^[[2m15 tests^[[22m^[[2m)^[[22m^[[90m 196^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:53.8539575Z  ^[[32m✓^[[39m tests/v5-income-ref.test.ts ^[[2m(^[[22m^[[2m27 tests^[[22m^[[2m)^[[22m^[[33m 456^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:54.1442235Z  ^[[32m✓^[[39m tests/v5-f2-m5-fields.test.ts ^[[2m(^[[22m^[[2m37 tests^[[22m^[[2m)^[[22m^[[90m 27^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:54.7139488Z  ^[[32m✓^[[39m tests/v5-f1c-effects.test.ts ^[[2m(^[[22m^[[2m21 tests^[[22m^[[2m)^[[22m^[[33m 301^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:55.2529500Z  ^[[32m✓^[[39m tests/v5-breeds-state.test.ts ^[[2m(^[[22m^[[2m35 tests^[[22m^[[2m)^[[22m^[[90m 260^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:39:55.5849539Z  ^[[32m✓^[[39m tests/v5-streak-sim.test.ts ^[[2m(^[[22m^[[2m22 tests^[[22m^[[2m)^[[22m^[[90m 69^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:11.5452866Z  ^[[32m✓^[[39m tests/m41-9-big-number.test.ts ^[[2m(^[[22m^[[2m35 tests^[[22m^[[2m)^[[22m^[[33m 15686^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:11.5454517Z    ^[[33m^[[2m✓^[[22m^[[39m K–T golden byte-identity (old dd223f5 vs new, 0..1e15)^[[2m > ^[[22mfmtCount over 24554 values ^[[33m429^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:11.5456417Z    ^[[33m^[[2m✓^[[22m^[[39m K–T golden byte-identity (old dd223f5 vs new, 0..1e15)^[[2m > ^[[22mfmtMoney / fmtMoneyShort / fmtMoneyPreview / fmtMoneyExact over the same values as dollars (cents < 1e17) ^[[33m14498^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:11.5474648Z    ^[[33m^[[2m✓^[[22m^[[39m QA4-1: no thousands separator in a suffixed value, widest strings are 8 chars^[[2m > ^[[22mlog-spaced 1e4..1e40 ^[[33m598^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:11.8761676Z  ^[[32m✓^[[39m tests/v5-tap-coins.test.ts ^[[2m(^[[22m^[[2m22 tests^[[22m^[[2m)^[[22m^[[90m 90^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:12.3432562Z  ^[[32m✓^[[39m tests/m41-7-hop-rulings.test.ts ^[[2m(^[[22m^[[2m26 tests^[[22m^[[2m)^[[22m^[[90m 206^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:12.6825847Z  ^[[32m✓^[[39m tests/workers-v11.test.ts ^[[2m(^[[22m^[[2m23 tests^[[22m^[[2m)^[[22m^[[90m 56^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:13.0271139Z  ^[[32m✓^[[39m tests/qa-rc1-bugs.test.ts ^[[2m(^[[22m^[[2m45 tests^[[22m^[[2m)^[[22m^[[90m 88^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:14.3190522Z  ^[[32m✓^[[39m tests/m4a-pick-hysteresis.test.ts ^[[2m(^[[22m^[[2m17 tests^[[22m^[[2m)^[[22m^[[33m 973^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:14.3191912Z    ^[[33m^[[2m✓^[[22m^[[39m M4A-41: 60 s of steady income, hint === highlight^[[2m > ^[[22mtwo rows within 10% give 0 changes ^[[33m424^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:14.7284278Z  ^[[32m✓^[[39m tests/hidden-time.test.ts ^[[2m(^[[22m^[[2m18 tests^[[22m^[[2m)^[[22m^[[90m 123^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:16.7915988Z  ^[[32m✓^[[39m tests/economy-copy.test.ts ^[[2m(^[[22m^[[2m13 tests^[[22m^[[2m)^[[22m^[[33m 1832^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:16.7917658Z    ^[[33m^[[2m✓^[[22m^[[39m --strict: each vendored sim file in SOURCE must match product/ by sha256 (fail closed on drift or missing) ^[[33m449^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:17.7959442Z  ^[[32m✓^[[39m tests/v5-f1b-clock-rng.test.ts ^[[2m(^[[22m^[[2m17 tests^[[22m^[[2m)^[[22m^[[33m 737^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:17.7960792Z    ^[[33m^[[2m✓^[[22m^[[39m F1b evRng / brRng^[[2m > ^[[22m[F1(a)][D-C4] isolation: golden/broody on + evRng/brRng drawn every tick leaves the customer sequence byte-identical ^[[33m376^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:18.0996988Z  ^[[32m✓^[[39m tests/v5-golden-rewards.test.ts ^[[2m(^[[22m^[[2m21 tests^[[22m^[[2m)^[[22m^[[90m 47^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:18.3889966Z  ^[[32m✓^[[39m tests/cost-segments.test.ts ^[[2m(^[[22m^[[2m8 tests^[[22m^[[2m)^[[22m^[[90m 80^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:20.9443643Z  ^[[32m✓^[[39m tests/release-html.test.ts ^[[2m(^[[22m^[[2m51 tests^[[22m^[[2m)^[[22m^[[33m 2331^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:20.9445033Z    ^[[33m^[[2m✓^[[22m^[[39m --build-id <id> and --build-id=<id> ^[[33m375^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:21.2589549Z  ^[[32m✓^[[39m tests/m4a-tracks.test.ts ^[[2m(^[[22m^[[2m31 tests^[[22m^[[2m)^[[22m^[[90m 37^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:21.5941298Z  ^[[32m✓^[[39m tests/v5-f3-config.test.ts ^[[2m(^[[22m^[[2m28 tests^[[22m^[[2m)^[[22m^[[90m 75^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:21.9849494Z  ^[[32m✓^[[39m tests/idb-mirror.test.ts ^[[2m(^[[22m^[[2m12 tests^[[22m^[[2m)^[[22m^[[90m 82^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:22.3529457Z  ^[[32m✓^[[39m tests/save-level-tolerance.test.ts ^[[2m(^[[22m^[[2m72 tests^[[22m^[[2m)^[[22m^[[90m 74^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:22.6000192Z  ^[[32m✓^[[39m tests/m41-p2-unpaid.test.ts ^[[2m(^[[22m^[[2m11 tests^[[22m^[[2m)^[[22m^[[90m 30^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:22.9324478Z  ^[[32m✓^[[39m tests/save-majors-2959ba0.test.ts ^[[2m(^[[22m^[[2m20 tests^[[22m^[[2m)^[[22m^[[90m 59^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:23.2739783Z  ^[[32m✓^[[39m tests/save-hardening.test.ts ^[[2m(^[[22m^[[2m27 tests^[[22m^[[2m)^[[22m^[[90m 32^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:29.9669825Z  ^[[32m✓^[[39m tests/zg-verdict.test.ts ^[[2m(^[[22m^[[2m21 tests^[[22m^[[2m)^[[22m^[[33m 4344^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:29.9671571Z    ^[[33m^[[2m✓^[[22m^[[39m ZG-AC7 [property] determinism, breed-neutrality, purity^[[2m > ^[[22m20 perturbations of coins / moods / energy / time / rng / settle stamps leave isZeroGain unchanged; s deep-equal after ^[[33m534^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:29.9674709Z    ^[[33m^[[2m✓^[[22m^[[39m ZG-AC20 [sim] parity with the Best buy verdict (bounded trace; full seeds 1–200 x 12,000 s is QA P2)^[[2m > ^[[22misZeroGain === optionGain.gain <= 0 for every offered COLL/HENS/VALUE, except HENS milestone steps with Δcap > 0 ^[[33m3773^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:30.3619517Z  ^[[32m✓^[[39m tests/save-recovery-v21.test.ts ^[[2m(^[[22m^[[2m16 tests^[[22m^[[2m)^[[22m^[[90m 52^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:30.9796282Z  ^[[32m✓^[[39m tests/s2-3a.test.ts ^[[2m(^[[22m^[[2m12 tests^[[22m^[[2m)^[[22m^[[90m 299^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:31.3813111Z  ^[[32m✓^[[39m tests/hidden-tab.test.ts ^[[2m(^[[22m^[[2m20 tests^[[22m^[[2m)^[[22m^[[90m 153^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:31.6979357Z  ^[[32m✓^[[39m tests/onboarding.test.ts ^[[2m(^[[22m^[[2m13 tests^[[22m^[[2m)^[[22m^[[90m 23^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:35.8129903Z ^[[90mstderr^[[2m | tests/serve-own.test.ts^[[2m > ^[[22m^[[2mexpectHeadBuild wiring (a real git tree + a served page)^[[2m > ^[[22m^[[2mgit unavailable (not a repo) is an error, also with ALLOW_DIRTY; only ALLOW_NO_GIT skips it
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:35.8159054Z ^[[22m^[[39mserveOwn: WARNING git unavailable in /tmp/so-nogit-6Us0W0; ALLOW_NO_GIT=1, served build m3-rc1-pre+abcdef1 NOT checked
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:35.8160366Z  ^[[32m✓^[[39m tests/serve-own.test.ts ^[[2m(^[[22m^[[2m15 tests^[[22m^[[2m | ^[[22m^[[33m1 skipped^[[39m^[[2m)^[[22m^[[33m 3895^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:35.8160962Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:35.8161736Z    ^[[33m^[[2m✓^[[22m^[[39m serveForRun wiring: one line, exit 2^[[2m > ^[[22mrc0-browser.mjs: PORT=abc -> exit 2, one stderr line, no stack ^[[33m687^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:35.8206499Z    ^[[33m^[[2m✓^[[22m^[[39m serveForRun wiring: one line, exit 2^[[2m > ^[[22mrelease-globals-browser.mjs: PORT=abc -> exit 2, one stderr line, no stack ^[[33m605^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:35.8208085Z    ^[[33m^[[2m✓^[[22m^[[39m serveForRun wiring: one line, exit 2^[[2m > ^[[22mn5: vite cannot be spawned (no npx on PATH) -> exit 2, one line ^[[33m2350^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:36.1474386Z  ^[[32m✓^[[39m tests/m4a-tracks-ui.test.ts ^[[2m(^[[22m^[[2m13 tests^[[22m^[[2m)^[[22m^[[90m 65^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:36.8119483Z  ^[[32m✓^[[39m tests/csr-idb1-mirror.test.ts ^[[2m(^[[22m^[[2m15 tests^[[22m^[[2m)^[[22m^[[90m 257^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:41.1649126Z  ^[[32m✓^[[39m tests/k10-breeds-offset.test.ts ^[[2m(^[[22m^[[2m9 tests^[[22m^[[2m)^[[22m^[[33m 3999^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:41.1655276Z    ^[[33m^[[2m✓^[[22m^[[39m k10 harness^[[2m > ^[[22mseed 1 equals the scratch harness of record (g1csv.ts -> g1tap/m5tap/breeds 76c07ecf, SEEDS=1, g1max @0.27) ^[[33m3960^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:41.5789365Z  ^[[32m✓^[[39m tests/market.test.ts ^[[2m(^[[22m^[[2m24 tests^[[22m^[[2m)^[[22m^[[90m 122^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:41.9479303Z  ^[[32m✓^[[39m tests/ac14.test.ts ^[[2m(^[[22m^[[2m13 tests^[[22m^[[2m)^[[22m^[[90m 35^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:42.3799349Z ^[[90mstdout^[[2m | tests/economy.test.ts^[[2m > ^[[22m^[[2mparity with vendored reference sim vendor/economy-sim (fixture: npm run gen-fixtures)^[[2m > ^[[22m^[[2mvendored SOURCE provenance equals the SHA256SUMS pins (unmodified copies)
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:42.3802008Z ^[[22m^[[39meconomy-sim vendored sim/economy_sim.py from product/sim/economy_sim.py sha256 10f29a4a38c8b22d3b952736c2627c0b83892fb5b299e257e4db9c7adf9fa6d6 on 2026-10-17
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:42.3803732Z economy-sim vendored economy.f1-m4cols.csv from product/economy.f1-m4cols.csv sha256 a8c4e26836bf7af98cb51f8e3e8a646750e82a4cdc18be450afe2f86eeeeb07f on 2026-10-17
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:42.3806007Z economy-sim vendored sim/seller_variance_sim.py from product/sim/seller_variance_sim.py sha256 68a64c59f0db10e67d4edc3a68a9a86bc559db72bc33102d3d9e3c7b669d98f1 on 2026-10-17
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:42.3807768Z economy-sim vendored sim/seller-variance-proposal.md from product/sim/seller-variance-proposal.md sha256 17877b4106116951ec9d41987bd03aec43af45f0b79bfd157f81abc984e4d4e5 on 2026-10-17
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:42.3808792Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:42.3898543Z  ^[[32m✓^[[39m tests/economy.test.ts ^[[2m(^[[22m^[[2m70 tests^[[22m^[[2m)^[[22m^[[90m 162^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:42.9744196Z  ^[[32m✓^[[39m tests/v5-f1a-fields.test.ts ^[[2m(^[[22m^[[2m10 tests^[[22m^[[2m)^[[22m^[[90m 295^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:44.0398649Z  ^[[32m✓^[[39m tests/pacing-x1-ac7.test.ts ^[[2m(^[[22m^[[2m11 tests^[[22m^[[2m)^[[22m^[[33m 813^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:44.7947842Z  ^[[32m✓^[[39m tests/s2-8-10.test.ts ^[[2m(^[[22m^[[2m11 tests^[[22m^[[2m)^[[22m^[[33m 485^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:44.7951512Z    ^[[33m^[[2m✓^[[22m^[[39m S2-8 gate: wages draining money to $0^[[2m > ^[[22mmoney never goes negative (small, exact-wage and huge balances) ^[[33m382^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:45.0835746Z  ^[[32m✓^[[39m tests/newer-save.test.ts ^[[2m(^[[22m^[[2m14 tests^[[22m^[[2m)^[[22m^[[90m 26^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:45.4159396Z  ^[[32m✓^[[39m tests/tab-guard-tg.test.ts ^[[2m(^[[22m^[[2m8 tests^[[22m^[[2m)^[[22m^[[90m 37^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:45.9056573Z  ^[[32m✓^[[39m tests/workers.test.ts ^[[2m(^[[22m^[[2m10 tests^[[22m^[[2m)^[[22m^[[90m 243^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:46.1565879Z  ^[[32m✓^[[39m tests/orders.test.ts ^[[2m(^[[22m^[[2m11 tests^[[22m^[[2m)^[[22m^[[90m 21^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:46.3688081Z  ^[[32m✓^[[39m tests/m41-9-art-rulings.test.ts ^[[2m(^[[22m^[[2m11 tests^[[22m^[[2m)^[[22m^[[90m 53^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:46.6322972Z  ^[[32m✓^[[39m tests/pacing-guards.test.ts ^[[2m(^[[22m^[[2m16 tests^[[22m^[[2m)^[[22m^[[90m 68^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:46.8979714Z  ^[[32m✓^[[39m tests/v5-m5load-pause-sanitize.test.ts ^[[2m(^[[22m^[[2m10 tests^[[22m^[[2m)^[[22m^[[90m 15^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:47.3087408Z  ^[[32m✓^[[39m tests/telemetry-m3.test.ts ^[[2m(^[[22m^[[2m10 tests^[[22m^[[2m)^[[22m^[[90m 197^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:47.5789489Z  ^[[32m✓^[[39m tests/m41-p1-mh-copy.test.ts ^[[2m(^[[22m^[[2m19 tests^[[22m^[[2m)^[[22m^[[90m 30^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:47.8038381Z  ^[[32m✓^[[39m tests/next-goal.test.ts ^[[2m(^[[22m^[[2m12 tests^[[22m^[[2m)^[[22m^[[90m 9^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:48.1108266Z  ^[[32m✓^[[39m tests/v5-f2-game-settle.test.ts ^[[2m(^[[22m^[[2m8 tests^[[22m^[[2m)^[[22m^[[90m 61^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:48.3928906Z  ^[[32m✓^[[39m tests/save-durability-v4.test.ts ^[[2m(^[[22m^[[2m12 tests^[[22m^[[2m)^[[22m^[[90m 20^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:48.8165052Z  ^[[32m✓^[[39m tests/m4a-migrate-v7.test.ts ^[[2m(^[[22m^[[2m29 tests^[[22m^[[2m)^[[22m^[[90m 128^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:49.1406871Z  ^[[32m✓^[[39m tests/s2-money.test.ts ^[[2m(^[[22m^[[2m8 tests^[[22m^[[2m)^[[22m^[[90m 52^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:49.5887403Z  ^[[32m✓^[[39m tests/v5-f3-qa-seam.test.ts ^[[2m(^[[22m^[[2m9 tests^[[22m^[[2m)^[[22m^[[90m 202^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:49.9369112Z  ^[[32m✓^[[39m tests/save.test.ts ^[[2m(^[[22m^[[2m9 tests^[[22m^[[2m)^[[22m^[[90m 20^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:50.1924531Z  ^[[32m✓^[[39m tests/ftue-v11.test.ts ^[[2m(^[[22m^[[2m9 tests^[[22m^[[2m)^[[22m^[[90m 29^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:50.8049520Z  ^[[32m✓^[[39m tests/v5-f2-roundtrip.test.ts ^[[2m(^[[22m^[[2m4 tests^[[22m^[[2m)^[[22m^[[90m 277^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:51.2149989Z  ^[[32m✓^[[39m tests/m41-p1-live-income.test.ts ^[[2m(^[[22m^[[2m31 tests^[[22m^[[2m)^[[22m^[[90m 123^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:52.0521277Z  ^[[32m✓^[[39m tests/payout-parity.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[33m 548^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:52.0522699Z    ^[[33m^[[2m✓^[[22m^[[39m payout parity (a): M4 off == pre-merge eggPriceCents values^[[2m > ^[[22mgrid of 560 states ^[[33m319^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:52.3793830Z  ^[[32m✓^[[39m tests/v7-marker-run-once.test.ts ^[[2m(^[[22m^[[2m6 tests^[[22m^[[2m)^[[22m^[[90m 15^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:52.8799488Z  ^[[32m✓^[[39m tests/telemetry-ring-export.test.ts ^[[2m(^[[22m^[[2m6 tests^[[22m^[[2m)^[[22m^[[90m 30^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:56.1030165Z ^[[90mstdout^[[2m | engineering/golden/m4on-golden.90a9c84.test.ts^[[2m > ^[[22m^[[2mgolden^[[2m > ^[[22m^[[2mstorage bytes
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:56.1033534Z ^[[22m^[[39mGOLDEN2 {"m1-rc2-v4-12min":"b1e07c13a21b6059ececdc898a4ddfe03b5286ea9133a4def6ae25992ec139dc","m2-rc1-v5-12min":"a425f0135a78b44615468a81fc99f955032e046a6003a9c180b973d51d346297","m2-rc1-v5-40min":"48b1fa43497a912c700461ddd4a2cf0abe59ba685977e7841c012ce8f7e6f1ef","m2-rc1-v5-40min-edge":"78b97634d0bbc3b4a174751917ad573889ec57bc22cc3163deb4c6fec0e4a4bc"}
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:56.1036083Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:56.1036981Z ^[[90mstdout^[[2m | engineering/golden/m4on-golden.90a9c84.test.ts^[[2m > ^[[22m^[[2mgolden^[[2m > ^[[22m^[[2msim trace
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:56.1038458Z ^[[22m^[[39mGOLDEN1 a54c9cf9d6a4c967ef8fc9d2cb741ba2deab042b8cad5097b38d5c192339fda5
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:56.1039121Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:56.1122892Z  ^[[32m✓^[[39m engineering/golden/m4on-golden.90a9c84.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[33m 2902^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:56.1125612Z    ^[[33m^[[2m✓^[[22m^[[39m golden^[[2m > ^[[22msim trace ^[[33m2765^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:56.5143828Z  ^[[32m✓^[[39m tests/hidden-save-paths.test.ts ^[[2m(^[[22m^[[2m5 tests^[[22m^[[2m)^[[22m^[[90m 56^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:56.8517929Z  ^[[32m✓^[[39m tests/v5-f3-is-paused.test.ts ^[[2m(^[[22m^[[2m9 tests^[[22m^[[2m)^[[22m^[[90m 38^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:57.1632424Z  ^[[32m✓^[[39m tests/sellall-label-grader.test.ts ^[[2m(^[[22m^[[2m9 tests^[[22m^[[2m)^[[22m^[[90m 10^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:57.5179901Z  ^[[32m✓^[[39m tests/m41-6-roundtrip-migrate.test.ts ^[[2m(^[[22m^[[2m13 tests^[[22m^[[2m)^[[22m^[[90m 47^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:59.7472745Z ^[[90mstdout^[[2m | engineering/golden/flagoff-golden.a01faea.test.ts^[[2m > ^[[22m^[[2mgolden^[[2m > ^[[22m^[[2mstorage bytes
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:59.7505632Z ^[[22m^[[39mGOLDEN2 {"m1-rc2-v4-12min":"b69c5783ba5b54dd663b56b898e2595cca59c6e03fc692b515af993634224ee9","m2-rc1-v5-12min":"2ac7070d0c5e7ea2d8fcdd1642732cf44871fe9c5b126d1b5873fcd8244f3a00","m2-rc1-v5-40min":"4fd4675956da96efa92f5eb48d979f132ad628c1e76e616076eb041ae311b431","m2-rc1-v5-40min-edge":"652d1b266de55a11ecc4faef9816eca0cfb803da3c7a7c14af85f88e4bb9f0bb"}
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:59.7517991Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:59.7524195Z ^[[90mstdout^[[2m | engineering/golden/flagoff-golden.a01faea.test.ts^[[2m > ^[[22m^[[2mgolden^[[2m > ^[[22m^[[2msim trace
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:59.7527367Z ^[[22m^[[39mGOLDEN1 f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:59.7554745Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:59.7558545Z  ^[[32m✓^[[39m engineering/golden/flagoff-golden.a01faea.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[33m 1863^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:40:59.7559676Z    ^[[33m^[[2m✓^[[22m^[[39m golden^[[2m > ^[[22msim trace ^[[33m1794^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:00.0119253Z  ^[[32m✓^[[39m tests/ios-tip.test.ts ^[[2m(^[[22m^[[2m12 tests^[[22m^[[2m)^[[22m^[[90m 6^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:00.3843492Z  ^[[32m✓^[[39m tests/tick.test.ts ^[[2m(^[[22m^[[2m9 tests^[[22m^[[2m)^[[22m^[[90m 76^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:03.7133226Z  ^[[32m✓^[[39m tests/m4a-pacing.test.ts ^[[2m(^[[22m^[[2m4 tests^[[22m^[[2m)^[[22m^[[90m 130^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:03.7137372Z ^[[90mstdout^[[2m | tests/m4a-pacing.test.ts^[[2m > ^[[22m^[[2mM4-A pacing (game sim, flag on)^[[2m > ^[[22m^[[2mreport (diagnostic, not gating: in-game farm_cost is main's, not the F1 + M3 taper table TR-5 uses)
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:03.7139610Z ^[[22m^[[39mM4A-PACING {"highlightF30":[22,22,22,22,21,22,22,22,22,22],"H":[24,24,24,24,24,24,24,24,24,24],"V":[24,24,24,24,24,24,24,24,24,24],"farmOnlyF30":[7,7,7,7,7,7,7,7,7,7],"worstGapS":[105,105,105,90,90,105,90,105,105,105]}
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:03.7140389Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:04.0169317Z  ^[[32m✓^[[39m tests/post-rc1.test.ts ^[[2m(^[[22m^[[2m5 tests^[[22m^[[2m)^[[22m^[[90m 89^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:04.9442218Z  ^[[32m✓^[[39m tests/release-build-id.test.ts ^[[2m(^[[22m^[[2m6 tests^[[22m^[[2m)^[[22m^[[33m 719^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:07.2043515Z ^[[90mstderr^[[2m | tests/telemetry.test.ts^[[2m > ^[[22m^[[2mtelemetry^[[2m > ^[[22m^[[2mevents carry ts + sessionMs
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:07.2044463Z ^[[22m^[[39m[telemetry] unknown event type: x
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:07.2044950Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:07.2048512Z ^[[90mstderr^[[2m | tests/telemetry.test.ts^[[2m > ^[[22m^[[2mtelemetry^[[2m > ^[[22m^[[2mring buffer capped at ring_size
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:07.2049382Z ^[[22m^[[39m[telemetry] unknown event type: e
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:07.2050205Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:07.2051018Z ^[[90mstderr^[[2m | tests/telemetry.test.ts^[[2m > ^[[22m^[[2mtelemetry^[[2m > ^[[22m^[[2mflush writes only when dirty; persisted buffer reloads
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:07.2051871Z ^[[22m^[[39m[telemetry] unknown event type: a
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:07.2052127Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:07.2052695Z  ^[[32m✓^[[39m tests/telemetry.test.ts ^[[2m(^[[22m^[[2m6 tests^[[22m^[[2m)^[[22m^[[33m 2010^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:07.2053633Z    ^[[33m^[[2m✓^[[22m^[[39m telemetry^[[2m > ^[[22mring buffer capped at ring_size ^[[33m1988^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:07.4799790Z  ^[[32m✓^[[39m tests/rc2-fmt.test.ts ^[[2m(^[[22m^[[2m13 tests^[[22m^[[2m)^[[22m^[[90m 39^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:14.4407297Z  ^[[32m✓^[[39m tests/bot-m5.test.ts ^[[2m(^[[22m^[[2m24 tests^[[22m^[[2m)^[[22m^[[33m 88361^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:14.4410879Z    ^[[33m^[[2m✓^[[22m^[[39m bot-m5: parity with m5x.ts^[[2m > ^[[22m[F-1][AC5] windowGate equals the original harness (scratch/v2-econ/h m5x.ts, uses pinned CSV fixture sha256=b48be8a4f920940876168abac57c0b353c661dfeb355e627f3436d5acb83f857, SEEDS=2 T=3000 CFG=none,AssZ PROFS=casual) ^[[33m8426^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:14.4412552Z    ^[[33m^[[2m✓^[[22m^[[39m bot-m5: run()^[[2m > ^[[22mobservers are read-only: same end state, reach and mechanics totals with and without them ^[[33m1509^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:14.4413566Z    ^[[33m^[[2m✓^[[22m^[[39m bot-m5: run()^[[2m > ^[[22mis deterministic per seed, and the stack changes the outcome ^[[33m1101^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:14.4414693Z    ^[[33m^[[2m✓^[[22m^[[39m bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off)^[[2m > ^[[22m[REQ-d M5.2] pressureSeed rows equal m5px.ts jsonl bytes: casual, on/off, PERT 0/+1, seeds 1-2 ^[[33m24498^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:14.4416075Z    ^[[33m^[[2m✓^[[22m^[[39m bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off)^[[2m > ^[[22m[REQ-d M5.1] refillGate equals m5lx.ts stdout: CFG=base,auto,off casual, SEEDS=2 T=3000 NOWIN=1 AT=30 RES=0 REST=0 MANAT=32 ^[[33m7099^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:14.4417646Z    ^[[33m^[[2m✓^[[22m^[[39m bot-m5 B: parity with m5px.ts / m5lx.ts (clock wage off)^[[2m > ^[[22m[REQ-d M5.1] charges stay in [0, cap], the auto arm never refills manually, and the M5.2 series is measurement-only ^[[33m3744^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:14.4419830Z    ^[[33m^[[2m✓^[[22m^[[39m [Q4] bot-m5: onObserve (QA seam Q4) is observe-only^[[2m > ^[[22m[Q4][AC7] windowGate (m5x-casual: AssZ casual) keeps the pinned parity hash with a hook that mutates what it is given ^[[33m6765^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:14.4421883Z    ^[[33m^[[2m✓^[[22m^[[39m [Q4] bot-m5: onObserve (QA seam Q4) is observe-only^[[2m > ^[[22m[Q4] M5.1/M5.2 rows are byte-identical with and without the hook, and the hook sees refills and a fresh clone per call ^[[33m12816^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:14.4423916Z    ^[[33m^[[2m✓^[[22m^[[39m bot-m5: driver input (CCR N-1, N-2 on #78)^[[2m > ^[[22m[VER-1h N-1][VER-1h N-2] the CLIs exit 2 on bad input before simulating (scripts/bot-m5x.ts, bot-m5px.ts, bot-m5lx.ts) ^[[33m7578^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:14.4425798Z    ^[[33m^[[2m✓^[[22m^[[39m [REQ-L35] bot-m5 B: parity-break report and toggle metric^[[2m > ^[[22m[REQ-L35 FDT] scripts/bot-m5-diverge.ts exits 0 on identical files, 1 with the first divergence, 2 on usage ^[[33m2258^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:14.4427239Z    ^[[33m^[[2m✓^[[22m^[[39m [REQ-L35] bot-m5 B: parity-break report and toggle metric^[[2m > ^[[22m[REQ-L35 D6] toggle sidecar: Asleep<->Unpaid flips per 30 min = tog / tAll * 1800, F10 variant on t10, casual seeds 1-2 within the D6 bar (<= 12) ^[[33m11077^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:14.4429819Z    ^[[33m^[[2m✓^[[22m^[[39m [REQ-L35] bot-m5 B: parity-break report and toggle metric^[[2m > ^[[22m[REQ-L35 D6][RF3 positive control] a forced Unpaid->Asleep flip is counted: tog = tog10 = 1 pinned, per-30-min = 3 over 600 s ^[[33m529^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:14.4432463Z    ^[[33m^[[2m✓^[[22m^[[39m bot-m5: O-3 loud fail (CCR rcv5-vs-main-1a61b36 F-1)^[[2m > ^[[22m[F-1][O-3][AC3] CLI: verify --profile m5x-casual --flags m4.flags.golden=1 exits 1 with the O-3 reason in verify.json (not the generic exit 4) ^[[33m901^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:14.6633174Z  ^[[32m✓^[[39m tests/sync-economy.test.ts ^[[2m(^[[22m^[[2m7 tests^[[22m^[[2m)^[[22m^[[90m 49^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:14.8787660Z  ^[[32m✓^[[39m tests/m4a-save-migrate.test.ts ^[[2m(^[[22m^[[2m10 tests^[[22m^[[2m)^[[22m^[[90m 12^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:15.0849666Z  ^[[32m✓^[[39m tests/m4a-sync.test.ts ^[[2m(^[[22m^[[2m7 tests^[[22m^[[2m)^[[22m^[[90m 25^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:15.4937745Z  ^[[32m✓^[[39m tests/v5-f1b-focus-wiring.test.ts ^[[2m(^[[22m^[[2m6 tests^[[22m^[[2m)^[[22m^[[90m 35^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:15.8070127Z  ^[[32m✓^[[39m tests/staging-f1-m4cols.test.ts ^[[2m(^[[22m^[[2m5 tests^[[22m^[[2m)^[[22m^[[90m 78^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:16.0393744Z  ^[[32m✓^[[39m tests/ui-logic.test.ts ^[[2m(^[[22m^[[2m10 tests^[[22m^[[2m)^[[22m^[[90m 29^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:16.3164652Z  ^[[32m✓^[[39m tests/resume.test.ts ^[[2m(^[[22m^[[2m8 tests^[[22m^[[2m)^[[22m^[[90m 42^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:16.5583291Z  ^[[32m✓^[[39m tests/m4a-offline-csv.test.ts ^[[2m(^[[22m^[[2m6 tests^[[22m^[[2m)^[[22m^[[90m 8^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:16.7399567Z  ^[[32m✓^[[39m tests/art-ux-rc0.test.ts ^[[2m(^[[22m^[[2m6 tests^[[22m^[[2m)^[[22m^[[90m 17^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5888584Z  ^[[32m✓^[[39m tests/verify.test.ts ^[[2m(^[[22m^[[2m56 tests^[[22m^[[2m)^[[22m^[[33m 100693^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5919568Z    ^[[33m^[[2m✓^[[22m^[[39m verify: the run^[[2m > ^[[22mis the AC7 workers bot: same Farm reach, Manage count, hires and Grader tiers as tests/bot-m2.ts runM2 (seller15, managed) ^[[33m710^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5934788Z    ^[[33m^[[2m✓^[[22m^[[39m verify: the run^[[2m > ^[[22mis deterministic: same seed -> identical checkpoints and trace hash; another seed -> another trace ^[[33m390^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5940152Z    ^[[33m^[[2m✓^[[22m^[[39m verify: the run^[[2m > ^[[22mflag off changes the run (m4.enabled = 0 via --flags) ^[[33m328^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5942191Z    ^[[33m^[[2m✓^[[22m^[[39m verify: the run^[[2m > ^[[22m[VER-1h N-5] CCR N-5 on #78: m5x-casual 0.25 h seed 1 trace and checkpoint egg counters are pinned (24 h pin 07139bdd: tests/bot-m5-trace.slow.test.ts) ^[[33m367^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5944364Z    ^[[33m^[[2m✓^[[22m^[[39m verify: the run^[[2m > ^[[22mm5x-casual is available and is tests/bot-m5.ts run() (casual, AssZ): same end state and Farm reach ^[[33m2631^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5959017Z    ^[[33m^[[2m✓^[[22m^[[39m verify: the run^[[2m > ^[[22mm5x-casual is deterministic, differs from idle, and its checkpoints are finite, non-negative, integer cents ^[[33m825^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5961379Z    ^[[33m^[[2m✓^[[22m^[[39m verify: end-state save round-trip (QA-D-1027-GOALPILL)^[[2m > ^[[22mvalidate(save(marked run.end)) is not tracksMigrated and keeps every level, tier, worker and coin ^[[33m654^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5963554Z    ^[[33m^[[2m✓^[[22m^[[39m verify: end-state save round-trip (QA-D-1027-GOALPILL)^[[2m > ^[[22mthe unmarked end state is what the bug was: the load price-matches V down ^[[33m574^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5966024Z    ^[[33m^[[2m✓^[[22m^[[39m verify: end-state save round-trip (QA-D-1027-GOALPILL)^[[2m > ^[[22m24 h seed 1: the loaded end state has nothing left to buy (pill = All upgrades done!) ^[[33m11573^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5968545Z    ^[[33m^[[2m✓^[[22m^[[39m verify: goldens^[[2m > ^[[22mthe copy in scripts/verify/golden.ts reproduces both pinned GOLDEN1 hashes on this tree ^[[33m2392^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5970842Z    ^[[33m^[[2m✓^[[22m^[[39m verify: arguments and flags^[[2m > ^[[22m[VER-1h N-4] CLI: usage errors exit 2 before building anything (no UNAVAILABLE path) ^[[33m1570^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5974215Z    ^[[33m^[[2m✓^[[22m^[[39m verify: save round-trip guard (VER-1a, CCR R1)^[[2m > ^[[22msaveRoundTrip passes for the marked end state and fails (tracksMigrated, V mismatch) for the unmarked one ^[[33m647^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5979260Z    ^[[33m^[[2m✓^[[22m^[[39m verify: save round-trip guard (VER-1a, CCR R1)^[[2m > ^[[22mm5x-casual: the marked end state round-trips under the shipped balance (not migrated, no mismatches) ^[[33m1291^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5982180Z    ^[[33m^[[2m✓^[[22m^[[39m verify: save round-trip guard (VER-1a, CCR R1)^[[2m > ^[[22mCLI: --profile m5x-casual runs (no exit 2) and records its profile and bot in verify.json ^[[33m4536^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5984483Z    ^[[33m^[[2m✓^[[22m^[[39m verify: save round-trip guard (VER-1a, CCR R1)^[[2m > ^[[22mCLI: with the marker skipped (VERIFY_TEST_SKIP_MARKER=1) verify exits 4, records saveRoundTrip FAIL, and leaves no PNG ^[[33m4091^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5986907Z    ^[[33m^[[2m✓^[[22m^[[39m verify: save round-trip guard (VER-1a, CCR R1)^[[2m > ^[[22mCLI: with the marker applied the same run passes the round-trip (exit 1 here only for the fake html / no shot) ^[[33m4508^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5989320Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1b (CCR F1/N2 on #72)^[[2m > ^[[22mF1: --flags m4.enabled=0 no longer gives a false PASS: exit 4, flagsDifferFromBuild, no screenshot, no PNG ^[[33m4286^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5991377Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1b (CCR F1/N2 on #72)^[[2m > ^[[22mF1: --flags equal to the shipped flags (m4.enabled=1) is not an override and passes the round-trip ^[[33m4922^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5993282Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1c (CCR S1/N-a/N-b on #73)^[[2m > ^[[22mS1: a usage error (exit 2) leaves no stale PASS verify.json and no verify.png in --out ^[[33m2302^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5995169Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1c (CCR S1/N-a/N-b on #73)^[[2m > ^[[22mS1: a build failure (exit 3) leaves no stale PASS verify.json and no verify.png in --out ^[[33m565^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5997208Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1c (CCR S1/N-a/N-b on #73)^[[2m > ^[[22mS1: an uncaught throw (exit 1) leaves no stale PASS verify.json and no verify.png in --out ^[[33m663^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.5999373Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1c (CCR S1/N-a/N-b on #73)^[[2m > ^[[22mN-a: --flags m4.enabled=2 (round-trips under the shipped balance, but differs from the build) exits 4, no PNG ^[[33m4608^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.6001340Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1c (CCR S1/N-a/N-b on #73)^[[2m > ^[[22mN-b: the CLI exits 2 with a clear message for both, and writes no PASS ^[[33m1618^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.6002985Z    ^[[33m^[[2m✓^[[22m^[[39m verify: exit codes and the browser step (CCR n1/n3)^[[2m > ^[[22mexit 3 when the html to verify is missing ^[[33m829^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.6004912Z    ^[[33m^[[2m✓^[[22m^[[39m verify: exit codes and the browser step (CCR n1/n3)^[[2m > ^[[22mexit 1 on a failed check (wrong build id, no screenshot); verify.json says FAIL and names no PNG ^[[33m4259^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.6007053Z    ^[[33m^[[2m✓^[[22m^[[39m verify: exit codes and the browser step (CCR n1/n3)^[[2m > ^[[22mn1: a Chromium launch failure gives ok:false with the launch error and leaves no (stale) PNG ^[[33m574^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.6009283Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1d (CCR m1/N-c on #74)^[[2m > ^[[22mm1 (M31): a real tsc break in a temp copy of the repo exits 3 (stage build), not 1, and leaves no stale PASS ^[[33m10456^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.6011440Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1d (CCR m1/N-c on #74)^[[2m > ^[[22mm1 (M28/M29): without --out, a usage error clears the existing default dir verify-out/<HEAD id>/ and writes the FAIL report there ^[[33m1711^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.6013578Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1d (CCR m1/N-c on #74)^[[2m > ^[[22mm1 (M17/M18/M19): a run SIGKILLed mid-sim (no handler runs) leaves neither verify.json nor verify.png ^[[33m904^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.6015915Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1d (CCR m1/N-c on #74)^[[2m > ^[[22mm1 (M33): --skip-build with an older html clears that html's default dir; a crash then writes the FAIL report there ^[[33m977^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.6018088Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1d (CCR m1/N-c on #74)^[[2m > ^[[22mm1 (M27): a crash after the browser step wrote verify.png removes that PNG with the FAIL report ^[[33m4490^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.6021032Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1d (CCR m1/N-c on #74)^[[2m > ^[[22mN-c: <out>/verify.json being a directory: the original error (rm EISDIR) is what fails the run; the writer failure is only logged ^[[33m724^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.6023856Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1d (CCR m1/N-c on #74)^[[2m > ^[[22mN-c: an unwritable out dir keeps the original exit code (usage 2, not 1) and logs the writer failure ^[[33m693^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.6026121Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75)^[[2m > ^[[22mN-1 (NC4): the writer-failure line is sanitised: an out dir under the home dir prints as ~ ^[[33m792^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.6028175Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75)^[[2m > ^[[22mN-1: an out dir outside the repo and home prints <redacted>, never an absolute path ^[[33m719^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.6030281Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75)^[[2m > ^[[22mN-4 (NC5): when the first of two claimed dirs cannot take the FAIL report, the second still gets it and loses its PNG ^[[33m3417^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.6032673Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75)^[[2m > ^[[22mN-4 (H2): the after-shot hook really writes its stand-in verify.png before the crash (seen by a watcher), and the writer removes it ^[[33m5038^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.6035103Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75)^[[2m > ^[[22mO-1: a hostile html build id (../../victim) cannot move the default out dir outside the out root ^[[33m3936^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:26.6037584Z    ^[[33m^[[2m✓^[[22m^[[39m verify: VER-1e (CCR N-1/N-4/O-1/O-2 on #75)^[[2m > ^[[22mO-2: a read-only out dir on a run that fails the save round-trip keeps exit 4 (not an uncaught 1) and logs one line ^[[33m4851^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:27.8410278Z  ^[[32m✓^[[39m tests/m4a-flag-off.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[33m 987^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:27.8412553Z    ^[[33m^[[2m✓^[[22m^[[39m M4-A flag off = main^[[2m > ^[[22msim trace hash equals main (rc1 economy, flag off) ^[[33m986^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:28.0320957Z  ^[[32m✓^[[39m tests/seen-tracks-explainer-save.test.ts ^[[2m(^[[22m^[[2m12 tests^[[22m^[[2m)^[[22m^[[90m 7^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:35.4692477Z ^[[90mstdout^[[2m | tests/pacing.test.ts^[[2m > ^[[22m^[[2mAC7 pacing bot on the real sim^[[2m > ^[[22m^[[2mreport
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:35.4718106Z ^[[22m^[[39mAC7 seller15: {
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:35.4720577Z   first: ^[[33m15^[[39m,
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:35.4722326Z   up5: ^[[33m21^[[39m,
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:35.4722824Z   f10m: ^[[33m10^[[39m,
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:35.4723296Z   L10min: ^[[33m9.875^[[39m,
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:35.4723780Z   L18min: ^[[33m21.25^[[39m,
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:35.4724264Z   f30m: ^[[33m20^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:35.4725001Z } cheapest: { up5: ^[[33m19^[[39m, f10m: ^[[33m8^[[39m, f30m: ^[[33m20^[[39m }
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:35.4725591Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:35.4726247Z  ^[[32m✓^[[39m tests/pacing.test.ts ^[[2m(^[[22m^[[2m7 tests^[[22m^[[2m)^[[22m^[[90m 8^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:35.7374065Z  ^[[32m✓^[[39m tests/bug6-savedat.test.ts ^[[2m(^[[22m^[[2m5 tests^[[22m^[[2m)^[[22m^[[90m 17^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:35.9888486Z  ^[[32m✓^[[39m tests/m4a-saveseq-carry.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[90m 5^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:36.1802815Z  ^[[32m✓^[[39m tests/csr-recovery-types.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[90m 3^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:36.3589321Z  ^[[32m✓^[[39m tests/r1-dialog-spacing.test.ts ^[[2m(^[[22m^[[2m4 tests^[[22m^[[2m)^[[22m^[[90m 7^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:36.7750979Z  ^[[32m✓^[[39m tests/vendor-pins.test.ts ^[[2m(^[[22m^[[2m4 tests^[[22m^[[2m)^[[22m^[[90m 215^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:37.0153629Z  ^[[32m✓^[[39m tests/offline-modal.test.ts ^[[2m(^[[22m^[[2m5 tests^[[22m^[[2m)^[[22m^[[90m 13^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:37.2422319Z  ^[[32m✓^[[39m tests/m4a-maxlevel-data.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m)^[[22m^[[90m 5^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:37.4863634Z  ^[[32m✓^[[39m tests/v5-f2-downgrade.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m)^[[22m^[[90m 12^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:37.6582288Z  ^[[32m✓^[[39m tests/offline.test.ts ^[[2m(^[[22m^[[2m6 tests^[[22m^[[2m)^[[22m^[[90m 4^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:37.8301714Z  ^[[32m✓^[[39m tests/m41-p1-acr7.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[90m 16^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:44.1170090Z  ^[[32m✓^[[39m tests/release-bundle.test.ts ^[[2m(^[[22m^[[2m4 tests^[[22m^[[2m)^[[22m^[[33m 5990^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:44.1171675Z    ^[[33m^[[2m✓^[[22m^[[39m release bundle^[[2m > ^[[22mhas no ?ios= override (the flag reader is dead-code eliminated) ^[[33m2071^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:44.1173090Z    ^[[33m^[[2m✓^[[22m^[[39m release bundle^[[2m > ^[[22mhas no window.eggfarmOnb onboarding debug handle (QA builds only) ^[[33m1404^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:44.1174590Z    ^[[33m^[[2m✓^[[22m^[[39m release bundle^[[2m > ^[[22mD3/D4: no ?perf=1 SM-9 sampler and no ?debug=1 cheat panel in release (QA builds keep both) ^[[33m1198^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:44.1176016Z    ^[[33m^[[2m✓^[[22m^[[39m release bundle^[[2m > ^[[22mhas no window.eggfarm game handle in release (QA/dev builds keep it) ^[[33m1314^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:44.4182946Z  ^[[32m✓^[[39m tests/export-global.test.ts ^[[2m(^[[22m^[[2m1 test^[[22m^[[2m)^[[22m^[[90m 11^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:44.6139816Z  ^[[32m✓^[[39m tests/contrast.test.ts ^[[2m(^[[22m^[[2m11 tests^[[22m^[[2m)^[[22m^[[90m 5^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:44.8391234Z ^[[90mstderr^[[2m | tests/zg-telemetry-annotate.test.ts^[[2m > ^[[22m^[[2mMinor 1: Telemetry.annotateLast tags the newest matching event only^[[2m > ^[[22m^[[2mtwo upgrade events: only the second is annotated, and the buffer is marked dirty (flushed)
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:44.8393374Z  ^[[32m✓^[[39m tests/zg-telemetry-annotate.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[90m 6^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:44.8398549Z ^[[22m^[[39m[telemetry] unknown event type: tap_other
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:44.8398931Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:44.8400218Z ^[[90mstderr^[[2m | tests/zg-telemetry-annotate.test.ts^[[2m > ^[[22m^[[2mMinor 1: Telemetry.annotateLast tags the newest matching event only^[[2m > ^[[22m^[[2mno match: nothing changes and nothing is written
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:44.8401453Z ^[[22m^[[39m[telemetry] unknown event type: tap_other
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:44.8401760Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:48.8254174Z ^[[90mstdout^[[2m | tests/ac7-first-purchase.test.ts^[[2m > ^[[22m^[[2mAC7 new save: first purchase within 30 s (seeds 1-200, M4 on)^[[2m > ^[[22m^[[2mdeterministic bot (fixed 1 s taps, 15 s check-ins): every seed's first purchase <= 30 s
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:48.8256095Z ^[[22m^[[39mfirst purchase deterministic: max 15 s
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:48.8318514Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:48.8320996Z  ^[[32m✓^[[39m tests/ac7-first-purchase.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m)^[[22m^[[33m 3757^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:48.8322380Z    ^[[33m^[[2m✓^[[22m^[[39m AC7 new save: first purchase within 30 s (seeds 1-200, M4 on)^[[2m > ^[[22mdeterministic bot (fixed 1 s taps, 15 s check-ins): every seed's first purchase <= 30 s ^[[33m2256^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:48.8324181Z    ^[[33m^[[2m✓^[[22m^[[39m AC7 new save: first purchase within 30 s (seeds 1-200, M4 on)^[[2m > ^[[22mvariance bot (random timing): REPORT-ONLY, non-gating, first-purchase time logged ^[[33m1499^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:48.8325662Z ^[[90mstdout^[[2m | tests/ac7-first-purchase.test.ts^[[2m > ^[[22m^[[2mAC7 new save: first purchase within 30 s (seeds 1-200, M4 on)^[[2m > ^[[22m^[[2mvariance bot (random timing): REPORT-ONLY, non-gating, first-purchase time logged
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:48.8327263Z ^[[22m^[[39mfirst purchase variance: 40/200 over 30 s, max 57.8 s
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:48.8327856Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:49.5589453Z ^[[90mstdout^[[2m | tests/p4.test.ts^[[2m > ^[[22m^[[2mP4 build numbers vs Economy re-sim^[[2m > ^[[22m^[[2mreport
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:49.5599140Z ^[[22m^[[39mP4 build { W4: ^[[33m3^[[39m, W4b: ^[[33m3.25^[[39m, managePer15: ^[[33m6.75^[[39m }
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:49.5599901Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:49.5601071Z  ^[[32m✓^[[39m tests/p4.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m)^[[22m^[[90m 20^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:49.5978226Z  ^[[32m✓^[[39m tests/audio-unlock.test.ts ^[[2m(^[[22m^[[2m4 tests^[[22m^[[2m)^[[22m^[[33m 557^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:49.5979870Z    ^[[33m^[[2m✓^[[22m^[[39m PT1-3 audio unlock timeout^[[2m > ^[[22munlock returns within ~AUDIO_UNLOCK_MS when resume never resolves ^[[33m503^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:49.7559369Z  ^[[32m✓^[[39m tests/slot-preview.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m)^[[22m^[[90m 5^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:41:49.7885990Z  ^[[32m✓^[[39m tests/frame-sampler.test.ts ^[[2m(^[[22m^[[2m6 tests^[[22m^[[2m)^[[22m^[[90m 6^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:30.0354676Z ^[[90mstdout^[[2m | tests/pacing-m2.test.ts^[[2m > ^[[22m^[[2mM2 pacing: managed workers^[[2m > ^[[22m^[[2mreport
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:30.0398850Z ^[[22m^[[39mM2 seller15 {
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:30.0408642Z   none: [ ^[[33m9.875^[[39m, ^[[33m21.25^[[39m, ^[[33m52.75^[[39m ],
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:30.0409355Z   managed: [ ^[[33m10.25^[[39m, ^[[33m21^[[39m, ^[[33m36^[[39m ],
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:30.0412191Z   step: ^[[33m3^[[39m,
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:30.0412849Z   cheapestStep: ^[[33m3.25^[[39m,
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:30.0413387Z   managesPer10min: ^[[33m4.5^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:30.0413846Z }
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:30.0414111Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:30.0415246Z ^[[90mstdout^[[2m | tests/pacing-m2.test.ts^[[2m > ^[[22m^[[2mM2 pacing: managed workers^[[2m > ^[[22m^[[2mAC-W4b (soft, non-gating): cheapest managed steps F18->F25 <= 8 min
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:30.0416489Z ^[[22m^[[39mAC-W4b soft pass: 3.25 min
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:30.0416856Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:30.0417632Z  ^[[32m✓^[[39m tests/pacing-m2.test.ts ^[[2m(^[[22m^[[2m4 tests^[[22m^[[2m)^[[22m^[[90m 4^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:30.2060034Z  ^[[32m✓^[[39m tests/recovery-v11.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m)^[[22m^[[90m 4^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:39.9755712Z  ^[[32m✓^[[39m tests/zg-ac13-sim.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[33m 9598^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:39.9757820Z    ^[[33m^[[2m✓^[[22m^[[39m ZG-AC13 AC7 bots unchanged by zeroGainUi^[[2m > ^[[22mseller15 seeds 1–20: JSON(runBot) equal for zeroGainUi 0 / 1 / 1+bestBuyV2 ^[[33m6460^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:39.9759732Z    ^[[33m^[[2m✓^[[22m^[[39m ZG-AC13 AC7 bots unchanged by zeroGainUi^[[2m > ^[[22mcheapest seeds 1–20: JSON(runBot) equal for zeroGainUi 0 / 1 / 1+bestBuyV2 ^[[33m3137^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:40.1442356Z  ^[[32m✓^[[39m tests/s2-6-qtag.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m)^[[22m^[[90m 3^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:40.3726076Z  ^[[32m✓^[[39m tests/save-fixtures.test.ts ^[[2m(^[[22m^[[2m4 tests^[[22m^[[2m)^[[22m^[[90m 8^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:40.6167415Z  ^[[32m✓^[[39m tests/bot-farm-log.test.ts ^[[2m(^[[22m^[[2m1 test^[[22m^[[2m)^[[22m^[[90m 7^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:40.8158019Z  ^[[32m✓^[[39m tests/p3-collection-card.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[90m 3^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:41.0039027Z  ^[[32m✓^[[39m tests/m4a-max-label.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m)^[[22m^[[90m 3^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:41.1949577Z  ^[[32m✓^[[39m tests/d5-goal-pill.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[90m 3^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:43.1685463Z  ^[[32m✓^[[39m tests/m4-exp1-explainer.test.ts ^[[2m(^[[22m^[[2m25 tests^[[22m^[[2m)^[[22m^[[33m 828^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:43.1686456Z    ^[[33m^[[2m✓^[[22m^[[39m M4-AC-EXP1 tracks explainer^[[2m > ^[[22mmigrated save: shown once at the in-session commit, persisted, never again after reload ^[[33m471^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:47.2910905Z  ^[[32m✓^[[39m tests/zg-ui.test.ts ^[[2m(^[[22m^[[2m34 tests^[[22m^[[2m)^[[22m^[[33m 3400^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:47.2913317Z    ^[[33m^[[2m✓^[[22m^[[39m ZG-AC9 / ZG-AC15 [UI + telemetry] Buy works with confirm 0; upgrade.zero_gain^[[2m > ^[[22mflag on: zero_gain = isZeroGain(pre-buy) for collection/hens/eggValue (true and false cases); absent for farm; flag off absent ^[[33m562^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:47.2917070Z    ^[[33m^[[2m✓^[[22m^[[39m bestBuyV2 interaction (errata E-3; BBv2 mechanics are row 29, not built: the flag alone changes nothing here)^[[2m > ^[[22mzeroGainUi on: markup, nav dot and ★ are identical with m4.flags.bestBuyV2 = 0 and 1 on every fixture ^[[33m512^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:48.8419855Z  ^[[32m✓^[[39m tests/m41-p2-ui-dom.test.ts ^[[2m(^[[22m^[[2m18 tests^[[22m^[[2m)^[[22m^[[33m 831^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:51.2358661Z  ^[[32m✓^[[39m tests/m41-8-best-chip.test.ts ^[[2m(^[[22m^[[2m25 tests^[[22m^[[2m)^[[22m^[[33m 1552^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0073220Z ^[[90mstdout^[[2m | tests/m41-6-explainer-storage.test.ts^[[2m > ^[[22m^[[2mEXP-SB-QE-LATE^[[2m > ^[[22m^[[2mEXP-SB-QE-LATE commit-in-session
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0075796Z ^[[22m^[[39mQE_LATE commit-in-session {"storageFailed":false,"mem":false,"persistedBefore":null,"cardsDuringQE":0,"persistedAfterAutosave":null,"storageFailedAfter":false,"cardsOnReload":1,"cardsOnReload2":0}
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0077076Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0119097Z ^[[90mstdout^[[2m | tests/m41-6-explainer-storage.test.ts^[[2m > ^[[22m^[[2mEXP-SB-QE-LATE^[[2m > ^[[22m^[[2mEXP-SB-QE-LATE reload-committed-unseen
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0122493Z ^[[22m^[[39mQE_LATE reload-committed-unseen {"storageFailed":true,"mem":false,"persistedBefore":null,"cardsDuringQE":0,"persistedAfterAutosave":false,"storageFailedAfter":true,"cardsOnReload":1,"cardsOnReload2":0}
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0123922Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0167426Z ^[[90mstdout^[[2m | tests/m41-6-explainer-storage.test.ts^[[2m > ^[[22m^[[2mEXP-SB-QE-LATE mirror/reload variants^[[2m > ^[[22m^[[2mEXP-SB-QE-LATE-a
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0173436Z ^[[22m^[[39mQE_LATE_a {"v":"a","s1":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"qeHit":true,"storageFailed":true,"mem":false,"lsAtQE":null,"idbAtQE":null,"lsAfter":false,"idbAfter":null,"lsSeqAtDeath":5,"idbSeqAtDeath":null,"reloadSrc":"ls","reload1":1,"s2":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"reload2":0,"s3":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"lsSeqs":[4,5,6,7,8,9],"idbSeqs":[],"shownDuringQE":0,"total":1}
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0176517Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0220426Z ^[[90mstdout^[[2m | tests/m41-6-explainer-storage.test.ts^[[2m > ^[[22m^[[2mEXP-SB-QE-LATE mirror/reload variants^[[2m > ^[[22m^[[2mEXP-SB-QE-LATE-b
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0242418Z ^[[22m^[[39mQE_LATE_b {"v":"b","s1":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"qeHit":true,"storageFailed":true,"mem":false,"lsAtQE":null,"idbAtQE":false,"lsAfter":null,"idbAfter":false,"lsSeqAtDeath":4,"idbSeqAtDeath":5,"reloadSrc":"idb","reload1":1,"s2":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"reload2":0,"s3":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"lsSeqs":[4,5,6,7,8,9],"idbSeqs":[4,5,5,6,7,8,9],"shownDuringQE":0,"total":1}
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0249787Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0263653Z ^[[90mstdout^[[2m | tests/m41-6-explainer-storage.test.ts^[[2m > ^[[22m^[[2mEXP-SB-QE-LATE mirror/reload variants^[[2m > ^[[22m^[[2mEXP-SB-QE-LATE-c
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0266690Z ^[[22m^[[39mQE_LATE_c {"v":"c","s1":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"qeHit":true,"storageFailed":true,"mem":false,"lsAtQE":null,"idbAtQE":false,"lsAfter":false,"idbAfter":false,"lsSeqAtDeath":5,"idbSeqAtDeath":5,"reloadSrc":"ls","reload1":1,"s2":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"reload2":0,"s3":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"lsSeqs":[4,5,6,7,8,9],"idbSeqs":[4,5,5,6,7,8,9],"shownDuringQE":0,"total":1}
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0270302Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0308680Z ^[[90mstdout^[[2m | tests/m41-6-explainer-storage.test.ts^[[2m > ^[[22m^[[2mEXP-SB-QE-LATE mirror/reload variants^[[2m > ^[[22m^[[2mEXP-SB-QE-LATE-d
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0330474Z ^[[22m^[[39mQE_LATE_d {"v":"d","s1":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"qeHit":true,"storageFailed":true,"mem":false,"lsAtQE":null,"idbAtQE":false,"lsAfter":null,"idbAfter":false,"lsSeqAtDeath":4,"idbSeqAtDeath":5,"reloadSrc":"idb","reload1":1,"s2":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"reload2":0,"s3":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"lsSeqs":[4,5,6,7,8,9],"idbSeqs":[4,5,6,7,8,9],"shownDuringQE":0,"total":1}
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0333535Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0368894Z ^[[90mstdout^[[2m | tests/m41-6-explainer-storage.test.ts^[[2m > ^[[22m^[[2mEXP-SB-QE-LATE mirror/reload variants^[[2m > ^[[22m^[[2mEXP-SB-QE-LATE-e
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0374205Z ^[[22m^[[39mQE_LATE_e {"v":"e","s1":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"qeHit":true,"storageFailed":true,"mem":false,"lsAtQE":null,"idbAtQE":false,"lsAfter":null,"idbAfter":false,"lsSeqAtDeath":4,"idbSeqAtDeath":5,"reloadSrc":"idb","reload1":1,"s2":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"reload2":0,"s3":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"b42507d60308d615","newer":null,"recovery":null,"refund":0,"pending":false},"lsSeqs":[4,5,6,7,8,9],"idbSeqs":[4,5,6,7,8,9],"shownDuringQE":0,"total":1}
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0377006Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0390266Z ^[[90mstdout^[[2m | tests/m41-6-explainer-storage.test.ts^[[2m > ^[[22m^[[2mEXP-SB-QE-LATE mirror/reload variants^[[2m > ^[[22m^[[2mEXP-SB-QE-LATE-f
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0395405Z ^[[22m^[[39mQE_LATE_f {"v":"f","s1":{"mig":"committed","coins":123456789,"F":30,"H":30,"V":20,"bid":"60eae65901116870","newer":null,"recovery":null,"refund":0,"pending":false},"qeHit":true,"storageFailed":true,"mem":false,"lsAtQE":null,"idbAtQE":false,"lsAfter":null,"idbAfter":false,"lsSeqAtDeath":3,"idbSeqAtDeath":4,"reloadSrc":"idb","reload1":1,"s2":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"60eae65901116870","newer":null,"recovery":null,"refund":0,"pending":false},"reload2":0,"s3":{"mig":null,"coins":123456789,"F":30,"H":30,"V":20,"bid":"60eae65901116870","newer":null,"recovery":null,"refund":0,"pending":false},"lsSeqs":[2,3,4,5,6,7,8],"idbSeqs":[3,4,5,6,7,8],"shownDuringQE":0,"total":1}
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0398415Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.0399296Z  ^[[32m✓^[[39m tests/m41-6-explainer-storage.test.ts ^[[2m(^[[22m^[[2m17 tests^[[22m^[[2m)^[[22m^[[90m 101^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:52.7892752Z  ^[[32m✓^[[39m tests/m41-7-csr-copy.test.ts ^[[2m(^[[22m^[[2m26 tests^[[22m^[[2m)^[[22m^[[90m 67^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:59.5595337Z  ^[[32m✓^[[39m tests/m41-9-ux-ccr-m1.test.ts ^[[2m(^[[22m^[[2m16 tests^[[22m^[[2m)^[[22m^[[33m 6107^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:42:59.5597703Z    ^[[33m^[[2m✓^[[22m^[[39m CCR M1: the scrolled sheet (no fallback exemption)^[[2m > ^[[22msweep: every scrollTop 0..359 at 360/375/390, card 154 and 206: the placed card never meets a visible Buy; every state is named ^[[33m5785^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:00.2730224Z  ^[[32m✓^[[39m tests/m41-9-ux-minors.test.ts ^[[2m(^[[22m^[[2m18 tests^[[22m^[[2m)^[[22m^[[90m 177^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:01.2693289Z  ^[[32m✓^[[39m tests/m41-6-save-mirror-canpersist.test.ts ^[[2m(^[[22m^[[2m16 tests^[[22m^[[2m)^[[22m^[[90m 275^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:02.3769810Z  ^[[32m✓^[[39m tests/m41-9-ux-rulings.test.ts ^[[2m(^[[22m^[[2m10 tests^[[22m^[[2m)^[[22m^[[33m 524^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:03.7139399Z  ^[[32m✓^[[39m tests/m41-11-egg-unlock.test.ts ^[[2m(^[[22m^[[2m30 tests^[[22m^[[2m)^[[22m^[[33m 650^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:04.6262330Z  ^[[32m✓^[[39m tests/v5-p8-slim.test.ts ^[[2m(^[[22m^[[2m27 tests^[[22m^[[2m)^[[22m^[[90m 270^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:12.6900477Z  ^[[32m✓^[[39m tests/zg-matrix.test.ts ^[[2m(^[[22m^[[2m16 tests^[[22m^[[2m)^[[22m^[[33m 7467^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:12.6902692Z    ^[[33m^[[2m✓^[[22m^[[39m ZG matrix zeroGainUi=1, bestBuyV2=0, confirm=0^[[2m > ^[[22mverdict + ★ filter parity with (bb 0, confirm 0); DOM data-zero-gain = isZeroGain; ★ never on a ZG row (ZG-AC1/2/5/16/17/17b/18) ^[[33m1208^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:12.6959774Z    ^[[33m^[[2m✓^[[22m^[[39m ZG matrix zeroGainUi=1, bestBuyV2=0, confirm=1^[[2m > ^[[22mverdict + ★ filter parity with (bb 0, confirm 0); DOM data-zero-gain = isZeroGain; ★ never on a ZG row (ZG-AC1/2/5/16/17/17b/18) ^[[33m677^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:12.6990330Z    ^[[33m^[[2m✓^[[22m^[[39m ZG matrix zeroGainUi=1, bestBuyV2=1, confirm=0^[[2m > ^[[22mverdict + ★ filter parity with (bb 0, confirm 0); DOM data-zero-gain = isZeroGain; ★ never on a ZG row (ZG-AC1/2/5/16/17/17b/18) ^[[33m808^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:12.6993067Z    ^[[33m^[[2m✓^[[22m^[[39m ZG matrix zeroGainUi=1, bestBuyV2=1, confirm=1^[[2m > ^[[22mverdict + ★ filter parity with (bb 0, confirm 0); DOM data-zero-gain = isZeroGain; ★ never on a ZG row (ZG-AC1/2/5/16/17/17b/18) ^[[33m780^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:12.6995606Z    ^[[33m^[[2m✓^[[22m^[[39m ZG matrix flag-off cell: zeroGainUi=0, bestBuyV2=0^[[2m > ^[[22mconfirm=0: DOM byte-identical to the 65a7443-pinned zeroGainUi-0 config on every fixture/tab; no ZG nodes (ZG-AC12/19) ^[[33m761^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:12.6998158Z    ^[[33m^[[2m✓^[[22m^[[39m ZG matrix flag-off cell: zeroGainUi=0, bestBuyV2=0^[[2m > ^[[22mconfirm=1: DOM byte-identical to the 65a7443-pinned zeroGainUi-0 config on every fixture/tab; no ZG nodes (ZG-AC12/19) ^[[33m775^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:12.7000649Z    ^[[33m^[[2m✓^[[22m^[[39m ZG matrix flag-off cell: zeroGainUi=0, bestBuyV2=1^[[2m > ^[[22mconfirm=0: DOM byte-identical to the 65a7443-pinned zeroGainUi-0 config on every fixture/tab; no ZG nodes (ZG-AC12/19) ^[[33m787^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:12.7003104Z    ^[[33m^[[2m✓^[[22m^[[39m ZG matrix flag-off cell: zeroGainUi=0, bestBuyV2=1^[[2m > ^[[22mconfirm=1: DOM byte-identical to the 65a7443-pinned zeroGainUi-0 config on every fixture/tab; no ZG nodes (ZG-AC12/19) ^[[33m792^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:13.8205246Z  ^[[32m✓^[[39m tests/m41-p1-scene-tap-guard.test.ts ^[[2m(^[[22m^[[2m6 tests^[[22m^[[2m)^[[22m^[[33m 456^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:16.6483650Z  ^[[32m✓^[[39m tests/m41-11-farm-max.test.ts ^[[2m(^[[22m^[[2m7 tests^[[22m^[[2m)^[[22m^[[33m 2270^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:16.6485811Z    ^[[33m^[[2m✓^[[22m^[[39m B1-10 / F4-19: best_roi, the ★ and the strip never target a Max-for-this-farm row^[[2m > ^[[22mgrid over F0..20 and Egg value / Hens L23..29 on the farm-max-20 balance, broke and rich ^[[33m1834^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:17.6781837Z  ^[[32m✓^[[39m tests/m41-p1-yard-hens.test.ts ^[[2m(^[[22m^[[2m10 tests^[[22m^[[2m)^[[22m^[[33m 493^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:18.4711282Z  ^[[32m✓^[[39m tests/m41-7-explainer-recovery.test.ts ^[[2m(^[[22m^[[2m7 tests^[[22m^[[2m)^[[22m^[[90m 98^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:19.2149558Z  ^[[32m✓^[[39m tests/m41-9-card-wrap.test.ts ^[[2m(^[[22m^[[2m12 tests^[[22m^[[2m)^[[22m^[[90m 87^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:19.9623152Z  ^[[32m✓^[[39m tests/m41-7-ui-fixes.test.ts ^[[2m(^[[22m^[[2m16 tests^[[22m^[[2m)^[[22m^[[90m 92^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:21.0963232Z  ^[[32m✓^[[39m tests/zg-followup.test.ts ^[[2m(^[[22m^[[2m6 tests^[[22m^[[2m)^[[22m^[[33m 548^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:21.7279897Z  ^[[32m✓^[[39m tests/m41-p1-acr8-coop-copy.test.ts ^[[2m(^[[22m^[[2m9 tests^[[22m^[[2m)^[[22m^[[90m 57^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:22.8607679Z  ^[[32m✓^[[39m tests/pl1-key-guard.test.ts ^[[2m(^[[22m^[[2m4 tests^[[22m^[[2m)^[[22m^[[33m 537^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:22.9702727Z  ^[[32m✓^[[39m tests/pacing-m2b.test.ts ^[[2m(^[[22m^[[2m2 tests^[[22m^[[2m)^[[22m^[[90m 6^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:23.8954110Z  ^[[32m✓^[[39m tests/zg-ui-onestrip.test.ts ^[[2m(^[[22m^[[2m1 test^[[22m^[[2m)^[[22m^[[90m 294^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:24.7605496Z ^[[90mstdout^[[2m | tests/zg-flagoff-dom.test.ts^[[2m > ^[[22m^[[2mZG-AC12/19 flag-off DOM byte-identical to 65a7443^[[2m > ^[[22m^[[2msha256 over (config x fixture x tab) markup + nav dot + strip
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:24.7610318Z ^[[22m^[[39mZG-FLAGOFF-DOM 9c4b6439016e5d5b6a779b34643f70793fda5df8d44728f9bcc32844c662ee35
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:24.7611058Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:24.7617820Z  ^[[32m✓^[[39m tests/zg-flagoff-dom.test.ts ^[[2m(^[[22m^[[2m1 test^[[22m^[[2m)^[[22m^[[33m 1231^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:43:24.7618912Z    ^[[33m^[[2m✓^[[22m^[[39m ZG-AC12/19 flag-off DOM byte-identical to 65a7443^[[2m > ^[[22msha256 over (config x fixture x tab) markup + nav dot + strip ^[[33m1230^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4283315Z ^[[90mstdout^[[2m | tests/pacing-acw1.test.ts^[[2m > ^[[22m^[[2mAC-W1 casual (seeds 1-200, 201-299, slow)^[[2m > ^[[22m^[[2mdesign gate seeds 1-200: >= 95% reach F10 within 16 min, F18 median <= 40 min; M4 baseline (1-200 only)
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4284444Z ^[[22m^[[39mAC-W1 build 1-200 {
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4284790Z   pass10: ^[[33m91^[[39m,
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4285136Z   pass10at16: ^[[33m98^[[39m,
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4285518Z   pass10gate: ^[[33m98^[[39m,
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4285837Z   medF10: ^[[33m13.67^[[39m,
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4286163Z   medF18: ^[[33m25^[[39m,
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4286470Z   at900: ^[[33m16^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4287093Z } M4 baseline { pass10: ^[[33m91^[[39m, medF10: ^[[33m13.67^[[39m, medF18: ^[[33m25^[[39m }
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4287739Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4289002Z ^[[90mstdout^[[2m | tests/pacing-acw1.test.ts^[[2m > ^[[22m^[[2mAC-W1 casual (seeds 1-200, 201-299, slow)^[[2m > ^[[22m^[[2mdesign gate seeds 201-299: >= 95% reach F10 within 16 min, F18 median <= 40 min; M4 baseline (1-200 only)
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4290065Z ^[[22m^[[39mAC-W1 build 201-299 {
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4290314Z   pass10: ^[[33m90.91^[[39m,
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4290558Z   pass10at16: ^[[33m96.97^[[39m,
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4290802Z   pass10gate: ^[[33m96.97^[[39m,
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4291022Z   medF10: ^[[33m14^[[39m,
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4291228Z   medF18: ^[[33m25^[[39m,
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4291429Z   at900: ^[[33m7^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4291818Z } M4 baseline { pass10: ^[[33m91^[[39m, medF10: ^[[33m13.67^[[39m, medF18: ^[[33m25^[[39m }
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4292073Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4292444Z  ^[[32m✓^[[39m tests/pacing-acw1.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m)^[[22m^[[33m 212667^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4293373Z    ^[[33m^[[2m✓^[[22m^[[39m AC-W1 casual (seeds 1-200, 201-299, slow)^[[2m > ^[[22mdesign gate seeds 1-200: >= 95% reach F10 within 16 min, F18 median <= 40 min; M4 baseline (1-200 only) ^[[33m159958^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4294431Z    ^[[33m^[[2m✓^[[22m^[[39m AC-W1 casual (seeds 1-200, 201-299, slow)^[[2m > ^[[22mdesign gate seeds 201-299: >= 95% reach F10 within 16 min, F18 median <= 40 min; M4 baseline (1-200 only) ^[[33m52702^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4524441Z 
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4566502Z ^[[2m Test Files ^[[22m ^[[1m^[[32m153 passed^[[39m^[[22m^[[90m (153)^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4575676Z ^[[2m      Tests ^[[22m ^[[1m^[[32m2240 passed^[[39m^[[22m^[[2m | ^[[22m^[[33m1 skipped^[[39m^[[90m (2241)^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4576579Z ^[[2m   Start at ^[[22m 01:39:45
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4581490Z ^[[2m   Duration ^[[22m 295.34s^[[2m (transform 3.65s, setup 0ms, collect 189.30s, tests 504.62s, environment 9.39s, prepare 10.59s)^[[22m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-11-06T01:44:40.4588237Z 
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	﻿2026-11-06T01:44:40.5214613Z ##[group]Run npm run test:slow
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:44:40.5214891Z ^[[36;1mnpm run test:slow^[[0m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:44:40.5232928Z shell: /usr/bin/bash -e {0}
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:44:40.5233159Z ##[endgroup]
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:44:40.6175091Z 
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:44:40.6175725Z > egg-farm@0.1.0 test:slow
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:44:40.6176872Z > node scripts/check-vendor-pins.mjs && vitest run --config vitest.slow.config.ts --poolOptions.forks.maxForks=2 --poolOptions.forks.minForks=1
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:44:40.6178218Z 
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:44:40.6513722Z check-vendor-pins: 4 vendored file(s) match SHA256SUMS, no unlisted files
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:44:40.9128516Z 
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:44:40.9149182Z ^[[1m^[[7m^[[36m RUN ^[[39m^[[27m^[[22m ^[[36mv2.1.9 ^[[39m^[[90m/home/runner/work/egg-farm/egg-farm^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:44:40.9151186Z 
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:47:03.0199965Z ^[[90mstdout^[[2m | tests/seller-variance.slow.test.ts^[[2m > ^[[22m^[[2mold deterministic bot (variance off) = Python var=None^[[2m > ^[[22m^[[2mm2: per-seed level at 30:00 equal, every reach time within 15 s, 100 seeds
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:47:03.0201175Z ^[[22m^[[39mm2 old: 87/100 seeds bit-exact
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:47:03.0201489Z 
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:47:03.0202303Z ^[[90mstdout^[[2m | tests/seller-variance.slow.test.ts^[[2m > ^[[22m^[[2mm1 variance bot vs Python, 100 seeds (distribution)^[[2m > ^[[22m^[[2mAC7 quantiles match; proposal targets 1-2 hold
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:47:03.0203385Z ^[[22m^[[39mm1 variance t18 P5/P50/P95 TS 20.03/20.61/22.07 PY 20.04/20.63/22.05; spread TS 7.1% PY 6.8%; L@30 P5/P95 20/20
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:47:03.0203877Z 
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:47:03.0204636Z ^[[90mstdout^[[2m | tests/seller-variance.slow.test.ts^[[2m > ^[[22m^[[2mm2 variance bot vs Python, 100 seeds (distribution)^[[2m > ^[[22m^[[2mAC7 quantiles match; proposal targets 1-2 hold
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:47:03.0205657Z ^[[22m^[[39mm2 variance t18 P5/P50/P95 TS 20.63/21.11/22.61 PY 20.56/21.06/22.39; spread TS 7.1% PY 6.3%; L@30 P5/P95 20/21
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:47:03.0206107Z 
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:47:03.0207280Z  ^[[32m✓^[[39m tests/seller-variance.slow.test.ts ^[[2m(^[[22m^[[2m11 tests^[[22m^[[2m)^[[22m^[[33m 141613^[[2mms^[[22m^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:47:03.0208644Z    ^[[33m^[[2m✓^[[22m^[[39m variance stream = CPython random.Random (exact)^[[2m > ^[[22mm1: full action trace equals Python (seeds 1,2,3,4,5) ^[[33m959^[[2mms^[[22m^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:47:03.0209872Z    ^[[33m^[[2m✓^[[22m^[[39m variance stream = CPython random.Random (exact)^[[2m > ^[[22mm2: full action trace equals Python (seeds 1,2,3,4,5) ^[[33m1758^[[2mms^[[22m^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:47:03.0211617Z    ^[[33m^[[2m✓^[[22m^[[39m old deterministic bot (variance off) = Python var=None^[[2m > ^[[22mm1: per-seed reach times exact, 100 seeds ^[[33m14320^[[2mms^[[22m^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:47:03.0213339Z    ^[[33m^[[2m✓^[[22m^[[39m old deterministic bot (variance off) = Python var=None^[[2m > ^[[22mm2: per-seed level at 30:00 equal, every reach time within 15 s, 100 seeds ^[[33m26862^[[2mms^[[22m^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:47:03.0215238Z    ^[[33m^[[2m✓^[[22m^[[39m m1 variance bot vs Python, 100 seeds (distribution)^[[2m > ^[[22mAC7 quantiles match; proposal targets 1-2 hold ^[[33m13142^[[2mms^[[22m^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:47:03.0216615Z    ^[[33m^[[2m✓^[[22m^[[39m m2 variance bot vs Python, 100 seeds (distribution)^[[2m > ^[[22mAC7 quantiles match; proposal targets 1-2 hold ^[[33m26073^[[2mms^[[22m^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:47:03.0218130Z    ^[[33m^[[2m✓^[[22m^[[39m AC7 band, variance bot (data/economy.csv a8c4e268)^[[2m > ^[[22mband per CSV sha a8c4e268 (F1: hard band) ^[[33m58479^[[2mms^[[22m^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:49:09.9789141Z ^[[90mstdout^[[2m | tests/ac7-worst-seed.slow.test.ts^[[2m > ^[[22m^[[2mAC7 worst-seed guards, workers variance bot (data/economy.csv a8c4e268)^[[2m > ^[[22m^[[2mF1 variance bot: L18-25 slowest-level P95/worst within bounds; P95 time-to-L20 warn (F1 6dca24cd or T3 b48be8a4; skipped on pre-F1 57d964d5)
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:49:09.9791682Z ^[[22m^[[39mvariance L18-25 slowest level P95 236.4s (<= 390) worst 255.9s (<= 480); t20 P5/P50/P95/worst 1413/1476/1555/1583s (warn P95 > 1740)
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:49:09.9792659Z 
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:49:09.9800127Z ^[[90mstdout^[[2m | tests/ac7-worst-seed.slow.test.ts^[[2m > ^[[22m^[[2mAC7 worst-seed guards, workers variance bot (data/economy.csv a8c4e268)^[[2m > ^[[22m^[[2mF1 fixed bot: every seed's slowest L18-25 level <= l18_25_step_p95_max_s (F1 6dca24cd or T3 b48be8a4; skipped on pre-F1 57d964d5)
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:49:09.9805336Z ^[[22m^[[39mfixed L18-25 slowest level P95 180.0s worst 180.0s (<= 360)
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:49:09.9805888Z 
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:49:09.9806638Z  ^[[32m✓^[[39m tests/ac7-worst-seed.slow.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m)^[[22m^[[33m 126771^[[2mms^[[22m^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:49:09.9809030Z    ^[[33m^[[2m✓^[[22m^[[39m AC7 worst-seed guards, workers variance bot (data/economy.csv a8c4e268)^[[2m > ^[[22mF1 variance bot: L18-25 slowest-level P95/worst within bounds; P95 time-to-L20 warn (F1 6dca24cd or T3 b48be8a4; skipped on pre-F1 57d964d5) ^[[33m63012^[[2mms^[[22m^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:49:09.9811484Z    ^[[33m^[[2m✓^[[22m^[[39m AC7 worst-seed guards, workers variance bot (data/economy.csv a8c4e268)^[[2m > ^[[22mF1 fixed bot: every seed's slowest L18-25 level <= l18_25_step_p95_max_s (F1 6dca24cd or T3 b48be8a4; skipped on pre-F1 57d964d5) ^[[33m63757^[[2mms^[[22m^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:50:14.8393145Z ^[[90mstdout^[[2m | tests/ac7-dceo-04.slow.test.ts^[[2m > ^[[22m^[[2mAC7 D-CEO-20261019-04 final-SHA gate^[[2m > ^[[22m^[[2mseeds 1-200, both paths: L10 P95 <= 12.1 min, fastest-seed L10 >= 7.8 min
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:50:14.8394146Z ^[[22m^[[39mD-CEO-04 1-200 L10 nw P95 12.02 fastest 7.87 | w P95 12.08 fastest 8.32
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:50:14.8394522Z 
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:50:14.8398176Z ^[[90mstdout^[[2m | tests/ac7-dceo-04.slow.test.ts^[[2m > ^[[22m^[[2mAC7 D-CEO-20261019-04 final-SHA gate^[[2m > ^[[22m^[[2mseeds 201-300 pass all original gates strictly
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:50:14.8399397Z ^[[22m^[[39mD-CEO-04 201-300 L10 nw P95 11.81 fastest 8.13 | w P95 11.81 fastest 8.76; L@30 nw P5/P95 19/20 w 21/22
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:50:14.8399948Z 
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:50:14.8400953Z  ^[[32m✓^[[39m tests/ac7-dceo-04.slow.test.ts ^[[2m(^[[22m^[[2m3 tests^[[22m^[[2m | ^[[22m^[[33m1 skipped^[[39m^[[2m)^[[22m^[[33m 333429^[[2mms^[[22m^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:50:14.8414455Z    ^[[33m^[[2m✓^[[22m^[[39m AC7 D-CEO-20261019-04 final-SHA gate^[[2m > ^[[22mseeds 1-200, both paths: L10 P95 <= 12.1 min, fastest-seed L10 >= 7.8 min ^[[33m179671^[[2mms^[[22m^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:50:14.8415840Z    ^[[33m^[[2m✓^[[22m^[[39m AC7 D-CEO-20261019-04 final-SHA gate^[[2m > ^[[22mseeds 201-300 pass all original gates strictly ^[[33m153756^[[2mms^[[22m^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:50:32.7981525Z  ^[[32m✓^[[39m tests/bot-m5-trace.slow.test.ts ^[[2m(^[[22m^[[2m1 test^[[22m^[[2m)^[[22m^[[33m 17710^[[2mms^[[22m^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:50:32.7983354Z    ^[[33m^[[2m✓^[[22m^[[39m verify m5x-casual: pinned trace and checkpoint counters (CCR N-5)^[[2m > ^[[22m[VER-1h N-5] 24 h seed 1: trace 07139bdd, and eggs.collected/sold at each checkpoint equal sums over bot-m5 events ^[[33m17709^[[2mms^[[22m^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:50:32.8127683Z 
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:50:32.8133801Z ^[[2m Test Files ^[[22m ^[[1m^[[32m4 passed^[[39m^[[22m^[[90m (4)^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:50:32.8134855Z ^[[2m      Tests ^[[22m ^[[1m^[[32m17 passed^[[39m^[[22m^[[2m | ^[[22m^[[33m1 skipped^[[39m^[[90m (18)^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:50:32.8135566Z ^[[2m   Start at ^[[22m 01:44:40
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:50:32.8136582Z ^[[2m   Duration ^[[22m 351.90s^[[2m (transform 357ms, setup 0ms, collect 827ms, tests 619.52s, environment 1ms, prepare 195ms)^[[22m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-11-06T01:50:32.8137252Z 
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	﻿2026-11-06T01:50:32.8392033Z ##[group]Run npm run build
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:32.8392290Z ^[[36;1mnpm run build^[[0m
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:32.8410411Z shell: /usr/bin/bash -e {0}
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:32.8410634Z ##[endgroup]
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:32.9323422Z 
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:32.9324076Z > egg-farm@0.1.0 build
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:32.9324813Z > vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && vite build && node scripts/check-release-build.mjs dist
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:32.9325190Z 
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:33.2433395Z balance.json up to date with economy.csv
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:38.4859819Z ^[[36mvite v5.4.21 ^[[32mbuilding for production...^[[36m^[[39m
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:38.5293630Z transforming...
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:39.1291228Z ^[[32m✓^[[39m 74 modules transformed.
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:39.3321315Z rendering chunks...
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:39.3371837Z computing gzip size...
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:39.3435030Z ^[[2mdist/^[[22m^[[32mindex.html                 ^[[39m^[[1m^[[2m  0.68 kB^[[22m^[[1m^[[22m^[[2m │ gzip:  0.39 kB^[[22m
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:39.3436368Z ^[[2mdist/^[[22m^[[2massets/^[[22m^[[35mindex-DUjXgk7c.css  ^[[39m^[[1m^[[2m 53.57 kB^[[22m^[[1m^[[22m^[[2m │ gzip: 11.58 kB^[[22m
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:39.3437860Z ^[[2mdist/^[[22m^[[2massets/^[[22m^[[36mindex-DeigIhum.js   ^[[39m^[[1m^[[2m213.01 kB^[[22m^[[1m^[[22m^[[2m │ gzip: 72.50 kB^[[22m
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:39.3438898Z ^[[32m✓ built in 835ms^[[39m
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:39.3931893Z check-release-build: m4.1+69f9c61 ok
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:39.3936707Z check-release-build: release prefix m4.1 ok
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:39.3938400Z check-release-build: no eggfarmUi in release ok
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:39.3949949Z check-release-build: no ?debug/?perf/?ios/QA hooks ok
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:39.4042099Z check-release-build: window global writes only eggfarmExportTelemetry ok
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:39.4086101Z check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok
+gate	Release build (npm run build; sync-economy --check, tsc --noEmit, vite build, check-release-build dist)	2026-11-06T01:50:39.4087893Z check-release-build: eggfarm* identifiers eggfarmRecovery, eggfarmTabGuard, eggfarmExportTelemetry ok
+gate	Install browser (chromium)	﻿2026-11-06T01:50:39.4198172Z ##[group]Run test -x /usr/bin/google-chrome
+gate	Install browser (chromium)	2026-11-06T01:50:39.4198582Z ^[[36;1mtest -x /usr/bin/google-chrome^[[0m
+gate	Install browser (chromium)	2026-11-06T01:50:39.4215828Z shell: /usr/bin/bash -e {0}
+gate	Install browser (chromium)	2026-11-06T01:50:39.4216060Z ##[endgroup]
+gate	Release globals allowlist (chromium)	﻿2026-11-06T01:50:39.4283035Z ##[group]Run npm run check-globals -- chromium
+gate	Release globals allowlist (chromium)	2026-11-06T01:50:39.4283375Z ^[[36;1mnpm run check-globals -- chromium^[[0m
+gate	Release globals allowlist (chromium)	2026-11-06T01:50:39.4300407Z shell: /usr/bin/bash -e {0}
+gate	Release globals allowlist (chromium)	2026-11-06T01:50:39.4300625Z ##[endgroup]
+gate	Release globals allowlist (chromium)	2026-11-06T01:50:39.5200693Z 
+gate	Release globals allowlist (chromium)	2026-11-06T01:50:39.5201368Z > egg-farm@0.1.0 check-globals
+gate	Release globals allowlist (chromium)	2026-11-06T01:50:39.5201907Z > node scripts/release-globals-browser.mjs chromium
+gate	Release globals allowlist (chromium)	2026-11-06T01:50:39.5202106Z 
+gate	Release globals allowlist (chromium)	2026-11-06T01:50:40.7025924Z serveOwn: dist on port 37067 (free port; set PORT to pin)
+gate	Release globals allowlist (chromium)	2026-11-06T01:50:40.7165919Z check-globals: dist m4.1+69f9c61 on port 37067
+gate	Release globals allowlist (chromium)	2026-11-06T01:51:20.2532285Z PASS [chromium] B-4 release ?perf=1: eggfarm* globals ["eggfarmExportTelemetry"], no perf overlay
+gate	Release globals allowlist (chromium)	2026-11-06T01:51:21.5825982Z PASS [chromium] refused newer-save boot window globals vs blank page: []
+gate	Release globals allowlist (chromium)	2026-11-06T01:51:21.5827412Z PASS [chromium] release window globals vs blank page: ["eggfarmExportTelemetry"]; allowed ["eggfarmExportTelemetry"]; not allowed []; 'eggfarm' in window=false; egg ids/names ["nestEggs"]
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	﻿2026-11-06T01:51:21.8681423Z ##[group]Run npm run build:html
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:21.8681693Z ^[[36;1mnpm run build:html^[[0m
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:21.8700022Z shell: /usr/bin/bash -e {0}
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:21.8700255Z ##[endgroup]
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:21.9608042Z 
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:21.9608770Z > egg-farm@0.1.0 build:html
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:21.9610037Z > vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && node scripts/build-html.mjs dist-html && node scripts/check-release-build.mjs dist-html/egg-farm.html
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:21.9610831Z 
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:22.2323706Z balance.json up to date with economy.csv
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:28.2812048Z build:html: dist-html/egg-farm.html (595828 bytes, 16 asset rewrites, 45 inlined files)
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:28.3285784Z check-release-build: single-file dist-html/egg-farm.html (595828 bytes)
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:28.3328545Z check-release-build: m4.1+69f9c61 ok
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:28.3331684Z check-release-build: release prefix m4.1 ok
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:28.3332311Z check-release-build: build id m4.1+69f9c61 matches HEAD ok
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:28.3351487Z check-release-build: build-id meta + data-build-id = m4.1+69f9c61 ok
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:28.3353718Z check-release-build: no eggfarmUi in release ok
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:28.3372896Z check-release-build: no ?debug/?perf/?ios/QA hooks ok
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:28.3488995Z check-release-build: window global writes only eggfarmExportTelemetry ok
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:28.3513199Z check-release-build: every asset/font URL inlined (data:) ok
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:28.3584018Z check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok
+gate	Single-file release html (build:html runs check-release-build on dist-html/egg-farm.html)	2026-11-06T01:51:28.3586914Z check-release-build: eggfarm* identifiers eggfarmRecovery, eggfarmTabGuard, eggfarmExportTelemetry ok
+gate	check-release-build --build-id (expected id = BUILD_PREFIX + this commit)	﻿2026-11-06T01:51:28.3700904Z ##[group]Run prefix=$(sed -n "s/^export const BUILD_PREFIX = '\(.*\)';/\1/p" scripts/build-id.ts)
+gate	check-release-build --build-id (expected id = BUILD_PREFIX + this commit)	2026-11-06T01:51:28.3701415Z ^[[36;1mprefix=$(sed -n "s/^export const BUILD_PREFIX = '\(.*\)';/\1/p" scripts/build-id.ts)^[[0m
+gate	check-release-build --build-id (expected id = BUILD_PREFIX + this commit)	2026-11-06T01:51:28.3701980Z ^[[36;1mnode scripts/check-release-build.mjs dist-html/egg-farm.html --build-id "$prefix+$(git rev-parse --short HEAD)"^[[0m
+gate	check-release-build --build-id (expected id = BUILD_PREFIX + this commit)	2026-11-06T01:51:28.3720212Z shell: /usr/bin/bash -e {0}
+gate	check-release-build --build-id (expected id = BUILD_PREFIX + this commit)	2026-11-06T01:51:28.3720432Z ##[endgroup]
+gate	check-release-build --build-id (expected id = BUILD_PREFIX + this commit)	2026-11-06T01:51:28.4083975Z check-release-build: single-file dist-html/egg-farm.html (595828 bytes)
+gate	check-release-build --build-id (expected id = BUILD_PREFIX + this commit)	2026-11-06T01:51:28.4126399Z check-release-build: m4.1+69f9c61 ok
+gate	check-release-build --build-id (expected id = BUILD_PREFIX + this commit)	2026-11-06T01:51:28.4130072Z check-release-build: release prefix m4.1 ok
+gate	check-release-build --build-id (expected id = BUILD_PREFIX + this commit)	2026-11-06T01:51:28.4130703Z check-release-build: build id m4.1+69f9c61 matches expected ok
+gate	check-release-build --build-id (expected id = BUILD_PREFIX + this commit)	2026-11-06T01:51:28.4152611Z check-release-build: build-id meta + data-build-id = m4.1+69f9c61 ok
+gate	check-release-build --build-id (expected id = BUILD_PREFIX + this commit)	2026-11-06T01:51:28.4160852Z check-release-build: no eggfarmUi in release ok
+gate	check-release-build --build-id (expected id = BUILD_PREFIX + this commit)	2026-11-06T01:51:28.4174163Z check-release-build: no ?debug/?perf/?ios/QA hooks ok
+gate	check-release-build --build-id (expected id = BUILD_PREFIX + this commit)	2026-11-06T01:51:28.4298742Z check-release-build: window global writes only eggfarmExportTelemetry ok
+gate	check-release-build --build-id (expected id = BUILD_PREFIX + this commit)	2026-11-06T01:51:28.4316013Z check-release-build: every asset/font URL inlined (data:) ok
+gate	check-release-build --build-id (expected id = BUILD_PREFIX + this commit)	2026-11-06T01:51:28.4386676Z check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok
+gate	check-release-build --build-id (expected id = BUILD_PREFIX + this commit)	2026-11-06T01:51:28.4389888Z check-release-build: eggfarm* identifiers eggfarmRecovery, eggfarmTabGuard, eggfarmExportTelemetry ok
+gate	Upload egg-farm-html artifact	﻿2026-11-06T01:51:28.4506003Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:28.4506553Z with:
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:28.4506802Z   name: egg-farm-html
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:28.4507109Z   path: dist-html/egg-farm.html
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:28.4507787Z   retention-days: 14
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:28.4508086Z   if-no-files-found: warn
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:28.4508392Z   compression-level: 6
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:28.4508671Z   overwrite: false
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:28.4508959Z   include-hidden-files: false
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:28.4509268Z ##[endgroup]
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:28.5903791Z (node:9399) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:28.5904561Z (Use `node --trace-deprecation ...` to show where the warning was created)
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:28.5945494Z With the provided path, there will be 1 file uploaded
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:28.5963920Z Artifact name is valid!
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:28.5970032Z Root directory input is valid!
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:28.9650712Z Beginning upload of artifact content to blob storage
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:28.9956218Z (node:9399) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:29.5941574Z Uploaded bytes 308620
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:29.6722330Z Finished uploading artifact content to blob storage!
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:29.6723777Z SHA256 digest of uploaded artifact zip is 34a6ce539a3e42c6942e45f44c3cf8c514842341b34dfe5ab9356c650e49d013
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:29.6724742Z Finalizing artifact upload
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:30.1210870Z Artifact egg-farm-html.zip successfully finalized. Artifact ID 13470381766
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:30.1212117Z Artifact egg-farm-html has been successfully uploaded! Final size is 308620 bytes. Artifact ID is 13470381766
+gate	Upload egg-farm-html artifact	2026-11-06T01:51:30.1218095Z Artifact download URL: https://github.com/PrincipalLewis/egg-farm/actions/runs/42145282654/artifacts/13470381766
+gate	Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	﻿2026-11-06T01:51:30.1403273Z Post job cleanup.
+gate	Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:51:30.2418474Z (node:9413) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+gate	Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:51:30.2419178Z (Use `node --trace-deprecation ...` to show where the warning was created)
+gate	Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020	2026-11-06T01:51:30.2421669Z Cache hit occurred on the primary key node-cache-Linux-x64-npm-570ff3660310d24e3be09c9ec0ca06ee18b34fdf834293b38f8aa5f6d204e898, not saving cache.
+gate	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	﻿2026-11-06T01:51:30.2544701Z Post job cleanup.
+gate	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:51:30.3295403Z [command]/usr/bin/git version
+gate	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:51:30.3333060Z git version 2.56.0
+gate	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:51:30.3363939Z Temporarily overriding HOME='/home/runner/work/_temp/79794974-35d6-4289-8ed9-e622c992e838' before making global git config changes
+gate	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:51:30.3365420Z Adding repository directory to the temporary git global config as a safe directory
+gate	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:51:30.3366540Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/egg-farm/egg-farm
+gate	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:51:30.3404457Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+gate	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:51:30.3464985Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+gate	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:51:30.3695359Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+gate	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:51:30.3723945Z http.https://github.com/.extraheader
+gate	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:51:30.3741047Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+gate	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:51:30.3773645Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+gate	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:51:30.4012366Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+gate	Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262	2026-11-06T01:51:30.4055227Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+gate	Complete job	﻿2026-11-06T01:51:30.4420777Z Cleaning up orphan processes
+gate	Complete job	2026-11-06T01:51:30.4731825Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11d5960a326750d5838078e36cf38b85af677262, actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

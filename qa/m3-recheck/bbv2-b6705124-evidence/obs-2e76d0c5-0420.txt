@@ -1,0 +1,10 @@
+PR100 merge-forward hosted check (2026-11-06 04:20 CET), read-only gh api against PrincipalLewis/egg-farm
+pull/100/head = 2e76d0c55d8bcb29f5fb561e30378457dc69aae7 (matches expected); base rc/v5 = eed62687db4aa05167e5e7f8b14e1674715dfc4a (live tip, unchanged)
+2e76d0c5 parents: 8b222f6a4109dd6c5cf96439027e62049a5ce7d3, eed62687; tree 7049c3fb2be6b759c3378bcd79be11362f2644ff (matches HoQA claim)
+compare eed62687...8b222f6a merge_base=49ee46dd (ahead 19, behind 31, 32 files); compare eed62687...2e76d0c5 merge_base=eed62687 (ahead 20, behind 0, 32 files)
+Per-file blob shas of the two 32-file lists: 31 identical; src/econ/income.ts differs (8b222f6a e54e3691 vs 2e76d0c5 f5b675d1). It is the only file changed on both sides (PR and rc/v5 since 49ee46dd).
+git merge-file (base 49ee46dd, ours 8b222f6a, theirs eed62687) on income.ts: rc=0 clean; result sha256 e3a5b1f1624844b0bb68aad307e01b816bfd04f69c86854f76c20045817c1fa0 == head blob sha256 (byte-identical). No conflict, no manual edits.
+Run 42152006627 ci @2e76d0c5: in_progress (started 02:42:18Z); gate job in_progress; Slow suites/Release build/Install chromium/Release globals allowlist (chromium)/html/build-id steps not concluded.
+Run 42152006631 pacing @2e76d0c5: in_progress; casual SUCCESS, optimal in_progress, seller15 in_progress.
+Run 42152531746 pacing #116 @629ab76d: in_progress (started 02:47:21Z); casual SUCCESS, optimal/seller15 in_progress.
+Old runs 42141804885/42141804950 not credited; 42131797413/42127280016 not cited.

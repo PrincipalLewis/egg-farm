@@ -1,0 +1,9 @@
+START 2026-11-05T23:46:14+01:00 tip=560b4d437f06df1e399d3f91c7af850b2b1e2bb5
+PASS ring-{v,events}: v=0.6.2 keys=events,v eventsLen=1
+PASS legacy-load-no-throw: threw=false len=1 legacy=true
+PASS legacy-vless-object: legacy=true
+PASS export-schema_version: export=0.6.2 snap=0.6.2 const=0.6.2
+PASS old-new-export-roundtrip: stored.v=0.6.2 reloaded=3 export.sv=0.6.2 export.events=3 legacy0=true
+---
+SUMMARY 5/5 PASS
+EXIT=0 END 2026-11-05T23:46:14+01:00

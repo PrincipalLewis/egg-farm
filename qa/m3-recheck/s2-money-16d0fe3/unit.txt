@@ -1,0 +1,75 @@
+
+ RUN  v2.1.9 /tmp/qa-s2money-16d
+
+ ✓ tests/onboarding.test.ts (13 tests) 32ms
+ ✓ tests/save-hardening.test.ts (28 tests) 57ms
+ ✓ tests/workers-v11.test.ts (13 tests) 68ms
+ ✓ tests/ac14.test.ts (13 tests) 57ms
+ ✓ tests/market.test.ts (24 tests) 146ms
+ ✓ tests/workers.test.ts (10 tests) 337ms
+ ✓ tests/telemetry-m3.test.ts (10 tests) 311ms
+ ✓ tests/s2-money.test.ts (8 tests) 91ms
+ ✓ tests/ftue-v11.test.ts (9 tests) 52ms
+ ✓ tests/next-goal.test.ts (12 tests) 20ms
+ ✓ tests/save.test.ts (9 tests) 48ms
+ ✓ tests/ios-tip.test.ts (12 tests) 23ms
+ ✓ tests/s2-3a.test.ts (7 tests) 299ms
+ ✓ tests/economy.test.ts (68 tests) 203ms
+ ✓ tests/tick.test.ts (9 tests) 66ms
+ ✓ tests/ui-logic.test.ts (10 tests) 18ms
+ ✓ tests/post-rc1.test.ts (5 tests) 152ms
+ ✓ tests/resume.test.ts (8 tests) 53ms
+ ✓ tests/sync-economy.test.ts (6 tests) 65ms
+ ✓ tests/orders.test.ts (8 tests) 45ms
+ ✓ tests/art-ux-rc0.test.ts (6 tests) 36ms
+ ✓ tests/offline-modal.test.ts (5 tests) 40ms
+ ✓ tests/offline.test.ts (6 tests) 14ms
+ ✓ tests/contrast.test.ts (11 tests) 7ms
+ ✓ tests/slot-preview.test.ts (3 tests) 32ms
+ ✓ tests/frame-sampler.test.ts (6 tests) 14ms
+ ✓ tests/audio-unlock.test.ts (4 tests) 564ms
+   ✓ PT1-3 audio unlock timeout > unlock returns within ~AUDIO_UNLOCK_MS when resume never resolves 505ms
+ ✓ tests/telemetry.test.ts (6 tests) 2017ms
+   ✓ telemetry > ring buffer capped at ring_size 2003ms
+ ✓ tests/recovery-v11.test.ts (3 tests) 9ms
+ ✓ tests/save-fixtures.test.ts (4 tests) 7ms
+ ✓ tests/release-build-id.test.ts (2 tests) 1072ms
+   ✓ clean id passes, +dirty fails 513ms
+   ✓ m3-rc0 name only allowed when HEAD is the m3-rc0 tag commit 16176a3 557ms
+ ✓ tests/release-bundle.test.ts (2 tests) 3456ms
+   ✓ release bundle > has no ?ios= override (the flag reader is dead-code eliminated) 2298ms
+   ✓ release bundle > has no window.eggfarmOnb onboarding debug handle (QA builds only) 1157ms
+stdout | tests/pacing.test.ts > AC7 pacing bot on the real sim > report
+AC7 seller15: { first: 15, up5: 12, f10m: 10, L10min: 9.25, L18min: 27.25, f30m: 18 } cheapest: { up5: 11, f10m: 9, f30m: 17 }
+
+ ✓ tests/pacing.test.ts (6 tests) 852ms
+   ✓ AC7 pacing bot on the real sim > Farm L18 reached within 24-36 min 839ms
+stdout | tests/p4.test.ts > P4 build numbers vs Economy re-sim > report
+P4 build { W4: 5.5, W4b: 7.5, managePer15: 5.63 }
+
+ ✓ tests/p4.test.ts (3 tests) 25ms
+stdout | tests/pacing-m2.test.ts > M2 pacing: managed workers > report
+M2 seller15 {
+  none: [ 9.25, 27.25, 90 ],
+  managed: [ 10, 28.25, 61.5 ],
+  step: 5.5,
+  cheapestStep: 7.5,
+  managesPer10min: 3.75
+}
+
+stdout | tests/pacing-m2.test.ts > M2 pacing: managed workers > AC-W4b (soft, non-gating): cheapest managed steps F18->F25 <= 8 min
+AC-W4b soft pass: 7.5 min
+
+ ✓ tests/pacing-m2.test.ts (4 tests) 15ms
+ ✓ tests/pacing-m2b.test.ts (2 tests) 8ms
+stdout | tests/pacing-acw1.test.ts > AC-W1 casual (100 seeds, slow) > >= 95% reach F10 within 15 min, F18 median <= 40 min, parity with Python (±20% medians, ±5 pts pass rate)
+AC-W1 build { pass10: 100, medF10: 11, medF18: 29 } python { pass10: 98, medF10: 12.33, medF18: 30.67 }
+
+ ✓ tests/pacing-acw1.test.ts (2 tests) 65652ms
+   ✓ AC-W1 casual (100 seeds, slow) > >= 95% reach F10 within 15 min, F18 median <= 40 min, parity with Python (±20% medians, ±5 pts pass rate) 65650ms
+
+ Test Files  37 passed (37)
+      Tests  357 passed (357)
+   Start at  08:53:04
+   Duration  68.79s (transform 1.39s, setup 0ms, collect 145.08s, tests 75.96s, environment 7ms, prepare 4.54s)
+

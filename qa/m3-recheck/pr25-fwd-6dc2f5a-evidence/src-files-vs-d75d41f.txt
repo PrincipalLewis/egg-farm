@@ -1,0 +1,14 @@
+src/config/balance.json
+src/config/formulas.ts
+src/debug/frame-sampler.ts
+src/game.ts
+src/main.ts
+src/platform/visibility.ts
+src/save/hidden-time.ts
+src/sim/actions.ts
+src/sim/payout.ts
+src/ui/app.ts
+src/ui/format.ts
+src/ui/order-list.ts
+src/ui/orders.ts
+src/ui/styles.css

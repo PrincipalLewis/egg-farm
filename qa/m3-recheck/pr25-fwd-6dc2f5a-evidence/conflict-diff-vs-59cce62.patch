@@ -1,0 +1,1214 @@
+diff --git a/src/config/balance.json b/src/config/balance.json
+index 296db37..0d5b6d4 100644
+--- a/src/config/balance.json
++++ b/src/config/balance.json
+@@ -2,7 +2,10 @@
+   "_source": "economy params GENERATED from data/economy.csv (copied from product/economy.csv) by scripts/sync-economy.ts (verified on every row); edit the CSV, not these blocks",
+   "tickHz": 10,
+   "save": {
+-    "autosaveIntervalS": 5
++    "autosaveIntervalS": 5,
++    "lsHeadroomFactor": 2,
++    "lsHeadroomMarginBytes": 65536,
++    "migrationAttemptsCap": 3
+   },
+   "feel": {
+     "tap_combine_window_ms": 250,
+@@ -23,11 +26,11 @@
+       "start_pct": 100,
+       "drain_s_per_pct": 9,
+       "tired_below_pct": 30,
+-      "yawn_at_pct": 40,
++      "yawn_at_pct": 50,
+       "manage_cooldown_s": 30,
+       "manage_all_min_workers": 3,
+       "unpaid_resume_wage_min": 1,
+-      "manage_prompt_threshold": 0.4
++      "manage_prompt_threshold": 0.5
+     },
+     "market_hand": {
+       "unlock_farm": 3,
+@@ -53,23 +56,28 @@
+       "tiers": [
+         {
+           "farm": 18,
+-          "mult": 1.5
++          "mult": 1.5,
++          "cost": 5538
+         },
+         {
+           "farm": 19,
+-          "mult": 2
++          "mult": 2,
++          "cost": 9100
+         },
+         {
+           "farm": 21,
+-          "mult": 2.5
++          "mult": 2.5,
++          "cost": 20330
+         },
+         {
+           "farm": 22,
+-          "mult": 3
++          "mult": 3,
++          "cost": 28294
+         },
+         {
+           "farm": 24,
+-          "mult": 4
++          "mult": 4,
++          "cost": 51567
+         }
+       ],
+       "tier_cost_share_of_farm_cost": 0.5,
+@@ -104,7 +112,40 @@
+     "customerIntervalMinS": 1.5,
+     "demandLoFactor": 0.8,
+     "demandHiFactor": 1.6,
+-    "eggsPerSecL0": 1.5
++    "eggsPerSecL0": 1.5,
++    "costTable": [
++      100,
++      135,
++      182,
++      246,
++      332,
++      448,
++      560,
++      700,
++      875,
++      1094,
++      1368,
++      1710,
++      2138,
++      2672,
++      3340,
++      4844,
++      7024,
++      10185,
++      11076,
++      18201,
++      31050,
++      40660,
++      56589,
++      68756,
++      72194,
++      97461,
++      131573,
++      177624,
++      239792,
++      323719,
++      624316
++    ]
+   },
+   "customers": {
+     "customer_patience_s": 30,
+@@ -118,5 +159,237 @@
+     "offlineRateMultiplier": 0.25,
+     "offlineMinSeconds": 60,
+     "hiddenSimMaxSeconds": 60
++  },
++  "m4": {
++    "enabled": 0,
++    "hens": {
++      "costs": [
++        36,
++        46,
++        60,
++        79,
++        102,
++        133,
++        173,
++        225,
++        293,
++        381,
++        496,
++        645,
++        838,
++        1090,
++        1417,
++        1842,
++        2395,
++        3114,
++        4048,
++        5262,
++        6841,
++        8894,
++        11562,
++        15031,
++        19540,
++        25403,
++        33023,
++        42931,
++        55810,
++        72553,
++        94319
++      ],
++      "capOverFarm": 3
++    },
++    "offline": {
++      "eggsPerSec": [
++        0.38,
++        0.5,
++        0.75,
++        1,
++        1.25,
++        1.5,
++        1.75,
++        2,
++        2.25,
++        2.5,
++        2.75,
++        3,
++        3.25,
++        3.5,
++        3.75,
++        4,
++        4.25,
++        4.5,
++        4.75,
++        5,
++        5.25,
++        5.5,
++        5.75,
++        6,
++        6.25,
++        6.5,
++        6.75,
++        7,
++        7.25,
++        7.5,
++        7.75
++      ],
++      "maxEggs2h": [
++        2700,
++        3600,
++        5400,
++        7200,
++        9000,
++        10800,
++        12600,
++        14400,
++        16200,
++        18000,
++        19800,
++        21600,
++        23400,
++        25200,
++        27000,
++        28800,
++        30600,
++        32400,
++        34200,
++        36000,
++        37800,
++        39600,
++        41400,
++        43200,
++        45000,
++        46800,
++        48600,
++        50400,
++        52200,
++        54000,
++        55800
++      ]
++    },
++    "eggValue": {
++      "costs": [
++        48,
++        63,
++        84,
++        112,
++        150,
++        199,
++        265,
++        353,
++        469,
++        625,
++        831,
++        1105,
++        1470,
++        1955,
++        2601,
++        3459,
++        4601,
++        6119,
++        8138,
++        10824,
++        14397,
++        19148,
++        25466,
++        30484,
++        31534,
++        41940,
++        55780,
++        74187,
++        98670,
++        131231,
++        249339
++      ],
++      "capOverFarm": 3,
++      "baseStep": 0.05,
++      "levelBonus": 0.12
++    },
++    "milestones": {
++      "hens": [
++        {
++          "level": 10,
++          "coopMult": 1.25,
++          "offlineMult": 1.25
++        },
++        {
++          "level": 20,
++          "coopMult": 1.5,
++          "offlineMult": 1.5
++        },
++        {
++          "level": 30,
++          "coopMult": 2,
++          "offlineMult": 2
++        }
++      ],
++      "grades": [
++        {
++          "level": 5,
++          "mult": 1.1,
++          "minFarm": 0
++        },
++        {
++          "level": 10,
++          "mult": 1.25,
++          "minFarm": 0
++        },
++        {
++          "level": 20,
++          "mult": 1.5,
++          "minFarm": 15
++        }
++      ],
++      "balanced": [
++        {
++          "level": 5,
++          "mult": 1.1
++        },
++        {
++          "level": 10,
++          "mult": 1.15
++        },
++        {
++          "level": 15,
++          "mult": 1.2
++        },
++        {
++          "level": 20,
++          "mult": 1.25
++        },
++        {
++          "level": 25,
++          "mult": 1.3
++        }
++      ]
++    },
++    "tc": {
++      "ability_cd_s": 300,
++      "ability_s": 30,
++      "ability_w1_price_mult": 1.15,
++      "ability_w2_lay_mult": 1.15,
++      "ability_w3_price_mult": 1.15,
++      "ability_w4_tier_add": 0.5,
++      "complete_bonus_share": 0.05,
++      "egg_cash_s": 45,
++      "egg_despawn_s": 30,
++      "egg_eggs_as_cash_from_farm": 20,
++      "egg_eggs_s": 60,
++      "egg_gap_max_s": 300,
++      "egg_gap_min_s": 120,
++      "egg_unlock_farm": 8,
++      "egg_w_cash": 0.45,
++      "egg_w_eggs": 0.2,
++      "egg_w_frenzy": 0.35,
++      "focus_premium": 0.1,
++      "frenzy_all_sales": 1,
++      "frenzy_price_mult": 2,
++      "frenzy_s": 30,
++      "leave_penalty_share": 0.05,
++      "streak_cap": 0.4,
++      "streak_decay_per_s": 0.03,
++      "streak_hold_s": 3,
++      "streak_max_taps_per_s": 1,
++      "streak_per_tap": 0.01
++    }
+   }
+ }
+diff --git a/src/config/formulas.ts b/src/config/formulas.ts
+index 60ac829..fb2a339 100644
+--- a/src/config/formulas.ts
++++ b/src/config/formulas.ts
+@@ -2,6 +2,7 @@
+  * Economy formulas (M1-R1). Single implementation used by the sim AND by scripts/sync-economy.ts
+  * (which fits these params from product/economy.csv and verifies every row). Mirrors product/sim/economy_sim.py.
+  */
++export interface CostGrowthSegment { from: number; to: number; growth: number }
+ export interface EconomyParams {
+   maxLevel: number;
+   collection: { baseCost: number; costGrowth: number; eggsPerTapBase: number; eggsPerTapPerLevel: number; pricePercentPerLevel: number };
+@@ -12,17 +13,80 @@ export interface EconomyParams {
+     demandLoFactor: number; demandHiFactor: number;
+     /** P3 (PT1-11, Economy's approach): L0 eggs/s from the CSV row; hens stay formula-driven. Absent = formula. */
+     eggsPerSecL0?: number;
++    /** F1 (product/f1-proposal.md): per-level-range cost growth; levels inclusive, non-overlapping, from >= 1.
++     *  Segment {from,to,growth} uses `growth` for the step INTO each level from..to; costGrowth elsewhere. Absent/empty = pure pow. */
++    costGrowthSegments?: CostGrowthSegment[];
++    /** F1 (HoE, Oct 17): farm_cost per level, copied verbatim from the CSV by sync-economy (index = level, 0..maxLevel).
++     *  When present it is THE farm cost (covers the F1-GAP cuts and any later per-level edits); no formula fallback.
++     *  Absent = baseCost/costGrowth/segments curve (pre-F1 behaviour). */
++    costTable?: number[];
+   };
+   customers: { customer_patience_s: number; first_customer_s: number; queue_max_base: number; queue_max_step_levels: number; queue_max_cap: number };
+   offline: { offlineCapSeconds: number; offlineRateMultiplier: number; offlineMinSeconds: number; hiddenSimMaxSeconds: number };
++  /** M4-A three tracks (product/m4-manage-proposal.md §2.1-2.2). Optional so pre-M4 params stay valid. */
++  m4?: M4Params;
++}
++export interface M4Params {
++  /** Feature flag: 0 = off (pre-M4 game, Farm drives eggs/s and price), 1 = Hens/Egg value tracks live. */
++  enabled: number;
++  /** costs[L] = price of L -> L+1 (CSV hens_cost / egg_value_cost, verbatim). */
++  hens: { costs: number[]; capOverFarm: number };
++  /** spec v1.14 M4A-4: offline grant per Hens level, verbatim from economy.csv (offline_eggs_per_sec, offline_max_eggs_2h). */
++  offline?: { eggsPerSec: number[]; maxEggs2h: number[] };
++  eggValue: { costs: number[]; capOverFarm: number; baseStep: number; levelBonus: number };
++  milestones: {
++    /** M1 (HoP 14:45): Hens milestones raise coop capacity and offline eggs only, never the in-tab lay rate. */
++    hens: { level: number; coopMult: number; offlineMult: number }[];
++    grades: { level: number; mult: number; minFarm: number }[];
++    /** mult on the unit price (1.10 = +10%), CSV balancedN_mult. */
++    balanced: { level: number; mult: number }[];
++  };
++  /** Later-M4 scalar tunables (tc_* columns), carried through verbatim; unused by M4-A code. */
++  tc?: Record<string, number>;
+ }
+ /** Round half-up to `dp` decimals on the decimal expansion (avoids 1.005 -> 1.00 style errors). */
+ export const roundHalfUp = (x: number, dp: number) => { const m = 10 ** dp; return Math.round(Number((x * m).toPrecision(12))) / m; };
+-const clampL = (L: number, p: EconomyParams) => Math.max(0, Math.min(L, p.maxLevel));
++export const clampL = (L: number, p: EconomyParams) => Math.max(0, Math.min(L, p.maxLevel));
+ export const collectionCost = (C: number, p: EconomyParams) => Math.floor(p.collection.baseCost * p.collection.costGrowth ** clampL(C, p));
+ export const eggsPerTap = (C: number, p: EconomyParams) => p.collection.eggsPerTapBase + p.collection.eggsPerTapPerLevel * clampL(C, p);
+ export const collectionPriceBonus = (C: number, p: EconomyParams) => roundHalfUp(p.collection.pricePercentPerLevel * clampL(C, p), 4);
+-export const farmCost = (F: number, p: EconomyParams) => Math.floor(p.farm.baseCost * p.farm.costGrowth ** clampL(F, p));
++export const farmCost = (F: number, p: EconomyParams) => {
++  const t = p.farm.costTable, L = clampL(F, p);
++  if (t) { const v = t[L]; if (!Number.isInteger(v)) throw new Error(`balance.farm.costTable has no integer cost for level ${L}`); return v; }
++  return farmCurveCost(L, p);
++};
++/** Farm cost from baseCost/costGrowth/segments (used when there is no costTable). */
++export const farmCurveCost = (F: number, p: EconomyParams) => {
++  const segs = p.farm.costGrowthSegments, L = clampL(F, p);
++  if (!segs || segs.length === 0) return Math.floor(p.farm.baseCost * p.farm.costGrowth ** L); // pre-F1 expression, unchanged
++  // Same evaluation order as the sim (SegEco.fcost) so floors match the CSV.
++  let v = p.farm.baseCost, n = L;
++  for (const s of segs) { const k = Math.max(0, Math.min(L, s.to) - s.from + 1); v *= s.growth ** k; n -= k; }
++  return Math.floor(v * p.farm.costGrowth ** n);
++};
++/** Throws unless segments are well-formed: integers, 1 <= from <= to, growth > 0 (finite), no overlaps. */
++export function validateCostGrowthSegments(segs: unknown, where = 'farm.costGrowthSegments'): void {
++  if (segs === undefined) return;
++  if (!Array.isArray(segs)) throw new Error(`balance.${where} must be an array`);
++  const ok = (x: unknown) => typeof x === 'number' && Number.isFinite(x);
++  segs.forEach((s: any, i) => {
++    if (!s || !ok(s.from) || !ok(s.to) || !ok(s.growth)) throw new Error(`balance.${where}[${i}] needs numeric from, to, growth`);
++    if (!Number.isInteger(s.from) || !Number.isInteger(s.to)) throw new Error(`balance.${where}[${i}] from/to must be integers`);
++    if (s.from < 1) throw new Error(`balance.${where}[${i}] from must be >= 1`);
++    if (s.from > s.to) throw new Error(`balance.${where}[${i}] from must be <= to`);
++    if (!(s.growth > 0)) throw new Error(`balance.${where}[${i}] growth must be > 0`);
++  });
++  const sorted = [...segs].sort((a: any, b: any) => a.from - b.from);
++  for (let i = 1; i < sorted.length; i++) if (sorted[i].from <= sorted[i - 1].to)
++    throw new Error(`balance.${where}: segments ${sorted[i - 1].from}-${sorted[i - 1].to} and ${sorted[i].from}-${sorted[i].to} overlap`);
++}
++/** Throws unless the table is maxLevel+1 positive integers (strict increase is NOT required here; sync-economy copies the CSV verbatim). */
++export function validateCostTable(t: unknown, maxLevel: number, where = 'farm.costTable'): void {
++  if (t === undefined) return;
++  if (!Array.isArray(t)) throw new Error(`balance.${where} must be an array`);
++  if (t.length !== maxLevel + 1) throw new Error(`balance.${where} must have maxLevel+1 = ${maxLevel + 1} entries, got ${t.length}`);
++  t.forEach((v, i) => { if (!Number.isSafeInteger(v) || v <= 0) throw new Error(`balance.${where}[${i}] must be a positive integer`); });
++}
+ export const hens = (F: number, p: EconomyParams) => p.farm.hensBase + p.farm.hensPerLevel * clampL(F, p);
+ export const eggsPerSec = (F: number, p: EconomyParams) =>
+   clampL(F, p) === 0 && p.farm.eggsPerSecL0 !== undefined ? p.farm.eggsPerSecL0 : roundHalfUp(hens(F, p) * p.farm.eggsPerHenPerSec, 4);
+@@ -43,6 +107,34 @@ export const demandRange = (F: number, p: EconomyParams): readonly [number, numb
+ export const queueMax = (F: number, p: EconomyParams) =>
+   Math.min(p.customers.queue_max_cap, p.customers.queue_max_base + Math.floor(clampL(F, p) / p.customers.queue_max_step_levels));
+ export const patienceS = (_F: number, p: EconomyParams) => p.customers.customer_patience_s;
++// ---------- M4-A tracks (product/farm/m4a-spec.md v1.2) ----------
++/** M4A-1: cost in coins of Hens/Egg value level L -> L+1 (CSV column at L). */
++export const hensCost = (H: number, p: EconomyParams) => p.m4!.hens.costs[clampL(H, p)];
++export const eggValueCost = (V: number, p: EconomyParams) => p.m4!.eggValue.costs[clampL(V, p)];
++/** M4A-2: buy cap min(maxLevel, F + *_cap_over_farm). Enforced at purchase only (migrated levels may exceed it, M4A-27/28). */
++export const hensCap = (F: number, p: EconomyParams) => Math.min(p.maxLevel, F + p.m4!.hens.capOverFarm);
++export const eggValueCap = (F: number, p: EconomyParams) => Math.min(p.maxLevel, F + p.m4!.eggValue.capOverFarm);
++const best = <T extends { level: number }>(xs: T[], L: number, ok: (x: T) => boolean = () => true) => xs.filter(x => L >= x.level && ok(x)).pop();
++/** M4A-8: highest Hens milestone reached (null below the first). */
++export const hensMilestone = (H: number, p: EconomyParams) => best(p.m4!.milestones.hens, H) ?? null;
++export const hensCoopMult = (H: number, p: EconomyParams) => hensMilestone(H, p)?.coopMult ?? 1;
++export const hensOfflineMult = (H: number, p: EconomyParams) => hensMilestone(H, p)?.offlineMult ?? 1;
++/** M4A-9: egg grade multiplier; a grade with a Farm gate falls back to the lower grade until F reaches it. */
++export const gradeMult = (V: number, F: number, p: EconomyParams) => best(p.m4!.milestones.grades, V, g => F >= g.minFarm)?.mult ?? 1;
++/** M4A-10: Balanced-farm price multiplier on min(F,H,V) (Collection not included). */
++export const balancedMult = (F: number, H: number, V: number, p: EconomyParams) => best(p.m4!.milestones.balanced, Math.min(F, H, V))?.mult ?? 1;
++export const balancedTier = (F: number, H: number, V: number, p: EconomyParams) => p.m4!.milestones.balanced.filter(t => Math.min(F, H, V) >= t.level).length;
++/** M4A-4: in-tab lay rate = CSV eggs_per_sec at H, no milestone multiplier (M1). */
++export const trackEggsPerSec = (H: number, p: EconomyParams) => eggsPerSec(H, p);
++/** M4A-4/M4A-8: coop capacity at F x the Hens coop milestone. */
++export const trackCoopCapacity = (F: number, H: number, p: EconomyParams) => Math.floor(coopCapacity(F, p) * hensCoopMult(H, p));
++/** M4A-5: unit price before the Grader, in integer cents, one half-up rounding at the end:
++ *  (1 + baseStep*V) x (1 + levelBonus*V) x grade x Balanced. Collection never enters. */
++export const trackPriceCents = (F: number, H: number, V: number, p: EconomyParams) => {
++  const v = clampL(V, p), e = p.m4!.eggValue;
++  return Math.round(Number((100 * (1 + e.baseStep * v) * (1 + e.levelBonus * v) * gradeMult(v, F, p) * balancedMult(F, H, v, p)).toPrecision(12)));
++};
++export const m4On = (p: EconomyParams) => !!p.m4?.enabled;
+ /** One row in economy.csv column format, for verification/parity. */
+ export function tableRow(L: number, p: EconomyParams) {
+   const [demand_min, demand_max] = demandRange(L, p);
+diff --git a/src/game.ts b/src/game.ts
+index 50d1de3..9ad9630 100644
+--- a/src/game.ts
++++ b/src/game.ts
+@@ -1,14 +1,27 @@
++import { m4On } from './config/formulas';
+ import type { Balance } from './config/balance';
+-import { GameState, initialState, coopCapacity } from './sim/state';
++import { GameState, initialState } from './sim/state';
++import { coopCap } from './sim/tracks';
+ import { advance } from './sim/tick';
+ import { apply, Action, isUpgrade } from './sim/actions';
+ import { applyOffline } from './sim/offline';
+ import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
+ import type { SimEvent } from './sim/events';
+-import { save, serialize, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery } from './save/save';
++import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
++import type { IdbBoot } from './save/idb-mirror';
++import { TELEMETRY_KEY } from './telemetry/telemetry';
++import { migrateTracksV7 } from './sim/migrate-v7';
+ import { Telemetry, installId } from './telemetry/telemetry';
+ export type GameEvent = SimEvent | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
+ /** Glue between sim, storage and telemetry; UI only talks to this. */
++/** The same balance with the M4 flag off: a pending or aborted track migration runs the session as plain v6 (M4-14). */
++export const tracksOff = (b: Balance): Balance => (b.m4 ? markM4BuildOff({ ...b, m4: { ...b.m4, enabled: 0 } }) : b);
++export interface GameOpts {
++  /** M4-20: outcome of boot's IndexedDB open + read ('unknown' defers the migration; default 'absent' = no IndexedDB). */
++  idbBoot?: IdbBoot; idbAbsentReason?: string;
++  /** N7: migrationId source (save/newMigrationId), injectable for goldens. */
++  newId?: () => string;
++}
+ export class Game {
+   state: GameState; accMs = 0; lastFrameAt: number; offline = { eggs: 0, awayS: 0 };
+   /** Set during "Reset save" so pagehide doesn't write the old state back. */
+@@ -30,7 +43,7 @@ export class Game {
+   private notify(e: GameEvent) { for (const f of this.listeners) f(e); }
+   /** D2: durable mirror of every save (IndexedDB, durability 'strict'); none in tests, second tabs or without IndexedDB. */
+   mirror: { write(raw: string): unknown; clear(): Promise<void>; newer?: number | null; onNewer?: ((v: number) => void) | null } | null;
+-  constructor(private b: Balance, private kv: KV, private now = () => Date.now(), seed?: number, public build = 'dev', mirror: Game['mirror'] = null, idbRaw: string | null = null) {
++  constructor(private b: Balance, private kv: KV, private now = () => Date.now(), seed?: number, public build = 'dev', mirror: Game['mirror'] = null, idbRaw: string | null = null, private opts: GameOpts = {}) {
+     this.mirror = mirror;
+     this.telemetry = new Telemetry(kv, b.telemetry, now);
+     this.installId = installId(kv);
+@@ -41,6 +54,15 @@ export class Game {
+     // M4-safety: a save from a newer build is refused untouched; this Game never writes (no new game autosaves over it).
+     if (r.newer !== undefined) { this.newerSave = r.newer; this.readOnly = true; this.isNewGame = false; this.mirror = null; this.telemetry.track('save_newer_version', { version: r.newer, build }); }
+     else if (this.mirror) this.mirror.onNewer = v => this.refuseNewer(v);
++    // m4-design §3c (ADR M4-14..17): an unmarked v6 farm with M4 on boots as plain v6 under flag-off rules. The
++    // backup + in-session commit run later in startTracksMigration(); nothing about backups is touched on load (N2).
++    // Accepted risk (review m3): a farm that loses its marker is migrated again with a fresh backup (overwrites).
++    if (f?.tracksMigrated && f.v6State && f.preTracksRaw && r.newer === undefined) {
++      this.tracksPending = { raw: f.preTracksRaw, on: b, v6Keys: f.v6Keys ?? Object.keys(f.v6State) };
++      f.state = f.v6State; b = this.b = tracksOff(b);
++      // M4-24 / M4-20: IndexedDB gets no writes until the commit is confirmed (deferral sessions never write it).
++      this.pausedMirror = this.mirror; this.mirror = null;
++    }
+     if (r.recovery) {
+       const { reason, had_backup, restored_from_backup, copy_failed } = r.recovery;
+       this.telemetry.track('save_corrupt', { reason, had_backup, restored_from_backup, build, ...(copy_failed ? { copy_failed: true } : {}) });
+@@ -48,6 +70,9 @@ export class Game {
+       if (!restored_from_backup) this.bakAllowed = false;
+     }
+     this.state = f ? f.state : initialState(b, seed ?? ((now() & 0xffffffff) >>> 0));
++    // M4-22: a fresh farm on an M4 build (incl. corrupt-v7 recovery) is committed at creation: marker + a new
++    // migrationId, no backup, never touches an existing v6_backup.
++    if (!f && m4On(b)) this.state = { ...this.state, tracksV7: 1, v6BackupId: (opts.newId ?? newMigrationId)() };
+     this.loaded = f ? { coinsCents: f.state.coinsCents, farmLevel: f.state.farmLevel, collectionLevel: f.state.collectionLevel, savedAt: Number.isFinite(f.savedAt) ? f.savedAt : now() } : null;
+     if (f) {
+       // A pending grant left by the previous load (tab closed with the modal open) counts as granted: settle it first,
+@@ -57,6 +82,8 @@ export class Game {
+       if (Number.isFinite(f.savedAt)) this.grantOffline(now() - f.savedAt); else this.telemetry.track('save_savedat_invalid', {}); // one absence = last save -> this load, if >= 60 s
+     }
+     this.lastFrameAt = now();
++    // N3 (doc v0.3.2): drop a headroom probe left by a crash mid-check (never on a refused newer save: nothing is touched).
++    if (!this.readOnly) try { if (kv.getItem(HEADROOM_PROBE_KEY) !== null) kv.removeItem?.(HEADROOM_PROBE_KEY); } catch { /* best effort */ }
+     if (!this.readOnly) this.save(); // never on a refused newer save (M4A-31(f)6); persist pending offline eggs + new timestamp so the grant never repeats for one absence
+   }
+   private grantOffline(gapMs: number) {
+@@ -75,7 +102,7 @@ export class Game {
+     }
+   }
+   private checkCoopFull() {
+-    const full = this.state.coop >= coopCapacity(this.state.farmLevel, this.b);
++    const full = this.state.coop >= coopCap(this.state, this.b);
+     if (full && this.coopFullSince === null) { this.coopFullSince = this.now(); this.telemetry.track('coop_full', { phase: 'start' }); this.notify({ type: 'coop_full', phase: 'start' }); }
+     else if (!full && this.coopFullSince !== null) { this.telemetry.track('coop_full', { phase: 'end', durationMs: this.now() - this.coopFullSince }); this.coopFullSince = null; this.notify({ type: 'coop_full', phase: 'end' }); }
+   }
+@@ -100,17 +127,123 @@ export class Game {
+   private held() { return this.now() < this.holdUntil; }
+   /** Save now, then hold for `ms` so the state the new tab loads is exactly ours. */
+   flushForHandover(ms = 3000) { if (this.inactive) return; this.holdUntil = 0; this.save(); this.holdUntil = this.now() + ms; }
++  /** Pending interim migration (unmarked v6, M4 on): the validated raw bytes loaded (M4-17), the flag-on balance, and the
++   *  v6 state keys (only those are written while pending, so no track levels reach the v6 save). null once committed. */
++  private tracksPending: { raw: string; on: Balance; v6Keys: string[] } | null = null;
++  /** Set when this session's migration was aborted (M4-12/M4-16); the session stays flag-off v6 (M4-14). */
++  tracksMigrationAborted: string | null = null;
++  /** UI hook: the migration committed in-session; M4 rules/UI are live from now on. */
++  onTracksCommitted: (() => void) | null = null;
++  /** The balance this session runs on right now (flag off until the migration commits); the UI reads it live. */
++  get balance(): Balance { return this.b; }
++  get tracksMigrationPending() { return this.tracksPending !== null; }
++  private persisted(st: GameState = this.state): GameState {
++    const p = this.tracksPending;
++    if (!p) {
++      return flagOffShape(st, this.b); // HoE flag-off rule (save.ts)
++    }
++    const o: any = {}; for (const k of p.v6Keys) if (k in st) o[k] = (st as any)[k]; return o;
++  }
++  private pausedMirror: Game['mirror'] = null;
++  /** migrationId of this session's aborted attempt (N2 quota cleanup scope). */
++  private abortedMigrationId: string | null = null;
++  private mirrorResumeOnSave = false;
++  /** The raw this Game last wrote to localStorage main (M4-20 change detection), or the boot bytes before any write. */
++  private lastMainRaw: string | null = null;
++  /** Head of QA (2): plain integer, capped at balance.save.migrationAttemptsCap; anything that isn't an integer is reset to 0. */
++  private attempts(): number {
++    try { const r = this.kv.getItem(MIGRATION_ATTEMPTS_KEY); if (r === null) return 0;
++      if (!/^\d+$/.test(r)) { this.kv.setItem(MIGRATION_ATTEMPTS_KEY, '0'); return 0; }
++      return Math.min(Number(r), this.tracksCap()); } catch { return 0; } }
++  private tracksCap() { return (this.tracksPending?.on ?? this.b).save.migrationAttemptsCap; }
++  /** Deferral (M4-16/M4-20/M4-24): stay v6 under flag-off rules, attempt counter +1, retry next load. */
++  private deferTracks(store: 'ls' | 'idb', reason: string): 'deferred' {
++    const n = Math.min(this.attempts() + 1, this.tracksCap()); try { this.kv.setItem(MIGRATION_ATTEMPTS_KEY, String(n)); } catch { /* counter is best effort */ }
++    this.endTracks(store, reason, n); return 'deferred';
++  }
++  /** Abort (M4-12): the counter is reported unchanged; my own LS record (if written) is removed (M4-13 under §3d). */
++  private abortTracks(store: 'ls' | 'idb', reason: string, myRecord?: string, idbUnknown = false): 'aborted' {
++    if (myRecord) { this.abortedMigrationId = decodeBackup(myRecord)?.migrationId ?? null; try { if (this.kv.getItem(V6_BACKUP_KEY) === myRecord) this.kv.removeItem?.(V6_BACKUP_KEY); } catch { /* best effort */ } }
++    this.endTracks(store, reason, this.attempts(), idbUnknown); return 'aborted';
++  }
++  private endTracks(store: 'ls' | 'idb', reason: string, n: number, idbUnknown = store === 'idb' && this.opts.idbBoot === 'unknown') {
++    this.tracksPending = null; this.tracksMigrationAborted = reason; // M4-14: flag-off v6 for the rest of the session
++    // N6 (doc v0.3.2): the mirror resumes after any abort/deferral except an IndexedDB-unknown deferral (boot read not definite).
++    // HoE correction: it resumes on the NEXT normal save (save() below), not here.
++    this.mirrorResumeOnSave = !idbUnknown;
++    this.telemetry.track('save_migration_aborted', { store, reason, path: TRACKS_MARKER_PATH, attempt_count: n, ...(n >= this.tracksCap() ? { stuck_on_v6: true } : {}) });
++    this.telemetry.flush(true);
++  }
++  private canCommit() { return !this.resetting && !this.readOnly && !this.inactive && !this.held() && !(this.canWrite && !this.canWrite()) && !this.newerGuard(); }
++  /** m4-design §3c/§3d (ADR M4-14..24), interim marker path; called by boot after the lease claim (m1). localStorage only.
++   *  0. boot IndexedDB read must be definite (M4-20): 'unknown' => defer (idb_timeout|idb_read_error|idb_blocked);
++   *     'absent' (no_global|security) => save_backup_idb_unavailable, proceed on localStorage.
++   *  1. LS main re-read: must still be what this session last wrote (or the boot bytes) => else defer ls_main_changed.
++   *  2. Headroom (spec v1.10 + HoE): trial write of max(factor x (save+backup), save+backup+margin) to the probe key, removed at once => else defer quota_headroom.
++   *  3. LS backup record {migrationId, raw} (overwrites an orphan, only here: N2); read back, id must match (readback_mismatch).
++   *  4. IDB main re-read (read-only): outranks the boot copy (M4-19) or the read fails => abort idb_main_changed.
++   *  5. Guards, then the dedicated commitWrite (M4-21; no Game.save, no IDB fallback) of the migrated LIVE state with
++   *     tracksV7 + v6BackupId (N3) => else abort commit_write_failed (old main kept, v6/flag-off).
++   *  6. Read-back: main byte-equal + backup id matches => only then the mirror resumes (M4-24 (3)), counter removed,
++   *     m4Active, save_migrated {from:6,to:6,migration:'tracksV7_marker'}. */
++  async startTracksMigration(): Promise<'none' | 'committed' | 'aborted' | 'deferred'> {
++    const p = this.tracksPending; if (!p || !this.canCommit()) return 'none';
++    const boot = this.opts.idbBoot ?? 'absent', idb = this.pausedMirror as (Game['mirror'] & { readStrict?(ms?: number): Promise<string | null | undefined> }) | null;
++    if (boot === 'unknown') return this.deferTracks('idb', this.opts.idbAbsentReason ?? 'idb_read_error');
++    if (boot === 'absent') this.telemetry.track('save_backup_idb_unavailable', { reason: this.opts.idbAbsentReason ?? 'no_global', path: TRACKS_MARKER_PATH });
++    const lsMain = this.kv.getItem(SAVE_KEY);
++    if (lsMain !== (this.lastMainRaw ?? p.raw)) return this.deferTracks('ls', 'ls_main_changed');
++    const id = (this.opts.newId ?? newMigrationId)(), rec = encodeBackup({ migrationId: id, raw: p.raw });
++    const live = { ...migrateTracksV7(this.state, p.on).state, tracksV7: 1 as const, v6BackupId: id };
++    const need = headroomNeed(serialize(live, this.now(), saveSeqOf(lsMain) + 1).length, rec.length, p.on.save); // spec v1.10 + HoE
++    if (!probeHeadroom(this.kv, need)) return this.deferTracks('ls', 'quota_headroom');
++    try { this.kv.setItem(V6_BACKUP_KEY, rec); } catch (e) { return this.abortTracks('ls', (e as Error)?.name === 'QuotaExceededError' ? 'quota' : 'error', rec); }
++    const back = decodeBackup(this.kv.getItem(V6_BACKUP_KEY));
++    if (!back || back.migrationId !== id || back.raw !== p.raw) return this.abortTracks('ls', 'readback_mismatch', rec);
++    if (idb?.readStrict) {
++      const now = await idb.readStrict();
++      if (now === undefined) return this.abortTracks('idb', 'idb_main_changed', rec, true); // failed re-read = IDB unknown: mirror stays off (N6)
++      if ((now !== null && rankCompare(now, p.raw) > 0 && now !== this.kv.getItem(SAVE_KEY))) return this.abortTracks('idb', 'idb_main_changed', rec);
++    }
++    if (this.tracksPending !== p || !this.canCommit() || this.kv.getItem(SAVE_KEY) !== lsMain) return this.abortTracks('ls', 'commit_write_failed', rec);
++    const migrated = { ...migrateTracksV7(this.state, p.on).state, tracksV7: 1 as const, v6BackupId: id };
++    // Head of QA (1): read v6_backup back right before the marker/v7 write; its migrationId must be state.v6BackupId.
++    let pre: string | undefined; try { pre = decodeBackup(this.kv.getItem(V6_BACKUP_KEY))?.migrationId; } catch { pre = undefined; }
++    if (pre !== migrated.v6BackupId) return this.abortTracks('ls', 'readback_mismatch', rec);
++    const raw = commitWrite(this.kv, migrated, this.now(), p.on);
++    const confirmed = raw !== null && this.kv.getItem(SAVE_KEY) === raw && decodeBackup(this.kv.getItem(V6_BACKUP_KEY))?.migrationId === id;
++    if (!confirmed) return this.abortTracks('ls', 'commit_write_failed', rec);
++    this.state = migrated; this.b = p.on; this.tracksPending = null; this.lastMainRaw = raw;
++    try { this.kv.removeItem?.(MIGRATION_ATTEMPTS_KEY); } catch { /* best effort */ }
++    this.mirror = this.pausedMirror; this.pausedMirror = null; this.mirror?.write(raw); // M4-24 (3): only after the read-back
++    this.telemetry.track('save_migrated', { from: 6, to: 6, migration: TRACKS_MARKER_PATH, refund_cents: 0, farm_level: migrated.farmLevel, backup_stores: ['ls'] });
++    this.telemetry.flush(true); this.onTracksCommitted?.();
++    return 'committed';
++  }
++  /** M4-23: after an abort, a normal save that hits quota first removes the leftover (uncommitted) LS backup record, then
++   *  retries once. A committed record is never removed. */
++  private saveWithQuotaRetry(t: number, st: GameState = this.state): string {
++    try { return save(this.kv, this.persisted(st), t, this.b, this.bakAllowed); }
++    catch (e) {
++      if (e instanceof NewerSaveError || (e as Error)?.name !== 'QuotaExceededError') throw e;
++      // N2 (doc v0.3.2): remove ONLY the record of this session's aborted migrationId, never the one main's v6BackupId points to.
++      const rec = this.kv.getItem(V6_BACKUP_KEY), id = rec === null ? undefined : decodeBackup(rec)?.migrationId;
++      // N2 (HoE): never the only pre-M4 backup: only while main itself is still the unmigrated v6 (else fail visibly below).
++      if (!id || id !== this.abortedMigrationId || this.state.tracksV7 === 1 || id === this.state.v6BackupId || isCommittedBackup(rec!, this.state.v6BackupId)) throw e;
++      this.kv.removeItem?.(V6_BACKUP_KEY); return save(this.kv, this.persisted(st), t, this.b, this.bakAllowed);
++    }
++  }
+   save() {
+     if (this.resetting || this.readOnly || this.inactive || this.held()) return;
+     if (this.canWrite && !this.canWrite()) { this.telemetry.track('tab_guard_blocked_write'); this.deactivate(); return; }
+     if (this.newerGuard()) return;
+-    // S2: while hidden, persist the state as of the hide, stamped at the hide, so a tab killed while hidden reloads exactly
+-    // like one closed at the hide (C-AC36); the provisional hidden sim is never saved.
+-    const t = this.hidden ? this.hidden.at : this.now(), st = this.hidden ? this.hidden.state : this.state;
+-    try { const raw = save(this.kv, st, t, this.b, this.bakAllowed); this.mirror?.write(raw); }
++    // S2 (#25): while hidden, persist the state as of the hide, stamped at the hide (C-AC36); the provisional hidden sim is never saved.
++    const t = this.hidden ? this.hidden.at : this.now(), base = this.hidden ? this.hidden.state : this.state;
++    if (this.mirrorResumeOnSave) { this.mirrorResumeOnSave = false; this.mirror = this.pausedMirror; this.pausedMirror = null; } // N6
++    try { const raw = this.saveWithQuotaRetry(t, base); this.lastMainRaw = raw; this.mirror?.write(raw); }
+     catch (e) {
+       if (e instanceof NewerSaveError) { this.refuseNewer(e.version); return; } /* localStorage failed: the IndexedDB copy still gets this save */
+-      if (this.mirror) try { this.mirror.write(serialize(st, t)); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
++      if (this.mirror) try { let q: string | null = null; try { q = this.kv.getItem(SAVE_KEY); } catch { /* blocked */ } const st = this.persisted(base); this.mirror.write(serialize(st, t, m4SaveSeq(st, this.b, q))); } catch { /* mirror never throws */ } /* keep playing, retry next autosave; warn once */
+       if (!this.storageFailed) { this.storageFailed = true; this.telemetry.track('save_failed', { reason: (e as Error)?.name || 'error' }); this.onStorageFail?.(); } }
+     this.telemetry.flush();
+   }
+@@ -155,7 +288,9 @@ export class Game {
+     this.state = r.state; this.accMs = r.accMs; this.emit(ev); this.checkCoopFull();
+   }
+   /** Debug/QA: write the save as if it was made `ms` ago, and stop further saves (caller reloads). */
+-  debugBackdateSave(ms: number) { this.save(); if (this.readOnly) return; const raw = save(this.kv, this.state, this.now() - ms); this.mirror?.write(raw); this.resetting = true; }
++  /** Dev only. Goes through the same load-time backup gate as any save (review n2): the v6 backup is written (or the
++   *  migration aborted) in the constructor, before any save, so a backdated write can never skip it. */
++  debugBackdateSave(ms: number) { this.save(); if (this.readOnly) return; const raw = save(this.kv, this.persisted(), this.now() - ms); this.mirror?.write(raw); this.resetting = true; }
+   /** Reset save: drop the IndexedDB copy too (resolves when committed, or after 1 s), then the caller reloads. */
+   clearMirror(): Promise<void> { return this.mirror ? Promise.race([this.mirror.clear(), new Promise<void>(r => setTimeout(r, 1000))]) : Promise.resolve(); }
+   /** Progress made after a fresh start: the next save (main is valid by then) may rotate into `.bak`. */
+diff --git a/src/sim/actions.ts b/src/sim/actions.ts
+index 48d0056..d260440 100644
+--- a/src/sim/actions.ts
++++ b/src/sim/actions.ts
+@@ -1,19 +1,24 @@
+ import type { Balance } from '../config/balance';
+-import { GameState, eggsPerTap, collectionCost, farmCost, eggPriceCents } from './state';
++import { GameState, eggsPerTap, collectionCost, farmCost } from './state';
++import { m4On } from '../config/formulas';
++import { Track, salePriceCents, trackLock, trackCost, trackLevel, reachedMilestones } from './tracks';
+ import type { Sink } from './events';
+ import { saleValueCents } from './payout';
+ import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
+ export type Action =
+   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
+   | { type: 'buyCollection' } | { type: 'buyFarm' } | { type: 'collectOffline' } | { type: 'dismissOffline' } | { type: 'markCelebrated'; tier: number }
+-  | { type: 'hire'; worker: WorkerId } | { type: 'manage'; worker: WorkerId } | { type: 'manageAll' } | { type: 'buyGraderTier' };
+-export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm';
++  | { type: 'hire'; worker: WorkerId } | { type: 'manage'; worker: WorkerId } | { type: 'manageAll' } | { type: 'buyGraderTier' }
++  | { type: 'buyTrack'; track: Track } | { type: 'markMilestones'; ids: string[] };
++/** Sell all preview lives in sim/payout.ts (the one payout fn, #25; M4 sale price via salePriceCents); re-exported for #28 callers. */
++export { sellAllPreview } from './payout';
++export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm' || a.type === 'buyTrack';
+ /** Sells k=min(basket, remaining) at the price at sale time (current Farm + Collection level). Removed only when filled. Unknown id => no-op (MK-11). */
+ export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'player' | 'market_hand' = 'player'): GameState {
+   const c = s.customers.find(c => c.id === id); if (!c) return s;
+   const k = Math.min(Math.floor(s.basket), c.demand - c.filled); if (k <= 0) return s;
+   // One payout function (sim/payout.ts) for credit and every UI preview.
+-  const price = eggPriceCents(s.farmLevel, s.collectionLevel, b), value = saleValueCents(s, k, b), filled = c.filled + k, done = filled >= c.demand;
++  const price = salePriceCents(s, b), value = saleValueCents(s, k, b), filled = c.filled + k, done = filled >= c.demand;
+   ev?.push({ type: 'sell', id, k, N: c.demand, price, value, by });
+   if (done) ev?.push({ type: 'customer_served', id, N: c.demand, partial: c.filled > 0 });
+   const customers = done ? s.customers.filter(x => x.id !== id) : s.customers.map(x => x.id === id ? { ...x, filled } : x);
+@@ -22,16 +27,38 @@ export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'pla
+ function buy(s: GameState, kind: 'collection' | 'farm', b: Balance, ev?: Sink): GameState {
+   const L = kind === 'collection' ? s.collectionLevel : s.farmLevel; if (L >= b.maxLevel) return s;
+   const cost = (kind === 'collection' ? collectionCost : farmCost)(L, b) * 100; if (s.coinsCents < cost) return s;
+-  ev?.push({ type: 'upgrade', upgrade: kind, newLevel: L + 1, cost, coinsBefore: s.coinsCents });
++  ev?.push({ type: 'upgrade', upgrade: kind, newLevel: L + 1, cost, coinsBefore: s.coinsCents, ...(m4On(b) ? { track: kind } : {}) });
+   return { ...s, coinsCents: s.coinsCents - cost, ...(kind === 'collection' ? { collectionLevel: L + 1 } : { farmLevel: L + 1 }) };
+ }
++/** M4-A: buy one Hens / Egg value level; refused at the cap (min(F+3, max)) or when unaffordable. Flag off => no-op. */
++function buyTrack(s: GameState, t: Track, b: Balance, ev?: Sink): GameState {
++  if (!m4On(b) || trackLock(s, t, b)) return s;
++  const L = trackLevel(s, t), cost = trackCost(L, t, b) * 100; if (s.coinsCents < cost) return s;
++  ev?.push({ type: 'upgrade', upgrade: t, newLevel: L + 1, cost, coinsBefore: s.coinsCents, track: t === 'hens' ? 'hens' : 'egg_value' });
++  return { ...s, coinsCents: s.coinsCents - cost, ...(t === 'hens' ? { hensLevel: L + 1 } : { eggValueLevel: L + 1 }) };
++}
++/** Emits milestone_reached for ids newly reached by a level change (Farm can unlock Jumbo and Balanced tiers too). */
++function withMilestones(before: GameState, after: GameState, b: Balance, ev?: Sink): GameState {
++  if (after === before || !ev || !m4On(b)) return after;
++  const had = new Set(reachedMilestones(before, b));
++  const M = b.m4!.milestones;
++  for (const id of reachedMilestones(after, b)) if (!had.has(id)) {
++    const [kind, n] = id.split(':'), k = +n; // M4A-34 payloads
++    if (kind === 'hens') ev.push({ type: 'milestone_reached', id, track: 'hens', level: k, mult: M.hens.find(m => m.level === k)!.offlineMult });
++    else if (kind === 'grade') ev.push({ type: 'milestone_reached', id, track: 'egg_value', level: k, mult: M.grades.find(g => g.level === k)!.mult });
++    else ev.push({ type: 'balanced_tier', id, tier: k, min_level: Math.min(after.farmLevel, after.hensLevel, after.eggValueLevel) });
++  }
++  return after;
++}
+ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink): GameState {
+   switch (a.type) {
+     case 'collect': { const n = Math.min(Math.floor(s.coop), eggsPerTap(s.collectionLevel, b)); ev?.push({ type: 'collect', eggs: n }); return { ...s, coop: s.coop - n, basket: s.basket + n }; }
+     case 'sell': return sellTo(s, a.customerId, b, ev);
+     case 'sellAll': { let r = s; for (const c of s.customers) { if (r.basket < 1) break; r = sellTo(r, c.id, b, ev); } return r; }
+     case 'buyCollection': return buy(s, 'collection', b, ev);
+-    case 'buyFarm': return buy(s, 'farm', b, ev);
++    case 'buyFarm': return withMilestones(s, buy(s, 'farm', b, ev), b, ev);
++    case 'buyTrack': return withMilestones(s, buyTrack(s, a.track, b, ev), b, ev);
++    case 'markMilestones': { const add = a.ids.filter(id => !s.celebratedMilestones.includes(id)); return add.length ? { ...s, celebratedMilestones: [...s.celebratedMilestones, ...add] } : s; }
+     case 'hire': {
+       const id = a.worker; if (s.workers[id] || s.farmLevel < unlockFarm(id, b)) return s;
+       const cost = hireCostCents(id, b); if (s.coinsCents < cost) return s;
+diff --git a/src/sim/payout.ts b/src/sim/payout.ts
+index 019c615..548b456 100644
+--- a/src/sim/payout.ts
++++ b/src/sim/payout.ts
+@@ -1,7 +1,8 @@
+ /** The one sale-payout function (QA BUG-1/2, Product rule: every money preview == amount credited, to the cent).
+  *  sellTo credits it; the Sell all label, '+$X' popup and order cards preview it. */
+ import type { Balance } from '../config/balance';
+-import { type GameState, eggPriceCents } from './state';
++import type { GameState } from './state';
++import { salePriceCents } from './tracks';
+ import { graderMult } from './workers';
+ /** Price multipliers applied to a sale, in order. M4 adds streak / frenzy entries here (one place for credit + previews). */
+ export function saleMultipliers(s: GameState, b: Balance): number[] {
+@@ -9,7 +10,7 @@ export function saleMultipliers(s: GameState, b: Balance): number[] {
+ }
+ /** Cents credited for selling k eggs now: exact k x price with no multiplier, else round(k x price x mult). */
+ export function saleValueCents(s: GameState, k: number, b: Balance): number {
+-  const base = eggPriceCents(s.farmLevel, s.collectionLevel, b), m = saleMultipliers(s, b).reduce((a, x) => a * x, 1);
++  const base = salePriceCents(s, b), m = saleMultipliers(s, b).reduce((a, x) => a * x, 1);
+   return m === 1 ? k * base : Math.round(k * base * m);
+ }
+ /** Preview of Sell all: same per-customer walk as the 'sellAll' action. */
+diff --git a/src/ui/app.ts b/src/ui/app.ts
+index a409517..9d4dcd1 100644
+--- a/src/ui/app.ts
++++ b/src/ui/app.ts
+@@ -5,7 +5,8 @@ import { IOS_FLAG_ENABLED } from './ios-tip';
+ import type { Balance } from '../config/balance';
+ import type { Game, GameEvent } from '../game';
+ import * as S from '../sim/state';
+-import { fmtCount, fmtMoney, fmtMoneyExact, fmtAway, fmtTimeToAfford, IncomeRate } from './format';
++import { fmtMoneyShort } from './format';
++import { fmtCount, fmtMoney, fmtMoneyExact, fmtAway, fmtTimeToAfford, fmtAffordableIn, IncomeRate } from './format';
+ import { TapFx, Throttle } from './fx';
+ import type { Audio, SfxName } from './audio';
+ import { resetProgress, keepPrefsOnly } from '../save/save';
+@@ -15,6 +16,11 @@ import { visibleOrders, stripSplit, stripSplitAt, slotPreview, slotAdded, sellAl
+ const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
+ import { OrderList } from './order-list';
+ import { saleValueCents, sellAllPreview } from '../sim/payout';
++import { graderMult } from '../sim/workers';
++import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hensMilestone, gradeMult } from '../config/formulas';
++import { salePriceCents, coopCap, trackLevel, trackCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
++import { DualPicker, ROW_OF_KEY, type SharedPick } from './pick-hysteresis';
++import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, hensMilestoneEffect, gradeEffect } from './tracks-ui';
+ import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
+ import type { Recovery } from '../save/save';
+ import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onboarding';
+@@ -72,7 +78,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+     </div>
+     <div class="collectbar">
+       <div class="meter" id="meter"><i id="meterFill"></i><span class="num" id="meterText"></span></div>
+-      <button class="goal" id="goal" type="button" aria-live="off"><img class="goal-ic" src="${A('icon-goal.svg')}" alt=""><span class="goal-label"></span><span class="goal-status num"></span><span class="goal-chev" aria-hidden="true">›</span></button>
++      <button class="goal" id="goal" type="button" aria-live="off"><span class="goal-pill"><img class="goal-ic" src="${A('icon-goal.svg')}" alt=""><span class="goal-label"></span><span class="goal-status num"></span><span class="goal-chev" aria-hidden="true">›</span></span></button>
+       <div class="sr" aria-live="polite" id="goalLive"></div>
+       <button class="btn xl" id="collect"></button>
+     </div></main>`);
+@@ -148,7 +154,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+   const setP = (el: HTMLElement, p: number) => { const v = (Math.round(Math.min(1, Math.max(0, p)) * 120) / 120).toFixed(4); if (el.style.getPropertyValue('--p') !== v) el.style.setProperty('--p', v); };
+   /** WebKit perf: a same-value `hidden`/attribute write still invalidates style every frame; write only on change. */
+   const setHidden = (el: HTMLElement, v: boolean) => { if (el.hidden !== v) el.hidden = v; };
+-  const showToast = (text: string) => { toast.textContent = text; /* F1: below the queue strip, never over it (measured after this frame's render) */ const place = () => { const qb = queueEl.getBoundingClientRect().bottom; const below = qb > 0 && !docked.matches; toast.style.top = below ? `${Math.round(qb + 8)}px` : ''; toast.classList.toggle('below', below); }; place(); requestAnimationFrame(place); toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1300); };
++  const showToast = (text: string, atHud = false) => { toast.textContent = text; /* F1: below the queue strip, never over it (measured after this frame's render). M4-A tier/milestone toasts (Art&UX 02:54 #1): top-centre under the HUD (HUD bottom + 8px), same host/z-index above sheets. */ const place = () => { if (atHud) { toast.style.top = `${Math.round(Math.max(0, hud.getBoundingClientRect().bottom) + 8)}px`; toast.classList.remove('below'); return; } const qb = queueEl.getBoundingClientRect().bottom; const below = qb > 0 && !docked.matches; toast.style.top = below ? `${Math.round(qb + 8)}px` : ''; toast.classList.toggle('below', below); }; place(); requestAnimationFrame(place); toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = window.setTimeout(() => { toast.classList.remove('show'); const nx = toastQ.shift(); if (nx !== undefined) window.setTimeout(() => showToast(nx, true), 250); }, 1300); };
++  /** M4-A: several milestones can land in one buy (e.g. Hens L20 + Balanced 4/5); each gets its own toast, in order, never overwritten. */
++  const toastQ: string[] = [];
++  const queueToasts = (texts: string[]) => { if (!texts.length) return; if (toast.classList.contains('show')) toastQ.push(...texts); else { showToast(texts[0], true); toastQ.push(...texts.slice(1)); } };
+   const pulse = (el: Element) => retrigger(el, 'pulse');
+ 
+   // ---------- Panels ----------
+@@ -216,7 +225,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+     // S2-4a: decide from the live state, not the button's aria-disabled (which can be a frame or more stale).
+     const kind = bt.dataset.act, wid = bt.dataset.w as any;
+     if (kind) { if (!act(kind === 'hire' ? { type: 'hire', worker: wid } : kind === 'manage' ? { type: 'manage', worker: wid } : kind === 'manageAll' ? { type: 'manageAll' } : { type: 'buyGraderTier' })) return cantAfford(bt); dirty = true; return; }
+-    lastBuyBtn = bt; if (!act({ type: bt.dataset.kind === 'farm' ? 'buyFarm' : 'buyCollection' })) return cantAfford(bt);
++    lastBuyBtn = bt; const bk = bt.dataset.kind;
++    if (!act(bk === 'hens' || bk === 'eggValue' ? { type: 'buyTrack', track: bk } : { type: bk === 'farm' ? 'buyFarm' : 'buyCollection' })) return cantAfford(bt);
+     // F5: one tap = one dispatch; act() has already redrawn the sheet with the new level/price (S2-10).
+   });
+   let lastBuyBtn: HTMLElement | null = null;
+@@ -275,11 +285,15 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+   const dwell = new ServedDwell(b.feel.served_dwell_ms), dwellEls = new Map<number, HTMLElement>();
+   const moreChip = h(`<button class="chip more" type="button"></button>`);
+   let qTagShown = false;
++  /** Art&UX 02:54 #2/#3: leaving / turned-away customers draw inside the strip (clipped to it, under the .qtag), chip-wide, never past x=0. */
++  const ghostHost = h(`<div class="ghosts" aria-hidden="true"></div>`);
+   const ghost = (at: DOMRect | null, cls: string, bubble?: { text: string; cls: string }) => {
+-    const q = queueEl.getBoundingClientRect(); const r = at ?? new DOMRect(q.right - 64, q.top, 64, 72);
+-    const el = h(`<div class="ghost ${cls}" style="left:${r.left}px;top:${r.top - 12}px">${bubble ? `<span class="bubble ${bubble.cls}">${bubble.text}</span>` : ''}<img src="${A('icon-customer.svg')}" alt=""></div>`);
++    const q = queueEl.getBoundingClientRect(); const w = Math.round(at?.width || 56); const r = at ?? new DOMRect(q.right - w, q.top, w, 72);
++    const left = Math.max(0, Math.min(Math.round(r.left - q.left), Math.round(q.width - w))), top = Math.max(0, Math.round(r.top - q.top - 12));
++    const el = h(`<div class="ghost ${cls}" style="left:${left}px;top:${top}px;width:${w}px">${bubble ? `<span class="bubble ${bubble.cls}">${bubble.text}</span>` : ''}<img src="${A('icon-customer.svg')}" alt=""></div>`);
+     if (rm() && bubble) el.querySelector('img')!.remove(); // reduced motion: bubble fade only
+-    spawn(el, 1500);
++    if (live.length >= 30) live.shift()?.remove();
++    ghostHost.append(el); live.push(el); setTimeout(() => { el.remove(); const i = live.indexOf(el); if (i >= 0) live.splice(i, 1); }, 1500);
+   };
+   const renderQueue = () => {
+     const s = g.state, slots = S.queueMax(s.farmLevel, b), patience = S.patienceS(s.farmLevel, b);
+@@ -314,7 +328,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+     const needEmpty = Math.max(0, stripSlots - kids.length);
+     while (empties.length < needEmpty) empties.push(h(`<div class="chip empty" aria-hidden="true"></div>`));
+     empties.length = needEmpty;
+-    const want = [...kids, ...empties];
++    const want = [...kids, ...empties, ghostHost];
+     if (want.some((el, i) => queueEl.children[i] !== el) || queueEl.children.length !== want.length + (qTagShown ? 1 : 0)) {
+       for (const el of want) if (!chipBorn.has(el)) chipBorn.set(el, now());
+       queueEl.replaceChildren(...want); qTagShown = false;
+@@ -322,11 +336,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+     // Queue full cue (amber outline + tag), informational
+     const full = s.customers.length >= slots;
+     queueEl.classList.toggle('full', full);
+-    if (full && !qTagShown) { queueEl.append(h(`<span class="qtag">Queue full</span>`)); qTagShown = true; }
++    if (full && !qTagShown) { queueEl.append(h(`<span class="qtag"><span class="q-long">Queue full</span><span class="q-short">Full</span></span>`)); qTagShown = true; }
+     // Slot unlock moment (first reach of a new slot count; once, persisted)
+     if (slots > flags.seenSlots) {
+       flags.seenSlots = slots; saveFlags();
+-      const newSlot = empties[empties.length - 1] ?? queueEl.lastElementChild;
++      const newSlot = empties[empties.length - 1] ?? kids[kids.length - 1];
+       if (newSlot && !rm()) { retrigger(newSlot, 'unlock'); sparkle(newSlot, 4); }
+       slotToastPending = slotAdded(s.farmLevel, b);
+     }
+@@ -369,7 +383,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+       case 'customer_partial': { dwell.gone(e.id); const r = chips.get(e.id)?.getBoundingClientRect() ?? null; ghost(r, rm() ? '' : 'wave leave'); sfx('customerLeave'); break; }
+       case 'customer_lost':
+         if (e.reason === 'timeout') { const r = e.id ? chips.get(e.id)?.getBoundingClientRect() ?? null : null; ghost(r, rm() ? '' : 'wave leave', { text: 'Sold out!', cls: 'soldout' }); sfx('customerLeave'); }
+-        else if (qfullCue.ready()) { ghost(null, rm() ? '' : 'walkoff', { text: 'Queue full!', cls: 'qfull' }); sfx('customerLeave'); }
++        else if (qfullCue.ready()) { ghost(null, rm() ? '' : 'walkoff') /* Art&UX 01:17 #3: no tag of its own; only the strip's .qtag says Queue full */; sfx('customerLeave'); }
+         break;
+       case 'upgrade': {
+         sfx('upgrade'); const src = lastBuyBtn ?? uRow;
+@@ -386,12 +400,16 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+   // ---------- M3-AC5 next-goal strip ----------
+   const goalBtn = $<HTMLButtonElement>('#goal'), goalLbl = $('.goal-label', goalBtn), goalSt = $('.goal-status', goalBtn), goalLive = $('#goalLive');
+   let hlSel = '', hlUntil = 0, goalLiveT = 0;
++  // M4A-18 v1.4 / M4A-41: one shared picker for the highlight and the hint (replaces the holdTicks = 2 hold).
++  const picker = new DualPicker(); let rowPick: SharedPick | null = null, hintPick: SharedPick | null = null; let rowHl: RowKey | null = null;
+   const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
+   const renderGoal = () => {
+     const t = now();
+-    if (!goalNow && t - goalTickAt < 1000) return; // 1 Hz UI tick; purchases bypass
+-    const imm = goalNow; goalNow = false; goalTickAt = t;
+-    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t)), imm); goalShown = gl;
++    const M4 = m4On(b), prevKey = hintPick?.key;
++    if (M4) { const r = picker.tick(g.state, b, t); rowPick = r.highlight; hintPick = r.hint; rowHl = rowPick ? ROW_OF_KEY[rowPick.key] ?? null : null; } // every state change + 5 s re-check
++    if (!goalNow && t - goalTickAt < 1000 && !(M4 && hintPick?.key !== prevKey)) return; // 1 Hz text tick; purchases / pick changes bypass
++    const imm = goalNow || M4; goalNow = false; goalTickAt = t;
++    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t), M4 ? hintPick?.key : undefined), imm); goalShown = gl;
+     setText(goalLbl, gl.label); setText(goalSt, gl.status);
+     goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
+     goalBtn.setAttribute('aria-label', goalAria(gl));
+@@ -426,15 +444,17 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+     const arrow = (a: string, z: string) => max ? `${a}` : `${a} <span class="arrow">→</span> ${z}`;
+     const price = (f: number, c: number) => fmtMoney(S.eggPriceCents(f, c, b));
+     const slotLines = isF && !max ? slotPreview(S.queueMax(F, b), S.queueMax(F + 1, b), S.demandRange(F, b) as [number, number], S.demandRange(F + 1, b) as [number, number], A('icon-customer.svg')) : null;
++    const M4 = m4On(b);
+     const fx = isF ? [
+-      `Hens ${arrow(fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b)))}`,
+-      `Coop capacity ${arrow(fmtCount(S.coopCapacity(F, b)), fmtCount(S.coopCapacity(F + 1, b)))}`,
+-      `Egg price ${arrow(price(F, C), price(F + 1, C))}`,
++      ...(M4 ? [`Hens & Egg value up to L${hensCap(F, b)} ${max ? '' : `<span class="arrow">→</span> L${hensCap(F + 1, b)}`}`]
++        : [`Hens ${arrow(fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b)))}`]),
++      `Coop capacity ${arrow(fmtCount(M4 ? trackCoopCapacity(F, s.hensLevel, b) : S.coopCapacity(F, b)), fmtCount(M4 ? trackCoopCapacity(F + 1, s.hensLevel, b) : S.coopCapacity(F + 1, b)))}`,
++      ...(M4 ? [] : [`Egg price ${arrow(price(F, C), price(F + 1, C))}`]),
+       ...(!max && slotLines ? [] : [`Customers every ${arrow(`${S.customerIntervalS(F, b)}s`, `${S.customerIntervalS(F + 1, b)}s`)}`,
+       `Customer demand ${arrow(S.demandRange(F, b).join('–'), S.demandRange(F + 1, b).join('–'))}`]),
+     ] : [
+       `Eggs per tap ${arrow(fmtCount(S.eggsPerTap(C, b)), fmtCount(S.eggsPerTap(C + 1, b)))}`,
+-      `Egg price ${arrow(price(F, C), price(F, C + 1))}`,
++      ...(M4 ? [] : [`Egg price ${arrow(price(F, C), price(F, C + 1))}`]),
+     ];
+     const nextTier = [5, 10, 20].find(t => t > F);
+     let hint = '';
+@@ -446,21 +466,45 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+       } else hint = `<div class="hint">Need ${fmtMoney(cost * 100 - s.coinsCents)} more</div>`;
+     } else if (!max) hint = `<div class="hint" aria-hidden="true"></div>`;
+     // 4.6c Limited by coop (Collection row): next tap > 50% of current coop cap. Advisory only.
+-    if (!isF && !max && S.eggsPerTap(C + 1, b) > 0.5 * S.coopCapacity(F, b))
++    if (!isF && !max && S.eggsPerTap(C + 1, b) > 0.5 * coopCap(s, b))
+       hint += `<div class="hint coop"><img src="${A('icon-coop.svg')}" alt="">Limited by coop · <button class="link">Upgrade Farm →</button></div>`;
+-    return `<div class="up">
++    return `<div class="up"${max ? ` role="group" aria-label="${isF ? 'Farm level' : 'Collect per tap'}, level ${L}, max."` : ''}>
+       <div class="ic">${isF ? `<img src="${A('icon-coop.svg')}" alt="">` : `<span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>`}<span class="lv">L${L}</span></div>
+       <div class="col"><h3>${isF ? 'Farm level' : 'Collect per tap'}</h3>
+       ${isF && nextTier ? `<div class="tier"><img src="${A('icon-coop.svg')}" alt="">Coop upgrade at L${nextTier}</div>` : ''}
+       <ul class="fx">${slotLines ?? ''}${fx.map(l => `<li>${l}</li>`).join('')}</ul>
+       <div class="meta">Level ${L} / ${b.maxLevel}</div>
+-      ${max ? `<button class="btn maxed" tabindex="-1">MAX</button>` :
++      ${max ? `<span class="maxed" aria-hidden="true">MAX</span>` :
+         `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`}
+       <div>${hint}</div></div></div>`;
+   };
++  /** M4-A Option A: Hens / Egg value rows (art-ux/m4-tracks-copy.md), reusing the .up row component. */
++  const trackRowHtml = (t: Track) => {
++    const s = g.state, F = s.farmLevel, H = s.hensLevel, V = s.eggValueLevel, L = trackLevel(s, t), lock = trackLock(s, t, b);
++    const cost = trackCost(L, t, b), can = !lock && s.coinsCents >= cost * 100, name = t === 'hens' ? 'Hens' : 'Egg value';
++    const arrow = (a: string, z: string) => lock ? a : `${a} <span class="arrow">→</span> ${z}`;
++    const fx = t === 'hens'
++      ? [`Eggs/s ${arrow(fmtCount(trackEggsPerSec(H, b)), fmtCount(trackEggsPerSec(H + 1, b)))}`]
++      : [`Egg price ${arrow(fmtMoneyShort(trackPriceCents(F, H, V, b)), fmtMoneyShort(trackPriceCents(F, H, V + 1, b)))}`];
++    const right = lock === 'max' ? `<span class="maxed" aria-hidden="true">MAX</span>`
++      : lock === 'cap' ? `<div class="lock" aria-label="${name}, level ${L}, locked. Needs Farm level ${F + 1}.">${trackLockText(F)}</div>`
++      : `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${t}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`;
++    const best = rowHl === t ? (rowPick?.affordable ? ' best' : ' best pending') : '';
++    const mh = milestoneHint(t, L, F, b), eta = best === ' best pending' ? `<div class="hint eta">${fmtAffordableIn(income.secondsToAfford(now(), (rowPick?.costCents ?? 0) - s.coinsCents))}</div>` : '';
++    return `<div class="up track${best}" data-track="${t}"${lock === 'max' ? ` role="group" aria-label="${name}, level ${L}, max."` : ''}>
++      <div class="ic"><img src="${A(t === 'hens' ? 'char-chicken.svg' : 'icon-egg.svg')}" alt=""><span class="lv">L${L}</span></div>
++      <div class="col"><h3>${name}</h3><ul class="fx">${fx.map(l => `<li>${l}</li>`).join('')}</ul>${mh ? `<div class="ms-hint">${mh}</div>` : ''}${eta}
++      <div class="meta">Level ${L} / ${b.maxLevel}</div>${right}</div></div>`;
++  };
++  const farmTabHtml = () => {
++    const s = g.state, st = balancedStrip(s, b);
++    const segs = balancedSegments(s, b).map(g => `<i class="${g.weakest ? 'weakest' : ''}" data-track="${g.track}"><b style="width:${Math.round(g.fill * 100)}%"></b></i>`).join('');
++    return `<div class="tracks"><div class="balanced" role="img" aria-label="${balancedStripText(s, b, true)}"><div class="segs">${segs}</div><span>${balancedStripText(s, b)}</span></div>
++      ${trackRowHtml('hens')}${trackRowHtml('eggValue')}${upRowHtml('farm').replace('<div class="up"', `<div class="up${rowHl === 'farm' ? (rowPick?.affordable ? ' best' : ' best pending') : ''}" data-track="farm"`)}</div>`;
++  };
+   let lastUp = '', ordersExpanded = false;
+   function render() {
+-    const s = g.state, F = s.farmLevel, cap = S.coopCapacity(F, b), coopWhole = Math.floor(s.coop);
++    const s = g.state, F = s.farmLevel, cap = coopCap(s, b), coopWhole = Math.floor(s.coop);
+     setText(coinsEl, fmtMoney(s.coinsCents)); setText(basketEl, fmtCount(s.basket));
+     // coop tier + celebration (once per first reach, persisted in save)
+     const tier = S.coopTier(F);
+@@ -470,6 +514,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+       if (!rm()) { retrigger(coopImg, 'bounce'); sparkle(coopImg, 8); }
+       showToast(slotToastPending ? 'Coop upgraded! +1 customer slot' : 'Coop upgraded!'); slotToastPending = false;
+     }
++    // M4-A milestone toasts: once per save (celebratedMilestones), never for ones seeded by the v7 migration.
++    { const pend = pendingMilestones(s, b); if (pend.length) { g.dispatch({ type: 'markMilestones', ids: pend }); queueToasts(pend.map(id => milestoneToast(id, b))); } }
+     renderQueue();
+     if (slotToastPending) { showToast('Coop upgraded! +1 customer slot'); slotToastPending = false; }
+     // hens
+@@ -511,12 +557,12 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
+       orderList.update({ customers: s.customers, basket, unit, visible: vis, expanded: ordersExpanded, rm: rm(), waitingLen: waiting.read(s.customers.length) });
+       mRows.querySelectorAll<HTMLElement>('.order[data-row]').forEach(r => { const c = s.customers.find(x => x.id === +r.dataset.row!); if (c) setP(r.querySelector('.av') as HTMLElement, c.waitedS / patience); });
+       const ni = $('#nextIn'); if (ni) setText(ni, `(${Math.ceil(s.nextCustomerInS)}s)`);
+-      const { eggs, cents } = sellAllPreview(s, b);
++      const { eggs, cents } = sellAllPreview(s, b); // same per-order Grader math + rounding as the sellAll action
+       setText(sellAllBtn, sellAllLabel(eggs, cents, fmtCount, fmtMoney)); setDisabled(sellAllBtn, eggs === 0);
+     }
+     if (open === 'upgrades' || docked.matches) {
+       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+-      const html = tab === 'workers' ? workersHtml(s, b) : upRowHtml(tab);
++      const html = tab === 'workers' ? workersHtml(s, b) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
+       if (html !== lastUp) { lastUp = html; uRow.innerHTML = html; if (hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
+     }
+     pendingLvPop = false;
+diff --git a/src/ui/format.ts b/src/ui/format.ts
+index 2af2e11..ae46cbf 100644
+--- a/src/ui/format.ts
++++ b/src/ui/format.ts
+@@ -1,19 +1,22 @@
+ /** Display formatters (layout-spec §1, feature-spec F7). Pure; unit-tested. */
+-const TIERS: [number, string][] = [[1e3, 'K'], [1e6, 'M'], [1e9, 'B'], [1e12, 'T']];
+-/** BUG-3: round first, then pick the suffix (999,960 -> "1M", never "1000K"). K: 1 decimal; M+: 2 under 10, else 1. */
+-export const fmtCount = (n: number) => {
++const TIERS: [number, string][] = [[1e12, 'T'], [1e9, 'B'], [1e6, 'M'], [1e3, 'K']];
++/** FMT-1/FMT-2: integer rounding (9,995,000 -> 10M, not float 9.99M), a tier that rounds to 1000 rolls up (999,950 -> 1M), T tier, '—' for NaN/Infinity. */
++export const fmtCount = (n: number): string => {
++  if (!Number.isFinite(n)) return '—';
+   n = Math.floor(n);
+   if (n < 1e4) return n.toLocaleString('en-US');
+-  let i = TIERS.length - 1; while (i > 0 && n < TIERS[i][0]) i--;
+-  for (;; i++) {
+-    const [d, u] = TIERS[i], v = n / d, dp = i === 0 || v >= 10 ? 1 : 2, r = v.toFixed(dp);
+-    if (+r >= 1000 && i < TIERS.length - 1) continue;
+-    return r.replace(/\.?0+$/, '') + u;
++  for (let i = 0; i < TIERS.length; i++) {
++    const [base, u] = TIERS[i]; if (n < base) continue;
++    const dp = u === 'K' || n >= base * 10 ? 1 : 2, v = Math.round(n / (base / 10 ** dp)) / 10 ** dp;
++    if (v >= 1000 && i > 0) /* TIERS[i-1] is the next larger tier */ return (Math.round(n / (TIERS[i - 1][0] / 100)) / 100).toFixed(2).replace(/\.?0+$/, '') + TIERS[i - 1][1];
++    return (v >= 1000 ? Math.round(v).toLocaleString('en-US') : v.toFixed(dp).replace(/\.?0+$/, '')) + u;
+   }
++  return n.toLocaleString('en-US'); // unreachable for n >= 1e4 (K matches); keeps the return type total
+ };
+ /** Coins: always 2 decimals under 1K ($12.40), "$1,234.50" under 10K, then $12.3K / $1.2M. */
+ export const fmtMoney = (cents: number) => {
+-  const d = cents / 100;
++  if (!Number.isFinite(cents)) return '—';
++  const d = Math.round(cents) / 100; // whole cents first, so $9,999.996 -> $10K, not "$10,000.00"
+   if (d < 10_000) return '$' + d.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+   return '$' + fmtCount(d);
+ };
+@@ -44,13 +47,19 @@ export class IncomeRate {
+   }
+   secondsToAfford(now: number, needCents: number) { const r = this.centsPerSec(now); return needCents <= 0 ? 0 : r > 0 ? needCents / r : null; }
+ }
+-/** Art & UX compact money for pops/cards: "$12.50" under $1,000, then "$1.2K" / "$3.4M".
+- *  Default floors to 1 decimal (never above the true amount). Pass round:'nearest' only if a call site needs it. */
+-export const fmtMoneyShort = (cents: number, opts?: { round?: 'floor' | 'nearest' }) => {
+-  const d = cents / 100; if (d < 1000) return fmtMoney(cents);
+-  const [v, u] = d >= 1e12 ? [d / 1e12, 'T'] : d >= 1e9 ? [d / 1e9, 'B'] : d >= 1e6 ? [d / 1e6, 'M'] : [d / 1e3, 'K'];
+-  const q = (opts?.round ?? 'floor') === 'nearest' ? Math.round(v * 10) / 10 : Math.floor(v * 10) / 10;
+-  return '$' + q.toFixed(1).replace(/\.0$/, '') + u;
++/** Art & UX compact money for pops/cards: "$12.50" under $1,000, then "$1.2K" / "$3.4M" / "$1.2T" (1 decimal, half-up on whole
++ * cents like fmtCount/fmtMoney; a tier that rounds to 1000 rolls up: $999,950 -> "$1M"; thousands separator above 1,000T). */
++export const fmtMoneyShort = (cents: number, opts?: { round?: 'nearest' | 'floor' }) => {
++  const rnd = opts?.round === 'floor' ? Math.floor : Math.round; // floor: never above the true amount (Sell preview, HoP 15:14)
++  if (!Number.isFinite(cents)) return '—';
++  const c = Math.round(cents); if (c < 100_000) return fmtMoney(c);
++  for (let i = 0; i < TIERS.length; i++) {
++    const [base, u] = TIERS[i]; if (c < base * 100) continue;
++    const v = rnd(c / (base * 10)) / 10; // base*10 cents = 0.1 unit, an exact integer
++    if (v >= 1000 && i > 0) return '$' + rnd(c / (TIERS[i - 1][0] * 10)) / 10 + TIERS[i - 1][1];
++    return '$' + v.toLocaleString('en-US', { maximumFractionDigits: 1 }) + u;
++  }
++  return fmtMoney(c);
+ };
+ /** Sell-button preview only (HoP 15:14): exact under $1K; at $1K+ short form floored so the button never shows more than the credit. */
+ export const fmtMoneyPreview = (cents: number) => fmtMoneyShort(cents, { round: 'floor' });
+@@ -59,3 +68,11 @@ export const fmtMoneyExact = (cents: number) => {
+   if (!Number.isFinite(cents)) return '—';
+   return '$' + (cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+ };
++/** Upgrade-card ETA (Product copy, Oct 16; same as rc1/ux-clarity format.ts): "Affordable in a moment" under 10 s; "Affordable in ~m:ss"; "~h:mm:ss" from 1 h; no income "Affordable in —". */
++export const fmtAffordableIn = (seconds: number | null) => {
++  if (seconds === null || !isFinite(seconds)) return 'Affordable in —';
++  const s = Math.max(0, Math.ceil(seconds));
++  if (s < 10) return 'Affordable in a moment';
++  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60, p = (n: number) => String(n).padStart(2, '0');
++  return `Affordable in ~${h ? `${h}:${p(m)}` : m}:${p(r)}`;
++};
+diff --git a/src/ui/styles.css b/src/ui/styles.css
+index 0a53da1..1f10f34 100644
+--- a/src/ui/styles.css
++++ b/src/ui/styles.css
+@@ -36,7 +36,8 @@ img{user-select:none;-webkit-user-drag:none}
+ @keyframes glow{50%{box-shadow:var(--shadow),0 0 0 3px rgb(61 127 51/.35)}}
+ .btn.secondary{background:var(--c-white);min-height:44px}.btn.danger{background:var(--c-barn);color:#fff;min-height:44px}
+ .btn[aria-disabled=true]{background:var(--c-disabled);color:var(--c-muted);box-shadow:none;animation:none}
+-.btn.maxed{background:var(--c-gold);pointer-events:none;box-shadow:none}
++/* MAX is a label, not a button (m4-tracks-copy.md line 10, layout-spec.md lines 110/159): yolk pill, --c-text, no shadow, no press, not focusable */
++.maxed{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:var(--r-pill);background:var(--c-yolk);color:var(--c-text);font:700 var(--fs-base) var(--f-display);box-shadow:none;pointer-events:none;user-select:none}
+ .btn img{width:20px;height:20px}
+ .shake{animation:shake var(--t-med) linear}@keyframes shake{25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-4px)}}
+ .icon-btn{width:44px;height:44px;border-radius:var(--r-pill);border:0;background:transparent;display:grid;place-items:center;padding:0}.icon-btn img{width:28px;height:28px}
+@@ -66,7 +67,6 @@ img{user-select:none;-webkit-user-drag:none}
+ .ghost.walkoff{animation:walkoff 900ms 500ms ease-in forwards}@keyframes walkoff{to{transform:translateX(90px);opacity:0}}
+ .bubble{font:700 var(--fs-xs) var(--f-display);padding:1px 8px;border-radius:var(--r-pill);white-space:nowrap;margin-bottom:2px;border:var(--bw) solid var(--c-outline)}
+ .bubble.soldout{background:var(--c-cream);color:var(--c-text)}
+-.bubble.qfull{background:var(--c-yolk-dark);color:var(--c-text);animation:fadeout 1400ms ease forwards}
+ @keyframes fadeout{0%{opacity:0;transform:translateY(4px)}15%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0}}
+ .rm .ghost.walkoff,.rm .ghost.leave{animation:none}.rm .ghost.wave img{animation:none}
+ .scene{position:relative;aspect-ratio:4/3;max-height:100%;margin-inline:auto;width:min(100%,560px);min-height:0;align-self:center;cursor:pointer}
+@@ -412,12 +412,14 @@ html,body{overflow-x:hidden;max-width:100%}
+ /* Recovery dialog v1.1: Q export = full-width outlined secondary button below the primary */
+ /* AC14b v2.1 (art-ux/save-recovery-dialog.md §2) */
+ .recovery-layer{background:var(--c-scrim)}
+-.recovery-card{gap:0;border-color:var(--c-outline)}
++.recovery-card{border-color:var(--c-outline)}
++/* R1: v2.1 spacing only on the AC14b dialog; tab-guard + newer-save keep gap:12px */
++.recovery-layer[data-outcome] .recovery-card{gap:0}
+ .recovery-card .rc-icon{position:relative;display:inline-block;width:72px;height:72px;flex:none}.recovery-card .rc-icon img{width:72px;height:72px;display:block}
+ .rc-badge{position:absolute;right:-6px;bottom:-4px;box-sizing:border-box;width:28px;height:28px;border-radius:50%;border:2px solid #fff;color:#fff;font:700 16px/24px var(--f-body, Nunito, sans-serif);text-align:center}
+ .rc-badge.ok{background:var(--c-meadow-strong)}.rc-badge.new{background:var(--c-focus)}.rc-badge.warn{background:var(--c-wood-text)}
+-.recovery-card h2{margin-top:8px;line-height:1.2;color:var(--c-text)}.recovery-card p#rcB{margin-top:8px}
+-.recovery-card .rc-primary{margin-top:16px}
++.recovery-card h2{line-height:1.2;color:var(--c-text)}.recovery-layer[data-outcome] .recovery-card h2{margin-top:8px}.recovery-layer[data-outcome] .recovery-card p#rcB{margin-top:8px}
++.recovery-layer[data-outcome] .recovery-card .rc-primary{margin-top:16px}
+ .recovery-card .rc-link{margin-top:8px;min-width:120px;min-height:44px}
+ .recovery-card .rc-export-q{width:100%;min-height:44px;margin-top:12px;border-radius:999px;background:var(--c-white);color:var(--c-wood-text);border:2px solid var(--c-wood-text);box-shadow:none;font:700 16px var(--f-body, Nunito, sans-serif);cursor:pointer}
+ .recovery-card .rc-msg{margin-top:8px}.recovery-card .rc-msg:empty{margin-top:0}
+@@ -453,3 +455,54 @@ html,body{overflow-x:hidden;max-width:100%}
+ @media (prefers-reduced-motion:reduce){.tab-guard .recovery-card{animation:none}}
+ .reduced-motion .tab-guard .recovery-card{animation:none}
+ .tab-guard #tgPlay:focus{outline:3px solid #2B79A8;outline-offset:3px}
++.tab-guard #tgPlay{min-height:48px} /* art-ux/single-tab-guard/dialog.html .btn (was 44px via .rc-primary) */
++
++/* M4-A 3-row Farm screen (Option A) */
++.tracks{display:flex;flex-direction:column;gap:var(--s-3)}
++.tracks .balanced{display:flex;flex-direction:column;gap:var(--s-1);font:700 14px var(--f-body,inherit)}
++.tracks .balanced .segs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
++.tracks .balanced .segs i{height:8px;border-radius:4px;background:var(--c-dust,#d9cfc4);border:2px solid var(--c-outline);overflow:hidden;display:block}
++.tracks .balanced .segs i b{display:block;height:100%;background:var(--c-yolk,#f6c445)}
++.tracks .balanced .segs i.weakest{outline:2px solid var(--c-yolk-dark,#c8901a);outline-offset:1px}
++@media (prefers-reduced-motion:reduce){.tracks .balanced .segs i b{transition:none}}
++.up .lock{min-height:44px;display:flex;align-items:center;justify-content:flex-end;color:var(--c-ink,#3E2C23);font-weight:700}
++.up .lock::before{content:'';flex:none;width:12px;height:14px;margin-right:6px;background:
++  linear-gradient(var(--c-disabled),var(--c-disabled)) 0 6px/12px 8px no-repeat,
++  radial-gradient(circle at 50% 100%,transparent 2.5px,var(--c-disabled) 2.5px 4.5px,transparent 4.5px) 1px 0/10px 6px no-repeat;border-radius:2px} /* Art&UX 01:17 #4: CSS lock glyph in Dust (#CFC6BA), not the 🔒 emoji */
++
++/* M4A-18 next-goal highlight on one Farm-tab row (static outline; no motion) */
++.tracks .up.best{outline:3px solid var(--c-yolk-dark,#c8901a);outline-offset:-3px}
++.tracks .up .ms-hint{font:400 13px var(--f-body,'Nunito',inherit);color:var(--c-muted,#6b5e52)}
++.tracks .up.best.pending{outline-style:dashed}
++/* D5 (m3-next-goal-spec v1.0.1): button.goal is a 44px hit area (2px transparent padding-block); the visible 40px pill is
++   the inner span.goal-pill. The gap below goes 8px -> 4px (margin-bottom:-4px against the 8px column gap), so the row stays 48px. */
++:root{--goal-h:40px;--goal-hit:44px}
++.goal{display:block;height:auto;min-height:var(--goal-hit);padding:2px 0;margin-bottom:-4px;background:transparent;border:0;box-shadow:none;border-radius:var(--r-pill);animation:none}
++.goal-pill{display:grid;grid-template-columns:var(--goal-icon) minmax(0,1fr) auto 16px;gap:var(--s-2);align-items:center;width:100%;height:var(--goal-h);padding:0 var(--s-3);box-sizing:border-box;
++  border-radius:var(--r-pill);background:var(--c-white);border:2px solid var(--c-outline);box-shadow:var(--shadow);text-align:left;min-width:0}
++.goal[data-state=ready]{animation:none}
++.goal[data-state=ready] .goal-pill{border-color:var(--c-meadow-strong);animation:goalglow 4s infinite}
++.goal-pill>*{min-width:0}
++@media (max-width:379px){.goal-pill{grid-template-columns:var(--goal-icon) minmax(0,1fr) auto}}
++@media (min-width:960px) and (orientation:landscape){.goal{min-height:var(--goal-h-lg);padding:0;margin-bottom:0;height:auto}.goal-pill{height:var(--goal-h-lg)}}
++/* S2-6 (layout-spec §3.3, rc1): the "Queue full" tag straddles the strip's top outline, never over a chip or the "+N" tile; "Full" below 380px */
++.qtag{top:-9px;right:8px;height:18px;line-height:16px;z-index:1;pointer-events:none;white-space:nowrap;box-sizing:border-box;border:1px solid transparent}
++.qtag .q-short{display:none}
++@media (max-width:379px){.qtag .q-long{display:none}.qtag .q-short{display:inline}}
++@media (max-width:390px){.farm{padding-top:10px}} /* room for the tag's 9px overhang above the strip (farm padding is 8px here) */
++/* S2-6 (QA s2-7-bd0dc66: tag over the "+N" tile at 375/390 with 9/9): the strip reserves a 9px top band, so the tag's lower
++   half sits in it and never reaches a chip or the "+N" tile, at any chip size (64/56) or strip height. */
++.queue{padding-top:9px;min-height:81px}
++@media (max-height:699px){.queue{min-height:73px}}
++/* Art&UX 02:54 #2/#3: ghosts live in a strip-sized clip box under the Queue full tag; bubbles are chip-wide (56px max) and wrap */
++.queue>.ghosts{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;border-radius:inherit}
++.queue>.qtag{z-index:2}
++.ghosts .ghost{max-width:64px}
++.ghosts .bubble{max-width:100%;box-sizing:border-box;padding:1px 4px;white-space:normal;text-align:center;line-height:13px;overflow:hidden}
++/* Art&UX 02:54 #3 / layout-spec §3.3: the "Sold out!" tag stays above its chip for 800 ms while only the customer waves and slides out
++   (the whole ghost used to slide, dragging the tag out of the strip and past x=0) */
++.ghosts .ghost.leave{animation:none}
++.ghosts .ghost.wave.leave img{animation:wave 300ms ease-in-out,leave 240ms 300ms ease-in forwards}
++.ghosts .ghost.leave:not(.wave) img{animation:leave 240ms 300ms ease-in forwards}
++.ghosts .bubble.soldout{animation:fadeout 800ms ease forwards}
++.rm .ghosts .ghost img,.rm .ghosts .ghost.leave img{animation:none}
+diff --git a/tests/qa-rc1-bugs.test.ts b/tests/qa-rc1-bugs.test.ts
+index 15885b0..106097b 100644
+--- a/tests/qa-rc1-bugs.test.ts
++++ b/tests/qa-rc1-bugs.test.ts
+@@ -116,7 +116,7 @@ describe('BUG-4/5: FX lifetimes', () => {
+   it('leaving customer waves then slides out, and reduced motion cuts the slide', () => {
+     expect(css).toMatch(/\.ghost\.leave\{animation:leave 240ms 300ms/); expect(css).toMatch(/@keyframes leave\{to\{transform:translateX\(-80px\);opacity:0\}/);
+     expect(css).toMatch(/\.rm \.ghost\.walkoff,\.rm \.ghost\.leave\{animation:none\}/);
+-    expect(app).toMatch(/ghost\(r, rm\(\) \? '' : 'wave leave'\)/); expect(app).toMatch(/spawn\(el, 1500\)/);  // lives past 300 + 240 ms
++    expect(app).toMatch(/ghost\(r, rm\(\) \? '' : 'wave leave'\)/); expect(app).toMatch(/spawn\(el, 1500\)|live\.splice\(i, 1\); \}, 1500\)/);  /* #31: ghostHost + setTimeout 1500 */  // lives past 300 + 240 ms
+     expect(app).not.toMatch(/addEventListener\('animationend', kill/);                                       // no bubbled child animationend kill
+   });
+   it('merged +N floater re-arms its removal timer', () => {
+@@ -170,7 +170,7 @@ describe('S2-REL-1 / exact money wiring', () => {
+   it('sell popup and Thanks card use fmtMoneyExact', () => {
+     expect(app).toMatch(/fmtMoneyExact\(e\.value\)/);
+     expect(app).toMatch(/fmtMoneyExact\(d\.cents\)/);
+-    expect(app).not.toMatch(/fmtMoneyShort\(/);
++    expect(app).not.toMatch(/fmtMoneyShort\((?!trackPriceCents)/); // #31: unit Egg price row may use short form; sell money stays exact
+   });
+ });
+ 

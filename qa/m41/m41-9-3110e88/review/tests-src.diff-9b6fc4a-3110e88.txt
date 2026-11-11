@@ -1,0 +1,135 @@
+diff --git a/src/ui/format.ts b/src/ui/format.ts
+index 04f3086..bdbe8d9 100644
+--- a/src/ui/format.ts
++++ b/src/ui/format.ts
+@@ -15,9 +15,11 @@ type Rnd = (x: number) => number;
+  *  15 significant digits so the rounding/roll-up edges (9.995Sx -> 10Sx, 999.95No -> 1Dc) behave like their decimal value. */
+ const dec = (q: number, base: number) => base >= 1e15 ? Number(q.toPrecision(15)) : q;
+ const rndOf = (opts?: { round?: 'nearest' | 'floor' }): Rnd => opts?.round === 'floor' ? Math.floor : Math.round;
+-/** Scientific, 3 significant figures, no "+" in the exponent: 1.23e36. Floor mode never shows more than n. */
++/** Scientific, 3 significant figures, no "+" in the exponent: 1.23e36. Floor mode never shows more than n. CCR m1 on #64: the
++ *  mantissa x100 is snapped to 15 significant digits first (as dec() does for the tiers), so x.xx5 rounds half-up
++ *  (9.995e36 -> 1.00e37, 1.005e36 -> 1.01e36) and an exact 1.23e36 floors to itself. The snap replaces the old +1e-9 nudge. */
+ export const fmtSci = (n: number, rnd: Rnd = Math.round): string => {
+-  const [m, e] = n.toExponential(12).split('e'); let mant = rnd(parseFloat(m) * 100 + (rnd === Math.floor ? 1e-9 : 0)) / 100, exp = Number(e);
++  const [m, e] = n.toExponential(12).split('e'); let mant = rnd(Number((parseFloat(m) * 100).toPrecision(15))) / 100, exp = Number(e);
+   if (mant >= 10) { mant /= 10; exp += 1; }
+   return `${mant.toFixed(2)}e${exp}`;
+ };
+diff --git a/src/ui/orders.ts b/src/ui/orders.ts
+index 7f574ce..a4e2d46 100644
+--- a/src/ui/orders.ts
++++ b/src/ui/orders.ts
+@@ -38,7 +38,9 @@ export function orderView(c: Customer, basket: number, priceCents: number | ((k:
+   // MK-24 / HoP 15:14: visible button uses floored short money; aria uses fmtMoneyAria (= fmtMoneyExact below $1e15).
+   const wait = `Need ${eggs(rem)}`;
+   const button = state === 'wait' ? wait : `Sell ${eggsFloor(sell)} · +${preview(sellCents)}`;
+-  const buttonAria = state === 'wait' ? wait : `Sell ${eggsAria(sell)} · +${exact(sellCents)}`;
++  // Art ruling (4) on #64: the Sell aria follows the visible floored count ('Sell 12.9K'); where the visible text is as on main
++  // (under 10K, or floor == nearest) it stays byte-identical. The money stays exact (its visible form is unchanged from main).
++  const buttonAria = state === 'wait' ? wait : `Sell ${spellShort(eggsFloor(sell))} · +${exact(sellCents)}`;
+   const line = `${eggs(have)}/${eggs(want)}\u00a0eggs · ${value}`; // Art & UX: NBSP between count and eggs
+   const lineAria = `${eggsAria(have)} of ${eggsAria(want)} eggs delivered, order worth ${exact(valueCents)}`;
+   return { id: c.id, have, want, sell, valueCents, sellCents, state, line, lineAria, button, buttonAria };
+diff --git a/tests/m41-9-art-rulings.test.ts b/tests/m41-9-art-rulings.test.ts
+index 1a5cea5..d877b2e 100644
+--- a/tests/m41-9-art-rulings.test.ts
++++ b/tests/m41-9-art-rulings.test.ts
+@@ -1,4 +1,6 @@
+-/** M41-9: Art rulings on #56 (Art & UX, Oct 19 10:06), one test block per ruling, so each is pinned by name.
++/** M41-9: Art rulings on #56 (art-ux/number-format-big.md: the 09:45 ruling and the 10:10 addendum, rulings 1-4), one test block
++ *  per ruling, so each is pinned by name. Mapping (CCR n4): R1 = 10:10 ruling 1, R2 = ruling 2, R3 = ruling 3 (aria), R4 = ruling 3
++ *  (visible), R5 = ruling 4.
+  *  R1 compact money 1 decimal; counts + plain money 2 decimals under 10x the tier base.  R2 exactly 1e36 -> '1.00e36'.
+  *  R3 spell out only Qa+ and only in aria/live; K–T aria/live byte-identical to main ('$1M').  R4 visible pops/floaters never
+  *  spelled ('$1.2Qa').  R5 Sell floor approved (previews never above the credit). */
+@@ -96,7 +98,7 @@ describe("QA4-1: the order card keeps 'eggs' whole (count and $ never truncate)"
+   const css = readFileSync('src/ui/styles.css', 'utf8'), list = readFileSync('src/ui/order-list.ts', 'utf8');
+   it('fit tiers 14px / 12px tight, applied by OrderList.syncLineFit after the Sell width sync', () => {
+     expect(css).toMatch(/\.order \.l1\.fit1\{font-size:14px\}\.order \.l1\.fit2\{font-size:12px;letter-spacing:-\.02em\}/);
+-    expect(list).toMatch(/this\.syncSellWidth\(\); this\.syncLineFit\(\);/);
++    expect(list).toMatch(/this\.syncSellWidth\(\); this\.syncLineFit\(\);/); expect(list).toMatch(/export function fitLine/);
+     expect(css).toMatch(/\.order \.l1 \.n\{[^}]*flex-shrink:0/); expect(css).toMatch(/\.order \.l1 \.v\{[^}]*flex-shrink:0/);
+   });
+ });
+diff --git a/tests/m41-9-big-number.test.ts b/tests/m41-9-big-number.test.ts
+index 3c938dc..2a269b0 100644
+--- a/tests/m41-9-big-number.test.ts
++++ b/tests/m41-9-big-number.test.ts
+@@ -100,7 +100,7 @@ describe('QA4-2: one rounding rule on a Sell (never more eggs than are sold)', (
+   it('basket 12,960, demand 20,000 (QA repro): card and Sell all both read 12.9K / $12.9K', () => {
+     const v = orderView(cust(20_000), 12_960, 100);
+     expect(v.button).toBe(`Sell 12.9K${NB}· +$12.9K`);
+-    expect(v.buttonAria).toBe(`Sell 13K${NB}· +$12,960.00`); // aria count as on main (Art ruling on #56)
++    expect(v.buttonAria).toBe(`Sell 12.9K${NB}· +$12,960.00`); // Art ruling (4) on #64 (CCR m3): the aria count follows the visible floored count
+     expect(sellAllLabel(12_960, 1_296_000, fmtCountFloor, fmtMoneyFloor)).toBe(`Sell all (12.9K${NB}eggs${NB}· $12.9K)`);
+   });
+   it('floored count never exceeds the real count', () => {
+@@ -157,7 +157,47 @@ describe('Art ruling on #56: spelled words only in aria/live; visible pops stay
+     for (const n of xs) for (const c of [n, n * 100 + 37]) if (c < 1e17) expect(liveText(c, n)).toBe(`${OLD.fmtMoney(c)}, ${OLD.fmtCount(n)} eggs`);
+     for (const want of xs.filter(x => x > 0 && x < 999.95e12)) for (const [filled, basket] of [[0, 0], [0, Math.floor(want / 3)], [Math.floor(want / 2), want], [0, want]]) for (const price of [1, 37, 100]) {
+       const c = cust(want, filled), a = orderView(c, basket, price), o = OLDO.orderView(c, basket, price);
+-      expect(a.lineAria).toBe(o.lineAria); expect(a.buttonAria).toBe(o.buttonAria);
++      expect(a.lineAria).toBe(o.lineAria);
++      // Art ruling (4) on #64: the Sell aria is byte-identical to main wherever the visible Sell text is; where the visible
++      // count changed (floored), the aria follows it.
++      if (a.button === o.button) expect(a.buttonAria).toBe(o.buttonAria);
++      else if (a.state !== 'wait') expect(a.buttonAria).toBe(o.buttonAria.replace(/^Sell [^\u00a0]+/, `Sell ${NEW.spellShort(/^Sell (\S+)\u00a0/.exec(a.button)![1])}`));
+     }
+   });
+ });
++
++describe('Art ruling (4) on #64 / CCR m3: the Sell aria count == the visible (floored) count', () => {
++  it('every floored Sell label above 10K: the aria names exactly the visible count (spelled only Qa+), money exact', () => {
++    let n = 0;
++    for (let e = 4; e < 37; e += 0.0371) {
++      const basket = Math.floor(10 ** e), v = orderView(cust(basket * 3), basket, 100);
++      const vis = /^Sell (\S+)\u00a0· \+/.exec(v.button)![1], aria = /^Sell (.+?)\u00a0· \+/.exec(v.buttonAria)![1];
++      expect(aria).toBe(NEW.spellShort(vis)); n++;
++    }
++    expect(n).toBeGreaterThan(800);
++  });
++  it('where the visible text is unchanged from main (under 10K, or floor == nearest), the Sell aria is byte-identical to main', () => {
++    for (const basket of [1, 7, 999, 9_999, 10_000, 12_000, 1_000_000, 2_500_000_000]) {
++      const v = orderView(cust(basket * 2), basket, 100), o = OLDO.orderView(cust(basket * 2), basket, 100);
++      if (v.button === o.button) expect(v.buttonAria).toBe(o.buttonAria);
++    }
++  });
++});
++
++describe('CCR m1 on #64: scientific notation rounds half-up on x.xx5 (15 s.f. snap, as dec() does for the tiers)', () => {
++  it.each([[9.995e36, '1.00e37'], [1.005e36, '1.01e36'], [1.255e36, '1.26e36'], [1.0049e36, '1.00e36'], [1e36, '1.00e36'], [9.994e40, '9.99e40']])('fmtSci(%s) = %s', (n, want) => {
++    expect(NEW.fmtSci(n)).toBe(want); expect(NEW.fmtCount(n)).toBe(want);
++  });
++  it('0 half-up misses over every x.xx5e36..e40 mantissa', () => {
++    for (let k = 100; k < 1000; k++) for (const ex of [36, 37, 40]) {
++      const n = Number(`${k}5e${ex - 3}`) , want = Math.round(k + 1) ; // k.5 (x100) -> rounds up to k+1
++      const got = NEW.fmtSci(n), [m, e] = got.split('e');
++      expect(Math.round(Number(m) * 100) * 10 ** (Number(e) - ex + 0)).toBe(want >= 1000 ? 1000 : want);
++    }
++  });
++  it('CCR n1: floor mode (the old +1e-9 floor, now the snap) floors an exact value to itself and never above n', () => {
++    for (const [n, want] of [[1.23e36, '1.23e36'], [4.56e38, '4.56e38'], [1.239e36, '1.23e36'], [9.999e36, '9.99e36'], [7e40, '7.00e40']] as const)
++      expect(NEW.fmtSci(n, Math.floor)).toBe(want);
++    for (let k = 100; k < 1000; k += 7) expect(NEW.fmtSci(Number(`${k}e34`), Math.floor)).toBe(`${(k / 100).toFixed(2)}e36`);
++  });
++});
+diff --git a/tests/qa-rc1-bugs.test.ts b/tests/qa-rc1-bugs.test.ts
+index 106097b..0f7a4de 100644
+--- a/tests/qa-rc1-bugs.test.ts
++++ b/tests/qa-rc1-bugs.test.ts
+@@ -147,12 +147,12 @@ describe('MK-24-1 v3: always two-line Sell, shared width, money never truncates'
+     expect(css).not.toMatch(/\.order \.btn\.sell \.sk,\.order \.btn\.sell \.sy\{[^}]*text-overflow:ellipsis/);
+     expect(listSrc).toMatch(/--sell-w/);
+   });
+-  it('3: row count and $ never truncate; only .egg may ellipsize (Art & UX)', () => {
++  it('3: row count and $ never truncate; .egg no longer ellipsizes either (Art ruling on #64 / HoE Oct 22: wrap instead)', () => {
+     expect(css).toMatch(/\.order \.l1 \.n\{[^}]*flex-shrink:0/);
+     expect(css).toMatch(/\.order \.l1 \.v\{[^}]*flex-shrink:0/);
+     expect(css).toMatch(/\.order \.l1 \.v\{[^}]*overflow:visible/);
+     expect(css).not.toMatch(/\.order \.l1 \.v\{[^}]*text-overflow:ellipsis/);
+-    expect(css).toMatch(/\.order \.l1 \.egg\{[^}]*text-overflow:ellipsis/);
++    expect(css).not.toMatch(/\.order \.l1 \.egg\{[^}]*text-overflow:ellipsis/); expect(css).toMatch(/\.order \.l1 \.egg\{[^}]*flex-shrink:0/);
+   });
+   it('≤375 does not cap the Sell button at 96px', () => {
+     expect(css).not.toMatch(/@media \(max-width:375px\)\{[^}]*\.order \.btn\.sell[^}]*max-width:96px/);

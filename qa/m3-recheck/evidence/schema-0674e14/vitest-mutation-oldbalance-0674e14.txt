@@ -1,0 +1,56 @@
+LOCK+START 2026-11-05T22:13:08+01:00 loadavg=0.56 2.02 3.78 2/2054 1193211
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/schema-0674-2207/mut
+
+ ❯ tests/telemetry-schema.test.ts (50 tests | 2 failed | 44 skipped) 12ms
+   × [TEL-AC8 / BB-AC16] BBv2 rows #19-23 (errata rev. 10, D-HOE-29/-31/-32) > [F-1][QA-D-1105-SCHEMA] missing telemetry.bbv2 still validates when bestBuyV2 is off or absent 7ms
+     → expected [Function] to not throw an error but 'Error: balance.telemetry.bbv2.shown_m…' was thrown
+   × [TEL-AC8 / BB-AC16] BBv2 rows #19-23 (errata rev. 10, D-HOE-29/-31/-32) > [F-1][QA-D-1105-SCHEMA] a present bbv2 value <= 0 is still rejected 1ms
+     → expected [Function] to throw error matching /balance\.telemetry\.bbv2\.shown_min_g…/ but got 'balance.telemetry.bbv2.shown_min_gap_…'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/telemetry-schema.test.ts > [TEL-AC8 / BB-AC16] BBv2 rows #19-23 (errata rev. 10, D-HOE-29/-31/-32) > [F-1][QA-D-1105-SCHEMA] missing telemetry.bbv2 still validates when bestBuyV2 is off or absent
+AssertionError: expected [Function] to not throw an error but 'Error: balance.telemetry.bbv2.shown_m…' was thrown
+
+- Expected: 
+undefined
+
++ Received: 
+"Error: balance.telemetry.bbv2.shown_min_gap_s must be > 0"
+
+ ❯ tests/telemetry-schema.test.ts:289:62
+    287|   };
+    288|   it('[F-1][QA-D-1105-SCHEMA] missing telemetry.bbv2 still validates w…
+    289|     expect(() => validateBalance(withoutBbv2(0), false)).not.toThrow();
+       |                                                              ^
+    290|     expect(() => validateBalance(withoutBbv2('absent'), false)).not.to…
+    291|     expect(() => validateBalance(structuredClone(b), false)).not.toThr…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/telemetry-schema.test.ts > [TEL-AC8 / BB-AC16] BBv2 rows #19-23 (errata rev. 10, D-HOE-29/-31/-32) > [F-1][QA-D-1105-SCHEMA] a present bbv2 value <= 0 is still rejected
+AssertionError: expected [Function] to throw error matching /balance\.telemetry\.bbv2\.shown_min_g…/ but got 'balance.telemetry.bbv2.shown_min_gap_…'
+
+- Expected: 
+/balance\.telemetry\.bbv2\.shown_min_gap_s must be > 0/
+
++ Received: 
+"balance.telemetry.bbv2.shown_min_gap_s invalid"
+
+ ❯ tests/telemetry-schema.test.ts:297:47
+    295|       const x = structuredClone(b) as any;
+    296|       x.telemetry.bbv2.shown_min_gap_s = v;
+    297|       expect(() => validateBalance(x, false)).toThrow(/balance\.teleme…
+       |                                               ^
+    298|     }
+    299|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 4 passed | 44 skipped (50)
+   Start at  22:13:08
+   Duration  385ms (transform 150ms, setup 0ms, collect 180ms, tests 12ms, environment 0ms, prepare 56ms)
+
+EXIT=1 END 2026-11-05T22:13:09+01:00 loadavg=0.56 2.02 3.78 1/2051 1193339

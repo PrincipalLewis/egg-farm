@@ -1,0 +1,17 @@
+
+> egg-farm@0.1.0 build
+> vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && vite build && node scripts/check-release-build.mjs dist
+
+balance.json up to date with economy.csv
+vite v5.4.21 building for production...
+transforming...
+✓ 36 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                         0.71 kB │ gzip:  0.38 kB
+dist/assets/index-D1_wNpVh.css         35.29 kB │ gzip:  8.12 kB
+dist/assets/frame-sampler-DvRddTas.js   1.69 kB │ gzip:  0.90 kB
+dist/assets/panel-DCM5QCup.js           2.87 kB │ gzip:  1.27 kB
+dist/assets/index-6MlzcsX4.js          87.17 kB │ gzip: 30.64 kB
+✓ built in 417ms
+check-release-build: m3-rc1-pre+eb2ec26 ok

@@ -1,0 +1,60 @@
+246de09 M4 EXP1 (Saves Major, Q2): after a failed flag save, save the reverted state so the IDB mirror is rewritten with seen=false + Q2 repro
+45eb5e3 M4 EXP1 (Saves/HoQA Major): failed flag save reverts seenTracksExplainer to false so later saves/mirror never carry seen=true + unit
+8396ed1 M4 gate5 HoE #49b: explainer gate also honours g.storageFailed (real QuotaExceededError) and re-checks after the flag save + unit and rc0 g5 quota case
+c9d7523 M4 gate5 HoE Major #49: no explainer while localStorage is blocked (lease.storageBlocked, the NO_STORAGE_TEXT signal) + unit and rc0 g5 storage-blocked case
+51351f0 M4 gate5 v1.15 rc0 g5: 375 width, Art reshoot shots (focus after Got it, outside Buy tap card stays, Buy/Collect clear, reload, refund line at opacity 1, new save) + activeElement per shot
+c11e3a0 M4 gate5 v1.15: rc0 g5 section asserts only the non-modal rules (drop variant-B swallow checks; add card-not-covering-Collect)
+ffc3dfd M4 gate5 B-M1: focus after close - sheet closed -> bottom-nav Upgrades, open -> active tab, last resort #collect
+085af12 M4 gate5 v1.15 on capped: replace the swallow (2c34044) with the non-modal explainer (port of bac1c27)
+0ee8831 M4 gate5: focus return treats the docked Upgrades tab as visible ([hidden] overridden by CSS at >=900)
+4795fad M4 gate5: P46-M1 focus return fix (CCR major)
+2c34044 M4 gate5 B: dismissing outside tap is swallowed (CEO D-07 amendment)
+0c1195c M4 gate5 A: hold toasts while the explainer is open; queue it behind modals; focus (P46-M1)
+7ab3d3d fix(saves): CCR #47 m1/m2: whole-number level strings coerce ('12'->12); null/negative/NaN/Infinity/'2.5'/junk -> invalid_state (corrupt path + .bak restore, never 0 over main); drop redundant v6State sanitize; tests
+5198e35 fix(saves): f68c799 refund line uses migrateStoredTracksV7 (this branch's import after the level-tolerance merge; fixes tsc TS2304 + 14 test failures)
+9b79c75 rc0 g5: scroll the Upgrades tabs into view before the tabs shot
+2585e7c rc0: g5 section (EXP1 explainer on a migrated save, tap pass-through, buy, no re-show; F2 tab sizes; G5SHOTS shots)
+ccbafea M4 gate5 §11 gaps: refund line (migrationRefundCents > 0) + reduced-motion test
+bd21da1 M4 gate5 Saves m1: show the explainer only when seenTracksExplainer can be persisted
+89013af M4 gate5 F2: Upgrades tabs 36px visual / 44px tap on phones (CSS only)
+372c5e6 test(saves): seenTracksExplainer save-side coverage (optional v6 field, migration/M4-off resave keep it, checksum, old fixtures)
+e9e614a M4 gate5 F1: tracks explainer (M4-AC-EXP1 / M4A-33)
+93bbc27 Merge commit '002d8a43f9124154bdcc755f0f2e81715641ee3b' into rc/m4-t3-capped
+002d8a4 test(saves): v6->v7 marker run-once + rollback + L31+ tolerance tests; add fixture m4-pre-v7-F30-C30 from 732e70e (M4A-29..33)
+1d10311 test: acw1 design gate 16 min (960 s, inclusive) on seeds 1-200 and 201-299 per D-CEO-20261019-06 (in force 04:04)
+7240833 test: M4-on p4/acw1 targets (D-HOP-2026-10-19-09); acw1 seeds 1-200 + 201-299, 15-min gate unchanged; delete zz-t3 scratch (CCR M1); fix stale F1-only titles (CCR m2)
+a399d27 fix(saves): load levels above maxLevel as stored; sanitize garbage levels (l30plus-saves M2 + m1)
+4ccb9fd status: PR #44 HoE rulings, D-CEO-20261019-04 gate numbers, acw1/p4 diagnosis
+6e133f2 test(AC7): encode D-CEO-20261019-04 final-SHA gate (decisions.md:51)
+a93e66a test: cost-segments allows T3 b48be8a4 (keeps 6dca24cd); m4a-tracks TR-1 reads track prices from config (HoE #44)
+1a1192e vendor: economy.f1-m4cols.csv = T3 b48be8a4 (byte-identical to the pack; SOURCE/SHA256SUMS updated; economy.f1.csv untouched)
+4e7a4ed status: T3 retune branch results
+3044977 test(golden): M4-on sim trace re-pinned a54c9cf9 for T3 data (2 runs identical; storage pins and flag-off golden unchanged)
+32e7ec6 test: allowlist T3 CSV b48be8a4 in AC7 band, worst-seed guards and economy-sim parity (same rules as F1)
+5727b7b test(fixture): seller_variance.json from the T3 pack (4ea66e5c, Economy regenerated)
+0808fa6 data: M4-on retune T3 economy.csv b48be8a4 (hens_cost/egg_value_cost L0-L11 only; D-CEO-20261019-04) + balance.json via sync-economy
+cb57f17 docs(triage): #43 merge, bot Farm-log fix, AC7 1-200 re-run; status
+91c5c13 test(bot): record Farm level after the buy (2 Farm buys in one check-in were logged as one level; HoQA ac7-twobot-528f1a7) + regression test
+130366c Merge remote-tracking branch 'origin/rc/m4-default-on' into rc/m4-on-tests-2
+7fdb273 Merge #43 PL-1 keyboard guard into rc/m4-default-on (QA PASS, CCR 0 Major)
+f9baba1 nits: label variance first-purchase case report-only (n2); triage remaining failures 3 unit / slow 14/14 (n3)
+528f1a7 docs(triage): D-HOP-02 bot results, seeds 1-200 AC7, CCR minors; status
+969d7a9 test: AC7 new save first purchase <= 30 s, seeds 1-200, M4 on (deterministic gating; variance reported)
+32ebe43 test(seller-variance): Python-parity cases forced flag-off (fixtures model the pre-M4 bot); AC7 band stays on shipped M4-on. Revertable (HoE)
+beb7a8a test: CCR n1 offline-modal g2 expects the unmarked-v6 grant
+5889947 test: CCR m3 M4-on N2 refusal case (fails when the game.ts:232 tracksV7 guard is removed; verified locally, src untouched)
+427573a test: CCR m2 MK-12 tests price at sale time after a Farm upgrade with M4 on (Balanced tier 220 -> 242 c)
+1a24902 test: CCR m1 pin literal 100 c M4-on price in tick/workers/sellall (not from salePriceCents)
+8308417 test(bot): D-HOP-2026-10-19-02 seller15 (M4 on) = game payback pick over ALL purchasables incl. Collection + workers, wait rule; M4-on golden trace re-pinned 723b91ab
+e79d50d docs(triage): D-HOP-2026-10-19-01 bot change results, AC7 L10/L30 vs Economy, Art & UX hint handoff; status
+48bdb09 PL-1: inline guard, jsdom test on real app.ts wiring (Escape 0 buys; held Enter/Space 1 buy); jsdom devDep
+d9de058 PL-1 (QA-D-1019-1): keyboard guard - Escape only closes, never activates; no held-key repeat buys
+c163fb9 test(bot): D-HOP-2026-10-19-01 HENS/VALUE in AC7/pacing bots' best-buy (payback pick, tests/bot-m4.ts); M4-on golden trace re-pinned 9173492e (flag-off unchanged)
+99ad822 docs(triage): list of every changed test/golden in #42 with reasons (D-CEO-20261019-03)
+06171c7 docs(triage): M4-on test triage FINAL + status
+67a3810 test(m4-on): unmarked-v6 seeds get the flag-off offline grant (ADR M4-14..17): expOfflineV6 helper
+1000137 test(m4-on): M4-on expectations; flag-off cases forced explicit; M4-on golden (403ca889) + flag-off golden kept forced-off
+eb7495c docs(triage): Saves c3811f7 per-test section + IDB-mirror pause design note; revived baseline
+e1b5806 test(saves): M4-on triage - 5 save failures are test artifacts (flag-off/unmarked-v6 assumptions)
+5259834 WIP rc/m4-on-tests: rc0 script selector/regex fixes + partial M4-on triage (stopped, release parked)
+90a9c84 rc: M4 default ON (balance.m4.enabled 0->1), flag only - D-CEO-20261017-03

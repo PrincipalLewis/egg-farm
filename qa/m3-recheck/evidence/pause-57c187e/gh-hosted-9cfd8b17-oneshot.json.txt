@@ -1,0 +1,40 @@
+{
+  "checked_at_cet": "2026-11-06T01:30:02+01:00",
+  "tip": "9cfd8b17d07018bd443aeb783347d135e39f4db7",
+  "ci": {
+    "run_id": 42136506858,
+    "status": "in_progress",
+    "conclusion": null,
+    "job_gate": "in_progress",
+    "unit_tests": "success",
+    "slow_suites": "in_progress"
+  },
+  "pacing": {
+    "run_id": 42136506812,
+    "status": "in_progress",
+    "conclusion": null,
+    "shards": [
+      {
+        "name": "seller15",
+        "job_id": 127626070122,
+        "status": "in_progress"
+      },
+      {
+        "name": "optimal",
+        "job_id": 127626069828,
+        "status": "in_progress"
+      },
+      {
+        "name": "casual",
+        "job_id": 127626070220,
+        "status": "in_progress"
+      }
+    ],
+    "aggregate": "not_yet_scheduled"
+  },
+  "k10": {
+    "run_id": 42136506791,
+    "status": "in_progress",
+    "note": "non-required"
+  }
+}

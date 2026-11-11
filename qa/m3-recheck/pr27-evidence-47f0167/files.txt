@@ -1,0 +1,14 @@
+.github/workflows/ci.yml
+engineering/ci-gates.md
+engineering/status.md
+scripts/check-release-build.mjs
+scripts/release-globals-browser.mjs
+scripts/release-scan.mjs
+scripts/serve-own.mjs
+tests/fixtures/release-html/fail-data-attr-in-comment.html
+tests/fixtures/release-html/fail-data-attr-not-app.html
+tests/fixtures/release-html/fail-line-comment-in-key.html
+tests/fixtures/release-html/fail-meta-in-comment.html
+tests/fixtures/release-html/pass-commented-build-id.html
+tests/release-html.test.ts
+tests/serve-own.test.ts

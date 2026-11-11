@@ -1,0 +1,281 @@
+{
+ "engine": "firefox",
+ "runs": [
+  {
+   "tag": "firefox-360",
+   "buildId": "m3-rc1-pre+d56033f",
+   "banners": {
+    "unpaidCount": 2,
+    "unpaidText": "⚠ Unpaid, production stopped",
+    "graderText": "💤 Asleep, bonus down to 15%"
+   },
+   "errs": [],
+   "under44": [
+    "closed | button#goal > span.goal-pill > span.goal-status.num | \"Ready!\" | aria=null | 64x20"
+   ]
+  },
+  {
+   "tag": "firefox-1280",
+   "buildId": "m3-rc1-pre+d56033f",
+   "banners": {
+    "unpaidCount": 2,
+    "unpaidText": "⚠ Unpaid, production stopped",
+    "graderText": "💤 Asleep, bonus down to 15%"
+   },
+   "errs": [],
+   "under44": [
+    "closed | button#goal > span.goal-pill > span.goal-status.num | \"Ready!\" | aria=null | 64x20"
+   ]
+  }
+ ],
+ "clip": [
+  {
+   "n": 0,
+   "url": {
+    "width": 360,
+    "height": 800
+   },
+   "items": [
+    {
+     "el": "h1.sr",
+     "text": "Egg Farm",
+     "sw": 75,
+     "cw": 1,
+     "ov": "hidden",
+     "to": "clip"
+    },
+    {
+     "el": "div#live.sr",
+     "text": "$70.00, 0 eggs",
+     "sw": 55,
+     "cw": 1,
+     "ov": "hidden",
+     "to": "clip"
+    }
+   ]
+  },
+  {
+   "n": 1,
+   "url": {
+    "width": 360,
+    "height": 800
+   },
+   "items": [
+    {
+     "el": "h1.sr",
+     "text": "Egg Farm",
+     "sw": 75,
+     "cw": 1,
+     "ov": "hidden",
+     "to": "clip"
+    },
+    {
+     "el": "div#live.sr",
+     "text": "$0.00, 0 eggs",
+     "sw": 46,
+     "cw": 1,
+     "ov": "hidden",
+     "to": "clip"
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "url": {
+    "width": 1280,
+    "height": 720
+   },
+   "items": [
+    {
+     "el": "h1.sr",
+     "text": "Egg Farm",
+     "sw": 75,
+     "cw": 1,
+     "ov": "hidden",
+     "to": "clip"
+    },
+    {
+     "el": "div#live.sr",
+     "text": "$70.00, 0 eggs",
+     "sw": 55,
+     "cw": 1,
+     "ov": "hidden",
+     "to": "clip"
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "url": {
+    "width": 1280,
+    "height": 720
+   },
+   "items": [
+    {
+     "el": "h1.sr",
+     "text": "Egg Farm",
+     "sw": 75,
+     "cw": 1,
+     "ov": "hidden",
+     "to": "clip"
+    },
+    {
+     "el": "div#live.sr",
+     "text": "$0.00, 0 eggs",
+     "sw": 46,
+     "cw": 1,
+     "ov": "hidden",
+     "to": "clip"
+    }
+   ]
+  },
+  {
+   "n": 4,
+   "url": {
+    "width": 360,
+    "height": 800
+   },
+   "items": [
+    {
+     "el": "h1.sr",
+     "text": "Egg Farm",
+     "sw": 75,
+     "cw": 1,
+     "ov": "hidden",
+     "to": "clip"
+    },
+    {
+     "el": "div#live.sr",
+     "text": "$70.00, 0 eggs",
+     "sw": 55,
+     "cw": 1,
+     "ov": "hidden",
+     "to": "clip"
+    }
+   ]
+  },
+  {
+   "n": 5,
+   "url": {
+    "width": 1280,
+    "height": 720
+   },
+   "items": [
+    {
+     "el": "h1.sr",
+     "text": "Egg Farm",
+     "sw": 75,
+     "cw": 1,
+     "ov": "hidden",
+     "to": "clip"
+    },
+    {
+     "el": "div#live.sr",
+     "text": "$70.00, 0 eggs",
+     "sw": 55,
+     "cw": 1,
+     "ov": "hidden",
+     "to": "clip"
+    }
+   ]
+  }
+ ],
+ "navBadge360": {
+  "ariaUpgrades": "Upgrades, 3 workers asleep or unpaid",
+  "badges": [
+   {
+    "selector": "market",
+    "cls": "qdot",
+    "hidden": true,
+    "text": "",
+    "rect": {
+     "x": 0,
+     "y": 0,
+     "width": 0,
+     "height": 0
+    },
+    "font": "12px"
+   },
+   {
+    "selector": "market",
+    "cls": "badge",
+    "hidden": true,
+    "text": "",
+    "rect": {
+     "x": 0,
+     "y": 0,
+     "width": 0,
+     "height": 0
+    },
+    "font": "12px"
+   },
+   {
+    "selector": "upgrades",
+    "cls": "badge",
+    "hidden": true,
+    "text": "",
+    "rect": {
+     "x": 0,
+     "y": 0,
+     "width": 0,
+     "height": 0
+    },
+    "font": "12px"
+   },
+   {
+    "selector": "upgrades",
+    "cls": "asleep-badge num badge-pulse",
+    "hidden": false,
+    "text": "3",
+    "rect": {
+     "x": 140,
+     "y": 739.8,
+     "width": 18,
+     "height": 18
+    },
+    "font": "12px"
+   },
+   {
+    "selector": "manageAll",
+    "cls": "count-badge num",
+    "hidden": false,
+    "text": "1",
+    "rect": {
+     "x": 236,
+     "y": 742,
+     "width": 16,
+     "height": 16
+    },
+    "font": "11px"
+   }
+  ]
+ },
+ "asleep": [
+  {
+   "w": 360,
+   "bannerText": "💤 Asleep, production stopped",
+   "bannerRect": {
+    "x": 16,
+    "y": 336,
+    "width": 328,
+    "height": 32
+   },
+   "under44": [
+    "button#goal > span.goal-pill > span.goal-status.num \"Ready!\" 64x20"
+   ]
+  },
+  {
+   "w": 1280,
+   "bannerText": "💤 Asleep, production stopped",
+   "bannerRect": {
+    "x": 898,
+    "y": 524,
+    "width": 366,
+    "height": 32
+   },
+   "under44": [
+    "button#goal > span.goal-pill > span.goal-status.num \"Ready!\" 64x20"
+   ]
+  }
+ ]
+}

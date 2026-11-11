@@ -1,0 +1,8 @@
+COMMENT | - * M5.1 breeds (product/m5.1-breeds-spec.md rev 3.8.6 sha1 13d5255e; tick semantics engineering/reviews/v5-breeds-tick-semantics.md).
+COMMENT | + * M5.1 breeds (product/m5.1-breeds-spec.md rev 3.8.9 sha1 ea922eb8; tick semantics engineering/reviews/v5-breeds-tick-semantics.md).
+COMMENT | -/** BR-AC26 / E12: the existing save_migrated shape (game.ts:252); from/to = SAVE_VERSION 6, never bumped (§6 R5). */
+COMMENT | +/** BR-AC26 / E12: save_migrated core (game.ts:260 tracks shape; rev 3.8.9 also requires reason/refund_cents/farm_level/backup_stores:[] — see gap list). from/to = SAVE_VERSION 6, never bumped (§6 R5). */
+COMMENT | - * Spec: product/m5.1-breeds-spec.md rev 3.8.6 (13d5255e) §4.2 BR-R8/R9/R11, §4.7 BR-R18, §4.8 E10-E12, §6.
+COMMENT | + * Spec: product/m5.1-breeds-spec.md rev 3.8.9 (ea922eb8) §4.2 BR-R8/R9/R11, §4.7 BR-R18, §4.8 E10-E12, §6.
+
+non_comment_changed_lines=0

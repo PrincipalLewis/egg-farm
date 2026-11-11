@@ -1,0 +1,8 @@
+5:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-05T22:36:53.4511248Z ## pacing-x1-stack: **FAIL**
+11:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-05T22:36:53.4529878Z - rows: 45 PASS, 0 FAIL, 1 WARN, 20 INFO, 0 PENDING-REPRED (not judged until HoP signs the re-prediction), 3 N/A (row 903, D-CEO-20261030-04), 12 NOT-WIRED (3 blocking), 24 EXCLUDED (G5-P pause rows)
+12:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-05T22:36:53.4531296Z - **FAIL: blocking row 904 optimal NOT-WIRED**
+13:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-05T22:36:53.4532345Z - **FAIL: blocking row 904 seller15 NOT-WIRED**
+14:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-05T22:36:53.4533474Z WARN L897 optimal N / H: worst 191 > 180 s (pre-existing L0–30 dead zone, known risk)
+15:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-05T22:36:53.4534033Z FAIL: blocking row 904 optimal NOT-WIRED
+16:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-05T22:36:53.4534423Z FAIL: blocking row 904 seller15 NOT-WIRED
+17:pacing-x1-stack	Verdict vs §13.2a (Y rows fail, incl. any Y row not judged PASS; N rows warn; a missing shard fails)	2026-11-05T22:36:53.4534809Z FAIL: blocking row 904 casual NOT-WIRED

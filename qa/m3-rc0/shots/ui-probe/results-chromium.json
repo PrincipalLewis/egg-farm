@@ -1,0 +1,282 @@
+[
+ {
+  "n": "release: ?ios=safari inert (no tip on non-iOS UA)",
+  "pass": true
+ },
+ {
+  "n": "release: ?ios=chrome inert (no tip on non-iOS UA)",
+  "pass": true
+ },
+ {
+  "n": "release: ?ios=standalone inert (no tip on non-iOS UA)",
+  "pass": true
+ },
+ {
+  "n": "release: ?perf=1 sampler refused/absent in prod (SM-9 rule)",
+  "pass": false,
+  "i": {
+   "perfNodes": [
+    "perf-ov:SM-9 warm-up 10 s…"
+   ],
+   "res": [
+    "http://127.0.0.1:4644/assets/frame-sampler-DvRddTas.js"
+   ]
+  }
+ },
+ {
+  "n": "release: ?debug=1 panel absent in prod (info)",
+  "pass": false,
+  "i": [
+   "http://127.0.0.1:4644/assets/panel-BcWG5yzN.js"
+  ]
+ },
+ {
+  "n": "AC14g qa ?ios=safari",
+  "pass": true,
+  "i": {
+   "t": {
+    "b": "safari",
+    "text": "Add Egg Farm to your Home Screen so your farm is never cleared.\n\nTap Share , then Add to Home Screen.",
+    "role": "status"
+   },
+   "errs": []
+  }
+ },
+ {
+  "n": "AC14g qa ?ios=chrome",
+  "pass": true,
+  "i": {
+   "t": {
+    "b": "chrome",
+    "text": "Add Egg Farm to your Home Screen so your farm is never cleared.\n\nTap Share  in the address bar, then Add to Home Screen.",
+    "role": "status"
+   },
+   "errs": []
+  }
+ },
+ {
+  "n": "AC14g qa ?ios=standalone",
+  "pass": true,
+  "i": {
+   "t": null,
+   "errs": []
+  }
+ },
+ {
+  "n": "AC14g session 1 -> no tip",
+  "pass": true
+ },
+ {
+  "n": "AC14g release real iPhone UA -> safari tip",
+  "pass": true
+ },
+ {
+  "n": "rotate: phone landscape overlay shown",
+  "pass": true,
+  "i": {
+   "shown": true,
+   "role": "alertdialog",
+   "modal": "true",
+   "name": "Turn your phone",
+   "desc": "Egg Farm plays best in portrait.",
+   "focus": "rotate-prompt",
+   "inert": true,
+   "anim": "rp-wobble"
+  }
+ },
+ {
+  "n": "rotate: role alertdialog + aria-modal + name/description",
+  "pass": true,
+  "i": {
+   "shown": true,
+   "role": "alertdialog",
+   "modal": "true",
+   "name": "Turn your phone",
+   "desc": "Egg Farm plays best in portrait.",
+   "focus": "rotate-prompt",
+   "inert": true,
+   "anim": "rp-wobble"
+  }
+ },
+ {
+  "n": "rotate: focus moves into prompt; #app inert",
+  "pass": true,
+  "i": {
+   "shown": true,
+   "role": "alertdialog",
+   "modal": "true",
+   "name": "Turn your phone",
+   "desc": "Egg Farm plays best in portrait.",
+   "focus": "rotate-prompt",
+   "inert": true,
+   "anim": "rp-wobble"
+  }
+ },
+ {
+  "n": "rotate: input blocked behind (hit-test + Tab/Enter/Space do not reach #app)",
+  "pass": true,
+  "i": {
+   "hit": "prompt",
+   "f2": {
+    "f": "BODY",
+    "inApp": false
+   }
+  }
+ },
+ {
+  "n": "rotate: back to portrait hides prompt, #app interactive, focus not stranded on prompt",
+  "pass": true,
+  "i": {
+   "shown": false,
+   "inert": false,
+   "focus": "BODY"
+  }
+ },
+ {
+  "n": "rotate: focus returns to the control focused before (Collect)",
+  "pass": true
+ },
+ {
+  "n": "rotate: tablet landscape 1024x768 touch overlay absent",
+  "pass": true,
+  "i": {
+   "shown": false,
+   "role": "alertdialog",
+   "modal": "true",
+   "name": "Turn your phone",
+   "desc": "Egg Farm plays best in portrait.",
+   "focus": "",
+   "inert": false,
+   "anim": "rp-wobble"
+  }
+ },
+ {
+  "n": "rotate: desktop 1280x800 overlay absent",
+  "pass": true,
+  "i": {
+   "shown": false,
+   "role": "alertdialog",
+   "modal": "true",
+   "name": "Turn your phone",
+   "desc": "Egg Farm plays best in portrait.",
+   "focus": "",
+   "inert": false,
+   "anim": "rp-wobble"
+  }
+ },
+ {
+  "n": "rotate: phone portrait overlay absent",
+  "pass": true,
+  "i": {
+   "shown": false,
+   "role": "alertdialog",
+   "modal": "true",
+   "name": "Turn your phone",
+   "desc": "Egg Farm plays best in portrait.",
+   "focus": "",
+   "inert": false,
+   "anim": "rp-wobble"
+  }
+ },
+ {
+  "n": "rotate: prefers-reduced-motion -> no wobble",
+  "pass": true,
+  "i": "none"
+ },
+ {
+  "n": "rotate: default motion -> wobble animation present",
+  "pass": true,
+  "i": "rp-wobble"
+ },
+ {
+  "n": "D1 re-confirm (360): licence link overlaps #sReset",
+  "pass": true,
+  "i": {
+   "linkTop": 386.890625,
+   "linkBottom": 430.890625,
+   "resetTop": 429.6875,
+   "overlap": 1.2,
+   "hitBottom": "sReset"
+  }
+ },
+ {
+  "n": "font credits (360): link -> OFL.txt bundled, 200, OFL text",
+  "pass": true,
+  "i": {
+   "href": "/fonts/OFL.txt",
+   "tgt": "_blank",
+   "status": 200
+  }
+ },
+ {
+  "n": "D1 re-confirm (390): licence link overlaps #sReset",
+  "pass": true,
+  "i": {
+   "linkTop": 488.890625,
+   "linkBottom": 532.890625,
+   "resetTop": 531.6875,
+   "overlap": 1.2,
+   "hitBottom": "sReset"
+  }
+ },
+ {
+  "n": "font credits (390): link -> OFL.txt bundled, 200, OFL text",
+  "pass": true,
+  "i": {
+   "href": "/fonts/OFL.txt",
+   "tgt": "_blank",
+   "status": 200
+  }
+ },
+ {
+  "n": "font credits: tapping link opens OFL.txt",
+  "pass": true,
+  "i": {
+   "u": "http://127.0.0.1:4644/fonts/OFL.txt",
+   "newTab": true
+  }
+ },
+ {
+  "n": "D1 re-confirm (1280): licence link overlaps #sReset",
+  "pass": true,
+  "i": {
+   "linkTop": 466.890625,
+   "linkBottom": 510.890625,
+   "resetTop": 509.6875,
+   "overlap": 1.2,
+   "hitBottom": "sReset"
+  }
+ },
+ {
+  "n": "font credits (1280): link -> OFL.txt bundled, 200, OFL text",
+  "pass": true,
+  "i": {
+   "href": "/fonts/OFL.txt",
+   "tgt": "_blank",
+   "status": 200
+  }
+ },
+ {
+  "n": "tap grid: 67 control-instances scanned; all ≥44x44 effective and unobstructed",
+  "pass": false,
+  "i": {
+   "#goal": [
+    "360 farm: 320x40 eff 320.5x40.5 own 97.9% {\"DIV.collectbar\":134}",
+    "390 farm: 350x40 eff 350.5x40.5 own 98.1% {\"DIV.collectbar\":134}"
+   ],
+   "A.SIL Open Font Licens": [
+    "360 settings: 140x44 eff 140x42.5 own 95.5% {\"#sReset\":140}",
+    "390 settings: 140x44 eff 140x42.5 own 95.5% {\"#sReset\":140}",
+    "1280 settings: 140x44 eff 140x42.5 own 95.5% {\"#sReset\":140}"
+   ]
+  }
+ },
+ {
+  "n": "big numbers: coinsCents=1e30, basket=1e15 -> no NaN/Infinity/e+ in UI",
+  "pass": true,
+  "i": {
+   "coins": "$10000000000000000000B",
+   "basket": "1000000B"
+  }
+ }
+]

@@ -1,0 +1,38 @@
+{
+ "shipped": {
+  "pause_unlock_farm": 10,
+  "pause_call_lockout_s": 45,
+  "flag_pause": 0
+ },
+ "stripBoth": "balance.m4.tc.pause_unlock_farm is required while flags.pause is on",
+ "stripUnlockOnly": "balance.m4.tc.pause_unlock_farm is required while flags.pause is on",
+ "stripLockoutOnly": "balance.m4.tc.pause_call_lockout_s is required while flags.pause is on",
+ "stripBothFlagOff": "ok",
+ "values": {
+  "pause_call_lockout_s=NaN": "balance.m4.tc.pause_call_lockout_s invalid",
+  "pause_call_lockout_s=-1": "balance.m4.tc.pause_call_lockout_s invalid",
+  "pause_call_lockout_s=0": "ok",
+  "pause_call_lockout_s=1000000000": "ok",
+  "pause_unlock_farm=NaN": "balance.m4.tc.pause_unlock_farm invalid",
+  "pause_unlock_farm=-5": "balance.m4.tc.pause_unlock_farm invalid",
+  "pause_unlock_farm=2.5": "ok"
+ },
+ "m5Load": {
+  "f10_1e308": {
+   "energy": 40,
+   "cdS": 0.7,
+   "paused": true,
+   "callLockoutS": 45
+  },
+  "f10_30": {
+   "energy": 40,
+   "cdS": 0.7,
+   "paused": true,
+   "callLockoutS": 30
+  },
+  "f9_30": {
+   "energy": 40,
+   "cdS": 0.7
+  }
+ }
+}

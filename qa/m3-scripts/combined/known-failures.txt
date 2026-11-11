@@ -1,0 +1,14 @@
+# Regexes (grep -E) for FAIL lines already classified as expected/harness in prior reports. Matching lines score as "known", not FAIL.
+# save-durability-98396ed.md: D3/D4 only meaningful on release; guard script runs on dist-qa by design
+D3/D4 \?debug=1&perf=1 inert in release
+# Firefox: no audio sink on the box (AudioContext suspended)
+FAIL \[firefox\] TG-UI-9
+# harness timing (8-cent wage tick between read and flush; R1 want sampled after save)
+FAIL \[(chromium|firefox|webkit)\] Handover:
+FAIL \[(firefox|webkit)\] R1 LS save corrupt
+# D2 sametask: kill at the same instant as the click, 1 level, never whole session
+^LOSS .*"mode":"sametask".*"wholeLost":false
+# rc1-ui-aa66bdb.md: QA-RC1UI-1 Low (unequal nav widths), accepted for rc1
+S2-5 4 equal nav buttons
+# fast-tap no-refill control (empty coop shows Empty by design)
+pointer-norefill

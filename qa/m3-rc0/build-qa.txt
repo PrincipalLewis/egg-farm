@@ -1,0 +1,17 @@
+
+> egg-farm@0.1.0 build:qa
+> vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && vite build --mode qa --outDir dist-qa
+
+balance.json up to date with economy.csv
+vite v5.4.21 building for qa...
+transforming...
+✓ 34 modules transformed.
+rendering chunks...
+computing gzip size...
+dist-qa/index.html                         0.71 kB │ gzip:  0.38 kB
+dist-qa/assets/index-AJN9rJLQ.css         35.20 kB │ gzip:  8.10 kB
+dist-qa/assets/frame-sampler-DvRddTas.js   1.69 kB │ gzip:  0.90 kB
+dist-qa/assets/panel-C2iDeHds.js           2.87 kB │ gzip:  1.27 kB
+dist-qa/assets/index-8wlkWavM.js          86.86 kB │ gzip: 30.45 kB
+✓ built in 387ms
+buildqa exit 0

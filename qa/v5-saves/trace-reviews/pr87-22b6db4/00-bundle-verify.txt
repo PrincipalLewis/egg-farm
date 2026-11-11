@@ -1,0 +1,7 @@
+../scratch/bundles/feat-saves-v5-streak-sim-2-22b6db4.bundle is okay
+The bundle contains this ref:
+22b6db41a7424285f10aa003ada774a415d4e9c5 refs/heads/feat/saves-v5-streak-sim-2
+The bundle requires these 2 refs:
+6bcc194090ea2c24fe7331d97c5ad653d4419dde 
+14894bd32fdb072f5f54369bce677853e6b53962 
+The bundle uses this hash algorithm: sha1

@@ -1,0 +1,46 @@
+2026-10-22 22:20:27 CEST === CSR ACs on b986cd3b9c58c8278437d7e130de0e085348501c
+2026-10-22 22:20:27 CEST spec sha256: 073fafd3b1190c8480c390661bd2db383a5a2ffafe4b0c642574a40092d6742b (want 073fafd3…6742b)
+2026-10-22 22:20:27 CEST fixtures: SHA256SUMS OK SHA256SUMS=e2d2eee776928553
+2026-10-22 22:20:27 CEST ancestors: dd223f5 Y, 1682a0c Y, 66680eb Y, 4c94704 Y, dfdf49c Y, b986cd3 Y (info: ff from b986cd3?); pushed on: origin/fix/saves-csr-loadsafe 
+2026-10-22 22:20:27 CEST DRY syntax ok csr-m41-7-browser.mjs
+2026-10-22 22:20:27 CEST DRY syntax ok csr-m41-7-b8-14.mjs
+2026-10-22 22:20:27 CEST DRY syntax ok csr-m41-7-ui.mjs
+2026-10-22 22:20:28 CEST DRY syntax ok csr12-ls-throw-probe.mjs
+2026-10-22 22:20:28 CEST DRY syntax ok csr9c-explainer-queue.mjs
+2026-10-22 22:20:28 CEST DRY syntax ok csr-m41-7-fixtures.mjs
+2026-10-22 22:20:28 CEST DRY syntax ok csr-m41-7-resetat.mjs
+2026-10-22 22:20:28 CEST DRY syntax ok m41-7-testdiff.sh
+DRY BRA1-pre-reset-seeded-ls+idb: kind=noDialog want=- loads=3 quotaRA=false export=false ls=eggfarm.save.reset_at,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=corrupt.<ts>
+DRY BRA1-pre-reset-seeded-idb-only: kind=noDialog want=- loads=3 quotaRA=false export=false ls=eggfarm.save.reset_at idb=corrupt.<ts>
+DRY BRA2-ui-reset-then-reloads: kind=uiReset want=- loads=3 quotaRA=false export=false ls=eggfarm.save,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=main,corrupt.<ts>
+DRY BRA3-post-reset-idb-orphan-M3-export: kind=dialog want=M3 loads=2 quotaRA=false export=true ls=eggfarm.save.reset_at idb=corrupt.<ts>
+DRY BRA3-post-reset-ls-main-corrupt-bak-valid-M1: kind=dialog want=M1 loads=2 quotaRA=false export=false ls=eggfarm.save.reset_at,eggfarm.save,eggfarm.save.bak idb=
+DRY BRA3-post-reset-ls-main-corrupt-nothing-valid-M3: kind=dialog want=M3 loads=2 quotaRA=false export=false ls=eggfarm.save.reset_at,eggfarm.save,eggfarm.save.bak idb=
+DRY BRA4-ui-reset-quota-blocked-reset_at: kind=uiReset want=- loads=3 quotaRA=true export=false ls=eggfarm.save,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=main,corrupt.<ts>
+DRY OK
+2026-10-22 22:20:28 CEST DRY RESET_AT vitest block present: 2 (want 1); it() in block: 7
+2026-10-22 22:20:28 CEST DRY plan: testdiff (-07 m4-exp1 byte-identity vs dfdf49c, HARD; review diffs); worktree /workspace/egg-farm-studio/qa/wt-m41-7-b986cd3-acs; npm ci; build:qa; vitest csr-m41-7.qa.test.ts (incl. RESET_AT -07(b)); [browser] resetat (csr-m41-7-resetat.mjs) -> flock:5961 csr-m41-7-browser.mjs -> b8-14 (CSR-8a/8b, CSR-14 M5/Q, re-measure) -> ui (M1/M1cf/M2/M3/M4/M5/legacy @360/375/390, settled+mid-animation, aria, copy); evidence qa/m41/m41-7-b986cd3/smoke-info/dry/acs
+2026-10-22 22:20:28 CEST DRY :5961 free; lock holders: 5
+2026-10-22 22:20:46 CEST === CSR ACs on b986cd3b9c58c8278437d7e130de0e085348501c
+2026-10-22 22:20:46 CEST spec sha256: 073fafd3b1190c8480c390661bd2db383a5a2ffafe4b0c642574a40092d6742b (want 073fafd3…6742b)
+2026-10-22 22:20:46 CEST fixtures: SHA256SUMS OK SHA256SUMS=e2d2eee776928553
+2026-10-22 22:20:46 CEST ancestors: dd223f5 Y, 1682a0c Y, 66680eb Y, 4c94704 Y, dfdf49c Y, b986cd3 Y (info: ff from b986cd3?); pushed on: origin/fix/saves-csr-loadsafe 
+2026-10-22 22:20:46 CEST DRY syntax ok csr-m41-7-browser.mjs
+2026-10-22 22:20:46 CEST DRY syntax ok csr-m41-7-b8-14.mjs
+2026-10-22 22:20:46 CEST DRY syntax ok csr-m41-7-ui.mjs
+2026-10-22 22:20:46 CEST DRY syntax ok csr12-ls-throw-probe.mjs
+2026-10-22 22:20:46 CEST DRY syntax ok csr9c-explainer-queue.mjs
+2026-10-22 22:20:46 CEST DRY syntax ok csr-m41-7-fixtures.mjs
+2026-10-22 22:20:46 CEST DRY syntax ok csr-m41-7-resetat.mjs
+2026-10-22 22:20:46 CEST DRY syntax ok m41-7-testdiff.sh
+DRY BRA1-pre-reset-seeded-ls+idb: kind=noDialog want=- loads=3 quotaRA=false export=false ls=eggfarm.save.reset_at,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=corrupt.<ts>
+DRY BRA1-pre-reset-seeded-idb-only: kind=noDialog want=- loads=3 quotaRA=false export=false ls=eggfarm.save.reset_at idb=corrupt.<ts>
+DRY BRA2-ui-reset-then-reloads: kind=uiReset want=- loads=3 quotaRA=false export=false ls=eggfarm.save,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=main,corrupt.<ts>
+DRY BRA3-post-reset-idb-orphan-M3-export: kind=dialog want=M3 loads=2 quotaRA=false export=true ls=eggfarm.save.reset_at idb=corrupt.<ts>
+DRY BRA3-post-reset-ls-main-corrupt-bak-valid-M1: kind=dialog want=M1 loads=2 quotaRA=false export=false ls=eggfarm.save.reset_at,eggfarm.save,eggfarm.save.bak idb=
+DRY BRA3-post-reset-ls-main-corrupt-nothing-valid-M3: kind=dialog want=M3 loads=2 quotaRA=false export=false ls=eggfarm.save.reset_at,eggfarm.save,eggfarm.save.bak idb=
+DRY BRA4-ui-reset-quota-blocked-reset_at: kind=uiReset want=- loads=3 quotaRA=true export=false ls=eggfarm.save,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=main,corrupt.<ts>
+DRY OK
+2026-10-22 22:20:46 CEST DRY RESET_AT vitest block present: 1 (want 1); it() in block: 7
+2026-10-22 22:20:46 CEST DRY plan: testdiff (-07 m4-exp1 byte-identity vs dfdf49c, HARD; review diffs); worktree /workspace/egg-farm-studio/qa/wt-m41-7-b986cd3-acs; npm ci; build:qa; vitest csr-m41-7.qa.test.ts (incl. RESET_AT -07(b)); [browser] resetat (csr-m41-7-resetat.mjs) -> flock:5961 csr-m41-7-browser.mjs -> b8-14 (CSR-8a/8b, CSR-14 M5/Q, re-measure) -> ui (M1/M1cf/M2/M3/M4/M5/legacy @360/375/390, settled+mid-animation, aria, copy); evidence /workspace/egg-farm-studio/qa/m41/m41-7-b986cd3/smoke-info/dry/acs
+2026-10-22 22:20:47 CEST DRY :5961 free; lock holders: 5

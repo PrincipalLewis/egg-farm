@@ -1,0 +1,234 @@
+{
+  "html_sha256": "dd919d616fe0138a89c362b1db269458558a0a2c85827b3e4fc104d36b22979b",
+  "schema_sha256": "fce0ef7c587ab7c1c030c8e0946565f86be3d17e3b4f8a646ec487f614f217b5",
+  "flags": [],
+  "checks": [
+    {
+      "id": "SELFTEST G-TEL-4 positive: both pinned events kept after trim",
+      "pass": true,
+      "hard": true,
+      "short": []
+    },
+    {
+      "id": "SELFTEST G-TEL-4 negative: milestone_reached ring-trimmed (lost) FAILS",
+      "pass": true,
+      "hard": true,
+      "short": [
+        "milestone_reached hens:10 lost in ring trim (must be pinned, D-HOP-2026-10-29-07)"
+      ]
+    },
+    {
+      "id": "SELFTEST G-TEL-4 negative: balanced_tier ring-trimmed (lost) FAILS",
+      "pass": true,
+      "hard": true,
+      "short": [
+        "balanced_tier balanced:1 lost in ring trim (must be pinned, D-HOP-2026-10-29-07)"
+      ]
+    },
+    {
+      "id": "SELFTEST G-TEL-4 negative: no trim happened FAILS (not exercised)",
+      "pass": true,
+      "hard": true,
+      "short": [
+        "ring trim did not happen (oldest non-pinned marker still present): retention not exercised"
+      ]
+    },
+    {
+      "id": "SELFTEST G-TEL-3 negative: offline_grant{awayS} FAILS",
+      "pass": true,
+      "hard": true,
+      "short": [
+        "offline_grant: required secondsAway missing (G-TEL-3)",
+        "offline_grant: forbidden field awayS (G-TEL-3: use secondsAway)"
+      ]
+    },
+    {
+      "id": "SELFTEST G-TEL-3 negative: offline_grant{secondsAway, awayS} FAILS",
+      "pass": true,
+      "hard": true,
+      "short": [
+        "offline_grant: forbidden field awayS (G-TEL-3: use secondsAway)"
+      ]
+    },
+    {
+      "id": "SELFTEST G-TEL-3 positive: offline_grant{secondsAway} passes",
+      "pass": true,
+      "hard": true,
+      "short": []
+    },
+    {
+      "id": "SELFTEST G-TEL-1 positive: notice_shown {notice,source,store}",
+      "pass": true,
+      "hard": true,
+      "short": []
+    },
+    {
+      "id": "SELFTEST G-TEL-1 positive: notice_dismissed with variant + null source/store",
+      "pass": true,
+      "hard": true,
+      "short": []
+    },
+    {
+      "id": "SELFTEST G-TEL-1 negative: notice extra field FAILS",
+      "pass": true,
+      "hard": true,
+      "short": [
+        "save_recovery_notice_shown: field level outside the closed list (D-HOP-2026-10-29-04)"
+      ]
+    },
+    {
+      "id": "SELFTEST G-TEL-1 negative: notice free-text enum FAILS",
+      "pass": true,
+      "hard": true,
+      "short": [
+        "save_recovery_notice_shown: notice=\"Your save was restored\" not in enum"
+      ]
+    },
+    {
+      "id": "SELFTEST G-TEL-1 negative: notice missing store FAILS",
+      "pass": true,
+      "hard": true,
+      "short": [
+        "save_recovery_notice_shown: required store missing"
+      ]
+    },
+    {
+      "id": "SELFTEST G-TEL-2 positive: milestone_reached hens:10",
+      "pass": true,
+      "hard": true,
+      "short": []
+    },
+    {
+      "id": "SELFTEST G-TEL-2 positive: milestone_reached grade:20 egg_value",
+      "pass": true,
+      "hard": true,
+      "short": []
+    },
+    {
+      "id": "SELFTEST G-TEL-2 positive: balanced_tier balanced:2",
+      "pass": true,
+      "hard": true,
+      "short": []
+    },
+    {
+      "id": "SELFTEST G-TEL-2 negative: milestone id not in enum FAILS",
+      "pass": true,
+      "hard": true,
+      "short": [
+        "milestone_reached: id \"hens:11\" not in milestone enum"
+      ]
+    },
+    {
+      "id": "SELFTEST G-TEL-2 negative: milestone id free text FAILS",
+      "pass": true,
+      "hard": true,
+      "short": [
+        "milestone_reached: id \"Big Coop!\" not in milestone enum; id kind Big Coop! is not a milestone (hens|grade); level 10 does not match id Big Coop!"
+      ]
+    },
+    {
+      "id": "SELFTEST G-TEL-2 negative: milestone extra field FAILS",
+      "pass": true,
+      "hard": true,
+      "short": [
+        "milestone_reached: field label outside the closed list (D-HOP-2026-10-29-04)"
+      ]
+    },
+    {
+      "id": "SELFTEST G-TEL-2 negative: milestone track mismatch FAILS",
+      "pass": true,
+      "hard": true,
+      "short": [
+        "milestone_reached: track egg_value does not match id hens:10"
+      ]
+    },
+    {
+      "id": "SELFTEST G-TEL-2 negative: milestone level mismatch FAILS",
+      "pass": true,
+      "hard": true,
+      "short": [
+        "milestone_reached: level 20 does not match id hens:10"
+      ]
+    },
+    {
+      "id": "SELFTEST G-TEL-2 negative: milestone missing mult FAILS",
+      "pass": true,
+      "hard": true,
+      "short": [
+        "milestone_reached: required mult missing",
+        "milestone_reached: mult undefined not a positive number"
+      ]
+    },
+    {
+      "id": "SELFTEST G-TEL-2 negative: balanced_tier extra field FAILS",
+      "pass": true,
+      "hard": true,
+      "short": [
+        "balanced_tier: field mult outside the closed list (D-HOP-2026-10-29-04)"
+      ]
+    },
+    {
+      "id": "SELFTEST G-TEL-2 negative: balanced_tier id not enum FAILS",
+      "pass": true,
+      "hard": true,
+      "short": [
+        "balanced_tier: id \"balanced:9\" not in milestone enum"
+      ]
+    },
+    {
+      "id": "SELFTEST G-TEL-2 negative: balanced_tier hens id FAILS",
+      "pass": true,
+      "hard": true,
+      "short": [
+        "balanced_tier: id kind hens is not balanced"
+      ]
+    },
+    {
+      "id": "SELFTEST negative: unlisted event FAILS the allowlist",
+      "pass": true,
+      "hard": true,
+      "short": [
+        "not in allowlist: not_a_real_event"
+      ]
+    },
+    {
+      "id": "T-AC9 G-TEL-4 milestone_reached + balanced_tier PINNED: survive a forced ring trim (D-HOP-2026-10-29-07)",
+      "pass": true,
+      "hard": true,
+      "short": {
+        "probs": [],
+        "ringSize": 5000,
+        "after": 5004
+      }
+    },
+    {
+      "id": "TS8 0 page/console errors",
+      "pass": true,
+      "hard": true,
+      "short": []
+    }
+  ],
+  "scenarios": {
+    "TS8": {
+      "ringSize": 5000,
+      "seeded": 5003,
+      "after": 5004
+    }
+  },
+  "milestoneIds": [
+    "hens:10",
+    "hens:20",
+    "hens:30",
+    "grade:5",
+    "grade:10",
+    "grade:20",
+    "balanced:1",
+    "balanced:2",
+    "balanced:3",
+    "balanced:4",
+    "balanced:5"
+  ],
+  "triage": {},
+  "browser": "156.0.8078.47",
+  "hardFail": 0
+}

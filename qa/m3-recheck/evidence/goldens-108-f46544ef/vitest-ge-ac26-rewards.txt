@@ -1,0 +1,32 @@
+LOCK+START 2026-11-06T03:57:08+01:00 loadavg=0.67 0.87 1.19 1/1774 1833963
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/goldens-108-f46544ef/wt
+
+ ✓ tests/v5-golden-rewards.test.ts > #1 golden rewards: integer money (§4 #2-#3, GE-AC9b) > cashBp / eggsBp = Math.round(seconds x 10000): 45 -> 450000, 60 -> 600000; fixture 59.5 -> 595000
+ ✓ tests/v5-golden-rewards.test.ts > #1 golden rewards: integer money (§4 #2-#3, GE-AC9b) > GE-AC9b cash .5 edges: 128250 -> 57713, 128249 -> 57712, 10 -> 5
+ ✓ tests/v5-golden-rewards.test.ts > #1 golden rewards: integer money (§4 #2-#3, GE-AC9b) > GE-AC9b eggs_cash: fixture 59.5 s: 100 -> 60, 99 -> 59; CSV 60 s: 128250 -> 76950
+ ✓ tests/v5-golden-rewards.test.ts > #1 golden rewards: integer money (§4 #2-#3, GE-AC9b) > GE-AC9b guard: cash switch at 20,015,998,342, eggs_cash at 15,011,998,757; disagreeing value; 1e12
+ ✓ tests/v5-golden-rewards.test.ts > #1 golden rewards: integer money (§4 #2-#3, GE-AC9b) > GE-AC9b spy: the BigInt path runs exactly above the switch (cash and eggs_cash)
+ ✓ tests/v5-golden-rewards.test.ts > #1 golden rewards: integer money (§4 #2-#3, GE-AC9b) > rewardCents of 0 / negative input is 0
+ ✓ tests/v5-golden-rewards.test.ts > #1 golden rewards: baseScaled and grants (GE-AC8, GE-AC9) > GE-AC8: baseScaled = Math.round(E x P_cents x 100) from goldenEEggsPerSec and priceDollars (Grader in, streak and Frenzy out)
+ ✓ tests/v5-golden-rewards.test.ts > #1 golden rewards: baseScaled and grants (GE-AC8, GE-AC9) > GE-AC8: E = 9.5, P = $1.35 -> 57,713 cents of cash
+ ✓ tests/v5-golden-rewards.test.ts > #1 golden rewards: baseScaled and grants (GE-AC8, GE-AC9) > GE-AC8: cash grant adds exactly rewardCents(baseScaled, cashBp) to coins; nothing else changes
+ ✓ tests/v5-golden-rewards.test.ts > #1 golden rewards: baseScaled and grants (GE-AC8, GE-AC9) > GE-AC9: F = 19 eggs: Basket += floor(60 x E), coop unchanged, coop cap ignored
+ ✓ tests/v5-golden-rewards.test.ts > #1 golden rewards: baseScaled and grants (GE-AC8, GE-AC9) > GE-AC9: F = 20 eggs_cash: coins += rewardCents(baseScaled, 600000), Basket unchanged
+ ✓ tests/v5-golden-rewards.test.ts > #1 golden rewards: baseScaled and grants (GE-AC8, GE-AC9) > frenzy grant sets frenzyRemainingS = tc_frenzy_s; a second one resets to 30, never stacks (R23)
+ ✓ tests/v5-golden-rewards.test.ts > #1 golden rewards: baseScaled and grants (GE-AC8, GE-AC9) > flag off: grantGolden is the identity
+ ✓ tests/v5-golden-rewards.test.ts > #1 golden rewards: the roll (GE-AC7) > u in [0, w_cash) -> cash, [w_cash, w_cash + w_frenzy) -> frenzy, rest -> eggs (F < 20) / eggs_cash (F >= 20)
+ ✓ tests/v5-golden-rewards.test.ts > #1 golden rewards: the roll (GE-AC7) > 10,000 seeded evRng rolls: 45/35/20 within 1.5 pp; changed weights change the shares
+ ✓ tests/v5-golden-rewards.test.ts > #1 Frenzy (R22/R23/X7, GE-AC10, GE-AC10b sim part) > GE-AC10/X7: a live Frenzy multiplies every sale (player and Market Hand) by tc_frenzy_price_mult with the streak; rounded once
+ ✓ tests/v5-golden-rewards.test.ts > #1 Frenzy (R22/R23/X7, GE-AC10, GE-AC10b sim part) > GE-AC10b: a suspended sale (menu / hide) pays 1x: no Frenzy, no streak
+ ✓ tests/v5-golden-rewards.test.ts > #1 Frenzy (R22/R23/X7, GE-AC10, GE-AC10b sim part) > golden off or no Frenzy: factor 1
+ ✓ tests/v5-golden-rewards.test.ts > #1 Frenzy (R22/R23/X7, GE-AC10, GE-AC10b sim part) > R23: counts down on the focus clock only; frozen on unfocused ticks; ends (field absent) after 30.0 s of focus +- 1 tick
+ ✓ tests/v5-golden-rewards.test.ts > #1 Frenzy (R22/R23/X7, GE-AC10, GE-AC10b sim part) > flag off: a stray frenzyRemainingS never ticks or pays
+ ✓ tests/v5-golden-rewards.test.ts > #1 golden rewards: validateBalance (GE-AC26 / D-HOP-2026-11-05-11) > tc_frenzy_all_sales must be 1 (0 is invalid, no alternate branch)
+
+ Test Files  1 passed (1)
+      Tests  21 passed (21)
+   Start at  03:57:08
+   Duration  350ms (transform 142ms, setup 0ms, collect 174ms, tests 22ms, environment 0ms, prepare 45ms)
+
+EXIT=0 END 2026-11-06T03:57:09+01:00 loadavg=0.69 0.87 1.19 2/1770 1834040

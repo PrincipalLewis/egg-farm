@@ -1,0 +1,47 @@
+{
+ "id": "F2-highlight",
+ "desc": "highlight-active state: coins enough for HENS/VALUE buys (highlight is UI-derived, not persisted; picker recomputes)",
+ "build": "acdbedc QA M4-on (balance clone m4.enabled=1)",
+ "ls": {
+  "eggfarm.install_id": "a20dec0b-a70d-48ad-9b19-80776ace319d",
+  "eggfarm.save": "{\"version\":6,\"savedAt\":1792227600000,\"saveSeq\":2,\"sum\":\"a7a26346\",\"state\":{\"coinsCents\":50000000,\"coop\":88,\"basket\":321,\"collectionLevel\":9,\"farmLevel\":12,\"customers\":[],\"nextCustomerInS\":10,\"nextCustomerId\":1,\"rng\":1478832577,\"pendingOfflineEggs\":0,\"celebratedTier\":0,\"workers\":{\"market_hand\":1,\"coop_hand\":1},\"graderTier\":2,\"manageCdS\":0,\"coopFullS\":0,\"wageFracCents\":{},\"hensLevel\":10,\"eggValueLevel\":10,\"celebratedMilestones\":[\"hens:10\",\"grade:5\",\"grade:10\",\"balanced:1\",\"balanced:2\"],\"tracksV7\":1,\"v6BackupId\":\"df9518fb2899179a\"}}",
+  "eggfarm.telemetry": "[{\"install_id\":\"a20dec0b-a70d-48ad-9b19-80776ace319d\",\"build\":\"qa-acdbedc-m4on\",\"type\":\"session_start\",\"ts\":1792227000000,\"sessionMs\":0}]",
+  "eggfarm.save.bak": "{\"version\":6,\"savedAt\":1792227000000,\"saveSeq\":1,\"sum\":\"88500542\",\"state\":{\"coinsCents\":0,\"coop\":0,\"basket\":0,\"collectionLevel\":0,\"farmLevel\":0,\"customers\":[],\"nextCustomerInS\":10,\"nextCustomerId\":1,\"rng\":1478832577,\"pendingOfflineEggs\":0,\"celebratedTier\":0,\"workers\":{},\"graderTier\":0,\"manageCdS\":0,\"coopFullS\":0,\"wageFracCents\":{},\"hensLevel\":0,\"eggValueLevel\":0,\"celebratedMilestones\":[],\"tracksV7\":1,\"v6BackupId\":\"df9518fb2899179a\"}}",
+  "eggfarm.ui": "{\"seenSlots\":5,\"onboardingDone\":true,\"workersIntroA\":true,\"workersIntroB\":true,\"sfx\":false}"
+ },
+ "idb": "{\"version\":6,\"savedAt\":1792227600000,\"saveSeq\":2,\"sum\":\"a7a26346\",\"state\":{\"coinsCents\":50000000,\"coop\":88,\"basket\":321,\"collectionLevel\":9,\"farmLevel\":12,\"customers\":[],\"nextCustomerInS\":10,\"nextCustomerId\":1,\"rng\":1478832577,\"pendingOfflineEggs\":0,\"celebratedTier\":0,\"workers\":{\"market_hand\":1,\"coop_hand\":1},\"graderTier\":2,\"manageCdS\":0,\"coopFullS\":0,\"wageFracCents\":{},\"hensLevel\":10,\"eggValueLevel\":10,\"celebratedMilestones\":[\"hens:10\",\"grade:5\",\"grade:10\",\"balanced:1\",\"balanced:2\"],\"tracksV7\":1,\"v6BackupId\":\"df9518fb2899179a\"}}",
+ "savedAt": 1792227600000,
+ "saveSeq": 2,
+ "state": {
+  "coinsCents": 50000000,
+  "coop": 88,
+  "basket": 321,
+  "collectionLevel": 9,
+  "farmLevel": 12,
+  "customers": [],
+  "nextCustomerInS": 10,
+  "nextCustomerId": 1,
+  "rng": 1478832577,
+  "pendingOfflineEggs": 0,
+  "celebratedTier": 0,
+  "workers": {
+   "market_hand": 1,
+   "coop_hand": 1
+  },
+  "graderTier": 2,
+  "manageCdS": 0,
+  "coopFullS": 0,
+  "wageFracCents": {},
+  "hensLevel": 10,
+  "eggValueLevel": 10,
+  "celebratedMilestones": [
+   "hens:10",
+   "grade:5",
+   "grade:10",
+   "balanced:1",
+   "balanced:2"
+  ],
+  "tracksV7": 1,
+  "v6BackupId": "df9518fb2899179a"
+ }
+}

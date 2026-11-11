@@ -1,0 +1,43 @@
+=== SEND-READY → Senior Engineer Features (95daf662) cc Head of QA (78e99c2d) ===
+
+Subject: QA verdict #17 cf50663 / #18 d8d680e (final heads, 3 engines)
+
+Final heads per HoQA. Older SHA browser results superseded.
+
+**#17 cf50663 — CONDITIONAL PASS**
+- Build ID m3-rc1-pre+cf50663 (static + runtime Chromium probe)
+- release-globals: PASS in chromium / firefox / webkit
+- rc0 (axe restored): 195/197 in all 3 engines — only **Minor** B5 (stale fixture; see SE UI note). Not a product fail.
+- ac7-l18-25 with workers: **PASS** (L@30 21/21/21, step P95 4.50)
+- ac7 no-workers: **INFO** exit 0 (HoP 00:35; TR-5 is the no-worker gate)
+
+**#18 d8d680e — CONDITIONAL PASS** (stacked on #17; balance.json identical)
+- Build ID m3-rc1-pre+d8d680e
+- release-globals PASS ×3; rc0 195/197 ×3 — same Minor B5 only
+- **Risk:** workers AC7 P5 = 20 sits exactly on the floor of L20–24 — **zero margin**; any pacing/cost regression fails the hard assert
+- AC7 with-workers PASS carries from #17 balance
+
+Merge stance: OK on product/balance. Land the B5 fixture fix with SE UI (or accept Minor follow-up). Reports: qa/m3-recheck/pr17-cf50663.md , pr18-d8d680e.md . Evidence folders alongside.
+
+— QA Engineer UI/Layout
+
+
+=== SEND-READY → Senior Engineer UI (e80556fd) — priority ===
+
+Subject: Minor B5 — update rc0 fixture to [30, 51, 98] for F1 manage_prompt_threshold 0.5
+
+B5 in `scripts/rc0-browser.mjs` is **Minor** (test hygiene), not a product fail.
+
+On #17 cf50663 / #18 d8d680e, rc0 is 195/197 in chromium, firefox, and webkit: only fail is B5 at 390 and 1280 — pill shows `Manage all (2 need it)` vs expected `(1 need it)`.
+
+Root cause: fixture sets energies `[30, 41, 98]` (~line 145) under the old 40% rule. F1 shipping balance has `manage_prompt_threshold=0.5` / `yawn_at_pct=50` (HoP 23:58). `canManageWorker` (`src/sim/workers.ts:20`) counts energy ≤ threshold×100, so both 30 and 41 qualify → N=2. Product matches the approved F1 threshold.
+
+**Data fix (preferred):** change the B5 `set([...])` to `[30, 51, 98]` so exactly one worker is ≤ 50% and the existing `(1 need it)` assert / "one worker" title stay valid. Optionally rename the title off "40%" to "manage_prompt_threshold".
+
+Alt: keep `[30, 41, 98]` and assert `(2 need it)` — worse, hard-codes the F1 double-hit instead of the one-worker intent.
+
+Evidence: `qa/m3-recheck/pr17-cf50663-evidence/rc0-chromium-rerun-axe.log` (and firefox/webkit twins; pr18 same). Reports: pr17-cf50663.md / pr18-d8d680e.md.
+
+Please land the fixture tweak so rc0 is green after #17/#18.
+
+— QA Engineer UI/Layout

@@ -1,0 +1,8 @@
+2026-10-22 22:19:27 CEST === testdiff b986cd3b9c58c8278437d7e130de0e085348501c vs dfdf49c (dfdf49cd904398c7e302eec16161f8fb63b10a8d)
+2026-10-22 22:19:27 CEST blob dfdf49c:tests/m4-exp1-explainer.test.ts 15b43290a5d2245381e6e535c06dc69a8f9b6c1d  b986cd3:tests/m4-exp1-explainer.test.ts b6ef2b95de668a9771f37d6cc82f4e716e64313f
+2026-10-22 22:19:27 CEST FAIL -07 m4-exp1 differs from dfdf49c: +24 -17 (41 changed lines, listed in m4-exp1.changed-lines.txt) -> needs HoE justification per line
+2026-10-22 22:19:27 CEST REVIEW tests/m41-6* vs dfdf49c: tests/m41-6-explainer-storage.test.ts +12 -6; tests/m41-6-save-mirror-canpersist.test.ts +6 -3; (empty = unchanged) | vs b986cd3: 
+2026-10-22 22:19:27 CEST REVIEW tests/m41-7-hop-rulings.test.ts vs dfdf49c: tests/m41-7-hop-rulings.test.ts +1 -1; (empty = unchanged) | vs b986cd3: 
+2026-10-22 22:19:27 CEST REVIEW scripts/rc0-browser.mjs vs dfdf49c: scripts/rc0-browser.mjs +7 -3; (empty = unchanged) | vs b986cd3: 
+2026-10-22 22:19:27 CEST all tests/ + scripts/ files changed vs dfdf49c: scripts/rc0-browser.mjs tests/fake-idb.ts tests/m4-exp1-explainer.test.ts tests/m41-6-explainer-storage.test.ts tests/m41-6-save-mirror-canpersist.test.ts tests/m41-7-csr8b-race.test.ts tests/m41-7-explainer-recovery.test.ts tests/m41-7-hop-rulings.test.ts 
+2026-10-22 22:19:27 CEST TESTDIFF m4-exp1 CHANGED 41 lines

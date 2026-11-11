@@ -1,0 +1,79 @@
+{
+ "ac7Buys": 827,
+ "ac7BuysSameAsBestBuy": 327,
+ "bbAffordable": 708,
+ "bbAffordableSame": 327,
+ "decisions": 2027,
+ "same": 327,
+ "diff": 1700,
+ "bbWorker": 538,
+ "bbUnaffordable": 1319,
+ "examples": [
+  {
+   "seed": 1,
+   "t": 15,
+   "F": 0,
+   "H": 1,
+   "V": 0,
+   "C": 0,
+   "coins": 0,
+   "ac7": null,
+   "bestBuy": "VALUE"
+  },
+  {
+   "seed": 1,
+   "t": 30,
+   "F": 0,
+   "H": 1,
+   "V": 1,
+   "C": 0,
+   "coins": 300,
+   "ac7": null,
+   "bestBuy": "VALUE"
+  },
+  {
+   "seed": 1,
+   "t": 45,
+   "F": 0,
+   "H": 1,
+   "V": 2,
+   "C": 0,
+   "coins": 1286,
+   "ac7": "c",
+   "bestBuy": "VALUE"
+  },
+  {
+   "seed": 1,
+   "t": 45,
+   "F": 0,
+   "H": 1,
+   "V": 2,
+   "C": 1,
+   "coins": 286,
+   "ac7": null,
+   "bestBuy": "VALUE"
+  },
+  {
+   "seed": 1,
+   "t": 60,
+   "F": 0,
+   "H": 1,
+   "V": 3,
+   "C": 1,
+   "coins": 1202,
+   "ac7": null,
+   "bestBuy": "FARM"
+  },
+  {
+   "seed": 1,
+   "t": 75,
+   "F": 0,
+   "H": 1,
+   "V": 3,
+   "C": 1,
+   "coins": 4790,
+   "ac7": "hens",
+   "bestBuy": "FARM"
+  }
+ ]
+}

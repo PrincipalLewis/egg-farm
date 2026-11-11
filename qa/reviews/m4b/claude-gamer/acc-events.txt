@@ -1,0 +1,203 @@
+# 2026-10-19T08:21:28.422Z acc file:///tmp/relchk/egg-farm.html profile=prof-accel 390x844 500s aheadHours=15
+0:03 build {"meta":"m3-rc1-pre+246de09","data":"m3-rc1-pre+246de09"}
+0:03 shot acc-01-0m03-start.png
+0:03 overlay ["card: Welcome back! You were away 18m +6,904 eggs Collect"]
+0:03 shot acc-02-0m03-overlay.png
+0:03 overlay-click Collect
+0:04 state {"top":"Egg Farm $2,792.64 6,727 $2,792.91, 6,687 eggs","goal":"Farm L17 ~1 min 55 s ›","collect":"Collect +75 · 2 ready","sellAll":"","sinceBuy":0}
+0:05 tabs Collection|Farm|Workers
+0:05 shot acc-03-0m05-upgrades-tabs.png
+0:08 buy [Collection] gap=3s :: L14 Collect per tap Eggs per tap 75 → 80 Level 14 / 30 $7,205.00
+0:08 shot acc-04-0m08-buy.png
+0:11 buy [Farm] gap=3s :: L18 Egg value Egg price $9.01 → $9.59 Next at L20: Jumbo ×1.5 Level 18 / 30 $8,138.00
+0:11 shot acc-05-0m11-buy.png
+0:14 buy [Farm] gap=3s :: L16 Farm level Coop upgrade at L20 Hens & Egg value up to L19 → L20 Coop capacity 1,062 → 1,125 Customers every 2.2s → 2.09s Customer demand
+0:14 shot acc-06-0m14-buy.png
+0:16 buy [Farm] gap=2s :: L19 Hens Eggs/s 20 → 21 Next at L20: bigger coop · offline ×1.5 Level 19 / 30 $5,262.00
+0:16 shot acc-07-0m16-buy.png
+0:19 buy [Farm] gap=3s :: L17 Farm level Coop upgrade at L20 Hens & Egg value up to L20 → L21 Coop capacity 1,350 → 1,425 Customers every 2.09s → 1.99s Customer deman
+0:19 shot acc-08-0m19-buy.png
+0:19 state {"top":"Egg Farm $3,677.24 5,918 $3,677.24, 5,918 eggs","goal":"Grader tier 1: ×1.5 ~7 s ›","collect":"Collect +80 · 21 ready","sellAll":"No eggs to sell","sinceBuy":1}
+0:22 buy [Farm] gap=3s :: L20 Hens Eggs/s 21 → 22 Level 20 / 30 $6,841.00
+0:22 manage 2
+0:23 buy [Workers] gap=2s :: Manage all 0:14 Market Hand · Working Energy 99% Manage 0:14 Coop Hand · Working Energy 68% Manage 0:14 Hawker · Working Energy 78% Manage 0
+0:26 buy [Collection] gap=3s :: L15 Collect per tap Eggs per tap 80 → 85 Level 15 / 30 $11.5K
+0:29 buy [Farm] gap=3s :: L19 Egg value Egg price $9.59 → $12.24 Next at L20: Jumbo ×1.5 Level 19 / 30 $10.8K
+0:30 buy [Farm] gap=1s :: L20 Egg value Egg price $12.24 → $12.99 Level 20 / 30 $14.4K
+0:33 buy [Collection] gap=3s :: L16 Collect per tap Eggs per tap 85 → 90 Level 16 / 30 $18.4K
+0:35 state {"top":"Egg Farm $17.5K 4,649 $17.5K, 4,649 eggs","goal":"Farm L19: Grader tier 2 Ready! ›","collect":"Collect +90 · 35 ready","sellAll":"No eggs to sell","sinceBuy":2}
+0:36 buy [Farm] gap=3s :: L18 Farm level Coop upgrade at L20 Hens & Egg value up to L21 → L22 Coop capacity 1,425 → 1,500 Customers every 1.99s → 1.89s Customer deman
+0:37 shot acc-09-0m37-buy.png
+0:38 sell Sell all (39 eggs · $759.92)
+0:38 buy [Farm] gap=2s :: L21 Hens Eggs/s 22 → 23 Level 21 / 30 $8,894.00
+0:38 manage 2
+0:40 buy [Workers] gap=1s :: Manage all 0:14 Market Hand · Working Energy 79% Manage 0:14 Coop Hand · Working Energy 99% Manage 0:14 Hawker · Working Energy 58% Manage 0
+0:41 buy [Farm] gap=1s :: L21 Egg value Egg price $12.99 → $13.76 Level 21 / 30 $19.1K
+0:44 buy [Farm] gap=3s :: L19 Farm level Coop upgrade at L20 +1 customer slot (9 → 10) Hens & Egg value up to L22 → L23 Coop capacity 1,500 → 1,575 Level 19 / 30 $18.
+0:44 shot acc-10-0m44-buy.png
+0:45 buy [Farm] gap=2s :: L22 Hens Eggs/s 23 → 24 Level 22 / 30 $11.6K
+0:46 manage 2
+0:47 buy [Collection] gap=1s :: L17 Collect per tap Eggs per tap 90 → 95 Level 17 / 30 $29.5K
+0:49 buy [Farm] gap=3s :: L22 Egg value Egg price $14.33 → $15.16 Level 22 / 30 $25.5K
+0:51 state {"top":"Egg Farm $37.3K 3,150 $37.3K, 3,150 eggs","goal":"Farm L21: Grader tier 3 Ready! ›","collect":"Collect +95 · 46 ready","sellAll":"No eggs to sell","sinceBuy":2}
+0:52 buy [Farm] gap=3s :: L20 Farm level Hens & Egg value up to L23 → L24 Coop capacity 1,575 → 1,650 Customers every 1.79s → 1.7s Customer demand 31–61 → 30–60 Level
+0:52 shot acc-11-0m52-buy.png
+0:54 buy [Farm] gap=2s :: L23 Hens Eggs/s 24 → 25 Level 23 / 30 $15K
+0:55 buy [Workers] gap=1s :: Market Hand · Working Energy 59% Manage Coop Hand · Working Energy 79% Manage Hawker · Working Energy 88% Manage Egg Grader · Working Energy
+0:58 buy [Farm] gap=2s :: L23 Egg value Egg price $15.16 → $16.01 Level 23 / 30 $30.5K
+1:01 buy [Collection] gap=3s :: L18 Collect per tap Eggs per tap 95 → 100 Level 18 / 30 $47.2K
+1:03 manage 2
+1:04 buy [Farm] gap=3s :: L21 Farm level Hens & Egg value up to L24 → L25 Coop capacity 1,650 → 1,725 Customers every 1.7s → 1.62s Customer demand 30–60 → 30–60 Level
+1:04 shot acc-12-1m04-buy.png
+1:06 buy [Farm] gap=2s :: L24 Hens Eggs/s 25 → 26 Level 24 / 30 $19.5K
+1:06 manage 2
+1:07 state {"top":"Egg Farm $31.6K 2,011 $31.6K, 2,011 eggs","goal":"Grader tier 4: ×3 Ready! ›","collect":"Collect +100 · 26 ready","sellAll":"No eggs to sell","sinceBuy":0}
+1:08 buy [Farm] gap=1s :: L24 Egg value Egg price $16.01 → $16.88 Level 24 / 30 $31.5K
+1:11 buy [Workers] gap=3s :: Market Hand · Working Energy 91% Manage Coop Hand · Working Energy 60% Manage Hawker · Working Energy 69% Manage Egg Grader · Working Energy
+1:14 buy [Collection] gap=3s :: L19 Collect per tap Eggs per tap 100 → 105 Level 19 / 30 $75.6K
+1:17 buy [Farm] gap=3s :: L22 Farm level Hens & Egg value up to L25 → L26 Coop capacity 1,725 → 1,800 Customers every 1.62s → 1.54s Customer demand 30–60 → 30–60 Leve
+1:17 shot acc-13-1m17-buy.png
+1:18 buy [Farm] gap=2s :: L25 Hens Eggs/s 26 → 27 Next at L30: bigger coop · offline ×2 Level 25 / 30 $25.4K
+1:19 shot acc-14-1m19-buy.png
+1:20 manage 2
+1:21 buy [Farm] gap=3s :: L25 Egg value Egg price $16.88 → $17.77 Level 25 / 30 $41.9K
+1:22 shot acc-15-1m22-buy.png
+1:22 state {"top":"Egg Farm $48.2K 757 $48.2K, 703 eggs","goal":"Farm L24: Grader tier 5 ~11 s ›","collect":"Collect +105 · 5 ready","sellAll":"No eggs to sell","sinceBuy":1}
+1:25 buy [Farm] gap=3s :: L23 Farm level Hens & Egg value up to L26 → L27 Coop capacity 1,800 → 1,875 Customers every 1.54s → 1.5s Customer demand 30–60 → 30–60 Level
+1:25 shot acc-16-1m25-buy.png
+1:26 buy [Farm] gap=2s :: L26 Hens Eggs/s 27 → 28 Next at L30: bigger coop · offline ×2 Level 26 / 30 $33K
+1:27 shot acc-17-1m27-buy.png
+1:29 manage 2
+1:30 buy [Farm] gap=4s :: L26 Egg value Egg price $17.77 → $18.68 Level 26 / 30 $55.8K
+1:31 shot acc-18-1m31-buy.png
+1:32 buy [Workers] gap=2s :: Market Hand · Working Energy 67% Manage Coop Hand · Working Energy 88% Manage Hawker · Working Energy 97% Manage Egg Grader · Working Energy
+1:36 sell Sell all (19 eggs · $1,419.68)
+1:36 buy [Farm] gap=4s :: L24 Farm level Hens & Egg value up to L27 → L28 Coop capacity 1,875 → 1,950 Customers every 1.5s → 1.5s Customer demand 30–60 → 32–63 Level 
+1:37 shot acc-19-1m36-buy.png
+1:38 buy [Farm] gap=2s :: L27 Hens Eggs/s 28 → 29 Next at L30: bigger coop · offline ×2 Level 27 / 30 $42.9K
+1:38 shot acc-20-1m38-buy.png
+1:39 state {"top":"Egg Farm $60.3K 58 $60.3K, 0 eggs","goal":"Egg value L28 ~7 s ›","collect":"Collect +105 · 0 ready","sellAll":"No eggs to sell","sinceBuy":1}
+1:42 buy [Farm] gap=4s :: L27 Egg value Egg price $19.43 → $20.40 Level 27 / 30 $74.2K
+1:42 shot acc-21-1m42-buy.png
+1:45 buy [Farm] gap=4s :: L25 Farm level Hens & Egg value up to L28 → L29 Coop capacity 1,950 → 2,025 Customers every 1.5s → 1.5s Customer demand 32–63 → 33–65 Level 
+1:46 shot acc-22-1m46-buy.png
+1:49 buy [Farm] gap=3s :: L28 Hens Eggs/s 29 → 30 Next at L30: bigger coop · offline ×2 Level 28 / 30 $55.8K
+1:49 shot acc-23-1m49-buy.png
+1:49 manage 2
+1:51 sell Sell all (21 eggs · $1,713.60)
+1:52 buy [Farm] gap=3s :: L28 Egg value Egg price $20.40 → $21.40 Level 28 / 30 $98.7K
+1:52 shot acc-24-1m52-buy.png
+1:52 manage 2
+1:54 state {"top":"Egg Farm $95.9K 0 $95.9K, 0 eggs","goal":"Farm L27 ~14 s ›","collect":"Collect +105 · 48 ready","sellAll":"No eggs to sell","sinceBuy":2}
+1:56 buy [Collection] gap=4s :: L20 Collect per tap Eggs per tap 105 → 110 Level 20 / 30 $120.9K
+1:57 sell Sell all (12 eggs · $1,027.20)
+2:00 buy [Farm] gap=4s :: L26 Farm level Hens & Egg value up to L29 → L30 Coop capacity 2,025 → 2,100 Customers every 1.5s → 1.5s Customer demand 33–65 → 34–68 Level 
+2:01 shot acc-25-2m01-buy.png
+2:03 buy [Farm] gap=3s :: L29 Hens Eggs/s 30 → 31 Next at L30: bigger coop · offline ×2 Level 29 / 30 $72.6K
+2:04 shot acc-26-2m04-buy.png
+2:05 manage 2
+2:08 buy [Farm] gap=4s :: L29 Egg value Egg price $21.40 → $22.43 Level 29 / 30 $131.2K
+2:08 shot acc-27-2m08-buy.png
+2:11 state {"top":"Egg Farm $118.1K 0 $118.1K, 0 eggs","goal":"Farm L28 ~21 s ›","collect":"Collect +110 · 31 ready","sellAll":"No eggs to sell","sinceBuy":3}
+2:13 manage 2
+2:15 buy [Collection] gap=7s :: L21 Collect per tap Eggs per tap 110 → 115 Level 21 / 30 $193.4K
+2:21 buy [Farm] gap=6s :: L27 Farm level Hens & Egg value up to L30 → L30 Coop capacity 2,800 → 2,900 Customers every 1.5s → 1.5s Customer demand 34–68 → 35–70 Level 
+2:21 shot acc-28-2m21-buy.png
+2:22 sell Sell all (19 eggs · $1,704.68)
+2:27 state {"top":"Egg Farm $247.6K 0 $247.6K, 0 eggs","goal":"Farm L29 Ready! ›","collect":"Collect +115 · 50 ready","sellAll":"No eggs to sell","sinceBuy":6}
+2:28 buy [Farm] gap=7s :: L28 Farm level Hens & Egg value up to L30 → L30 Coop capacity 2,900 → 3,000 Customers every 1.5s → 1.5s Customer demand 35–70 → 36–72 Level 
+2:28 shot acc-29-2m28-buy.png
+2:29 sell Sell all (15 eggs · $1,345.80)
+2:31 manage 2
+2:34 manage 2
+2:38 buy [Collection] gap=10s :: L22 Collect per tap Eggs per tap 115 → 120 Level 22 / 30 $309.5K
+2:43 state {"top":"Egg Farm $198.9K 0 $198.9K, 0 eggs","goal":"Farm L30 ~43 s ›","collect":"Collect +120 · 56 ready","sellAll":"No eggs to sell","sinceBuy":5}
+2:47 manage 2
+2:48 buy [Farm] gap=10s :: L29 Farm level Hens & Egg value up to L30 → L30 Coop capacity 3,000 → 3,100 Customers every 1.5s → 1.5s Customer demand 36–72 → 38–75 Level 
+2:49 shot acc-30-2m49-buy.png
+2:55 manage 2
+2:59 state {"top":"Egg Farm $336.8K 0 $336.8K, 0 eggs","goal":"Collection L24: +5/tap ~53 s ›","collect":"Collect +120 · 31 ready","sellAll":"No eggs to sell","sinceBuy":11}
+3:06 buy [Collection] gap=18s :: L23 Collect per tap Eggs per tap 120 → 125 Level 23 / 30 $495.2K
+3:07 sell Sell all (43 eggs · $3,857.96)
+3:12 sell Sell all (31 eggs · $2,781.32)
+3:14 manage 2
+3:14 state {"top":"Egg Farm $297.7K 0 $297.7K, 0 eggs","goal":"Collection L25: +5/tap ~2 min 47 s ›","collect":"Collect +125 · 50 ready","sellAll":"No eggs to sell","sinceBuy":8}
+3:16 manage 2
+3:26 sell Sell all (22 eggs · $1,973.84)
+3:29 manage 2
+3:30 state {"top":"Egg Farm $798.3K 0 $798.3K, 0 eggs","goal":"Collection L25: +5/tap Ready! ›","collect":"Collect +125 · 53 ready","sellAll":"No eggs to sell","sinceBuy":24}
+3:30 sell Sell all (62 eggs · $5,562.64)
+3:31 buy [Collection] gap=25s :: L24 Collect per tap Eggs per tap 125 → 130 Level 24 / 30 $792.3K
+3:37 manage 2
+3:45 state {"top":"Egg Farm $462.1K 62 $462.1K, 0 eggs","goal":"Collection L26: +5/tap ~4 min 32 s ›","collect":"Collect +130 · 6 ready","sellAll":"No eggs to sell","sinceBuy":15}
+3:48 sell Sell all (34 eggs · $3,050.48)
+3:55 manage 2
+3:58 manage 2
+4:01 state {"top":"Egg Farm $968.2K 0 $968.2K, 0 eggs","goal":"Collection L26: +5/tap ~1 min 41 s ›","collect":"Collect +130 · 25 ready","sellAll":"No eggs to sell","sinceBuy":31}
+4:11 manage 2
+4:12 buy [Collection] gap=42s :: L25 Collect per tap Eggs per tap 130 → 135 Level 25 / 30 $1.27M
+4:13 shot acc-31-4m13-buy.png
+4:15 sell Sell all (22 eggs · $1,973.84)
+4:18 state {"top":"Egg Farm $201.1K 0 $201.1K, 0 eggs","goal":"Collection L27: +5/tap ~10 min ›","collect":"Collect +135 · 37 ready","sellAll":"No eggs to sell","sinceBuy":5}
+4:19 manage 2
+4:21 sell Sell all (62 eggs · $5,562.64)
+4:28 sell Sell all (53 eggs · $4,755.16)
+4:33 state {"top":"Egg Farm $701.7K 0 $701.7K, 0 eggs","goal":"Collection L27: +5/tap ~7 min 28 s ›","collect":"Collect +135 · 25 ready","sellAll":"No eggs to sell","sinceBuy":20}
+4:35 manage 2
+4:38 manage 2
+4:49 state {"top":"Egg Farm $1.25M 0 $1.25M, 0 eggs","goal":"Collection L27: +5/tap ~4 min 21 s ›","collect":"Collect +135 · 25 ready","sellAll":"No eggs to sell","sinceBuy":37}
+4:50 manage 2
+4:54 sell Sell all (53 eggs · $4,755.16)
+4:57 manage 2
+4:59 sell Sell all (31 eggs · $2,781.32)
+5:05 state {"top":"Egg Farm $1.74M 62 $1.74M, 62 eggs","goal":"Collection L27: +5/tap ~1 min 39 s ›","collect":"Collect +135 · 9 ready","sellAll":"No eggs to sell","sinceBuy":52}
+5:09 sell Sell all (34 eggs · $3,050.48)
+5:15 manage 2
+5:16 buy [Collection] gap=63s :: L26 Collect per tap Eggs per tap 135 → 140 Level 26 / 30 $2.03M
+5:16 shot acc-32-5m16-buy.png
+5:18 manage 2
+5:20 state {"top":"Egg Farm $175.2K 0 $175.2K, 0 eggs","goal":"Collection L28: +5/tap ~17 min ›","collect":"Collect +140 · 31 ready","sellAll":"No eggs to sell","sinceBuy":4}
+5:31 manage 2
+5:33 sell Sell all (62 eggs · $5,562.64)
+5:36 state {"top":"Egg Farm $675.7K 0 $675.7K, 0 eggs","goal":"Collection L28: +5/tap ~14 min ›","collect":"Collect +140 · 25 ready","sellAll":"No eggs to sell","sinceBuy":20}
+5:38 manage 2
+5:41 sell Sell all (65 eggs · $5,831.80)
+5:43 sell Sell all (12 eggs · $1,076.64)
+5:51 state {"top":"Egg Farm $1.17M 62 $1.17M, 0 eggs","goal":"Collection L28: +5/tap ~12 min ›","collect":"Collect +140 · 6 ready","sellAll":"No eggs to sell","sinceBuy":35}
+5:55 manage 2
+5:58 manage 2
+6:06 state {"top":"Egg Farm $1.67M 62 $1.67M, 0 eggs","goal":"Collection L28: +5/tap ~8 min 59 s ›","collect":"Collect +140 · 0 ready","sellAll":"No eggs to sell","sinceBuy":51}
+6:11 manage 2
+6:15 sell Sell all (31 eggs · $2,781.32)
+6:18 manage 2
+6:22 state {"top":"Egg Farm $2.13M 0 $2.13M, 0 eggs","goal":"Collection L28: +5/tap ~6 min 11 s ›","collect":"Collect +140 · 22 ready","sellAll":"No eggs to sell","sinceBuy":66}
+6:33 sell Sell all (43 eggs · $3,857.96)
+6:35 manage 2
+6:37 state {"top":"Egg Farm $2.63M 62 $2.63M, 0 eggs","goal":"Collection L28: +5/tap ~3 min 32 s ›","collect":"Collect +140 · 3 ready","sellAll":"No eggs to sell","sinceBuy":81}
+6:38 manage 2
+6:39 sell Sell all (25 eggs · $2,243.00)
+6:44 sell Sell all (65 eggs · $5,831.80)
+6:50 sell Sell all (34 eggs · $3,050.48)
+6:50 manage 2
+6:52 state {"top":"Egg Farm $3.13M 0 $3.13M, 0 eggs","goal":"Collection L28: +5/tap ~40 s ›","collect":"Collect +140 · 53 ready","sellAll":"No eggs to sell","sinceBuy":96}
+6:57 buy [Collection] gap=102s :: L27 Collect per tap Eggs per tap 140 → 145 Level 27 / 30 $3.25M
+6:58 shot acc-33-6m58-buy.png
+6:58 manage 2
+7:08 state {"top":"Egg Farm $383.9K 62 $383.9K, 0 eggs","goal":"Collection L29: +5/tap ~27 min ›","collect":"Collect +145 · 3 ready","sellAll":"No eggs to sell","sinceBuy":11}
+7:15 manage 2
+7:18 manage 2
+7:24 state {"top":"Egg Farm $884.5K 62 $884.5K, 0 eggs","goal":"Collection L29: +5/tap ~25 min ›","collect":"Collect +145 · 0 ready","sellAll":"No eggs to sell","sinceBuy":26}
+7:31 manage 2
+7:35 sell Sell all (34 eggs · $3,050.48)
+7:38 manage 2
+7:40 state {"top":"Egg Farm $1.39M 62 $1.39M, 0 eggs","goal":"Collection L29: +5/tap ~22 min ›","collect":"Collect +145 · 3 ready","sellAll":"No eggs to sell","sinceBuy":42}
+7:54 sell Sell all (53 eggs · $4,755.16)
+7:55 manage 2
+7:55 state {"top":"Egg Farm $1.89M 62 $1.89M, 0 eggs","goal":"Collection L29: +5/tap ~19 min ›","collect":"Collect +145 · 0 ready","sellAll":"No eggs to sell","sinceBuy":58}
+7:58 manage 2
+8:02 sell Sell all (12 eggs · $1,076.64)
+8:11 state {"top":"Egg Farm $2.35M 0 $2.35M, 0 eggs","goal":"Collection L29: +5/tap ~16 min ›","collect":"Collect +145 · 25 ready","sellAll":"No eggs to sell","sinceBuy":74}
+8:11 sell Sell all (28 eggs · $2,512.16)
+8:12 manage 2
+8:20 manage 2
+8:20 shot acc-34-8m20-end.png

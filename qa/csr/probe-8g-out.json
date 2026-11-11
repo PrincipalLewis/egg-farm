@@ -1,0 +1,48 @@
+{
+ "build": {
+  "result": "committed",
+  "migrationId": "00112233aabbccdd",
+  "rawSha256": "773483d57cdc9f069772d78e98d1d7af9a9e6d17022212daab7f87bc76f06a09",
+  "rawIsPreMigrationInput": true,
+  "recordSha256": "9d8bb93f45547cbc4a46497339a875f1573039699328d4f16098129b3babef9c",
+  "committedMain": {
+   "F": 18,
+   "H": 18,
+   "V": 10,
+   "v6BackupId": "00112233aabbccdd",
+   "tracksV7": 1
+  }
+ },
+ "8g-OQ1+v6b": {
+  "recovery": {
+   "case": "F",
+   "reason": "invalid_state",
+   "restored": false
+  },
+  "outcome": "fresh",
+  "isNewGame": true,
+  "F": 0,
+  "coinsCents": 0,
+  "newV6BackupId": "fc0fa07d2b73d588",
+  "v6bByteIdentical": true,
+  "v6bStillCommitted": false,
+  "corruptCopies": 1,
+  "bak": false
+ },
+ "8f-4BAD+v6b": {
+  "recovery": {
+   "case": "F",
+   "reason": "invalid_state",
+   "restored": false
+  },
+  "outcome": "fresh",
+  "isNewGame": true,
+  "F": 0,
+  "coinsCents": 0,
+  "newV6BackupId": "e955406dff57a8c6",
+  "v6bByteIdentical": true,
+  "v6bStillCommitted": false,
+  "corruptCopies": 1,
+  "bak": false
+ }
+}

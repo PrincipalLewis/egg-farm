@@ -1,0 +1,217 @@
+{
+ "engine": "webkit",
+ "port": 5252,
+ "build_id": "m4.1+65a7443",
+ "label": "RECORD ONLY - NOT EVIDENCE; UI1 cell = PROXY (FX-L17 $3,000 farm screen on rc/v5 65a7443, BBv2 not built)",
+ "launch": [
+  {
+   "launch_ms": 96.2,
+   "close_ms": 10.6
+  },
+  {
+   "launch_ms": 58,
+   "close_ms": 6.1
+  },
+  {
+   "launch_ms": 54.4,
+   "close_ms": 6.7
+  }
+ ],
+ "cells": [
+  {
+   "size": "360x640",
+   "rep": 0,
+   "proxy": true,
+   "goal": false,
+   "load_ms": 15293.2,
+   "bid_ok": true,
+   "shot_ms": 19.5,
+   "checkOut": {
+    "rects": 0,
+    "overflow": null,
+    "under44": 0,
+    "stars": 0
+   },
+   "check_ms": 2,
+   "axeInject_ms": 73.3,
+   "axe_ms": 74.4,
+   "axe_violations_recorded_not_graded": 1
+  },
+  {
+   "size": "360x640",
+   "rep": 1,
+   "proxy": true,
+   "goal": false,
+   "load_ms": 15224.9,
+   "bid_ok": true,
+   "shot_ms": 16.6,
+   "checkOut": {
+    "rects": 0,
+    "overflow": null,
+    "under44": 0,
+    "stars": 0
+   },
+   "check_ms": 2.8,
+   "axeInject_ms": 83.9,
+   "axe_ms": 85.9,
+   "axe_violations_recorded_not_graded": 1
+  },
+  {
+   "size": "360x640",
+   "rep": 2,
+   "proxy": true,
+   "goal": false,
+   "load_ms": 15224.4,
+   "bid_ok": true,
+   "shot_ms": 68.2,
+   "checkOut": {
+    "rects": 0,
+    "overflow": null,
+    "under44": 0,
+    "stars": 0
+   },
+   "check_ms": 2.3,
+   "axeInject_ms": 182.2,
+   "axe_ms": 111.1,
+   "axe_violations_recorded_not_graded": 1
+  },
+  {
+   "size": "390x844",
+   "rep": 0,
+   "proxy": true,
+   "goal": false,
+   "load_ms": 15300.1,
+   "bid_ok": true,
+   "shot_ms": 20.5,
+   "checkOut": {
+    "rects": 0,
+    "overflow": null,
+    "under44": 0,
+    "stars": 0
+   },
+   "check_ms": 2.1,
+   "axeInject_ms": 78.1,
+   "axe_ms": 72.3,
+   "axe_violations_recorded_not_graded": 1
+  },
+  {
+   "size": "390x844",
+   "rep": 1,
+   "proxy": true,
+   "goal": false,
+   "load_ms": 15236.4,
+   "bid_ok": true,
+   "shot_ms": 22,
+   "checkOut": {
+    "rects": 0,
+    "overflow": null,
+    "under44": 0,
+    "stars": 0
+   },
+   "check_ms": 1.9,
+   "axeInject_ms": 75.7,
+   "axe_ms": 67.4,
+   "axe_violations_recorded_not_graded": 1
+  },
+  {
+   "size": "390x844",
+   "rep": 2,
+   "proxy": true,
+   "goal": false,
+   "load_ms": 15200.3,
+   "bid_ok": true,
+   "shot_ms": 25,
+   "checkOut": {
+    "rects": 0,
+    "overflow": null,
+    "under44": 0,
+    "stars": 0
+   },
+   "check_ms": 2.3,
+   "axeInject_ms": 79.6,
+   "axe_ms": 77.9,
+   "axe_violations_recorded_not_graded": 1
+  },
+  {
+   "size": "1280x800",
+   "rep": 0,
+   "proxy": true,
+   "goal": false,
+   "load_ms": 15266.5,
+   "bid_ok": true,
+   "shot_ms": 41.3,
+   "checkOut": {
+    "rects": 0,
+    "overflow": null,
+    "under44": 0,
+    "stars": 0
+   },
+   "check_ms": 1.8,
+   "axeInject_ms": 72.6,
+   "axe_ms": 77.3,
+   "axe_violations_recorded_not_graded": 1
+  },
+  {
+   "size": "1280x800",
+   "rep": 1,
+   "proxy": true,
+   "goal": false,
+   "load_ms": 15222.7,
+   "bid_ok": true,
+   "shot_ms": 43.5,
+   "checkOut": {
+    "rects": 0,
+    "overflow": null,
+    "under44": 0,
+    "stars": 0
+   },
+   "check_ms": 2.3,
+   "axeInject_ms": 78.4,
+   "axe_ms": 81.7,
+   "axe_violations_recorded_not_graded": 1
+  },
+  {
+   "size": "1280x800",
+   "rep": 2,
+   "proxy": true,
+   "goal": false,
+   "load_ms": 15200.3,
+   "bid_ok": true,
+   "shot_ms": 39.9,
+   "checkOut": {
+    "rects": 0,
+    "overflow": null,
+    "under44": 0,
+    "stars": 0
+   },
+   "check_ms": 2.7,
+   "axeInject_ms": 67.7,
+   "axe_ms": 75,
+   "axe_violations_recorded_not_graded": 1
+  }
+ ],
+ "runFor": {
+  "single_240000_ms": 4.7,
+  "single_coins_after": null,
+  "chunked_48x5000_plus_2000_ms": 106.1,
+  "chunk_ms": {
+   "min": 1.6,
+   "max": 5,
+   "mean": 2.2
+  },
+  "qaPicker_present": false
+ },
+ "bidChecks": [
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true,
+  true
+ ]
+}

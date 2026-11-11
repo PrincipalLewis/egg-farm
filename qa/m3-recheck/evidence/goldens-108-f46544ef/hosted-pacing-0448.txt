@@ -1,0 +1,24 @@
+# Hosted pacing one-shot (HoQA/pr108-pacing) — 2026-11-06 04:49:20 CET
+
+tip headSha (GitHub pull #108): f46544efaae907217126491b29588d77258ab28a (unchanged)
+run: pacing-x1-stack 42152085267 headSha f46544ef conclusion failure (expected: aggregate FAIL only row 904)
+
+## Shards
+| shard | job id | status | conclusion | started → completed (CET) |
+|---|---|---|---|---|
+| seller15 | 127677462563 | completed | success | 03:43:08 → 04:05:37 |
+| optimal | 127677462812 | completed | success | 03:43:08 → 04:28:41 |
+| casual | 127677462855 | completed | success | 03:43:09 → 04:15:46 |
+| aggregate (pacing-x1-stack) | 127692724288 | completed | failure | 04:28:45 → 04:29:02 |
+
+## Aggregate attribution (x1-verdict / summary.md)
+- rows: 45 PASS, 0 FAIL, 1 WARN, 20 INFO, 0 PENDING-REPRED, 3 N/A (903), 12 NOT-WIRED (3 blocking), 24 EXCLUDED (G5-P)
+- FAIL lines (only):
+  - blocking row 904 optimal NOT-WIRED
+  - blocking row 904 seller15 NOT-WIRED
+  - blocking row 904 casual NOT-WIRED
+- Verdict for pacing bar: PASS (shards SUCCESS ×3; aggregate FAIL only row 904 NOT-WIRED ×3)
+
+Artifacts copied: pacing-summary.md, pacing-verdict.json
+Run URL: https://github.com/PrincipalLewis/egg-farm/actions/runs/42152085267
+tip still f46544ef at 04:48 CET (GitHub PR #108 head.sha)

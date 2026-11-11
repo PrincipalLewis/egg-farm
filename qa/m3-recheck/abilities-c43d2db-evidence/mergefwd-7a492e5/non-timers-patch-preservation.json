@@ -1,0 +1,4 @@
+{
+  "equal_after_index_hunk_normalization": true,
+  "exception": "timers.ts explicitly merges incomeRef and abilities; automatic merge conflicts, so clean automatic merge claim fails"
+}

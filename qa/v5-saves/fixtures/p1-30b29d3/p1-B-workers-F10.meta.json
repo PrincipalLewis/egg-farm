@@ -1,0 +1,89 @@
+{
+  "id": "p1-B-workers-F10",
+  "source": "m4.1-p1-30b29d3 release asset",
+  "html_sha256": "dd919d616fe0138a89c362b1db269458558a0a2c85827b3e4fc104d36b22979b",
+  "build": {
+    "meta": "m4.1+30b29d3",
+    "app": "m4.1+30b29d3",
+    "dirty": false
+  },
+  "seededFrom": "7ae7524761119da9ad8eafff454763ea83053d80618091b2da4d563a55c4b6aa",
+  "loadTimeWrite": {
+    "preTapPresent": true,
+    "postTapDiffersFromSeed": true
+  },
+  "ui0": {
+    "coins": "$150.57",
+    "basket": "0",
+    "recovery": false,
+    "recoveryOutcome": null,
+    "welcome": true,
+    "welcomeText": "Welcome back!You were away 2h+ +19.8K eggs Collect",
+    "newer": false,
+    "guardBlocked": false
+  },
+  "play": {
+    "sellLabel": "No eggs to sell",
+    "bought": 3
+  },
+  "ui1": {
+    "coins": "$390.94",
+    "basket": "19.5K",
+    "recovery": false,
+    "recoveryOutcome": null,
+    "welcome": false,
+    "welcomeText": null,
+    "newer": false,
+    "guardBlocked": false
+  },
+  "summary": {
+    "version": 6,
+    "savedAt": 1793299384266,
+    "saveSeq": 11,
+    "coinsCents": 39094,
+    "basket": 19499,
+    "coop": 23.50000000000016,
+    "pendingOfflineEggs": 0,
+    "eggsTotal": 19522.5,
+    "farmLevel": 10,
+    "collectionLevel": 11,
+    "hensLevel": 12,
+    "eggValueLevel": 10,
+    "graderTier": 0,
+    "tracksV7": 1,
+    "workers": [
+      "coop_hand",
+      "hawker",
+      "market_hand"
+    ],
+    "workersPaused": {},
+    "m5": {},
+    "stateKeys": [
+      "basket",
+      "celebratedMilestones",
+      "celebratedTier",
+      "coinsCents",
+      "collectionLevel",
+      "coop",
+      "coopFullS",
+      "customers",
+      "eggValueLevel",
+      "farmLevel",
+      "graderTier",
+      "hensLevel",
+      "manageCdS",
+      "nextCustomerId",
+      "nextCustomerInS",
+      "pendingOfflineEggs",
+      "rng",
+      "seenTracksExplainer",
+      "tracksV7",
+      "v6BackupId",
+      "wageFracCents",
+      "workers"
+    ]
+  },
+  "errors": [],
+  "save_sha256": "617f3534991811cf8f93da41f808ab6085a8e95be1fbaadad0daec7cd70f9123",
+  "generatedAt": "2026-10-29T18:43:04.359Z"
+}

@@ -1,0 +1,11 @@
+hosted gate (cursor-github MCP) observed 2026-11-06T01:00:07+01:00 Europe/Belgrade
+ci run 42131703592 https://github.com/PrincipalLewis/egg-farm/actions/runs/42131703592
+  headSha=66c918442d4eab6c6d064d7a59bd1a9ecf29ce34
+  status=completed conclusion=SUCCESS
+  gate job 127609657985 conclusion=success completed_at=2026-11-05T23:56:01Z (= 2026-11-06 00:56:01 CET)
+  release-globals job 127614331310 conclusion=skipped — skipped-by-design on non-rc/* PR (ci.yml); enforced on RC PR. Skipped ≠ pass; not a block.
+pacing-x1-stack run 42131703569 (pending final check)
+  shard casual 127610019782
+  shard optimal 127610020137
+  shard seller15 127610020270
+k10-breeds-offset 42131703603 known-red non-required (D-HOP-2026-10-30-52/53); not a block

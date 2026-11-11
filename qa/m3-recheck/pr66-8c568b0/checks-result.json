@@ -1,0 +1,504 @@
+{
+  "sha": "8c568b0788ffd1371930c6db202b9e96e2655919",
+  "checks": [
+    {
+      "id": "4-help---help",
+      "pass": true,
+      "detail": {
+        "status": 0,
+        "lines": 9,
+        "first": "rc0 browser checks + screenshots. Needs a QA build (?ios= flag): npm run build:qa && node scripts/rc0-browser.mjs"
+      }
+    },
+    {
+      "id": "4-help--h",
+      "pass": true,
+      "detail": {
+        "status": 0,
+        "lines": 9,
+        "first": "rc0 browser checks + screenshots. Needs a QA build (?ios= flag): npm run build:qa && node scripts/rc0-browser.mjs"
+      }
+    },
+    {
+      "id": "4-unknown-engine-exit2",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "rc0-browser: unknown engine safari"
+      }
+    },
+    {
+      "id": "3-bad-port-rc0-browser.mjs-PORT=\"0\"",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "rc0-browser: serveOwn: PORT=\"0\" is not a port number (1..65535); unset it for a free port.",
+        "noStack": true,
+        "procs": 0
+      }
+    },
+    {
+      "id": "3-bad-port-rc0-browser.mjs-PORT=\"99999\"",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "rc0-browser: serveOwn: PORT=\"99999\" is not a port number (1..65535); unset it for a free port.",
+        "noStack": true,
+        "procs": 0
+      }
+    },
+    {
+      "id": "3-bad-port-rc0-browser.mjs-PORT=\"65536\"",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "rc0-browser: serveOwn: PORT=\"65536\" is not a port number (1..65535); unset it for a free port.",
+        "noStack": true,
+        "procs": 0
+      }
+    },
+    {
+      "id": "3-bad-port-rc0-browser.mjs-PORT=\"abc\"",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "rc0-browser: serveOwn: PORT=\"abc\" is not a port number (1..65535); unset it for a free port.",
+        "noStack": true,
+        "procs": 0
+      }
+    },
+    {
+      "id": "3-bad-port-rc0-browser.mjs-PORT=\"-1\"",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "rc0-browser: serveOwn: PORT=\"-1\" is not a port number (1..65535); unset it for a free port.",
+        "noStack": true,
+        "procs": 0
+      }
+    },
+    {
+      "id": "3-bad-port-rc0-browser.mjs-PORT=\"4.5\"",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "rc0-browser: serveOwn: PORT=\"4.5\" is not a port number (1..65535); unset it for a free port.",
+        "noStack": true,
+        "procs": 0
+      }
+    },
+    {
+      "id": "3-bad-port-rc0-browser.mjs-PORT=\" 5961\"",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "rc0-browser: serveOwn: PORT=\" 5961\" is not a port number (1..65535); unset it for a free port.",
+        "noStack": true,
+        "procs": 0
+      }
+    },
+    {
+      "id": "3-bad-port-rc0-browser.mjs-PORT=\"5961a\"",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "rc0-browser: serveOwn: PORT=\"5961a\" is not a port number (1..65535); unset it for a free port.",
+        "noStack": true,
+        "procs": 0
+      }
+    },
+    {
+      "id": "3-bad-port-release-globals-browser.mjs-PORT=\"0\"",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "check-globals: serveOwn: PORT=\"0\" is not a port number (1..65535); unset it for a free port.",
+        "noStack": true,
+        "procs": 0
+      }
+    },
+    {
+      "id": "3-bad-port-release-globals-browser.mjs-PORT=\"99999\"",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "check-globals: serveOwn: PORT=\"99999\" is not a port number (1..65535); unset it for a free port.",
+        "noStack": true,
+        "procs": 0
+      }
+    },
+    {
+      "id": "3-bad-port-release-globals-browser.mjs-PORT=\"65536\"",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "check-globals: serveOwn: PORT=\"65536\" is not a port number (1..65535); unset it for a free port.",
+        "noStack": true,
+        "procs": 0
+      }
+    },
+    {
+      "id": "3-bad-port-release-globals-browser.mjs-PORT=\"abc\"",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "check-globals: serveOwn: PORT=\"abc\" is not a port number (1..65535); unset it for a free port.",
+        "noStack": true,
+        "procs": 0
+      }
+    },
+    {
+      "id": "3-bad-port-release-globals-browser.mjs-PORT=\"-1\"",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "check-globals: serveOwn: PORT=\"-1\" is not a port number (1..65535); unset it for a free port.",
+        "noStack": true,
+        "procs": 0
+      }
+    },
+    {
+      "id": "3-bad-port-release-globals-browser.mjs-PORT=\"4.5\"",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "check-globals: serveOwn: PORT=\"4.5\" is not a port number (1..65535); unset it for a free port.",
+        "noStack": true,
+        "procs": 0
+      }
+    },
+    {
+      "id": "3-bad-port-release-globals-browser.mjs-PORT=\" 5961\"",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "check-globals: serveOwn: PORT=\" 5961\" is not a port number (1..65535); unset it for a free port.",
+        "noStack": true,
+        "procs": 0
+      }
+    },
+    {
+      "id": "3-bad-port-release-globals-browser.mjs-PORT=\"5961a\"",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "check-globals: serveOwn: PORT=\"5961a\" is not a port number (1..65535); unset it for a free port.",
+        "noStack": true,
+        "procs": 0
+      }
+    },
+    {
+      "id": "3-4a-foreign-occupied-PORT=5962-rc0-browser.mjs",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "rc0-browser: serveOwn: port 5962 is not serving dist-qa from /workspace/egg-farm-studio/qa/wt-pr66-8c568b0 (vite exit 1; expected index-D4ZZQrZm.js). Pick another PORT.",
+        "procs": 0
+      }
+    },
+    {
+      "id": "3-4a-foreign-occupied-PORT=5962-release-globals-browser.mjs",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "check-globals: serveOwn: port 5962 is not serving dist from /workspace/egg-farm-studio/qa/wt-pr66-8c568b0 (vite exit 1; expected index-DMhdhgB5.js). Pick another PORT.",
+        "procs": 0
+      }
+    },
+    {
+      "id": "3-unset-PORT-ephemeral-check-globals",
+      "pass": true,
+      "detail": {
+        "status": 0,
+        "passCount": 3,
+        "buildId": "m3-rc1-pre+8c568b0",
+        "chosenPort": 43975,
+        "portFreeAfter": true
+      }
+    },
+    {
+      "id": "3-explicit-PORT=5961-check-globals",
+      "pass": true,
+      "detail": {
+        "status": 0,
+        "stderr": "check-globals: dist m3-rc1-pre+8c568b0 on port 5961",
+        "passCount": 3,
+        "port5961FreeAfter": true
+      }
+    },
+    {
+      "id": "4b-stale-sha-in-dist-qa-rc0-browser.mjs",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "rc0-browser: serveOwn: served build-id \"m3-rc1-pre+dd223f5\" at http://127.0.0.1:5961/ is not HEAD 8c568b0 (stale build or foreign server).",
+        "port5961Free": true,
+        "procs": 0
+      }
+    },
+    {
+      "id": "4b-stale-sha-in-dist-release-globals-browser.mjs",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "check-globals: serveOwn: served build-id \"m3-rc1-pre+dd223f5\" at http://127.0.0.1:5961/ is not HEAD 8c568b0 (stale build or foreign server).",
+        "port5961Free": true,
+        "procs": 0
+      }
+    },
+    {
+      "id": "4d-clean-build-dirty-tracked-rc0-browser.mjs-ALLOW_DIRTY=0",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "rc0-browser: serveOwn: served build-id \"m3-rc1-pre+8c568b0\" at http://127.0.0.1:5961/ is clean but the tree at HEAD 8c568b0 is dirty (the build predates the uncommitted or untracked changes); commit, stash or remove the uncommitted AND untracked files (see git status), then rebuild; for a deliberate dirty run rebuild and set ALLOW_DIRTY=1.",
+        "port5961Free": true
+      }
+    },
+    {
+      "id": "4d-clean-build-dirty-tracked-rc0-browser.mjs-ALLOW_DIRTY=1",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "rc0-browser: serveOwn: served build-id \"m3-rc1-pre+8c568b0\" at http://127.0.0.1:5961/ is clean but the tree at HEAD 8c568b0 is dirty (the build predates the uncommitted or untracked changes); commit, stash or remove the uncommitted AND untracked files (see git status), then rebuild; for a deliberate dirty run rebuild and set ALLOW_DIRTY=1.",
+        "port5961Free": true
+      }
+    },
+    {
+      "id": "4d-clean-build-dirty-tracked-release-globals-browser.mjs-ALLOW_DIRTY=0",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "check-globals: serveOwn: served build-id \"m3-rc1-pre+8c568b0\" at http://127.0.0.1:5961/ is clean but the tree at HEAD 8c568b0 is dirty (the build predates the uncommitted or untracked changes); commit, stash or remove the uncommitted AND untracked files (see git status), then rebuild; for a deliberate dirty run rebuild and set ALLOW_DIRTY=1.",
+        "port5961Free": true
+      }
+    },
+    {
+      "id": "4d-clean-build-dirty-tracked-release-globals-browser.mjs-ALLOW_DIRTY=1",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "check-globals: serveOwn: served build-id \"m3-rc1-pre+8c568b0\" at http://127.0.0.1:5961/ is clean but the tree at HEAD 8c568b0 is dirty (the build predates the uncommitted or untracked changes); commit, stash or remove the uncommitted AND untracked files (see git status), then rebuild; for a deliberate dirty run rebuild and set ALLOW_DIRTY=1.",
+        "port5961Free": true
+      }
+    },
+    {
+      "id": "4d-clean-build-dirty-untracked-rc0-browser.mjs-ALLOW_DIRTY=0",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "rc0-browser: serveOwn: served build-id \"m3-rc1-pre+8c568b0\" at http://127.0.0.1:5961/ is clean but the tree at HEAD 8c568b0 is dirty (the build predates the uncommitted or untracked changes); commit, stash or remove the uncommitted AND untracked files (see git status), then rebuild; for a deliberate dirty run rebuild and set ALLOW_DIRTY=1.",
+        "port5961Free": true
+      }
+    },
+    {
+      "id": "4d-clean-build-dirty-untracked-rc0-browser.mjs-ALLOW_DIRTY=1",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "rc0-browser: serveOwn: served build-id \"m3-rc1-pre+8c568b0\" at http://127.0.0.1:5961/ is clean but the tree at HEAD 8c568b0 is dirty (the build predates the uncommitted or untracked changes); commit, stash or remove the uncommitted AND untracked files (see git status), then rebuild; for a deliberate dirty run rebuild and set ALLOW_DIRTY=1.",
+        "port5961Free": true
+      }
+    },
+    {
+      "id": "4d-clean-build-dirty-untracked-release-globals-browser.mjs-ALLOW_DIRTY=0",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "check-globals: serveOwn: served build-id \"m3-rc1-pre+8c568b0\" at http://127.0.0.1:5961/ is clean but the tree at HEAD 8c568b0 is dirty (the build predates the uncommitted or untracked changes); commit, stash or remove the uncommitted AND untracked files (see git status), then rebuild; for a deliberate dirty run rebuild and set ALLOW_DIRTY=1.",
+        "port5961Free": true
+      }
+    },
+    {
+      "id": "4d-clean-build-dirty-untracked-release-globals-browser.mjs-ALLOW_DIRTY=1",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "check-globals: serveOwn: served build-id \"m3-rc1-pre+8c568b0\" at http://127.0.0.1:5961/ is clean but the tree at HEAD 8c568b0 is dirty (the build predates the uncommitted or untracked changes); commit, stash or remove the uncommitted AND untracked files (see git status), then rebuild; for a deliberate dirty run rebuild and set ALLOW_DIRTY=1.",
+        "port5961Free": true
+      }
+    },
+    {
+      "id": "4c-pre-dirty-build-ids",
+      "pass": true,
+      "detail": {
+        "idQa": "m3-rc1-pre+8c568b0+dirty",
+        "idDist": "m3-rc1-pre+8c568b0+dirty"
+      }
+    },
+    {
+      "id": "4c-dirty-build-refused-without-ALLOW_DIRTY-rc0-browser.mjs",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "rc0-browser: serveOwn: served build-id \"m3-rc1-pre+8c568b0+dirty\" at http://127.0.0.1:5961/ is a +dirty build (uncommitted or untracked changes, e.g. a flag-off balance.json); commit, stash or remove the uncommitted AND untracked files (see git status), then rebuild, or for a deliberate dirty run set ALLOW_DIRTY=1.",
+        "port5961Free": true
+      }
+    },
+    {
+      "id": "4c-dirty-build-refused-without-ALLOW_DIRTY-release-globals-browser.mjs",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "check-globals: serveOwn: served build-id \"m3-rc1-pre+8c568b0+dirty\" at http://127.0.0.1:5961/ is a +dirty build (uncommitted or untracked changes, e.g. a flag-off balance.json); commit, stash or remove the uncommitted AND untracked files (see git status), then rebuild, or for a deliberate dirty run set ALLOW_DIRTY=1.",
+        "port5961Free": true
+      }
+    },
+    {
+      "id": "4c-ALLOW_DIRTY=1-flag-off-check-globals-passes",
+      "pass": true,
+      "detail": {
+        "status": 0,
+        "stderr": [
+          "serveOwn: WARNING ALLOW_DIRTY=1: testing a +dirty build (working-tree balance.json m4.enabled=0); not a release build",
+          "check-globals: dist m3-rc1-pre+8c568b0+dirty on port 5961"
+        ]
+      }
+    },
+    {
+      "id": "4c-ALLOW_DIRTY=1-flag-off-rc0-browser-admitted",
+      "pass": true,
+      "detail": {
+        "stderr": [
+          "serveOwn: WARNING ALLOW_DIRTY=1: testing a +dirty build (working-tree balance.json m4.enabled=0); not a release build",
+          "rc0-browser: dist-qa m3-rc1-pre+8c568b0+dirty on port 5961"
+        ],
+        "code": 143,
+        "port5961Free": true
+      }
+    },
+    {
+      "id": "4c-stale-dirty-build-on-clean-tree-rc0-browser.mjs-ALLOW_DIRTY=0",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "rc0-browser: serveOwn: served build-id \"m3-rc1-pre+8c568b0+dirty\" at http://127.0.0.1:5961/ is a +dirty build but the tree at HEAD 8c568b0 is clean (a stale dirty build, e.g. flag-off left after a revert); rebuild.",
+        "port5961Free": true
+      }
+    },
+    {
+      "id": "4c-stale-dirty-build-on-clean-tree-rc0-browser.mjs-ALLOW_DIRTY=1",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "rc0-browser: serveOwn: served build-id \"m3-rc1-pre+8c568b0+dirty\" at http://127.0.0.1:5961/ is a +dirty build but the tree at HEAD 8c568b0 is clean (a stale dirty build, e.g. flag-off left after a revert); rebuild.",
+        "port5961Free": true
+      }
+    },
+    {
+      "id": "4c-stale-dirty-build-on-clean-tree-release-globals-browser.mjs-ALLOW_DIRTY=0",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "check-globals: serveOwn: served build-id \"m3-rc1-pre+8c568b0+dirty\" at http://127.0.0.1:5961/ is a +dirty build but the tree at HEAD 8c568b0 is clean (a stale dirty build, e.g. flag-off left after a revert); rebuild.",
+        "port5961Free": true
+      }
+    },
+    {
+      "id": "4c-stale-dirty-build-on-clean-tree-release-globals-browser.mjs-ALLOW_DIRTY=1",
+      "pass": true,
+      "detail": {
+        "status": 2,
+        "stderr": "check-globals: serveOwn: served build-id \"m3-rc1-pre+8c568b0+dirty\" at http://127.0.0.1:5961/ is a +dirty build but the tree at HEAD 8c568b0 is clean (a stale dirty build, e.g. flag-off left after a revert); rebuild.",
+        "port5961Free": true
+      }
+    },
+    {
+      "id": "4c-rebuilt-clean-after-recipe",
+      "pass": true,
+      "detail": {
+        "idQaClean": "m3-rc1-pre+8c568b0",
+        "idDistClean": "m3-rc1-pre+8c568b0"
+      }
+    },
+    {
+      "id": "5-signal-rc0-browser.mjs-SIGTERM-startup",
+      "pass": true,
+      "detail": {
+        "exitCode": 143,
+        "wantExit": 143,
+        "portFree": true,
+        "leftoverProcs": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "id": "5-signal-rc0-browser.mjs-SIGTERM-mid-browser",
+      "pass": true,
+      "detail": {
+        "exitCode": 143,
+        "wantExit": 143,
+        "portFree": true,
+        "leftoverProcs": 0,
+        "stderr": "rc0-browser: dist-qa m3-rc1-pre+8c568b0 on port 5963"
+      }
+    },
+    {
+      "id": "5-signal-rc0-browser.mjs-SIGINT-startup",
+      "pass": true,
+      "detail": {
+        "exitCode": 130,
+        "wantExit": 130,
+        "portFree": true,
+        "leftoverProcs": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "id": "5-signal-rc0-browser.mjs-SIGINT-mid-browser",
+      "pass": true,
+      "detail": {
+        "exitCode": 130,
+        "wantExit": 130,
+        "portFree": true,
+        "leftoverProcs": 0,
+        "stderr": "rc0-browser: dist-qa m3-rc1-pre+8c568b0 on port 5963"
+      }
+    },
+    {
+      "id": "5-signal-release-globals-browser.mjs-SIGTERM-startup",
+      "pass": true,
+      "detail": {
+        "exitCode": 143,
+        "wantExit": 143,
+        "portFree": true,
+        "leftoverProcs": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "id": "5-signal-release-globals-browser.mjs-SIGTERM-mid-browser",
+      "pass": true,
+      "detail": {
+        "exitCode": 143,
+        "wantExit": 143,
+        "portFree": true,
+        "leftoverProcs": 0,
+        "stderr": "check-globals: dist m3-rc1-pre+8c568b0 on port 5963"
+      }
+    },
+    {
+      "id": "5-signal-release-globals-browser.mjs-SIGINT-startup",
+      "pass": true,
+      "detail": {
+        "exitCode": 130,
+        "wantExit": 130,
+        "portFree": true,
+        "leftoverProcs": 0,
+        "stderr": ""
+      }
+    },
+    {
+      "id": "5-signal-release-globals-browser.mjs-SIGINT-mid-browser",
+      "pass": true,
+      "detail": {
+        "exitCode": 130,
+        "wantExit": 130,
+        "portFree": true,
+        "leftoverProcs": 0,
+        "stderr": "check-globals: dist m3-rc1-pre+8c568b0 on port 5963"
+      }
+    }
+  ],
+  "fails": 0
+}

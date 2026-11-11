@@ -1,0 +1,19 @@
+Q7 (rebar probe): Σ fT should equal Σ F over 60 s attended, tolerance 1 tick (100 ms).
+Game.frame (game.ts:488-490) does focusMs = focusFrameMs(gap) for THIS animation frame, then
+advance(..., elapsed=gap, accMs carried, {focusMs}). accMs carries leftover time across frames;
+focusMs does not. focusFtMs is computed from that call's focusMs only.
+
+Results (qa-probe.txt):
+  1 fps  focusMs=60000 PASS
+ 10 fps  focusMs=60000 PASS
+ 20 fps  focusMs=30000 FAIL  (|30000-60000|=30000)
+ 30 fps  focusMs=19800 FAIL
+ 60 fps  focusMs= 9600 FAIL
+144 fps  focusMs= 3600 FAIL
+
+At 60 fps, each produced 100 ms tick receives only floor(1000/60) ≈ 16 ms of fT
+(the last frame that crossed the acc threshold), so Present accrues at ~16% of attended time.
+Before eb92b37, a focused tick used fT = round(focusS*1000) = 100 whenever nFocus>=1, so
+16 ms frames still credited a full tick. The F1 share fix is correct for a single advance()
+whose focusMs covers the ticks it emits (P1b, 1000 ms / 249 ms frames) but under-counts
+when Game.frame calls advance once per rAF.

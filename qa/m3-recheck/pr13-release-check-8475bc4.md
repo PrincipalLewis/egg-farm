@@ -1,0 +1,34 @@
+# PR #13 re-verify @ 8475bc4 (delta vs 6cc37f6)
+QA, 2026-10-17 01:28 to ~03:20 CEST. Fresh clone /tmp/qa-x/pr13c @ 8475bc4 (parent 68e7347 = merge of main 96756aa). Read-only: nothing pushed, commented or changed in settings. Evidence: `pr13-release-check-8475bc4/`. Browser/unit runs went through `flock .browser-test.lock timeout 600`, one engine at a time, on ports 5231/5232. PR #7 3b464ea ran first; its report was filed before my first browser run.
+
+## Verdict: CHANGES REQUESTED for one item only, F2 (a repo setting, so it is not the PR author's to fix). The code in this PR is APPROVE-quality: F1, F-META, F3 and N1/N2 are fixed, and there are no new injection misses on realistic shapes.
+If Head of QA accepts F2 as a tracked repo-setting action outside this PR, my verdict on the code is **APPROVE**.
+
+| # | Item | Result |
+|---|---|---|
+| F1a | `npm run build:html` gives 0× `url(.data:` | **PASS**: 0× `.data:`, 4× `url(data:` (build-html.log, buildhtml-8475bc4.html sha256 c2fe56c6…d0aa, 468,194 B). |
+| F1b | All 4 fonts load (Fredoka 500/700, Nunito 400/700), over http and file:// | **PASS** in Chromium, Firefox and WebKit: 4/4 FontFace `loaded`, `document.fonts.check` true for all 4, 0 failed requests, 0 console errors, no request except the page itself (fonts-<engine>.log/.json, shots/fonts-*.png). |
+| F1c | Browser globals check on the build:html output (new) | **PASS** in Chromium, Firefox and WebKit (globals-<engine>.log): only `eggfarmExportTelemetry`; the refused newer-save boot path gives `[]`. Harness: a scratch copy of scripts/release-globals-browser.mjs that serves the single file (qa/scratch/pr13c/). Over file:// the probe's diff also listed engine secure-context APIs (about:blank baseline vs file: origin; Chromium 244 names, Firefox 73, WebKit (fonts-webkit.json)). The only game key was `eggfarmExportTelemetry`, so this is a harness baseline artifact, not a finding. |
+| F1d | Runtime build id | **PASS** (both modes): meta = `#app` data-build-id = telemetry build = Settings "Egg Farm m3-rc1-pre+8475bc4", 1 meta, 1 `[data-build-id]`. |
+| F1e | New unresolved-url fixtures fail | **PASS**: fail-url-dot-data, fail-relative-font-url, fail-relative-asset-href and fail-js-asset-path each exit 1 with "unresolved (not inlined)…" (fixtures.log). |
+| F-META | Built html: exactly 1 `<meta name=build-id>` and 1 `#app data-build-id`, both = the script id | **PASS** (static grep, gate output, and the runtime DOM check above). |
+| F-META fixtures | 7 must-fail | **PASS** 7/7: meta-missing/duplicate/mismatch, data-attr-missing/duplicate/mismatch, plus pass.html with `--build-id=…def5678` (exit 1, "!= expected"). All 36 repo fixtures behave as named: 34 fail, 2 pass (fixtures.log). |
+| F2 | release-html / release-globals REQUIRED on main? | **FAIL, Medium (repo setting, report only)**. `GET branches/main`: `protected:false`, `required_status_checks.enforcement_level:"off"`, contexts `[]`, checks `[]` (f2-branch-main.json). I could not read rulesets: there's no MCP tool for them, and the unauthenticated API returns 404 because the repo is private (f2-rulesets.log). The branch shows unprotected and the PR's own ci-gates.md says "None of them is a required status check today". In the PR itself: CI now runs check-release-build `--build-id <prefix>+HEAD` and uploads the artifact, and the new release-asset.yml re-checks the uploaded release .html. That is good, but neither blocks anything until a protection/ruleset is set. **Owner action:** protect main and require `unit`, `release-globals (chromium|webkit|firefox)` and `release-html`. Nothing was changed by QA. |
+| F3 | ci-gates.md accuracy | **PASS**: Actions-run wording fixed, "none required" stated, fail-fast documented, F-META/F1/unparsed-key rules documented, release-asset job listed; all match the code. |
+| N1 | Regex/comment in a bracket key: fail closed | **PASS** with 1 Low remainder: regex ternary, `/* ] */`, the `k.replace(/[\]]/g,"")` fixture, globalThis and the eggfarm alias each give `[unparsed key]`. Still missed: line comment `window[k // ]\n]=1`. The look-ahead stops at `\n`; minifiers strip comments, so it's Low (n1n2.log). |
+| N2 | >4000-char key: fail closed | **PASS**: `window[f(1,…×3000)]=1` and globalThis give `[unparsed key]`. Controls (division read, regex read, allowed key) are not flagged. |
+| Fail-closed | Read/parse error or unexpected input gives non-zero | **PASS** with 1 Low: nonexistent file, empty dir, unreadable file (EACCES throw, rc 1), no args, unknown flag, binary file, empty file, and unbalanced `<script>` all exit 1. **Low (L-1):** a second positional path is silently ignored (`check-release-build pass.html extra.html` gives rc 0 and scans only the first). It should reject extra args (fail-closed.log). |
+| Inj | 34 injection variants (re-based with meta+attr so F-META doesn't mask them) | **PASS**: 30 caught, the same 4 known misses (inj-13, -17, -21, -28), no new miss (injections.log). |
+| Inj-new | 15 new F1/F-META variants | 11 caught (`url('.data:')`, `..data:`, spaced relative, `/fonts`, `URL(` upper case, css-escaped `\2e`, single-quoted / upper-case meta mismatch, empty or missing content, a bare `fonts/` JS path). **4 missed, all Low:** n07 `image-set("a.png")` (not used by the build); n10 meta only inside an HTML comment; n12 data-build-id only inside a comment; n11 data-build-id on a non-#app element. The gate counts `data-build-id` anywhere rather than on `#app`, and doesn't strip comments. None appear in the real build (runtime shows the real nodes), but the gate's claim is slightly broader than what it checks (injections-new-f1-meta.log, inj-new-fixtures/). |
+| Reg | Full vitest (2 workers, lock) + tsc | **PASS**: 50/50 files, 512 passed + 2 skipped (514), exit 0 (vitest.log, 01:51 CEST, 136 s hold). tsc --noEmit exit 0. The economy.test fixture freshness test did **not** fail, so no main comparison was needed. |
+
+## Findings
+- **F2 (Medium, repo setting):** see the table. To reproduce, read `GET /repos/PrincipalLewis/egg-farm/branches/main`.
+- **L-1 (Low):** extra positional args are ignored. Repro: `node scripts/check-release-build.mjs tests/fixtures/release-html/pass.html bogus.html; echo $?` gives 0.
+- **L-2 (Low):** F-META markup checks are comment-blind and not tied to `#app`. Repro: qa fixtures inj-new-fixtures/n10/n11/n12, each with HEAD_COMMIT=abc1234deadbeef, give rc 0. Fix: strip `<!--…-->` before scanning, and require the attribute on `id="app"`.
+- **L-3 (Low):** N1 line-comment variant is still missed (n1n2-probe.mjs).
+
+## Not run
+- Rulesets API (no read tool; private repo). Branch protection is confirmed off.
+- CI on 8475bc4 (Actions run status/annotations) was not read.
+- Release-asset workflow not executed (it needs a release event; a dispatch would be an external action).

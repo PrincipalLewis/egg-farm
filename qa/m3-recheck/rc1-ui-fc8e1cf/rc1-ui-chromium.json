@@ -1,0 +1,385 @@
+[
+ {
+  "n": "S2-6 360px queue-full tag straddles strip, covers no chip",
+  "pass": true,
+  "i": {
+   "text": "Full",
+   "straddle": true,
+   "over": false,
+   "n": 9
+  }
+ },
+ {
+  "n": "S2-9 360px Market dot 14px box, 10px #B83B37 fill (2px white ring), aria",
+  "pass": true,
+  "i": {
+   "shown": true,
+   "w": 14,
+   "h": 14,
+   "bg": "rgb(184, 59, 55)",
+   "bw": "2px",
+   "bc": "rgb(255, 255, 255)",
+   "inner": 10,
+   "aria": "Market, queue full"
+  }
+ },
+ {
+  "n": "360px no page errors (full queue)",
+  "pass": true,
+  "i": []
+ },
+ {
+  "n": "S2-6 375px queue-full tag straddles strip, covers no chip",
+  "pass": true,
+  "i": {
+   "text": "Full",
+   "straddle": true,
+   "over": false,
+   "n": 9
+  }
+ },
+ {
+  "n": "S2-9 375px Market dot 14px box, 10px #B83B37 fill (2px white ring), aria",
+  "pass": true,
+  "i": {
+   "shown": true,
+   "w": 14,
+   "h": 14,
+   "bg": "rgb(184, 59, 55)",
+   "bw": "2px",
+   "bc": "rgb(255, 255, 255)",
+   "inner": 10,
+   "aria": "Market, queue full"
+  }
+ },
+ {
+  "n": "S2-9 dot pulses at most once per 10 s (and does pulse)",
+  "pass": true,
+  "i": {
+   "pulses": 1
+  }
+ },
+ {
+  "n": "S2-3a full queue: sale shows +$X coin pop",
+  "pass": true,
+  "i": "+$237.20"
+ },
+ {
+  "n": "S2-9 dot clears when Market opened",
+  "pass": true
+ },
+ {
+  "n": "375px no page errors (full queue)",
+  "pass": true,
+  "i": []
+ },
+ {
+  "n": "S2-6 390px queue-full tag straddles strip, covers no chip",
+  "pass": true,
+  "i": {
+   "text": "Queue full",
+   "straddle": true,
+   "over": false,
+   "n": 9
+  }
+ },
+ {
+  "n": "S2-9 390px Market dot 14px box, 10px #B83B37 fill (2px white ring), aria",
+  "pass": true,
+  "i": {
+   "shown": true,
+   "w": 14,
+   "h": 14,
+   "bg": "rgb(184, 59, 55)",
+   "bw": "2px",
+   "bc": "rgb(255, 255, 255)",
+   "inner": 10,
+   "aria": "Market, queue full"
+  }
+ },
+ {
+  "n": "390px no page errors (full queue)",
+  "pass": true,
+  "i": []
+ },
+ {
+  "n": "Yellow fragment: no fx nodes ~1 s after collect animation, none near top-left",
+  "pass": true,
+  "i": {
+   "mid": 6,
+   "left": [],
+   "corner": 0
+  }
+ },
+ {
+  "n": "S2-5 one visible Manage-all control, labelled (no unlabeled/duplicate)",
+  "pass": true,
+  "i": {
+   "manageAll": 1,
+   "unlabeled": 0,
+   "nav": [
+    [
+     "Market",
+     97,
+     64
+    ],
+    [
+     "Upgrades",
+     97,
+     64
+    ],
+    [
+     "Refill 2",
+     85,
+     64
+    ],
+    [
+     "Farm",
+     97,
+     64
+    ]
+   ],
+   "label": "Refill",
+   "fs": "12px",
+   "badge": "2",
+   "badgeBg": "rgb(184, 59, 55)",
+   "aria": "Refill 2 tired workers",
+   "bg": "rgba(0, 0, 0, 0)"
+  }
+ },
+ {
+  "n": "S2-5 nav \"Refill\" 12px + red N=2 badge, aria \"Refill 2 tired workers\", no green fill",
+  "pass": true,
+  "i": {
+   "manageAll": 1,
+   "unlabeled": 0,
+   "nav": [
+    [
+     "Market",
+     97,
+     64
+    ],
+    [
+     "Upgrades",
+     97,
+     64
+    ],
+    [
+     "Refill 2",
+     85,
+     64
+    ],
+    [
+     "Farm",
+     97,
+     64
+    ]
+   ],
+   "label": "Refill",
+   "fs": "12px",
+   "badge": "2",
+   "badgeBg": "rgb(184, 59, 55)",
+   "aria": "Refill 2 tired workers",
+   "bg": "rgba(0, 0, 0, 0)"
+  }
+ },
+ {
+  "n": "S2-5 4 equal nav buttons, 64px tall",
+  "pass": false,
+  "i": [
+   [
+    "Market",
+    97,
+    64
+   ],
+   [
+    "Upgrades",
+    97,
+    64
+   ],
+   [
+    "Refill 2",
+    85,
+    64
+   ],
+   [
+    "Farm",
+    97,
+    64
+   ]
+  ]
+ },
+ {
+  "n": "S2-5 cooldown \"0:2x\", aria-disabled, focusable, aria \"Refill available in N seconds\"",
+  "pass": true,
+  "i": {
+   "label": "0:29",
+   "dis": "true",
+   "aria": "Refill available in 30 seconds",
+   "focus": true,
+   "imgFilter": "none",
+   "imgOp": "1",
+   "ring": true
+  }
+ },
+ {
+  "n": "S2-5 (c) Refill nav icon greyed during cooldown",
+  "pass": false,
+  "i": {
+   "label": "0:29",
+   "dis": "true",
+   "aria": "Refill available in 30 seconds",
+   "focus": true,
+   "imgFilter": "none",
+   "imgOp": "1",
+   "ring": true
+  }
+ },
+ {
+  "n": "S2-5 cooldown aria not changed within 5 s",
+  "pass": true,
+  "i": {
+   "a1": "Refill available in 30 seconds",
+   "a2": "Refill available in 30 seconds"
+  }
+ },
+ {
+  "n": "S2-5 no page errors",
+  "pass": true,
+  "i": []
+ },
+ {
+  "n": "S2-5 (d) 960px docked \"Refill tired (N)\" pill >= 44px tall",
+  "pass": true,
+  "i": [
+   {
+    "cls": "manage nav-manage farm-manage-all desk-manage-all",
+    "t": "Refill tired (2)",
+    "h": 44,
+    "w": 154.234375
+   }
+  ]
+ },
+ {
+  "n": "S2-5 (d) 1280px docked \"Refill tired (N)\" pill >= 44px tall",
+  "pass": true,
+  "i": [
+   {
+    "cls": "manage nav-manage farm-manage-all desk-manage-all",
+    "t": "Refill tired (2)",
+    "h": 44,
+    "w": 154.234375
+   }
+  ]
+ },
+ {
+  "n": "S2-1 F4->5: coop-l5.svg, toast above open sheet, up at 2.2 s, gone by 2.9 s",
+  "pass": true,
+  "i": {
+   "src": "coop-l5.svg",
+   "sheet": true,
+   "text": "Coop upgraded!",
+   "show": true,
+   "onTop": true,
+   "tz": 35,
+   "pz": 10,
+   "at22": true,
+   "at29": false
+  }
+ },
+ {
+  "n": "S2-1 F9->10: coop-l10.svg, toast above open sheet, up at 2.2 s, gone by 2.9 s",
+  "pass": true,
+  "i": {
+   "src": "coop-l10.svg",
+   "sheet": true,
+   "text": "Coop upgraded!",
+   "show": true,
+   "onTop": true,
+   "tz": 35,
+   "pz": 10,
+   "at22": true,
+   "at29": false
+  }
+ },
+ {
+  "n": "S2-1 F19->20: coop-l20.svg, toast above open sheet, up at 2.2 s, gone by 2.9 s",
+  "pass": true,
+  "i": {
+   "src": "coop-l20.svg",
+   "sheet": true,
+   "text": "Coop upgraded!",
+   "show": true,
+   "onTop": true,
+   "tz": 35,
+   "pz": 10,
+   "at22": true,
+   "at29": false
+  }
+ },
+ {
+  "n": "S2-1 three distinct coop SVGs served",
+  "pass": true,
+  "i": [
+   "979:",
+   "1373:",
+   "1890:"
+  ]
+ },
+ {
+  "n": "S2-4c line \"Market Hand sold X right away · +$Y\" with formatted values",
+  "pass": true,
+  "i": "Market Hand sold 1.5K right away · +$17.8K"
+ },
+ {
+  "n": "S2-4c money rises by at least +$Y within 1.5 s of Collect (one Market Hand cycle)",
+  "pass": true,
+  "i": {
+   "t": "Market Hand sold 1.5K right away · +$17.8K",
+   "gain": 17529
+  }
+ },
+ {
+  "n": "S2-4c line hidden when nothing sold (no Market Hand)",
+  "pass": true,
+  "i": {
+   "wb": true,
+   "sold": null
+  }
+ },
+ {
+  "n": "S2-8 (a) negative rate: \"▼−$X/s\" with U+25BC + U+2212, no hyphen, #B83B37 11px",
+  "pass": true,
+  "i": {
+   "text": "▼−$0.24/s",
+   "sign": "neg",
+   "color": "rgb(184, 59, 55)",
+   "fs": "11px",
+   "aria": "Net income minus 24 cents per second",
+   "cps": [
+    "25bc",
+    "2212",
+    "24",
+    "30",
+    "2e",
+    "32",
+    "34",
+    "2f",
+    "73"
+   ]
+  }
+ },
+ {
+  "n": "S2-8 wage lines \"Wage $X/s\" on worker cards",
+  "pass": true,
+  "i": [
+   "Wage $0.08/s",
+   "Wage $0.16/s"
+  ]
+ },
+ {
+  "n": "S2-8 no page errors",
+  "pass": true,
+  "i": []
+ }
+]

@@ -1,0 +1,102 @@
+[
+ {
+  "n": "real market_hand F23 -> \"Wage $5.75/min\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "real market_hand F24 -> \"Wage $0.10/s\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "real coop_hand F30 -> \"Wage $0.25/s\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "boundary $0.0999/s market_hand -> \"Wage $5.99/min\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "boundary $0.0999/s coop_hand -> \"Wage $5.99/min\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "boundary $0.1/s market_hand -> \"Wage $0.10/s\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "boundary $0.1/s coop_hand -> \"Wage $0.10/s\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "boundary $0.5/s market_hand -> \"Wage $0.50/s\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "boundary $0.5/s coop_hand -> \"Wage $0.50/s\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "boundary $1.25/s market_hand -> \"Wage $1.25/s\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "boundary $1.25/s coop_hand -> \"Wage $1.25/s\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "boundary $12.34/s market_hand -> \"Wage $12.34/s\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "boundary $12.34/s coop_hand -> \"Wage $12.34/s\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "boundary $999.99/s market_hand -> \"Wage $999.99/s\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "boundary $999.99/s coop_hand -> \"Wage $999.99/s\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "boundary $1000/s market_hand -> \"Wage $1.0K/s\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "boundary $1000/s coop_hand -> \"Wage $1.0K/s\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "boundary $1200/s market_hand -> \"Wage $1.2K/s\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "boundary $1200/s coop_hand -> \"Wage $1.2K/s\", one line, unclipped at 360",
+  "pass": false,
+  "i": null
+ },
+ {
+  "n": "no page errors",
+  "pass": true,
+  "i": []
+ }
+]

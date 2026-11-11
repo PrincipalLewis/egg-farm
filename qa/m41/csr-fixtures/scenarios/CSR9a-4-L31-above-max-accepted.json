@@ -1,0 +1,25 @@
+{
+ "id": "CSR9a-4-L31-above-max-accepted",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-9a"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-L31-badsum.json"
+  },
+  "eggfarm.save.v6_backup": {
+   "ref": "raw/V6B-valid-unmarked-F12-T-3h.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "notice": "M2",
+  "variant": "level",
+  "prevLevel": 31,
+  "body": "We restored an earlier save, from Farm level 12."
+ }
+}

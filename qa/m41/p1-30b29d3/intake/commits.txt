@@ -1,0 +1,13 @@
+30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134 M4.1 patch 1: shots - unpaid views hire only the role under test
+b12c8fe5b8007d0739f13501cf3b79a5a71d8ae9 M4.1 patch 1: Art shots add Coop Hand asleep/unpaid and Market Hand asleep + Coop Hand unpaid
+e5f5a1b1bf3a154c8d4fc6f27731119d6bf58ca7 M4.1 patch 1: AC-R7 test - HUD, card and ETA read the one incomePerSec value
+b2e04052087caa80c5524a8cb9bbfa17c6d12516 M4.1 patch 1: D-HOP-29 tests - AC-R8 caption from manage_prompt_threshold; frozen Coop Hand copy
+4e7a10b60fd308fcb825a1d1408e9e389480a4d1 M4.1 patch 1: banner effect from the role's own state only; HUD aria ', sales stopped' only for a stalled Market Hand
+e6a8510d71d43a4f917f4130626972e36036286b M4.1 patch 1: Coop Hand banner copy per rc1-asleep-state-spec v1.0.6 (copy only)
+d5fc62644369891e73115e8bdb9e51476af2b91f M4.1 patch 1: HoQA m-RC1-1 - explainer entry (expin) without scale overshoot (CSS only)
+b75a7a21cc27266f6ee22ee29e985bb754dba3e5 M4.1 patch 1: Art shots script (scripts/m41-p1-shots.mjs)
+3922391c5e743f52bcfe3f5a78becd78618e528f M4.1 patch 1 (5): #scene tap guard checks for the ported banner, Refill and badges (HoQA via HoE)
+b0a026627abf14f6167601202b079f4fa6a97527 M4.1 patch 1 (4/4): Market Hand banner copy per D-HOP-2026-10-24-14 and D-HOP-2026-10-24-17
+49ce43b461a44f356d941754fec0e1c7bd64e939 M4.1 patch 1 (3/4): D-HOP-2026-10-24-13 sales-stopped-spec §4.2 live-income fix
+645f12be0371734c60141832689ec49cda9a05e3 M4.1 patch 1 (2/4): S2 asleep signal - targeted port of rc1 AC-R1..R9
+ebf3a7aa80855c9b6510977a1a5450883b85c5ae M4.1-P1 yard hens: with M4 on, yard sprites = min(hens[H], 12) and #henpill shows hens[H] when > 12 (Hens track, CSV hens[hensLevel]); M4 off keeps S.hens(F). Pill keeps the NBSP ('×N\u00a0hens'); m41-9-big-number pins fmtCount(hensN). Tests from fix/yard-hens-from-track 2c9c0bb (10, incl. CCR boundary 12/13) with NBSP pill expectations. CCR resolution engineering/reviews/pr69-c849ccf-on-rc1-resolution.patch

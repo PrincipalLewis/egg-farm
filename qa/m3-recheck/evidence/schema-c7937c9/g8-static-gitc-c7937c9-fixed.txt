@@ -1,0 +1,28 @@
+PASS G8-1 src/telemetry/schema.ts exists at the RC SHA
+PASS G8-2 export const TELEMETRY_SCHEMA_VERSION = '0.6.2'
+PASS G8-3 export const EVENT_SCHEMA
+FAIL G8-4 export const EVENT_TYPES = Object.keys(EVENT_SCHEMA)
+PASS G8-5 export validateEvent(e) -> string[]
+PASS G8-6 export isPinned(e) event-based (not isPinned(type: string), F-10): export function isPinned(e: TEvent
+FAIL G8-7 FieldSpec kinds only enum|int|count|bucket|bool|float|str|arr (no free text; D-HOE-25 N-2): bad: obj
+PASS G8-7f float FieldSpec keys only {kind,min?,max?,step?,optional?,nullable?}, step > 0 (N-2): 2 float spec(s)
+FAIL G8-7s str FieldSpec carries a pattern (no free-text str; N-2): no pattern: { kind: 'str', pattern }
+FAIL G8-7a arr FieldSpec has of: FieldSpec and maxLen int >= 1 (N-2): bad: { kind: 'arr'; of: FieldSpec; maxLen: number } | { kind: 'arr', of, maxLen }
+PASS G8-14 FieldSpec optional?/nullable? declared, boolean literals only, read by validateEvent (default off: absent + null fail; N-2)
+FAIL G8-15 capped marker variants: ability_blocked {capped:bool, events:count}, coop_full {capped:bool, episodes:count} (N-2, D-HOE-23 (a)): ability_blocked not declared; coop_full not declared
+PASS G8-16 dynamicFields keyPattern from the code worker ids (market_hand|coop_hand|hawker|grader), anchored, no wildcard; validator reads dynamicFields (unknown keys fail; N-2)
+FAIL G8-17 ability_used.combo is kind bool, not optional/nullable (N-8): ability_used.combo not declared
+FAIL G8-18 stall_id/prev_stall_id kind int, min 1, on every event (incl. sales_stall; N-1 / D-HOE-24, not an enum): sales_stall.stall_id not declared
+FAIL G8-19 session_end.ability_blocked_taps int|count, min 0 if stated (all blocked taps incl. post-cap; errata rev 5 = rev 7 L119): not declared in session_end
+PASS G8-20 worst-case pinned-size test (src/**|tests/** *.test.ts: "worst" + dead_zone + the 200 KB cap) includes dead_zone (errata rev 13 V-3 L160): tests/telemetry-schema.test.ts
+FAIL G8-21 pinned set == errata rev 13 V-3 (20 types incl. dead_zone, zero_gain_purchase; 5 ring types not pinned): sales_stall:undeclared, fatigue_cue_shown:undeclared, fatigue_cue_tapped:undeclared, shift_sheet_opened:undeclared, refill_used:undeclared, rest_toggled:undeclared, first_worker_hired:undeclared, autorefill_toggled:undeclared, abilities_unlocked:undeclared, ability_used:undeclared, ability_ended:undeclared, ability_blocked:undeclared, worker_paused:undeclared, worker_resumed:undeclared, hatch_started:undeclared, flock_complete:undeclared, milestone_reached:undeclared, balanced_tier:undeclared, zero_gain_purchase:undeclared, dead_zone:undeclared
+FAIL G8-22 C-1: fatigue_cue_tapped declares surface, loss_per_s, loss_share, n_tired, n_asleep, n_paused, not suppressed_by_stall; shown = the 6 + suppressed_by_stall (SS cfff3817 note 3): fatigue_cue_tapped not declared; fatigue_cue_shown not declared
+FAIL G8-23 dead_zone reason only 'none_affordable'; zero_gain_purchase no capped marker; session_end.zero_gain_purchase_dropped declared (rev 13 rows #21/#22): dead_zone not declared; zero_gain_purchase not declared; session_end.zero_gain_purchase_dropped not declared
+PASS G8-8 EVENT_SCHEMA declares every type of the frozen v0.6.2 spec (61)
+PASS G8-9 envelope sid + fgMs named in schema.ts
+PASS G8-10 sales_stall resolved_by: all 14 values of sales-stopped-spec L249 (incl. chip_manage)
+PASS G8-11 no manage_used event type (HoQ C-3: refill_used only, no alias)
+FAIL G8-12 row 24 ring: telemetry.ts writes {v: TELEMETRY_SCHEMA_VERSION, events} and tags legacy:true
+FAIL G8-13 export header carries schema_version: TELEMETRY_SCHEMA_VERSION
+PASS TEL-AC11a every .track('<type>') call site in src (24) is in EVENT_SCHEMA
+G8: FAIL (13) G8-4 G8-7 G8-7s G8-7a G8-15 G8-17 G8-18 G8-19 G8-21 G8-22 G8-23 G8-12 G8-13

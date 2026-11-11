@@ -1,0 +1,14 @@
+numTotalTests=13 passed=13 failed=0 success=True
+ 1 PASSED 4.7ms  M1/m7: the recorded process is stopped > recordPid records a live child: pid, start time (stat field 22), parent = us, boot id
+ 2 PASSED 3.6ms  M1/m7: the recorded process is stopped > killRecorded SIGTERMs the recorded process group and the child exits by that signal
+ 3 PASSED 1.8ms  M1/m7: the recorded process is stopped > stopChild (serve-own stop path) stops a live recorded child with the given signal (SIGKILL, as d2-kill-browser)
+ 4 PASSED 2.2ms  M1/m7: the recorded process is stopped > group: false signals just the pid (a non-leader child)
+ 5 PASSED 0.3ms  M1/m7: a foreign or reused pid is refused and nothing is signalled > foreign pids are never recorded: init (1), our own parent, ourselves, invalid values
+ 6 PASSED 0.5ms  M1/m7: a foreign or reused pid is refused and nothing is signalled > a forged record for a foreign process (our own parent) is refused: not our child
+ 7 PASSED 2.1ms  M1/m7: a foreign or reused pid is refused and nothing is signalled > reused pid: same pid but a different recorded start time is refused
+ 8 PASSED 2.3ms  M1/m7: a foreign or reused pid is refused and nothing is signalled > a record from another boot is refused
+ 9 PASSED 2.2ms  M1/m7: a foreign or reused pid is refused and nothing is signalled > a group signal to a child that does not lead its own group is refused (would hit our own group)
+10 PASSED 4.4ms  M1/m7: a foreign or reused pid is refused and nothing is signalled > an exited child is refused by stopChild and by killRecorded (gone or zombie), and no record means no signal
+11 PASSED 0.7ms  m7/M1: no /proc walk or pattern kill left in the two scripts > scripts/d2-kill-browser.mjs
+12 PASSED 0.3ms  m7/M1: no /proc walk or pattern kill left in the two scripts > scripts/serve-own.mjs
+13 PASSED 0.2ms  m7/M1: no /proc walk or pattern kill left in the two scripts > scripts/recorded-pid.mjs

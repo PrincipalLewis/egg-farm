@@ -1,0 +1,3 @@
+rows 31; mismatches: 0
+worker columns 28 (expect 28); worker mismatches: 0
+exit 0

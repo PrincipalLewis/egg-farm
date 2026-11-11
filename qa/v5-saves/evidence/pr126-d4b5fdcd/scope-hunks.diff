@@ -1,0 +1,197 @@
+diff --git a/engineering/status.md b/engineering/status.md
+index 4c75718..f8d1ec4 100644
+--- a/engineering/status.md
++++ b/engineering/status.md
+@@ -131,3 +131,8 @@
+ - done: merged origin/rc/v5 518de304 into feat/saves-v5-telemetry-schema (merge 2f4794c, no conflicts). Schema contract verified against errata rev 13 a0e8f6d7: six FATIGUE_CUE_TAPPED_FIELDS; n_* sum <=4 with FAIL fixture at 5; zero_gain_purchase has no capped marker (overflow only session_end.zero_gain_purchase_dropped); dead_zone.reason only none_affordable; tapped rejects suppressed_by_stall. Follow-up a1f81a9 adds generalist slice, rev13 headers, explicit sum=5 fixture, warn-once assertion (kills prior M30 survivor). Gates: telemetry-schema 47/47; telemetry+m3 16/16; tsc --noEmit 0; G-8 base 155374 / buy-spam 175905 bytes (<=200KB). Bundles under egg-farm-studio/scratch/bundles/. Artifacts under egg-farm-studio/artifacts/saves-v5-telemetry-schema-a1f81a9/. No push / no PR opened.
+ - next: Saves QA (33ec1b55) verifies against rev13 before HoE merges. Then breeds RC blockers queue (PR C telemetry, BR-AC2b, #95 M1/M2) then F-9.
+ - blocked: none on JOB 2. Note: merge commit 2f4794c inherited Architect author from box git config at merge time (cannot amend); follow-up commit is Saves.
++
++## 2026-11-10 01:06 CET · Saves · HoE/breeds-sim-prB-traits COMMIT 0
++- familyClamp(s,b,family)→{rawBp,clampedBp,atCap}; familyActiveBp(s,b,family); bc keys lay_cap_bp_lt18/lay_cap_bp/lay_cap_farm/away_cap_bp/broody_cap_bp (match PR-B stubs + ea922eb8).
++- Branch saves/breeds-sim-prB-traits-c0 (ordinary push; no force). Commits 1–3 parked park/prB-traits-b381998.
++- tsc + sync-economy --check + focused 72 pass.
+diff --git a/src/config/breeds.ts b/src/config/breeds.ts
+index 150e2ff..667e3bc 100644
+--- a/src/config/breeds.ts
++++ b/src/config/breeds.ts
+@@ -20,6 +20,14 @@ export const BC_SPEC_DEFAULTS = {
+   unlock_farm: 10, slot2_farm: 14, slot3_farm: 20, rare_farm: 14, legendary_farm: 24, hatch_cost_s: 45, hatch_farm_share_bp: 10000,
+   hatch_min_cents: 50000, hatch_time_s: 60, settle_s: 300, incubators: 1, w_common: 70, w_rare: 22, w_epic: 7, w_legendary: 1,
+   pity_rare_after: 8, star_cap: 2, star_bonus_bp: 2500,
++  /**
++   * Family clamps (spec §4.3 L365–368 / §5; E8/E9). Verified vs m5.1-breeds-spec.ea922eb8:
++   * lay_cap_bp_lt18=700, lay_cap_bp=1500, away_cap_bp=3000, broody_cap_bp=2000.
++   * TODO(Econ/RC-PIN): economy.csv (8dc90e2b) and live product CSV have no bc_* columns yet (manifest row 27);
++   * bc() reads these defaults until the M5.1 CSV lands. lay_cap_farm=18 is the E9 F18 boundary implied by lt18 (not a CSV column).
++   */
++  lay_cap_bp_lt18: 700, lay_cap_bp: 1500, lay_cap_farm: 18,
++  away_cap_bp: 3000, broody_cap_bp: 2000,
+ } as const;
+ export type BcKey = keyof typeof BC_SPEC_DEFAULTS;
+ export const bc = (_b: Balance, k: BcKey): number => BC_SPEC_DEFAULTS[k];
+diff --git a/src/sim/breeds-family.ts b/src/sim/breeds-family.ts
+new file mode 100644
+index 0000000..25beef6
+--- /dev/null
++++ b/src/sim/breeds-family.ts
+@@ -0,0 +1,57 @@
++/**
++ * M5.1 breeds family clamps + Flock-sheet view (spec v0.2 rev 3.8.9 ea922eb8 §4.3 L365–368, E8/E9, BR-AC18).
++ * Shared clamp used by trait effects (Present/Away/Broody) and by familyClamp — one math path, no duplicates.
++ * API names match PR-B UI stubs (breeds-adapter): familyActiveBp, familyClamp, lay_cap_farm.
++ */
++import type { Balance } from '../config/balance';
++import { ROSTER, SLOT_IDX, bc, isBreedId, unlockedSlots, type Family } from '../config/breeds';
++import { on, type BreedsSave } from './breeds';
++import { slotTraitBp } from './breeds-hatch';
++import type { GameState } from './state';
++
++/** Cap for a family at Farm F (Present steps 700 → 1500 at lay_cap_farm per E9). */
++export function familyCapBp(family: Family, farmLevel: number, b: Balance): number {
++  if (family === 'present') return farmLevel >= bc(b, 'lay_cap_farm') ? bc(b, 'lay_cap_bp') : bc(b, 'lay_cap_bp_lt18');
++  if (family === 'away') return bc(b, 'away_cap_bp');
++  return bc(b, 'broody_cap_bp');
++}
++
++/** Shared clamp: min(raw, familyCap). Trait effects MUST use this (no parallel math). */
++export const clampFamilyBp = (rawBp: number, family: Family, farmLevel: number, b: Balance): number =>
++  Math.min(rawBp, familyCapBp(family, farmLevel, b));
++
++/** Unclamped sum of settled trait bp for `family` in unlocked slots (0 while settling / empty / flag-off). */
++export function familyRawBp(s: GameState, b: Balance, family: Family): number {
++  if (!on(s, b)) return 0;
++  const x = s.breeds as BreedsSave;
++  const open = unlockedSlots(s.farmLevel, b);
++  let sum = 0;
++  for (const i of SLOT_IDX) {
++    if (i >= open) break;
++    const id = x.slots[i];
++    if (!isBreedId(id) || ROSTER[id][1] !== family) continue;
++    sum += slotTraitBp(x, i, b);
++  }
++  return sum;
++}
++
++/**
++ * Clamped family bp — the figure trait effects apply (PR-B stub name `familyActiveBp(s, b, family)`).
++ * Identical to familyClamp(...).clampedBp.
++ */
++export const familyActiveBp = (s: GameState, b: Balance, family: Family): number =>
++  clampFamilyBp(familyRawBp(s, b, family), family, s.farmLevel, b);
++
++/** Flock-sheet family row (E8 "max" label): raw vs clamped from the shared clamp. */
++export interface FamilyClamp { rawBp: number; clampedBp: number; atCap: boolean; }
++
++/**
++ * Read-only per-family clamp view for UI (PR-A/PR-B Flock sheet). Name + return shape fixed by HoE API (01:04 CET).
++ * `atCap` is true when raw ≥ cap (E8: sheet shows "max").
++ */
++export function familyClamp(s: GameState, b: Balance, family: Family): FamilyClamp {
++  const rawBp = familyRawBp(s, b, family);
++  const clampedBp = clampFamilyBp(rawBp, family, s.farmLevel, b);
++  const capped = familyCapBp(family, s.farmLevel, b);
++  return { rawBp, clampedBp, atCap: rawBp >= capped && capped > 0 };
++}
+diff --git a/tests/v5-breeds-family-caps.test.ts b/tests/v5-breeds-family-caps.test.ts
+new file mode 100644
+index 0000000..a70167f
+--- /dev/null
++++ b/tests/v5-breeds-family-caps.test.ts
+@@ -0,0 +1,96 @@
++/**
++ * M5.1 breeds PR-B commit 0: family clamps + familyClamp / familyActiveBp (E8/E9, BR-AC18, §4.3 L365–368).
++ * Spec rev 3.8.9 ea922eb8. API names match PR-B UI stubs (HoE 01:04 CET).
++ */
++import { describe, it, expect } from 'vitest';
++import { balance as b } from '../src/config/balance';
++import { bc } from '../src/config/breeds';
++import { initialState, type GameState } from '../src/sim/state';
++import { type BreedsSave } from '../src/sim/breeds';
++import {
++  familyClamp, familyActiveBp, familyCapBp, familyRawBp, clampFamilyBp,
++} from '../src/sim/breeds-family';
++
++const BR = { ...b, m4: { ...b.m4!, flags: { ...b.m4!.flags, breeds: 1 } } } as typeof b;
++const fresh = (o: Partial<BreedsSave> = {}): BreedsSave => ({
++  owned: {}, slots: [null, null, null], incubator: null, settleMs: [0, 0, 0],
++  hatches: 0, pity: 0, rng: 0x9e3779b9, freeHatchUsed: 0, flockCompleteLogged: 0, ...o,
++});
++const st = (o: Partial<BreedsSave> = {}, F = 12): GameState => ({
++  ...initialState(b, 7), farmLevel: F, tracksV7: 1 as const, v6BackupId: '0123456789abcdef', breeds: fresh(o),
++});
++
++describe('BC_SPEC_DEFAULTS family clamps (§4.3 L365–368)', () => {
++  it('matches spec of record via bc() keys (no bc_ prefix)', () => {
++    expect(bc(BR, 'lay_cap_bp_lt18')).toBe(700);
++    expect(bc(BR, 'lay_cap_bp')).toBe(1500);
++    expect(bc(BR, 'away_cap_bp')).toBe(3000);
++    expect(bc(BR, 'broody_cap_bp')).toBe(2000);
++    expect(bc(BR, 'lay_cap_farm')).toBe(18); // E9 Farm-18 boundary (PR-B stub name)
++  });
++});
++
++describe('[E9] Present clamp lt18 vs ≥18', () => {
++  it('familyCapBp present: 700 below F18, 1500 from F18', () => {
++    expect(familyCapBp('present', 17, BR)).toBe(700);
++    expect(familyCapBp('present', 18, BR)).toBe(1500);
++    expect(familyCapBp('away', 10, BR)).toBe(3000);
++    expect(familyCapBp('broody', 30, BR)).toBe(2000);
++  });
++});
++
++describe('[E8] / [BR-AC18] at cap vs below cap', () => {
++  it('[BR-AC18][E8] 3 Present at 2★ (1575) at F24 → raw 1575, clamped 1500, atCap', () => {
++    const s = st({
++      owned: { cream_legbar: { stars: 2 }, ayam_cemani: { stars: 2 }, rhode_island_red: { stars: 2 } },
++      slots: ['cream_legbar', 'ayam_cemani', 'rhode_island_red'], settleMs: [0, 0, 0],
++    }, 24);
++    expect(familyRawBp(s, BR, 'present')).toBe(1575);
++    const v = familyClamp(s, BR, 'present');
++    expect(v).toEqual({ rawBp: 1575, clampedBp: 1500, atCap: true });
++    expect(familyActiveBp(s, BR, 'present')).toBe(1500);
++    expect(v.clampedBp).toBe(clampFamilyBp(v.rawBp, 'present', 24, BR));
++  });
++
++  it('[BR-AC18] below cap: Leghorn 2★ alone (375) at F12 → not atCap', () => {
++    const s = st({ owned: { leghorn: { stars: 2 } }, slots: ['leghorn', null, null], settleMs: [0, 0, 0] }, 12);
++    const v = familyClamp(s, BR, 'present');
++    expect(v.rawBp).toBe(375);
++    expect(v.clampedBp).toBe(375);
++    expect(v.atCap).toBe(false);
++  });
++
++  it('[BR-AC18][E9] 975 bp at F17 clamps to 700; at F18 stays 975', () => {
++    const base = {
++      owned: { ayam_cemani: { stars: 2 }, rhode_island_red: { stars: 2 } },
++      slots: ['ayam_cemani', 'rhode_island_red', null] as (string | null)[], settleMs: [0, 0, 0] as [number, number, number],
++    };
++    expect(familyClamp(st(base, 17), BR, 'present')).toEqual({ rawBp: 975, clampedBp: 700, atCap: true });
++    expect(familyClamp(st(base, 18), BR, 'present')).toEqual({ rawBp: 975, clampedBp: 975, atCap: false });
++  });
++
++  it('[E8] Away over 3000 clamps; Broody over 2000 clamps', () => {
++    const away = st({
++      owned: { sussex: { stars: 0 }, brahma: { stars: 0 } },
++      slots: ['sussex', 'brahma', null], settleMs: [0, 0, 0],
++    }, 14);
++    expect(familyClamp(away, BR, 'away')).toEqual({ rawBp: 3500, clampedBp: 3000, atCap: true });
++    const broody = st({
++      owned: { cochin: { stars: 0 }, orpington: { stars: 0 } },
++      slots: ['cochin', 'orpington', null], settleMs: [0, 0, 0],
++    }, 20);
++    expect(familyClamp(broody, BR, 'broody')).toEqual({ rawBp: 2500, clampedBp: 2000, atCap: true });
++  });
++});
++
++describe('familyActiveBp shares clamp with familyClamp', () => {
++  it('familyActiveBp === familyClamp.clampedBp === clampFamilyBp(raw)', () => {
++    const s = st({
++      owned: { cream_legbar: { stars: 2 }, ayam_cemani: { stars: 2 }, rhode_island_red: { stars: 2 } },
++      slots: ['cream_legbar', 'ayam_cemani', 'rhode_island_red'], settleMs: [0, 0, 0],
++    }, 24);
++    const v = familyClamp(s, BR, 'present');
++    expect(familyActiveBp(s, BR, 'present')).toBe(v.clampedBp);
++    expect(clampFamilyBp(v.rawBp, 'present', s.farmLevel, BR)).toBe(v.clampedBp);
++  });
++});

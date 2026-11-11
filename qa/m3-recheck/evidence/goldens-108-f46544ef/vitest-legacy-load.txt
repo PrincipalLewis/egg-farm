@@ -1,0 +1,139 @@
+LOCK+START 2026-11-06T03:57:11+01:00 loadavg=0.69 0.87 1.19 2/1802 1834229
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/goldens-108-f46544ef/wt
+
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak valid, IDB valid, v6_backup valid
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak valid, IDB valid, v6_backup invalid
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak valid, IDB valid, v6_backup absent
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak valid, IDB invalid, v6_backup valid
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak valid, IDB invalid, v6_backup invalid
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak valid, IDB invalid, v6_backup absent
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak valid, IDB absent, v6_backup valid
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak valid, IDB absent, v6_backup invalid
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak valid, IDB absent, v6_backup absent
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak invalid, IDB valid, v6_backup valid
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak invalid, IDB valid, v6_backup invalid
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak invalid, IDB valid, v6_backup absent
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak invalid, IDB invalid, v6_backup valid
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak invalid, IDB invalid, v6_backup invalid
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak invalid, IDB invalid, v6_backup absent
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak invalid, IDB absent, v6_backup valid
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak invalid, IDB absent, v6_backup invalid
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak invalid, IDB absent, v6_backup absent
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak absent, IDB valid, v6_backup valid
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak absent, IDB valid, v6_backup invalid
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak absent, IDB valid, v6_backup absent
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak absent, IDB invalid, v6_backup valid
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak absent, IDB invalid, v6_backup invalid
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak absent, IDB invalid, v6_backup absent
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak absent, IDB absent, v6_backup valid
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak absent, IDB absent, v6_backup invalid
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > .bak absent, IDB absent, v6_backup absent
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > both valid: higher-ranked IDB wins, higher-ranked .bak wins, tie -> .bak
+ ✓ tests/csr-loadsafe.test.ts > CSR-2 tier order: corrupt main -> tier A (.bak vs IDB by rank, tie .bak) -> v6_backup -> fresh > IDB absent -> tried reason no_global|security; IDB unknown + valid .bak -> .bak, mirror off (CSR-13)
+ ✓ tests/csr-loadsafe.test.ts > CSR-3: corrupt LS main + valid IDB is a recovery, never silent > IDB restored, corrupt main preserved, outcome restored, source idb
+ ✓ tests/csr-loadsafe.test.ts > CSR-3: corrupt LS main + valid IDB is a recovery, never silent > IDB bytes identical to the corrupt main count as invalid (and are preserved once)
+ ✓ tests/csr-loadsafe.test.ts > CSR-3: corrupt LS main + valid IDB is a recovery, never silent > reconcile() no longer restores over a corrupt LS main (loadSafe owns it)
+ ✓ tests/csr-loadsafe.test.ts > CSR-3: corrupt LS main + valid IDB is a recovery, never silent > Game: save_corrupt {recovered_from idb, store ls, tried, migrated:false} once and flushed
+ ✓ tests/csr-loadsafe.test.ts > save_restore {source:idb}: the silent non-corrupt stale-LS restore (G7, D-HOP-35, IDB1-7) > valid but older LS main + newer valid IDB -> IDB written into main, no recovery, staleRestore
+ ✓ tests/csr-loadsafe.test.ts > save_restore {source:idb}: the silent non-corrupt stale-LS restore (G7, D-HOP-35, IDB1-7) > Game emits save_restore {source:"idb"} exactly once after the loadSafe refactor (LS main missing), never save_restored
+ ✓ tests/csr-loadsafe.test.ts > save_restore {source:idb}: the silent non-corrupt stale-LS restore (G7, D-HOP-35, IDB1-7) > identical / older IDB copy -> no save_restore
+ ✓ tests/csr-loadsafe.test.ts > CSR-13 IDB unknown: defer (no v6_backup / fresh commit, no save write) > .bak invalid + IDB unknown -> case D, outcome deferred, file null, even with a valid v6_backup
+ ✓ tests/csr-loadsafe.test.ts > CSR-13 IDB unknown: defer (no v6_backup / fresh commit, no save write) > Game on defer: read-only, no save key written (only corrupt.* + telemetry), save_corrupt recovered_from deferred
+ ✓ tests/csr-loadsafe.test.ts > CSR-13 IDB unknown: defer (no v6_backup / fresh commit, no save write) > CSR-13b: defer with a quota-failing KV -> deferred, no key changed
+ ✓ tests/csr-loadsafe.test.ts > CSR-13 IDB unknown: defer (no v6_backup / fresh commit, no save write) > repeated deferred boots with the same corrupt bytes keep one corrupt.* copy (cross-boot dedupe, G6)
+ ✓ tests/csr-loadsafe.test.ts > CSR-13 IDB unknown: defer (no v6_backup / fresh commit, no save write) > M4 loader fields: case D, source deferred, outcome deferred (UI #58 maps it to M4)
+ ✓ tests/csr-loadsafe.test.ts > CSR-4/5 v6_backup tier > decodeBackup null (junk / old raw-string format) -> invalid; v6 raw version > 6 -> invalid version, not newer
+ ✓ tests/csr-loadsafe.test.ts > CSR-4/5 v6_backup tier > valid unmarked v6 raw -> restored, migrated (tracks migration re-runs), record byte-identical on load
+ ✓ tests/csr-loadsafe.test.ts > CSR-6/11 fresh only as last resort; every source corrupt > corrupt main + .bak, IDB, v6_backup all invalid -> fresh F, tried 3 invalid, <= 3 copies, v6_backup kept
+ ✓ tests/csr-loadsafe.test.ts > CSR-6/11 fresh only as last resort; every source corrupt > CSR-1: a sanitizeLevel failure (invalid_state) takes the same order
+ ✓ tests/csr-loadsafe.test.ts > CSR-6/11 fresh only as last resort; every source corrupt > missing main + no .bak + no IDB = new game, no recovery; missing main + invalid .bak -> chain
+ ✓ tests/csr-loadsafe.test.ts > CSR-7 dedupe / cap > .bak bytes identical to main are preserved once
+ ✓ tests/csr-loadsafe.test.ts > CSR-7 dedupe / cap > LS cap 3, oldest evicted (preserveCorrupt unchanged)
+ ✓ tests/csr-loadsafe.test.ts > CSR-9a prevLevel / restoredLevel / restoredSavedAt; loader fields for UI notice ids > CSR-9a-1: corrupt main JSON farmLevel 17 -> prevLevel 17, M2 level variant
+ ✓ tests/csr-loadsafe.test.ts > CSR-9a prevLevel / restoredLevel / restoredSavedAt; loader fields for UI notice ids > CSR-9a-2: main unparseable, .bak bytes carry farmLevel 15 -> prevLevel 15
+ ✓ tests/csr-loadsafe.test.ts > CSR-9a prevLevel / restoredLevel / restoredSavedAt; loader fields for UI notice ids > CSR-9a-3: none -> unset, age variant from the v6 raw savedAt; invalid savedAt -> fallback
+ ✓ tests/csr-loadsafe.test.ts > CSR-9a prevLevel / restoredLevel / restoredSavedAt; loader fields for UI notice ids > CSR-9a-4: 12.5, null, -1, "17" rejected (falls to .bak, then unset); 31 accepted
+ ✓ tests/csr-loadsafe.test.ts > CSR-9a prevLevel / restoredLevel / restoredSavedAt; loader fields for UI notice ids > level equal to prevLevel: both fields set and equal (UI picks age)
+ ✓ tests/csr-loadsafe.test.ts > CSR-9a prevLevel / restoredLevel / restoredSavedAt; loader fields for UI notice ids > loader fields behind M1 / M3 / storage: source + case + store
+ ✓ tests/csr-loadsafe.test.ts > CSR-9a prevLevel / restoredLevel / restoredSavedAt; loader fields for UI notice ids > legacy AC14b strings still shown for M1/M3 until UI swaps copy
+ ✓ tests/csr-loadsafe.test.ts > CSR-AC-IDB1 corrupt IDB copy with nothing valid in LS (IDB1-6 store, IDB1-8 no repair) > IDB1-abc: never a silent new game -> fresh M3, store idb, reason invalid_state
+ ✓ tests/csr-loadsafe.test.ts > CSR-AC-IDB1 corrupt IDB copy with nothing valid in LS (IDB1-6 store, IDB1-8 no repair) > IDB1-truncated: never a silent new game -> fresh M3, store idb, reason parse
+ ✓ tests/csr-loadsafe.test.ts > CSR-AC-IDB1 corrupt IDB copy with nothing valid in LS (IDB1-6 store, IDB1-8 no repair) > IDB1-wrongtype-version-string: never a silent new game -> fresh M3, store idb, reason wrong_type
+ ✓ tests/csr-loadsafe.test.ts > CSR-AC-IDB1 corrupt IDB copy with nothing valid in LS (IDB1-6 store, IDB1-8 no repair) > IDB1-nonstring-object: never a silent new game -> fresh M3, store idb, reason wrong_type
+ ✓ tests/csr-loadsafe.test.ts > CSR-AC-IDB1 corrupt IDB copy with nothing valid in LS (IDB1-6 store, IDB1-8 no repair) > IDB1 with a valid v6_backup -> M2
+ ✓ tests/csr-loadsafe.test.ts > CSR-AC-IDB1 corrupt IDB copy with nothing valid in LS (IDB1-6 store, IDB1-8 no repair) > IDB1-3: copy failed -> M3 with Export (bytes from memory), copy_failed, mirror off
+ ✓ tests/csr-loadsafe.test.ts > CSR-AC-IDB1 corrupt IDB copy with nothing valid in LS (IDB1-6 store, IDB1-8 no repair) > IDB1-6: corrupt LS main (OQ-1 bytes) + IDB1-abc -> store ls, tried idb invalid
+ ✓ tests/csr-loadsafe.test.ts > CSR-AC-IDB1 corrupt IDB copy with nothing valid in LS (IDB1-6 store, IDB1-8 no repair) > IDB unknown with no LS main stays a normal new game (legacy, no IDB1)
+ ✓ tests/csr-loadsafe.test.ts > CSR-15 no silent zero: random corruptions of a valid main always recover with a save_corrupt > 300 seeded mutations
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled > shipping balance has no m4.flags: every M5 flag off; SAVE_VERSION stays 6
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled > [CCR-77-N1][D-C1] m5Flag is config/flags flagOn for every M5_FLAGS name (one flag type, one rule)
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled > flags off: m5Load / m5Offline / m5ShortGap return the SAME object, no events (byte-identical to the base)
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled > m5Persist: no session key -> same object, so serialize writes exactly the base bytes (an M5 saved shape too)
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > valid values kept; a call spanning the reload ends once (offline, effect_s = tc_ability_s - activeS); activeS cleared
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > nextSpawnRemainingS = -1 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > nextSpawnRemainingS = 1000000000 -> 300
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > nextSpawnRemainingS = null -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > nextSpawnRemainingS = 87 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > frenzyRemainingS = 999 -> 30
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > frenzyRemainingS = -0.5 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyNestCents = 12.9 -> 12
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyNestCents = 50000000000000000 -> 1000000000000000
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyNestCents = -3 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyHenIdx = 12 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyHenIdx = 2.5 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyHenIdx = 11 -> 11
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > evRngState = 0 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > evRngState = 4294967296 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > evRngState = -4 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > evRngState = 4294967295 -> 4294967295
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > abilitiesCoachSeen = yes -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > abilitiesUnlocked = false -> false
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > readyAt clamped to [now, now + tc_ability_cd_s]; non-finite -> ready (absent); a clock rolled back a day loads at most one cooldown
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > activeS > tc_ability_s clamps (effect_s 0); non-finite / <= 0 is no call (no event); junk containers dropped
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > only the fields of a flag that is on are touched (flag off then on: kept, not read; abilities spec E7)
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > session-only keys in a hand-edited save never load; legacy v1.0 frenzyEndAt dropped (R23 uses frenzyRemainingS)
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 persist (save shape) > every session key is dropped (F1a M5_SESSION_FIELDS); saved fields and activeS kept (E2); input not mutated
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 persist (save shape) > [CCR-77-m1][D-C4] the strip list IS F1a M5_SESSION_FIELDS, pinned to the 8 spec keys; each one is dropped by persist and serialize
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a gap of 60 s or more (§9.1 / §9.1a) > egg expires (offline, fresh evRng gap), calls end at the gap start, s = 0; Frenzy frozen, nest kept, readyAt (wall clock) untouched
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a gap of 60 s or more (§9.1 / §9.1a) > no egg on screen: the countdown is kept, not re-drawn (golden R8, review fix B1); evRng not advanced
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a gap of 60 s or more (§9.1 / §9.1a) > D-C2: drawGap with no evRngState seeds mixSeed(state.rng ^ 0x6576526E) once and never touches state.rng
+ ✓ tests/v5-f2-m5-fields.test.ts > [D-HOE-41] endCalls / m5Load: AbilityState.durS is the granted length (offline end) > [D-HOE-41][AC] legacy save without durS: effect_s = tc_ability_s - activeS; no leftover durS
+ ✓ tests/v5-f2-m5-fields.test.ts > [D-HOE-41] endCalls / m5Load: AbilityState.durS is the granted length (offline end) > [D-HOE-41][AC] durS=45, activeS=40: effect_s≈5; both cleared (load and offline; with or without the combo key)
+ ✓ tests/v5-f2-m5-fields.test.ts > [D-HOE-41] endCalls / m5Load: AbilityState.durS is the granted length (offline end) > [D-HOE-41][AC] durS present but activeS>granted: clamp then clear both
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a hidden gap under 60 s > streak grace/decay in one step over 0 focus seconds: 5 s hidden at 0.28 returns 0.28 (K8); same object, nothing else moves
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a hidden gap under 60 s > streakAfter: hold 3 s then 0.03/s, 0 at 12.33 s from 0.28 (ST-AC5); dt < 0 counts as 0
+ ✓ tests/newer-save.test.ts > newer-version save (M4) is refused, never touched > newerSaveVersion
+ ✓ tests/newer-save.test.ts > newer-version save (M4) is refused, never touched > loadSafe: no file, no recovery, newer=version; no write/remove of save, .bak or corrupt keys
+ ✓ tests/newer-save.test.ts > newer-version save (M4) is refused, never touched > Game: refuses, read-only, constructor/save()/endSession() never write the save or .bak
+ ✓ tests/newer-save.test.ts > newer-version save (M4) is refused, never touched > IndexedDB reconcile never replaces a newer localStorage save (nor writes when IndexedDB holds the newer one)
+ ✓ tests/newer-save.test.ts > newer-version save (M4) is refused, never touched > a newer .bak is never overwritten by .bak rotation
+ ✓ tests/newer-save.test.ts > fixture corrupt-version-99.json (was case F) is now refused untouched > no preserve copy, no fresh start, save bytes unchanged
+ ✓ tests/newer-save.test.ts > review 8669522 fixes > B1: newerStoredVersion sees main, .bak and the IndexedDB copy
+ ✓ tests/newer-save.test.ts > review 8669522 fixes > B1: v7 only in IndexedDB, localStorage holds valid v6 -> loadSafe refuses, Game writes nothing, mirror never written
+ ✓ tests/newer-save.test.ts > review 8669522 fixes > B1: v7 only in IndexedDB, no localStorage save -> refused, no new game, nothing written
+ ✓ tests/newer-save.test.ts > review 8669522 fixes > B1: reconcile writes nothing when .bak is newer
+ ✓ tests/newer-save.test.ts > review 8669522 fixes > m1: non-integer versions are not "newer"; they go down the corrupt path
+ ✓ tests/newer-save.test.ts > review 8669522 fixes > m2: corrupt main + newer .bak -> refuse (no fresh start, no corrupt copies)
+ ✓ tests/newer-save.test.ts > review 8669522 fixes > m3: refusal copy is exactly M4A-31(b), Try again kept
+ ✓ tests/newer-save.test.ts > review 8669522 fixes > M1: main.ts runs the newer-save check before requestFlush / claim
+ ✓ tests/save.test.ts > save/load + migrations > AC8 round-trips coins, coop, basket, levels
+ ✓ tests/save.test.ts > save/load + migrations > null on empty, corrupt, or newer-version save
+ ✓ tests/save.test.ts > save/load + migrations > migrates v1 (float dollars) -> v2 (cents) and fills new fields
+ ✓ tests/save.test.ts > save/load + migrations > migrates v2 customers (no filled) -> v3
+ ✓ tests/save.test.ts > autosave > saves every 5 s (from config)
+ ✓ tests/save.test.ts > autosave > saves on visibilitychange→hidden (not visible), pagehide, beforeunload
+ ✓ tests/save.test.ts > autosave > saves immediately on every upgrade purchase
+ ✓ tests/save.test.ts > autosave > offline modal not granted twice for one absence
+ ✓ tests/save.test.ts > v4 celebratedTier > v3 save at farm L12 migrates with tier 2 celebrated
+ ✓ tests/save-fixtures.test.ts > QA M3 save fixtures (smoke) > m1-rc2-v4-12min.json migrates and loads
+ ✓ tests/save-fixtures.test.ts > QA M3 save fixtures (smoke) > m2-rc1-v5-12min.json migrates and loads
+ ✓ tests/save-fixtures.test.ts > QA M3 save fixtures (smoke) > m2-rc1-v5-40min.json migrates and loads
+ ✓ tests/save-fixtures.test.ts > QA M3 save fixtures (smoke) > m2-rc1-v5-40min-edge.json migrates and loads
+
+ Test Files  5 passed (5)
+      Tests  128 passed (128)
+   Start at  03:57:11
+   Duration  1.25s (transform 270ms, setup 0ms, collect 491ms, tests 127ms, environment 1ms, prepare 188ms)
+
+EXIT=0 END 2026-11-06T03:57:12+01:00 loadavg=0.69 0.87 1.19 2/1979 1834652

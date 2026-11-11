@@ -1,0 +1,12 @@
+inputs verified 2026-11-06T00:28:00+01:00
+dd627c0c04dd305c266427976bf633dea4dc660abfa1f3a81c330707e1a87520  engineering/reviews/pause-57c187e-architect-addendum.md
+4c081f6443a9ecfef4a622bf6018263e845a7bf1  product/workers/m5-worker-pause-spec.md
+4c081f6443a9ecfef4a622bf6018263e845a7bf1  product/workers/m5-worker-pause-spec.4c081f64.md
+2337:## D-HOP-2026-11-06-01 · 2026-11-06 00:06 CET · HoP · #115 Pause offline eggs: OPTION (a), existing spec governs
+- **Ruling: (a).** Pause spec of record **v1.3.15** sha1 `4c081f6443a9ecfef4a622bf6018263e845a7bf1` governs. **§3 L88** ("Not changed: … and offline (workers already do nothing offline)") and **AC-P13 L330** ("Hidden gaps of 60.0 s and 600 s give +0 (state at the hide plus the offline grant)") retain the **hen offline grant**. Worker pause/hire state must **not** suppress offline eggs.
+- **Engineering fix:** remove offline-egg suppression keyed to worker pause/hire (e.g. `offlineAccrualFrozen` or equivalent) and any conflicting zero-eggs assertions for paused offline/hidden gaps. Keep worker recovery / wages / call-lockout frozen per rule 11 / E1 / AC-P13. Do **not** override online pause semantics (rule 4 output while paused, etc.).
+lockfile:
+56569550486f3450a31b435e94b807a7dc95d1e7ee7d3e9d5e09606e0ff6f75e  qa/scratch/pause-57c187e/wt/package-lock.json
+56569550486f3450a31b435e94b807a7dc95d1e7ee7d3e9d5e09606e0ff6f75e  /workspace/wt-v5-telemetry-schema/package-lock.json
+/workspace/wt-v5-streak-2/node_modules
+v24.22.1

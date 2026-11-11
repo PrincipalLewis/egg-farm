@@ -1,0 +1,17 @@
+HEAD 30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134 porcelain=0 2026-10-24 18:41:58 CEST
+npm-ci exit=0 2s
+sync-check exit=0 1s
+tsc exit=0 7s
+vitest exit=0 410s
+build exit=0 13s
+build-html exit=0 14s
+build-qa exit=0 13s
+check-release-dist exit=0 0s
+check-release-html exit=0 0s
+dist name="build-id" content="m4.1+30b29d3" a7a4aa0891b65fafb14796f40c12f056ab16b76e5f45a6e67fd57706f2dd1022  dist/index.html
+dist-html name="build-id" content="m4.1+30b29d3" dd919d616fe0138a89c362b1db269458558a0a2c85827b3e4fc104d36b22979b  dist-html/egg-farm.html
+dist-qa name="build-id" content="m4.1+30b29d3" c2b1ad6d3784ffa9da0d9d2ed8e12186dafb139ca6e0a64b9ab44d0a5eeb9d1f  dist-qa/index.html
+porcelain-after-nonbrowser=
+rc0-chromium exit=0 372s
+check-globals exit=0 16s
+porcelain-after-browser=

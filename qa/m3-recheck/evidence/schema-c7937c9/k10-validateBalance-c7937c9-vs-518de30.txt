@@ -1,0 +1,4 @@
+gitc fixture has telemetry.bbv2: false
+gitc validateBalance(k10 fixture): THROWS balance.telemetry.bbv2.shown_min_gap_s must be > 0
+gitb fixture has telemetry.bbv2: false
+gitb validateBalance(k10 fixture balance-9a73bd8a.json): OK

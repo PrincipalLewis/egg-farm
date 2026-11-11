@@ -1,0 +1,4 @@
+2c2
+< csv /workspace/egg-farm-studio/scratch/m4-retune/handoff-T3h/cand/b.csv sha256 84bd0b70bf40b8dfa8be223a0356f2cddbf025c532fe4da3ab5adf11d9088faa | seeds 1-200 | workers T 14400s
+---
+> csv /workspace/egg-farm-studio/qa/m3-recheck/l30plus-dryrun-b-729565e9/inputs/b.csv sha256 84bd0b70bf40b8dfa8be223a0356f2cddbf025c532fe4da3ab5adf11d9088faa | seeds 1-200 | workers T 14400s

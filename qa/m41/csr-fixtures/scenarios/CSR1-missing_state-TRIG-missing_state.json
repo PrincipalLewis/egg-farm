@@ -1,0 +1,26 @@
+{
+ "id": "CSR1-missing_state-TRIG-missing_state",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-1",
+  "CSR-6",
+  "CSR-15"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/TRIG-missing_state.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "recovery": true,
+  "reason": "missing_state",
+  "store": "ls",
+  "recovered_from": "none",
+  "notice": "M3",
+  "corruptLsMin": 1
+ }
+}

@@ -1,0 +1,12 @@
+PR28 f7642c9 checkpoint
+gates: tsc 0, vitest 498 pass+1 skip (499) 2 workers, test:slow 11/11, sync --check 0, build+check-release-build 0 (m3-rc1-pre+f7642c9 ok), build:qa 0
+chromium: globals PASS 2/2, rc0 212/212, probe 57/57 (build id m3-rc1-pre+f7642c9 runtime; G0/1/2 x 3 cases x 390/360 label==gain, fit, 358/328x56)
+old main f035594 + new rc0 section (chromium lane2): sellallgrader FAILS 4 (G1/G2 label=$1.19T vs gained 1.78T/2.37T) -> check catches bug; unit test 9/9 fail on old
+firefox: globals PASS 2/2; rc0 interrupted -> rerun
+webkit: pending
+rc0 firefox=0 pass=212 fail=0
+probe firefox=0 pass=57 fail=0
+rc0 webkit=0 pass=212 fail=0
+probe webkit=0 pass=57 fail=0 (wrapper hung after probe on server-group kill; own PIDs killed manually)
+webkit: globals PASS 2/2
+REPORT WRITTEN; ALLDONE

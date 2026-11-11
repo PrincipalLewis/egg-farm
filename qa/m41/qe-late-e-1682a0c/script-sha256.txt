@@ -1,0 +1,5 @@
+847ade7dc70ede0770c8a284ab55f35f27ac11293b4e6442d813267ae1e7dec4  m3-scripts/qe-late-browser.mjs
+288c36a4764a992b3f9942c0c9d95e18b62f0c87087c0813dbd10180c4a96587  m3-scripts/qel7-save-bytes.qa.test.ts
+773705bf0903843909e5bdf062411ba22b9c1711638d4b8b43c858f842132bd2  m3-scripts/oq2-offline-grant-once.qa.test.ts
+20b12dc961146ba83359a716f367cb87a2b182f567f73cccb1f6e31a40a5c420  m3-scripts/gate4-explainer.qa.test.ts
+9a1b185b33ccf7c4302fd07ce37a66a7864452364d444567e579d32461776b79  scratch/qe-late-browser.mjs.orig-9a1b185b

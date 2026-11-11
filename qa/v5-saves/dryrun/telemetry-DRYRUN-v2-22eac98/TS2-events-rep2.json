@@ -1,0 +1,202 @@
+[
+  {
+    "install_id": "1d27d90d-93b2-4d3f-a648-499a7d1a09bd",
+    "build": "m4.1+22eac98",
+    "type": "session_start",
+    "ts": 1793275200436,
+    "sessionMs": 0
+  },
+  {
+    "type": "save_savedat_invalid",
+    "ts": 1793275200437,
+    "sessionMs": 1
+  },
+  {
+    "id": 82,
+    "N": 53,
+    "type": "customer_arrive",
+    "ts": 1793275200944,
+    "sessionMs": 508
+  },
+  {
+    "id": 82,
+    "N": 53,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793275201651,
+    "sessionMs": 1215
+  },
+  {
+    "id": 83,
+    "N": 51,
+    "type": "customer_arrive",
+    "ts": 1793275232471,
+    "sessionMs": 32035
+  },
+  {
+    "id": 83,
+    "N": 51,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793275232472,
+    "sessionMs": 32036
+  },
+  {
+    "id": 84,
+    "N": 38,
+    "type": "customer_arrive",
+    "ts": 1793275232472,
+    "sessionMs": 32036
+  },
+  {
+    "id": 84,
+    "N": 38,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793275232474,
+    "sessionMs": 32038
+  },
+  {
+    "id": 85,
+    "N": 41,
+    "type": "customer_arrive",
+    "ts": 1793275232474,
+    "sessionMs": 32038
+  },
+  {
+    "id": 85,
+    "N": 41,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793275232475,
+    "sessionMs": 32039
+  },
+  {
+    "id": 86,
+    "N": 55,
+    "type": "customer_arrive",
+    "ts": 1793275232475,
+    "sessionMs": 32039
+  },
+  {
+    "id": 86,
+    "N": 55,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793275232476,
+    "sessionMs": 32040
+  },
+  {
+    "id": 87,
+    "N": 60,
+    "type": "customer_arrive",
+    "ts": 1793275232476,
+    "sessionMs": 32040
+  },
+  {
+    "id": 87,
+    "N": 60,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793275232477,
+    "sessionMs": 32041
+  },
+  {
+    "id": 88,
+    "N": 35,
+    "type": "customer_arrive",
+    "ts": 1793275232477,
+    "sessionMs": 32041
+  },
+  {
+    "id": 88,
+    "N": 35,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793275232478,
+    "sessionMs": 32042
+  },
+  {
+    "id": 89,
+    "N": 63,
+    "type": "customer_arrive",
+    "ts": 1793275232478,
+    "sessionMs": 32042
+  },
+  {
+    "id": 89,
+    "N": 63,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793275232480,
+    "sessionMs": 32044
+  },
+  {
+    "id": 90,
+    "N": 36,
+    "type": "customer_arrive",
+    "ts": 1793275232480,
+    "sessionMs": 32044
+  },
+  {
+    "id": 90,
+    "N": 36,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793275232481,
+    "sessionMs": 32045
+  },
+  {
+    "id": 91,
+    "N": 51,
+    "type": "customer_arrive",
+    "ts": 1793275232481,
+    "sessionMs": 32045
+  },
+  {
+    "id": 91,
+    "N": 51,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793275232482,
+    "sessionMs": 32046
+  },
+  {
+    "id": 92,
+    "N": 38,
+    "type": "customer_arrive",
+    "ts": 1793275232482,
+    "sessionMs": 32046
+  },
+  {
+    "id": 92,
+    "N": 38,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793275232483,
+    "sessionMs": 32047
+  },
+  {
+    "wage_coop_hand_cents": 284,
+    "coop_hand_eggs": 442,
+    "wage_market_hand_cents": 138,
+    "market_hand_eggs": 521,
+    "market_hand_cents": 246954,
+    "type": "worker_summary",
+    "ts": 1793275200641,
+    "sessionMs": 205,
+    "windowMs": 93352
+  },
+  {
+    "secondsAway": 61.005,
+    "eggs": 247,
+    "type": "offline_grant",
+    "ts": 1793275293995,
+    "sessionMs": 93559
+  },
+  {
+    "type": "session_end",
+    "ts": 1793275294514,
+    "sessionMs": 94078
+  }
+]

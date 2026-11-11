@@ -1,0 +1,38 @@
+{
+  "src/config/formulas.ts": {
+    "old_tip": "45f71ae5f9c7a622303e45085857f68f32bfabcf",
+    "new_tip": "45f71ae5f9c7a622303e45085857f68f32bfabcf",
+    "same_as_old_tip": true,
+    "base": "69935f59210a720fe645faf8a59a10bb949752d1"
+  },
+  "src/config/m5-rules.ts": {
+    "old_tip": "5e416bacff1055ba27170e579531e24f530da166",
+    "new_tip": "06d2fd5df99b7cbb12abbb9bdf9db507a17115e5",
+    "same_as_old_tip": false,
+    "base": "bf08a01d88e95cace3d6a9189624a39cdcf33f27"
+  },
+  "src/sim/effects.ts": {
+    "old_tip": "4e6654c1015c887de3de55b17bb200e3cc5cdf97",
+    "new_tip": "4e6654c1015c887de3de55b17bb200e3cc5cdf97",
+    "same_as_old_tip": true,
+    "base": "17561e0bdf070660501fd8e11d9d5c16fac5b6a1"
+  },
+  "src/sim/golden.ts": {
+    "old_tip": "caadf2724a5d9f9935875e5b310bbdc5aed76803",
+    "new_tip": "caadf2724a5d9f9935875e5b310bbdc5aed76803",
+    "same_as_old_tip": true,
+    "base": null
+  },
+  "src/sim/timers.ts": {
+    "old_tip": "6d3fbed3f4c0f563b98a4dcc5f4696deb6b35cbe",
+    "new_tip": "6d3fbed3f4c0f563b98a4dcc5f4696deb6b35cbe",
+    "same_as_old_tip": true,
+    "base": "1a941adc61981f1fdd652e4f41552bc25718178a"
+  },
+  "tests/v5-golden-rewards.test.ts": {
+    "old_tip": "c7ccb2544f7a8029ce3c454e2e20970d2426212d",
+    "new_tip": "c7ccb2544f7a8029ce3c454e2e20970d2426212d",
+    "same_as_old_tip": true,
+    "base": null
+  }
+}

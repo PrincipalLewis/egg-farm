@@ -1,0 +1,22 @@
+{
+ "id": "CSR1-control-valid-C1-farmLevel-999-oversized-valid",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-1",
+  "control"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "../../csr/fixtures/C1-farmLevel-999-oversized-valid.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "recovery": false,
+  "notice": null,
+  "noSaveCorrupt": true
+ }
+}

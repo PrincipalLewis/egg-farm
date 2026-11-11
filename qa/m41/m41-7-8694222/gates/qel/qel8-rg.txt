@@ -1,0 +1,2 @@
+src/ui/tracks-explainer.ts:40:  g.state = { ...g.state, seenTracksExplainer: true }; g.save({ mirrorOnFail: false });
+src/game.ts:265:  save({ mirrorOnFail: mirrorFallback = true }: { mirrorOnFail?: boolean } = {}) {

@@ -1,0 +1,58 @@
+== tap-chromium-360.jsonl COMPLETE errors=0 pageerrors=[]
+  AFTER states=44 anyOverlap=0 places={'default': 38, 'inside': 2, 'none': 2, 'band': 2}
+  after  mouse: taps= 30 outcomes={'BUY(card stays)': 30} overlapsBuy=0 efpIsBuy=30/30 efpInCard=0 preventOrStop=0
+  after  touch: taps= 30 outcomes={'BUY(card stays)': 30} overlapsBuy=0 efpIsBuy=30/30 efpInCard=0 preventOrStop=0
+  none-contract (mouse): at0=default at200=none(vis=hidden) buyWhileNone={'bought': True, 'cardStillInDom': True, 'place': 'none', 'visibility': 'hidden', 'seenFlag': True, 'fadeOutCount': 0, 'popsCount': 0} rePlaceEnd=band(ov=False) rePlace0=default(ov=False) rePlaceColl=default rePlaceClosed=default dismissAllOk=True
+  none-contract (touch): at0=default at200=none(vis=hidden) buyWhileNone={'bought': True, 'cardStillInDom': True, 'place': 'none', 'visibility': 'hidden', 'seenFlag': True, 'fadeOutCount': 0, 'popsCount': 0} rePlaceEnd=band(ov=False) rePlace0=default(ov=False) rePlaceColl=default rePlaceClosed=default dismissAllOk=True
+== tap-chromium-375.jsonl COMPLETE errors=0 pageerrors=[]
+  AFTER states=44 anyOverlap=0 places={'default': 40, 'inside': 2, 'band': 2}
+  after  mouse: taps= 30 outcomes={'BUY(card stays)': 30} overlapsBuy=0 efpIsBuy=30/30 efpInCard=0 preventOrStop=0
+  after  touch: taps= 30 outcomes={'BUY(card stays)': 30} overlapsBuy=0 efpIsBuy=30/30 efpInCard=0 preventOrStop=0
+  none-contract (mouse): at0=default at200=band(vis=visible) buyWhileNone={'bought': True, 'cardStillInDom': True, 'place': 'band', 'visibility': 'visible', 'seenFlag': True, 'fadeOutCount': 0, 'popsCount': 0} rePlaceEnd=default(ov=False) rePlace0=default(ov=False) rePlaceColl=default rePlaceClosed=default dismissAllOk=True
+  none-contract (touch): at0=default at200=band(vis=visible) buyWhileNone={'bought': True, 'cardStillInDom': True, 'place': 'band', 'visibility': 'visible', 'seenFlag': True, 'fadeOutCount': 0, 'popsCount': 0} rePlaceEnd=default(ov=False) rePlace0=default(ov=False) rePlaceColl=default rePlaceClosed=default dismissAllOk=True
+== tap-chromium-390.jsonl COMPLETE errors=0 pageerrors=[]
+  AFTER states=44 anyOverlap=0 places={'default': 38, 'inside': 2, 'band': 4}
+  after  mouse: taps= 38 outcomes={'BUY(card stays)': 38} overlapsBuy=0 efpIsBuy=38/38 efpInCard=0 preventOrStop=0
+  after  touch: taps= 38 outcomes={'BUY(card stays)': 38} overlapsBuy=0 efpIsBuy=38/38 efpInCard=0 preventOrStop=0
+  none-contract (mouse): at0=default at200=default(vis=visible) buyWhileNone={'bought': True, 'cardStillInDom': True, 'place': 'default', 'visibility': 'visible', 'seenFlag': True, 'fadeOutCount': 0, 'popsCount': 0} rePlaceEnd=band(ov=False) rePlace0=default(ov=False) rePlaceColl=default rePlaceClosed=default dismissAllOk=True
+  none-contract (touch): at0=default at200=default(vis=visible) buyWhileNone={'bought': True, 'cardStillInDom': True, 'place': 'default', 'visibility': 'visible', 'seenFlag': True, 'fadeOutCount': 0, 'popsCount': 0} rePlaceEnd=band(ov=False) rePlace0=default(ov=False) rePlaceColl=default rePlaceClosed=default dismissAllOk=True
+== tap-firefox-360.jsonl COMPLETE errors=0 pageerrors=[]
+  AFTER states=44 anyOverlap=0 places={'default': 38, 'inside': 2, 'none': 2, 'band': 2}
+  after  mouse: taps= 30 outcomes={'BUY(card stays)': 30} overlapsBuy=0 efpIsBuy=30/30 efpInCard=0 preventOrStop=0
+  after  touch: taps= 30 outcomes={'BUY(card stays)': 30} overlapsBuy=0 efpIsBuy=30/30 efpInCard=0 preventOrStop=0
+  none-contract (mouse): at0=default at200=none(vis=hidden) buyWhileNone={'bought': True, 'cardStillInDom': True, 'place': 'none', 'visibility': 'hidden', 'seenFlag': True, 'fadeOutCount': 0, 'popsCount': 0} rePlaceEnd=band(ov=False) rePlace0=default(ov=False) rePlaceColl=default rePlaceClosed=default dismissAllOk=True
+  none-contract (touch): at0=default at200=none(vis=hidden) buyWhileNone={'bought': True, 'cardStillInDom': True, 'place': 'none', 'visibility': 'hidden', 'seenFlag': True, 'fadeOutCount': 0, 'popsCount': 0} rePlaceEnd=band(ov=False) rePlace0=default(ov=False) rePlaceColl=default rePlaceClosed=default dismissAllOk=True
+== tap-firefox-375.jsonl COMPLETE errors=0 pageerrors=[]
+  AFTER states=44 anyOverlap=2 places={'default': 40, 'inside': 2, 'band': 2}
+  after  mouse: taps= 30 outcomes={'BUY(card stays)': 30} overlapsBuy=1 efpIsBuy=30/30 efpInCard=0 preventOrStop=0
+  after  touch: taps= 30 outcomes={'BUY(card stays)': 30} overlapsBuy=1 efpIsBuy=30/30 efpInCard=0 preventOrStop=0
+  none-contract (mouse): at0=default at200=band(vis=visible) buyWhileNone={'bought': True, 'cardStillInDom': True, 'place': 'band', 'visibility': 'visible', 'seenFlag': True, 'fadeOutCount': 0, 'popsCount': 0} rePlaceEnd=default(ov=False) rePlace0=default(ov=False) rePlaceColl=default rePlaceClosed=default dismissAllOk=True
+  none-contract (touch): at0=default at200=band(vis=visible) buyWhileNone={'bought': True, 'cardStillInDom': True, 'place': 'band', 'visibility': 'visible', 'seenFlag': True, 'fadeOutCount': 0, 'popsCount': 0} rePlaceEnd=default(ov=False) rePlace0=default(ov=False) rePlaceColl=default rePlaceClosed=default dismissAllOk=True
+== tap-firefox-390.jsonl COMPLETE errors=0 pageerrors=[]
+  AFTER states=44 anyOverlap=0 places={'default': 38, 'inside': 2, 'band': 4}
+  after  mouse: taps= 38 outcomes={'BUY(card stays)': 38} overlapsBuy=0 efpIsBuy=38/38 efpInCard=0 preventOrStop=0
+  after  touch: taps= 38 outcomes={'BUY(card stays)': 38} overlapsBuy=0 efpIsBuy=38/38 efpInCard=0 preventOrStop=0
+  none-contract (mouse): at0=default at200=default(vis=visible) buyWhileNone={'bought': True, 'cardStillInDom': True, 'place': 'default', 'visibility': 'visible', 'seenFlag': True, 'fadeOutCount': 0, 'popsCount': 0} rePlaceEnd=band(ov=False) rePlace0=default(ov=False) rePlaceColl=default rePlaceClosed=default dismissAllOk=True
+  none-contract (touch): at0=default at200=default(vis=visible) buyWhileNone={'bought': True, 'cardStillInDom': True, 'place': 'default', 'visibility': 'visible', 'seenFlag': True, 'fadeOutCount': 0, 'popsCount': 0} rePlaceEnd=band(ov=False) rePlace0=default(ov=False) rePlaceColl=default rePlaceClosed=default dismissAllOk=True
+== tap-webkit-360.jsonl COMPLETE errors=0 pageerrors=[]
+  AFTER states=44 anyOverlap=0 places={'default': 38, 'inside': 2, 'none': 2, 'band': 2}
+  after  mouse: taps= 30 outcomes={'BUY(card stays)': 30} overlapsBuy=0 efpIsBuy=30/30 efpInCard=0 preventOrStop=0
+  after  touch: taps= 30 outcomes={'BUY(card stays)': 30} overlapsBuy=0 efpIsBuy=30/30 efpInCard=0 preventOrStop=0
+  none-contract (mouse): at0=default at200=none(vis=hidden) buyWhileNone={'bought': True, 'cardStillInDom': True, 'place': 'none', 'visibility': 'hidden', 'seenFlag': True, 'fadeOutCount': 0, 'popsCount': 0} rePlaceEnd=band(ov=False) rePlace0=default(ov=False) rePlaceColl=default rePlaceClosed=default dismissAllOk=True
+  none-contract (touch): at0=default at200=none(vis=hidden) buyWhileNone={'bought': True, 'cardStillInDom': True, 'place': 'none', 'visibility': 'hidden', 'seenFlag': True, 'fadeOutCount': 0, 'popsCount': 0} rePlaceEnd=band(ov=False) rePlace0=default(ov=False) rePlaceColl=default rePlaceClosed=default dismissAllOk=True
+== tap-webkit-375.jsonl COMPLETE errors=0 pageerrors=[]
+  AFTER states=44 anyOverlap=2 places={'default': 40, 'inside': 2, 'band': 2}
+  after  mouse: taps= 30 outcomes={'BUY(card stays)': 30} overlapsBuy=1 efpIsBuy=30/30 efpInCard=0 preventOrStop=0
+  after  touch: taps= 30 outcomes={'BUY(card stays)': 30} overlapsBuy=1 efpIsBuy=30/30 efpInCard=0 preventOrStop=0
+  none-contract (mouse): at0=default at200=band(vis=visible) buyWhileNone={'bought': True, 'cardStillInDom': True, 'place': 'band', 'visibility': 'visible', 'seenFlag': True, 'fadeOutCount': 0, 'popsCount': 0} rePlaceEnd=default(ov=False) rePlace0=default(ov=False) rePlaceColl=default rePlaceClosed=default dismissAllOk=True
+  none-contract (touch): at0=default at200=band(vis=visible) buyWhileNone={'bought': True, 'cardStillInDom': True, 'place': 'band', 'visibility': 'visible', 'seenFlag': True, 'fadeOutCount': 0, 'popsCount': 0} rePlaceEnd=default(ov=False) rePlace0=default(ov=False) rePlaceColl=default rePlaceClosed=default dismissAllOk=True
+== tap-webkit-390.jsonl COMPLETE errors=0 pageerrors=[]
+  AFTER states=44 anyOverlap=0 places={'default': 38, 'inside': 2, 'band': 4}
+  after  mouse: taps= 38 outcomes={'BUY(card stays)': 38} overlapsBuy=0 efpIsBuy=38/38 efpInCard=0 preventOrStop=0
+  after  touch: taps= 38 outcomes={'BUY(card stays)': 38} overlapsBuy=0 efpIsBuy=38/38 efpInCard=0 preventOrStop=0
+  none-contract (mouse): at0=default at200=default(vis=visible) buyWhileNone={'bought': True, 'cardStillInDom': True, 'place': 'default', 'visibility': 'visible', 'seenFlag': True, 'fadeOutCount': 0, 'popsCount': 0} rePlaceEnd=band(ov=False) rePlace0=default(ov=False) rePlaceColl=default rePlaceClosed=default dismissAllOk=True
+  none-contract (touch): at0=default at200=default(vis=visible) buyWhileNone={'bought': True, 'cardStillInDom': True, 'place': 'default', 'visibility': 'visible', 'seenFlag': True, 'fadeOutCount': 0, 'popsCount': 0} rePlaceEnd=band(ov=False) rePlace0=default(ov=False) rePlaceColl=default rePlaceClosed=default dismissAllOk=True
+
+=== GRAND TOTAL TAPS BY (lab, input, outcome) ===
+  ('after', 'mouse', 'BUY(card stays)') 294
+  ('after', 'touch', 'BUY(card stays)') 294

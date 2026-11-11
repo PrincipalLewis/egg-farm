@@ -1,0 +1,18 @@
+passed [row-8 isPaused] isPaused(w, b) > shipped balance has m4.flags.pause = 0
+passed [row-8 isPaused] isPaused(w, b) > false whenever pause = 0 (or m4.enabled = 0); true only with pause = 1 and paused === true
+passed [row-8 isPaused][AC-P1] pause = 0: paused:true leaves income byte-identical to the unpaused case > asleep
+passed [row-8 isPaused][AC-P1] pause = 0: paused:true leaves income byte-identical to the unpaused case > working
+passed [row-8 isPaused][AC-P1] pause = 0: paused:true leaves income byte-identical to the unpaused case > tired
+passed [row-8 isPaused][AC-P1] pause = 0: paused:true leaves income byte-identical to the unpaused case > unpaid
+passed [row-8 isPaused][AC-P1] pause = 0: paused:true leaves income byte-identical to the unpaused case > asleep MH with paused:true and pause = 0 is stalled (sales stop), as if
+passed [row-8 isPaused] pause = 1: paused is respected > a paused asleep Market Hand is not stalled (the player sells by hand); unpaused it is
+passed [row-8 isPaused][QA-10] every src read of `paused` goes through isPaused > no `.paused` / `["paused"]` / `paused !==|===` read outside sim/pause.ts isPaused
+passed [Q8] Q8 zero-gain paths (m4 namespace) > ships m4.flags.zeroGainUi = 0, m4.flags.bestBuyV2 = 0, m4.zeroGain.confirm = 0, and no m5 block
+passed [Q8] Q8 zero-gain paths (m4 namespace) > [D-HOP-2026-10-29-05] ships m4.flags.fatigueCue = 0 (Rule 2 chip cut flag, D-HOP-2026-10-29-05) and m4.flags.pause = 0
+passed [Q8] Q8 zero-gain paths (m4 namespace) > confirm is live only with zeroGainUi on (and m4.enabled) and confirm === 1
+passed [Q8] Q8 zero-gain paths (m4 namespace) > sync keeps m4.zeroGain whole (a flipped confirm survives a re-sync; absent = 0) and refuses typos
+passed [Q8] Q8 zero-gain paths (m4 namespace) > validateBalance rejects a non-0/1 confirm or an unknown zeroGain key
+passed [Q8] Q8 release gate rejects eggfarmQa* > a clean bundle passes
+passed [Q8] Q8 release gate rejects eggfarmQa* > fails: window.eggfarmQaZeroGain=()=>{};
+passed [Q8] Q8 release gate rejects eggfarmQa* > fails: const w=window;w.eggfarmQaZeroGain=1;
+passed [Q8] Q8 release gate rejects eggfarmQa* > fails: const f=globalThis.eggfarmQaFitBanners;

@@ -1,0 +1,43 @@
+LOCK+START 2026-11-06T03:57:09+01:00 loadavg=0.69 0.87 1.19 2/1773 1834051
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/goldens-108-f46544ef/wt
+
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: flag and unlock (R1/R2, GE-AC1, GE-AC34) > flag off: 30 focus min at F10 adds no golden field or event; spawnGolden / tapGolden are the identity
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: flag and unlock (R1/R2, GE-AC1, GE-AC34) > GE-AC1: F < tc_egg_unlock_farm for 30 focus min: no countdown, no spawn
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: flag and unlock (R1/R2, GE-AC1, GE-AC34) > GE-AC2/R2: reaching F8 starts tc_first_spawn_s (45) of focus time; due at 45 s +- 1 tick; interval_s 45
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: flag and unlock (R1/R2, GE-AC1, GE-AC34) > R1 never re-locks: a running countdown keeps going if F drops below 8
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: focus clock (R5/R7, GE-AC13, GE-AC21) > unfocused ticks move neither the countdown nor an on-screen egg
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: focus clock (R5/R7, GE-AC13, GE-AC21) > GE-AC21: dt <= 0 changes nothing golden
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: spawn (R4, R14/R15, GE-AC4, GE-AC16, sizing §12.2) > slot = spots[pickIndex(u, n)] from ONE evRng draw; the UI list order is the index space
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: spawn (R4, R14/R15, GE-AC4, GE-AC16, sizing §12.2) > GE-AC4: no second egg while one is on screen; not due -> no spawn
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: spawn (R4, R14/R15, GE-AC4, GE-AC16, sizing §12.2) > R15: an empty list defers (no egg, no lifetime, no draw); recheck every 500 ms of focus; deferred_ms counts focus time only
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: lifetime and expiry (R3, GE-AC3, GE-AC5) > GE-AC5: an untouched egg expires once at focus age tc_egg_despawn_s +- 1 tick; no reward; fresh R3 gap from evRng
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: lifetime and expiry (R3, GE-AC3, GE-AC5) > GE-AC3: 200 seeded resolutions: every gap in [120, 300), mean 210 +- 15; same seed same gaps; customer arrivals identical golden on vs off 1507ms
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: tap (R19/R20, GE-AC6, GE-AC18, GE-AC33, GE-AC35) > R19: a tap before tc_spawn_grace_ms of focus age is ignored (identity)
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: tap (R19/R20, GE-AC6, GE-AC18, GE-AC33, GE-AC35) > GE-AC6/AC8: cash tap grants exactly once; collectible_collected matches the state change; egg resolved with a fresh gap
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: tap (R19/R20, GE-AC6, GE-AC18, GE-AC33, GE-AC35) > in_warning from tc_warn_at_s; eggs reward_value = eggs added (F < 20); eggs_cash at F >= 20
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: tap (R19/R20, GE-AC6, GE-AC18, GE-AC33, GE-AC35) > frenzy tap: reward_value = tc_frenzy_price_mult, duration tc_frenzy_s; frenzy_started follows collectible_collected
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: tap (R19/R20, GE-AC6, GE-AC18, GE-AC33, GE-AC35) > GE-AC35: a golden tap is not a credited tap: streak, tap window and coop unchanged
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: tap (R19/R20, GE-AC6, GE-AC18, GE-AC33, GE-AC35) > GE-AC33: from initialState(b, 7) the draws follow xorshift32(evRng seed) in order gap at resolve -> slot -> reward (first-spawn uses tc_first_spawn_s, so this cycle starts at slot)
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: Frenzy run counters (§8 frenzy_ended, GE-AC12; session only) > GE-AC12: frenzy_ended{timeout}: extra_coins = sum(frenzy - non-frenzy value), eggs_sold = by_player + by_workers
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: Frenzy run counters (§8 frenzy_ended, GE-AC12; session only) > a re-granted Frenzy resets the time and keeps one run (no frenzy_ended in between)
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: offline / reload / save (R8, R10a, R10c; Saves contract) > m5Offline with an egg: expired{offline}, no reward, fresh gap; Frenzy frozen (kept)
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: offline / reload / save (R8, R10a, R10c; Saves contract) > goldenUnload(reload): the pagehide seam: expired{reload} + fresh gap; identity without an egg or with the flag off
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: offline / reload / save (R8, R10a, R10c; Saves contract) > R10a: the egg, the pending-spawn record and the Frenzy run are never saved; reload resumes the saved countdown (GE-AC14b)
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: validateBalance (D-HOP-2026-11-05-11, golden tc keys) > tc_frenzy_all_sales must be 1 (0 is invalid, no alternate branch)
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: validateBalance (D-HOP-2026-11-05-11, golden tc keys) > golden on requires the slice-2 keys (first_spawn_s, egg_unlock_farm, egg_despawn_s, spawn_grace_ms, warn_at_s, frenzy_all_sales)
+ ✓ tests/v5-golden-spawn.test.ts > #1 slice 2: validateBalance (D-HOP-2026-11-05-11, golden tc keys) > M5_TC_KEYS.abilities stays a real entry (Architect M1 / cannot vanish into golden EOL comment)
+ ✓ tests/v5-golden-m5persist.test.ts > Architect B m5Persist (golden egg on screen) > T1: egg on screen draws one gap on a copy; live egg, evRng and countdown stay put
+ ✓ tests/v5-golden-m5persist.test.ts > Architect B m5Persist (golden egg on screen) > T1 edge: no evRngState yet seeds once from state.rng and advances that seed; live rng is not the draw stream
+ ✓ tests/v5-golden-m5persist.test.ts > Architect B m5Persist (golden egg on screen) > T2: m5Persist(s0, b) twice is bit-identical JSON, and so is serialize/save of that same live input
+ ✓ tests/v5-golden-m5persist.test.ts > Architect B m5Persist (golden egg on screen) > T3: no egg leaves evRngState and nextSpawnRemainingS exactly as strip-only, including spawn-due 0
+ ✓ tests/v5-golden-m5persist.test.ts > Architect B m5Persist (golden egg on screen) > flag off, or no balance: an on-screen egg is stripped and the countdown/rng are not redrawn
+ ✓ tests/v5-golden-m5persist.test.ts > Architect B m5Persist (golden egg on screen) > M1: debugBackdateSave writes the backdated copy with the live balance, so an on-screen egg is drawn there too
+ ✓ tests/v5-golden-m5persist.test.ts > Architect B m5Persist (golden egg on screen) > load does not rewrite a stored spawn-due 0 (no egg on disk)
+
+ Test Files  2 passed (2)
+      Tests  32 passed (32)
+   Start at  03:57:09
+   Duration  2.18s (transform 217ms, setup 0ms, collect 308ms, tests 1.61s, environment 0ms, prepare 77ms)
+
+EXIT=0 END 2026-11-06T03:57:11+01:00 loadavg=0.69 0.87 1.19 3/1802 1834221

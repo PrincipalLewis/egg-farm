@@ -1,0 +1,5 @@
+iphone-15   PASS SM-1 load | PASS SM-2 core loop | PASS SM-3 save/reload | PASS SM-5 workers (hire) | PASS Export log | PASS Reset | PASS SM-7 layout | PASS SM-7b right edge | PASS SM-8 touch | PASS no console/page errors
+iphone-se   PASS SM-1 load | PASS SM-2 core loop | PASS SM-3 save/reload | PASS SM-5 workers (hire) | PASS Export log | PASS Reset | PASS SM-7 layout | PASS SM-7b right edge | PASS SM-8 touch | PASS no console/page errors
+ipad        PASS SM-1 load | PASS SM-2 core loop | PASS SM-3 save/reload | PASS SM-5 workers (hire) | PASS Export log | PASS Reset | PASS SM-7 layout | PASS SM-7b right edge | PASS SM-8 touch | PASS no console/page errors
+mac-webkit  PASS SM-1 load | PASS SM-2 core loop | PASS SM-3 save/reload | PASS SM-5 workers (hire) | PASS Export log | PASS Reset | PASS SM-7 layout | PASS SM-7b right edge | PASS no console/page errors
+exit 0

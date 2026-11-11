@@ -1,0 +1,15 @@
+/workspace/egg-farm-studio/qa/m3-recheck/goldens-27660196-evidence/release-build.log:1:check-release-build: m4.1+2766019 ok
+/workspace/egg-farm-studio/qa/m3-recheck/goldens-27660196-evidence/release-build.log:2:check-release-build: release prefix m4.1 ok
+/workspace/egg-farm-studio/qa/m3-recheck/goldens-27660196-evidence/release-build.log:3:check-release-build: no eggfarmUi in release ok
+/workspace/egg-farm-studio/qa/m3-recheck/goldens-27660196-evidence/release-build.log:4:check-release-build: no ?debug/?perf/?ios/QA hooks ok
+/workspace/egg-farm-studio/qa/m3-recheck/goldens-27660196-evidence/release-build.log:5:check-release-build: window global writes only eggfarmExportTelemetry ok
+/workspace/egg-farm-studio/qa/m3-recheck/goldens-27660196-evidence/release-build.log:6:check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok
+/workspace/egg-farm-studio/qa/m3-recheck/goldens-27660196-evidence/release-build.log:7:check-release-build: eggfarm* identifiers eggfarmRecovery, eggfarmTabGuard, eggfarmExportTelemetry ok
+/workspace/egg-farm-studio/qa/m3-recheck/goldens-27660196-evidence/build.log:3:> vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && vite build && node scripts/check-release-build.mjs dist
+/workspace/egg-farm-studio/qa/m3-recheck/goldens-27660196-evidence/build.log:15:check-release-build: m4.1+2766019 ok
+/workspace/egg-farm-studio/qa/m3-recheck/goldens-27660196-evidence/build.log:16:check-release-build: release prefix m4.1 ok
+/workspace/egg-farm-studio/qa/m3-recheck/goldens-27660196-evidence/build.log:17:check-release-build: no eggfarmUi in release ok
+/workspace/egg-farm-studio/qa/m3-recheck/goldens-27660196-evidence/build.log:18:check-release-build: no ?debug/?perf/?ios/QA hooks ok
+/workspace/egg-farm-studio/qa/m3-recheck/goldens-27660196-evidence/build.log:19:check-release-build: window global writes only eggfarmExportTelemetry ok
+/workspace/egg-farm-studio/qa/m3-recheck/goldens-27660196-evidence/build.log:20:check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok
+/workspace/egg-farm-studio/qa/m3-recheck/goldens-27660196-evidence/build.log:21:check-release-build: eggfarm* identifiers eggfarmRecovery, eggfarmTabGuard, eggfarmExportTelemetry ok

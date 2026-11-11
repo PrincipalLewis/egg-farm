@@ -1,0 +1,33 @@
+{
+ "id": "CSR13a-idb-unknown-bak-valid",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-13",
+  "CSR-13a"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-OQ1-abc.json"
+  },
+  "eggfarm.save.bak": {
+   "ref": "raw/BAK-valid-F20-seq4-older.json"
+  }
+ },
+ "idb": {
+  "status": "unknown",
+  "reason": "idb_timeout",
+  "records": [
+   {
+    "key": "main",
+    "ref": "raw/IDB-valid-F17-seq4-T-10m.json"
+   }
+  ]
+ },
+ "expect": {
+  "recovered_from": "bak",
+  "notice": "M1",
+  "farmLevel": 20,
+  "idbPutsAfterAutosave": 0,
+  "idbMainUnchanged": true
+ }
+}

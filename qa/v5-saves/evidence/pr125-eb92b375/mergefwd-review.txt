@@ -1,0 +1,31 @@
+merge-forward review, tip eb92b375aca7d3e59d8f5e54e994ea5d7f293388
+merge commit 8f47fd1820dd1bad3a5e378d746adaf664d7b961
+  parents: a8a1ae8a224d69c6b9099f25351ecd6ed1d4361b  d65391b0868cc993aa39e5bde49d279967c3b8af
+  subject: merge: origin/rc/v5 (d65391b0, #111) into breeds-sim-prB-traits
+CONTAINS_d65391b0=YES
+CONTAINS_d4b5fdcd=YES (#126)
+CONTAINS_baf410ff=YES (#124)
+CONTAINS_0bbcea52=YES (#120)
+CONTAINS_a8a1ae8a=YES (pre-mergefwd #125 tip)
+
+git merge-tree (a8a1ae8a vs d65391b0) "changed in both" / CONFLICT files:
+  1. src/game.ts
+     Resolution: kept #111 golden-game (collectible_id, goldenEnd, beginReset, driveGolden, layoutChanged, tapGolden)
+     AND #125 present_* session_end + away_bp offline_grant path.
+     Order in endSession: streakPeak, then goldenEnd('reload'), then session_end with sessionEndPresentFields.
+     grantOffline at the merge still read awayBp after applyOffline (F3); fixed later in eb92b37.
+  2. src/save/m5-fields.ts
+     Resolution: took #111 goldenUnload argument order (o, b, ev, 'offline'). No #125 product loss.
+  3. src/sim/actions.ts
+     Resolution: took #111 spawnGolden layout?: boolean and a.layout === true pass-through.
+     breedsNoteCreditedTap path retained (actions.ts:80).
+
+#126 content intact:
+  src/sim/breeds-family.ts                    tree blob 25beef68 = d4b5fdcd (IDENTICAL)
+  tests/v5-breeds-family-caps.test.ts         tree blob a70167fb = d4b5fdcd (IDENTICAL)
+  src/config/breeds.ts                        DIFFERS only by #125 present_calm_w_s:10 / present_calm_k:6
+  #126 bc keys still present at tip: lay_cap_bp_lt18, lay_cap_bp, lay_cap_farm, away_cap_bp, broody_cap_bp
+
+package.json mergefwd: added script "golden-game-browser" only; package-lock unchanged.
+14-file mergefwd delta vs a8a1ae8a is the #111 golden-game surface (ci workflow, golden-game tests, spots, etc.).
+VERDICT_MERGEFWD=PASS

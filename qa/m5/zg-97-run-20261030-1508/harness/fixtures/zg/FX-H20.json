@@ -1,0 +1,28 @@
+{
+ "id": "FX-H20",
+ "spec": "product/collection/m5.1-zero-gain-purchase-ui.md v0.3.5 sha1 1098f14e100edb0e80b43a099777be22fa13fd04 \u00a79",
+ "ac": [
+  "ZG-AC3"
+ ],
+ "state": {
+  "farmLevel": 17,
+  "hensLevel": 19,
+  "eggValueLevel": 0,
+  "collectionLevel": 0,
+  "graderTier": 0,
+  "workers": {}
+ },
+ "coins": {
+  "rule": "fixed",
+  "cents": 1000000000
+ },
+ "flags": {
+  "m4.enabled": 1
+ },
+ "pre": [
+  "HENS offered",
+  "gain(HENS)<=0",
+  "dCap(HENS)>0 (expect +225)",
+  "gain(COLL)>0 (collect-bound)"
+ ]
+}

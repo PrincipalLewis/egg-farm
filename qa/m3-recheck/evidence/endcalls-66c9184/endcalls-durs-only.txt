@@ -1,0 +1,47 @@
+endCalls durS-only + AbilityState shape (2026-11-06T00:59:56+01:00)
+=== AbilityState ===
+15: *  focus seconds left on a running call; `durS` = granted focus duration of that call (tc_ability_s, or tc combo_boost_duration_s
+16: *  for a rule-11 combo), set at fire and cleared with activeS. Saves honors durS on load/offline end (clamp, effect_s). */
+17:export interface AbilityState { readyAt?: number; activeS?: number; durS?: number; }
+=== endCalls body ===
+/** End every running call with cause `offline`. Never resume mid-call: activeS and durS are both cleared (readyAt stays).
+ *  Granted focus seconds (D-HOE-41 / abilities v1.3.12): finite durS > 0, else tc_ability_s (missing or invalid durS is today's
+ *  path). When balance has tc combo_boost_duration_s, granted is capped at max(tc_ability_s, that value). activeS clamps to
+ *  [0, granted]; effect_s = granted - activeS (the focus seconds the call ran). */
+function endCalls(o: any, b: Balance, ev: SimEvent[]) {
+  const base = tc(b, 'ability_s'), combo = b.m4?.tc?.combo_boost_duration_s;
+  const cap = typeof combo === 'number' && Number.isFinite(combo) ? Math.max(base, combo) : undefined;
+  for (const id of WORKERS) {
+    const a = o.abilities[id]; if (!a || typeof a !== 'object' || (!('activeS' in a) && !('durS' in a))) continue;
+    const { activeS, durS, ...rest } = a; o.abilities[id] = rest;
+    if (!(fin(activeS) && activeS > 0)) continue;
+    let granted = fin(durS) && durS > 0 ? durS : base;
+    if (cap !== undefined) granted = Math.min(granted, cap);
+    ev.push({ type: 'ability_ended', worker: id, cause: 'offline', effect_s: granted - clamp(activeS, 0, granted) });
+  }
+}
+/** Load (a reload counts as a gap of 60 s or more, AB-1): sanitise the fields of every flag that is on (D-C5), clamp readyAt
+ *  to [now, now + cd] (non-finite = ready), end a call that spanned the reload once. Fields of an off flag are untouched. */
+export function m5Load(s: GameState, b: Balance, now: number, ev: SimEvent[]): GameState {
+  if (!anyFlag(b) && !m5Flag(b, 'breeds')) return s; // breeds: its own early-out so the six-flag paths stay as they were
+  const o: any = { ...m5Persist(s) }; // hand-edited session keys never load
+  const num = (k: string, hi: number) => { if (!(k in o)) return; if (!fin(o[k])) delete o[k]; else o[k] = clamp(o[k], 0, hi); };
+  if (m5Flag(b, 'golden')) { num('nextSpawnRemainingS', tc(b, 'egg_gap_max_s')); num('frenzyRemainingS', tc(b, 'frenzy_s')); delete o.frenzyEndAt; } // v1.0 wall-clock name, replaced (R23)
+  if ((m5Flag(b, 'golden') || m5Flag(b, 'broody')) && 'evRngState' in o && !isU32(o.evRngState)) delete o.evRngState; // re-derived per D-C2
+  if (m5Flag(b, 'broody')) {
+    num('broodyNestCents', BROODY_NEST_MAX_CENTS); if ('broodyNestCents' in o) o.broodyNestCents = Math.floor(o.broodyNestCents);
+    if ('broodyHenIdx' in o && !(Number.isInteger(o.broodyHenIdx) && o.broodyHenIdx >= 0 && o.broodyHenIdx < BROODY_SLOTS)) delete o.broodyHenIdx; // #5 re-picks (R6)
+  }
+  if (m5Flag(b, 'abilities')) {
+    for (const k of ['abilitiesUnlocked', 'abilitiesCoachSeen']) if (k in o && typeof o[k] !== 'boolean') delete o[k];
+    if ('abilities' in o && (!o.abilities || typeof o.abilities !== 'object' || Array.isArray(o.abilities))) delete o.abilities;
+=== abilityDurS refs ===
+tests/v5-abilities-sim.test.ts:104:    expect('abilityDurS' in yes.state).toBe(false); // Architect #112: no top-level duration map
+tests/v5-abilities-sim.test.ts:137:    expect('abilityDurS' in s).toBe(false);
+tests/v5-abilities-sim.test.ts:241:  it('no top-level abilityDurS anywhere in src (Architect #112: rejected persisted shape; durS lives on AbilityState)', () => {
+tests/v5-abilities-sim.test.ts:243:      expect(readFileSync(new URL(f, import.meta.url), 'utf8')).not.toMatch(/abilityDurS/);
+tests/v5-abilities-sim.test.ts:249:    expect(saved.abilityDurS).toBeUndefined(); expect(saved.abilities.hawker).toEqual({ readyAt: NOW + CD_MS, activeS: 45, durS: 45 });
+=== D-HOE-41 lines from vitest-focused ===
+93: ✓ tests/v5-f2-m5-fields.test.ts > [D-HOE-41] endCalls / m5Load: AbilityState.durS is the granted length (offline end) > [D-HOE-41][AC] legacy save without durS: effect_s = tc_ability_s - activeS; no leftover durS
+94: ✓ tests/v5-f2-m5-fields.test.ts > [D-HOE-41] endCalls / m5Load: AbilityState.durS is the granted length (offline end) > [D-HOE-41][AC] durS=45, activeS=40: effect_s≈5; both cleared (load and offline; with or without the combo key)
+95: ✓ tests/v5-f2-m5-fields.test.ts > [D-HOE-41] endCalls / m5Load: AbilityState.durS is the granted length (offline end) > [D-HOE-41][AC] durS present but activeS>granted: clamp then clear both

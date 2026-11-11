@@ -1,0 +1,27 @@
+{
+ "id": "RUL-c-idb-unknown-nothing-else",
+ "now": 1792378840000,
+ "csr": [
+  "D-HOP-2026-10-22-01(c)",
+  "CSR-1",
+  "CSR-13"
+ ],
+ "ls": {},
+ "idb": {
+  "status": "unknown",
+  "reason": "idb_timeout",
+  "records": [
+   {
+    "key": "main",
+    "ref": "raw/IDB-valid-F17-seq4-T-10m.json"
+   }
+  ]
+ },
+ "expect": {
+  "recovery": false,
+  "newGame": true,
+  "noSaveCorrupt": true,
+  "idbPutsAfterAutosave": 0,
+  "idbMainUnchanged": true
+ }
+}

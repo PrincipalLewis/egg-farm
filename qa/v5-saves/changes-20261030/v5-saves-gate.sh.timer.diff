@@ -1,0 +1,40 @@
+--- ../scratch/v5-saves-gate.sh.orig-20261030-073843	2026-10-30 07:35:06.049706721 +0100
++++ scripts/v5-saves-gate.sh	2026-10-30 07:40:37.758510126 +0100
+@@ -16,6 +16,26 @@
+ # --selftest-sign (scripts/selftest-gate-sums.sh), so both use this exact code path. Verify: sha256sum -c SHA256SUMS && sha256sum -c STATUS.sha256
+ sign_results(){ (cd "$R" && find . -type f ! -name SHA256SUMS ! -name SHA256SUMS.check.txt ! -name STATUS.sha256 ! -path ./status.log ! -path '*/.serve/*' | sort | xargs sha256sum > SHA256SUMS); (cd "$R" && sha256sum -c SHA256SUMS > "$R/SHA256SUMS.check.txt" 2>&1) && say "SHA256SUMS -c OK $(sha256sum $R/SHA256SUMS | cut -c1-64) (status.log excluded; signed last in STATUS.sha256)" || say "SHA256SUMS -c FAILED (see SHA256SUMS.check.txt)"; du -sh "$R" | tee -a "$ST"
+   (cd "$R" && sha256sum status.log > STATUS.sha256 && sha256sum -c STATUS.sha256 >> "$R/SHA256SUMS.check.txt" 2>&1) && echo "STATUS.sha256 $(cut -c1-64 "$R/STATUS.sha256") (status.log final, signed last)" || echo "STATUS.sha256 -c FAILED (see SHA256SUMS.check.txt)"; }   # stdout only: status.log is closed
++# RC lock-window timer (rule 21 fix 2026-10-30, HoQ OK): ONE bash process (this script in --win-timer mode; printf builtin for the
++# timestamp, only `sleep` as a short-lived child in its own group). Started ONLY via ops/tools/lane-run.sh on lane saves-qa (own
++# session/process group, PID recorded in .pids/saves-qa.pids); stopped ONLY via ops/tools/lane-kill.sh on that recorded PID.
++# No pkill/killall/pattern kill, ever. If the timer's group survives the stop (lane-kill GONE with members, REFUSED, or members
++# still present), the gate STOPS (exit 3) and says to ask HoO. It appends to status.log, so it is stopped before sign_results().
++LT=/workspace/egg-farm-studio/ops/tools; LANE=saves-qa; SELF=$(realpath "$0"); WINPID=; WINDONE=0
++if [ "${1:-}" = --win-timer ]; then ST=$2; SUM=$3; W=$4; T=$5; G=$6   # same lines/targets as the old winwarn: status.log + summary.txt + gate stderr
++  out(){ printf '%s\n' "$1" >> "$ST"; printf '%s\n' "$1" >> "$SUM"; [ -w "/proc/$G/fd/2" ] && printf '%s\n' "$1" 2>/dev/null >> "/proc/$G/fd/2"; return 0; }
++  sleep "$W"; printf -v ts '%(%F %T %Z)T' -1; out "$ts WARNING lock window: $((W/60)) min elapsed of $((T/60)) (QA-D-1029-V5E-SCOPE). If it will overrun, tell HoQ and UI QA NOW."
++  sleep $((T-W)); printf -v ts '%(%F %T %Z)T' -1; out "$ts OVERRUN lock window: $((T/60)) min exceeded. Tell HoQ and UI QA at once."; exit 0; fi
++grpmembers(){ cat /proc/[0-9]*/stat 2>/dev/null | sed 's/^\([0-9]*\) (.*) /\1 /' | awk -v g="$1" '$4==g {print $1}'; }   # read-only one-pass /proc scan (pid state ppid pgrp), no signals
++winfail(){ local m="$(date '+%F %T %Z') ERROR lock-window timer $WINPID: $1. Timer process(es) may survive: STOP and ask HoO (rule 21). Do NOT pkill/killall or kill by name/pattern."; echo "$m" >&2; [ -n "${ST:-}" ] && [ ! -e "$(dirname "$ST")/STATUS.sha256" ] && echo "$m" >> "$ST"; exit 3; }
++startwin(){ WINPID=$("$LT/lane-run.sh" "$LANE" -- bash "$SELF" --win-timer "$ST" "$SUM" "$GATE_WARN_S" "$GATE_WINDOW_S" "$$") && [[ "$WINPID" =~ ^[0-9]+$ ]] || { WINPID=; WINDONE=1; winfail "did not start via lane-run.sh $LANE"; }; }
++stopwin(){ [ -n "$WINPID" ] && [ "$WINDONE" = 0 ] || return 0; WINDONE=1; local o i
++  o=$("$LT/lane-kill.sh" "$LANE" "$WINPID" 2>&1); case "$o" in "TERM $WINPID (group)"|"TERM $WINPID"|"GONE $WINPID") ;; *) winfail "lane-kill: $o";; esac
++  for i in $(seq 1 50); do [ -z "$(grpmembers "$WINPID")" ] && break; sleep 0.1; done
++  o=$("$LT/lane-kill.sh" "$LANE" "$WINPID" 2>&1); [ "$o" = "GONE $WINPID" ] || winfail "still present after TERM: $o"; }
++if [ "${1:-}" = --selftest-timer ]; then R=${2:?usage: --selftest-timer <dir> <hold_s>}; ST=$R/status.log; SUM=$R/summary.txt; GATE_WINDOW_S=${GATE_WINDOW_S:-7200}; GATE_WARN_S=${GATE_WARN_S:-6300}
++  startwin; echo "WINPID $WINPID"; sleep "${3:?}"; stopwin; echo "STOPPED $WINPID"; sign_results; exit 0; fi
++if [ "${1:-}" = --selftest-stopwin ]; then R=${2:?usage: --selftest-stopwin <dir> <pid>}; ST=$R/status.log; WINPID=${3:?}; stopwin; echo "STOPPED $WINPID"; exit 0; fi
+ if [ "${1:-}" = --selftest-sign ]; then R=${2:?usage: --selftest-sign <mock-results-dir>}; ST=$R/status.log; [ -f "$ST" ] || { echo "no $ST"; exit 2; }; sign_results; exit 0; fi
+ STUDIO=/workspace/egg-farm-studio; GIT=$STUDIO/game; Q=$STUDIO/qa; V=$Q/v5-saves; SC=$V/scripts; FX=$V/fixtures; M3=$Q/m3-scripts; LOCK=$STUDIO/.browser-test.lock; PORT=5961
+ RC=${1:-}; shift || true; GID=v5-rc-saves; ENGINES=chromium,firefox,webkit; FLAGS=; BASE=30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134; HH=; DRY=0
+@@ -29,9 +49,7 @@
+ step(){ local id=$1 hard=$2; shift 2; if [ -n "${NEEDBUILD:-}" ] && [ "$id" != G1-build ] && ! grep -q "^G1-build | PASS" "$SUM"; then echo "$id | NOT RUN | $hard | build failed" | tee -a "$SUM"; [ $hard = HARD ] && HF=$((HF+1)); return 0; fi; say "START $id"; "$@" > "$R/$id.log" 2>&1; local rc=$?; local res=$([ $rc = 0 ] && echo PASS || echo FAIL)
+   [ $res = FAIL ] && [ $hard = HARD ] && HF=$((HF+1)); echo "$id | $res | $hard | exit $rc" | tee -a "$SUM"; say "END $id $res"; return 0; }
+ T0=$(date +%s); GATE_WINDOW_S=${GATE_WINDOW_S:-7200}; GATE_WARN_S=${GATE_WARN_S:-6300}
+-winwarn(){ sleep "$GATE_WARN_S"; echo "$(date '+%F %T %Z') WARNING lock window: $((GATE_WARN_S/60)) min elapsed of $((GATE_WINDOW_S/60)) (QA-D-1029-V5E-SCOPE). If it will overrun, tell HoQ and UI QA NOW." | tee -a "$ST" "$SUM" >&2
+-  sleep $((GATE_WINDOW_S-GATE_WARN_S)); echo "$(date '+%F %T %Z') OVERRUN lock window: $((GATE_WINDOW_S/60)) min exceeded. Tell HoQ and UI QA at once." | tee -a "$ST" "$SUM" >&2; }
+-winwarn & WINPID=$!; stopwin(){ pkill -P $WINPID 2>/dev/null; kill $WINPID 2>/dev/null; }; trap stopwin EXIT   # own timer subshell + its sleep only
++startwin; trap stopwin EXIT   # lane-run timer on lane saves-qa; stopwin = lane-kill on its recorded PID only (rule 21)
+ say "lock window: Saves first, exclusive, ${GATE_WINDOW_S}s across all engines; warning at ${GATE_WARN_S}s"
+ say "gate=$GID rc=$FULL dry=$DRY engines=$ENGINES flags='$FLAGS' base=$BASE results=$R $([ $DRY = 1 ] && echo '*** DRYRUN: not gate evidence ***')"
+ # 0 pins: fixtures + frozen specs + scripts

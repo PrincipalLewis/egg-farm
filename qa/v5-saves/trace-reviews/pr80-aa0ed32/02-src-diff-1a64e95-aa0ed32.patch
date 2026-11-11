@@ -1,0 +1,136 @@
+diff --git a/src/config/flags.ts b/src/config/flags.ts
+index 541113f..f95f275 100644
+--- a/src/config/flags.ts
++++ b/src/config/flags.ts
+@@ -6,7 +6,7 @@
+  */
+ import type { EconomyParams } from './formulas';
+ export const M5_FLAGS = [
+-  'golden', 'streak', 'tapCoins', 'abilities', 'broody', 'salesStopped', 'pause', // M5.0
++  'golden', 'streak', 'tapCoins', 'abilities', 'broody', 'salesStopped', 'fatigueCue', 'pause', // M5.0 (fatigueCue: Rule 2 chip's own cut flag, D-HOP-2026-10-29-05)
+   'rc2Refill', 'autoRefill', 'clockWage', 'breeds', 'zeroGainUi', 'bestBuyV2', // M5.1
+ ] as const;
+ export type M5Flag = typeof M5_FLAGS[number];
+diff --git a/src/game.ts b/src/game.ts
+index 89279da..79c4f89 100644
+--- a/src/game.ts
++++ b/src/game.ts
+@@ -9,6 +9,8 @@ import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
+ import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
+ import type { SimEvent } from './sim/events';
+ import { focusFrameMs } from './sim/clock';
++import { anyM5FlagOn } from './sim/timers';
++import { playerSaleCtx, type SaleCtx } from './sim/effects';
+ import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
+ import type { IdbBoot } from './save/idb-mirror';
+ import { TELEMETRY_KEY } from './telemetry/telemetry';
+@@ -388,11 +390,16 @@ export class Game {
+   }
+   /** v5 F1b: is the player attending (no menu/sheet/modal/explainer/onboarding/coach open)? Set by the UI (F6 dialogOpen()).
+    *  Default false: no focus time accrues, so M5 timers stay frozen until the UI wires it. Visibility is handled by frame()
+-   *  itself (hidden frames never pass focus). Only read while M5 flags are on. */
++   *  itself (hidden frames never pass focus). Only read while an M5 flag is on (frame() skips it with every flag off). */
+   private attendedProbe: () => boolean = () => false;
+   setAttendedProbe(fn: () => boolean) { this.attendedProbe = fn; }
+   /** The one attended read (frame focus + player-sale suspension, Q-F1c-1 D-HOP-2026-10-29-06): live game and the UI probe says attended. */
+-  private attendedNow() { return !this.readOnly && this.attendedProbe(); }
++  /** CCR N-1 #79: with every M5 flag off the probe is never read (no per-frame / per-dispatch DOM query); attended = false
++   *  then, which changes nothing: no timed effect is live, so suspension has nothing to suspend (goldens byte-identical). */
++  private attendedNow() { return !this.readOnly && anyM5FlagOn(this.b) && this.attendedProbe(); }
++  /** CCR m1 #80: the sale context a player sell/sellAll dispatched now would be credited with. UI previews (order cards, Sell all)
++   *  pass it to saleValueCents / sellAllPreview so the preview equals the credit for the same attended read. */
++  playerSaleCtx(): SaleCtx { return playerSaleCtx(this.attendedNow()); }
+   frame() {
+     if (this.inactive || this.held()) { this.lastFrameAt = this.now(); return; }
+     const t = this.now(); let gap = t - this.lastFrameAt; this.lastFrameAt = t;
+diff --git a/src/save/m5-fields.ts b/src/save/m5-fields.ts
+index c1cbb90..de29368 100644
+--- a/src/save/m5-fields.ts
++++ b/src/save/m5-fields.ts
+@@ -8,13 +8,14 @@
+  * visible gap) elapses with no subtraction here; a load clamps the stored value to [now, now + cd] (E2, clock tamper).
+  */
+ import type { Balance } from '../config/balance';
+-import { m4On } from '../config/formulas';
+ import { type GameState, nextRand } from '../sim/state';
+ import type { SimEvent } from '../sim/events';
+ import { WORKERS } from '../sim/workers';
+-export type M5Flag = 'golden' | 'streak' | 'tapCoins' | 'broody' | 'abilities' | 'pause';
+-/** D-C1 (= F1a config/flags.ts flagOn): on only when m4.flags[k] === 1 and m4.enabled. */
+-export const m5Flag = (b: Balance, k: M5Flag) => m4On(b) && b.m4?.flags?.[k] === 1;
++import { type M5Flag, flagOn } from '../config/flags';
++import { M5_SESSION_FIELDS } from '../sim/m5-state';
++export type { M5Flag }; // ONE flag-name type: config/flags.ts (CCR N-1 on #77)
++/** D-C1: on only when m4.flags[k] === 1 and m4.enabled. The same function as config/flags.ts flagOn. */
++export const m5Flag = (b: Balance, k: M5Flag): boolean => flagOn(b, k);
+ const anyFlag = (b: Balance) => (['golden', 'streak', 'tapCoins', 'broody', 'abilities'] as const).some(k => m5Flag(b, k));
+ const tc = (b: Balance, k: string): number => b.m4?.tc?.[k] ?? 0;
+ /** D-C2 salt + seeding: ONE code path, re-exported from F1b sim/rng.ts (identical formula and validity rule). */
+@@ -23,7 +24,7 @@ export { EV_RNG_SALT, ensureEvRng };
+ /** D-C5: the Broody nest clamp (fmtMoneyExact limit) and the yard slot range 0..11. */
+ export const BROODY_NEST_MAX_CENTS = 1e15; export const BROODY_SLOTS = 12;
+ /** Never saved (F1a M5_SESSION_FIELDS: golden R10a on-screen egg, streak R11 s, I_ref ring, Broody nestScaled/brRng). */
+-export const M5_SESSION_KEYS = ['goldenEgg', 'streakS', 'streakHoldS', 'tapCreditCdS', 'irefRingCents', 'refWarmS', 'broodyNestScaled', 'brRngState'] as const;
++export const M5_SESSION_KEYS = M5_SESSION_FIELDS; // ONE list, owned by sim/m5-state.ts (CCR m1 on #77)
+ const fin = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0;
+ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+ const isU32 = (v: unknown) => Number.isInteger(v) && (v as number) > 0 && (v as number) <= 0xffffffff;
+diff --git a/src/sim/actions.ts b/src/sim/actions.ts
+index e77f355..8327b4f 100644
+--- a/src/sim/actions.ts
++++ b/src/sim/actions.ts
+@@ -4,6 +4,7 @@ import { m4On } from '../config/formulas';
+ import { Track, salePriceCents, trackLock, trackCost, trackLevel, reachedMilestones } from './tracks';
+ import type { Sink } from './events';
+ import { saleValueCents } from './payout';
++import { playerSaleCtx } from './effects';
+ import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
+ export type Action =
+   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
+@@ -19,7 +20,7 @@ export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'pla
+   const c = s.customers.find(c => c.id === id); if (!c) return s;
+   const k = Math.min(Math.floor(s.basket), c.demand - c.filled); if (k <= 0) return s;
+   // One payout function (sim/payout.ts) for credit and every UI preview.
+-  const price = salePriceCents(s, b), value = saleValueCents(s, k, b, suspended ? { by, suspended } : by === 'player' ? undefined : { by }), filled = c.filled + k, done = filled >= c.demand;
++  const price = salePriceCents(s, b), value = saleValueCents(s, k, b, by === 'player' ? playerSaleCtx(!suspended) : suspended ? { by, suspended } : { by }), filled = c.filled + k, done = filled >= c.demand;
+   ev?.push({ type: 'sell', id, k, N: c.demand, price, value, by });
+   if (done) ev?.push({ type: 'customer_served', id, N: c.demand, partial: c.filled > 0 });
+   const customers = done ? s.customers.filter(x => x.id !== id) : s.customers.map(x => x.id === id ? { ...x, filled } : x);
+diff --git a/src/sim/effects.ts b/src/sim/effects.ts
+index 8ec4a41..87177ba 100644
+--- a/src/sim/effects.ts
++++ b/src/sim/effects.ts
+@@ -18,10 +18,12 @@ export interface LayCtx { suspended?: boolean; }
+ export interface SaleEffect { id: string; flag: M5Flag; factor(s: GameState, b: Balance, ctx: SaleCtx): number; }
+ export interface LayEffect { id: string; flag: M5Flag; factor(s: GameState, b: Balance): number; }
+ /** Feature PRs append their entry IN THIS FILE (one line each). Order is documentation only: factors multiply (golden X7).
+- *  Mutable only so tests can push a fixture entry and remove it in a finally block; src never mutates them at runtime. */
+-export const SALE_EFFECTS: SaleEffect[] = [];
+-export const LAY_EFFECTS: LayEffect[] = [];
++ *  Typed readonly (CCR nit #80): src cannot mutate them; only tests cast to push a fixture entry and clear it in afterEach. */
++export const SALE_EFFECTS: readonly SaleEffect[] = [];
++export const LAY_EFFECTS: readonly LayEffect[] = [];
+ export const PLAYER_SALE: SaleCtx = { by: 'player' };
++/** CCR m1 #80: the ONE player-sale context for a given attended value (Q-F1c-1). sellTo credits with it; every preview uses it. */
++export const playerSaleCtx = (attended: boolean): SaleCtx => attended ? PLAYER_SALE : { by: 'player', suspended: true };
+ /** Live sale factors with attribution: [{id, factor}] for entries whose flag is on and that are not neutral (factor !== 1). */
+ export function saleEffectFactors(s: GameState, b: Balance, ctx: SaleCtx = PLAYER_SALE, effects: readonly SaleEffect[] = SALE_EFFECTS): { id: string; factor: number }[] {
+   if (ctx.suspended || !effects.length) return [];
+diff --git a/src/sim/payout.ts b/src/sim/payout.ts
+index a7e7421..0bc226b 100644
+--- a/src/sim/payout.ts
++++ b/src/sim/payout.ts
+@@ -16,9 +16,10 @@ export function saleValueCents(s: GameState, k: number, b: Balance, ctx: SaleCtx
+   const base = salePriceCents(s, b), m = saleMultipliers(s, b, ctx).reduce((a, x) => a * x, 1);
+   return m === 1 ? k * base : Math.round(k * base * m);
+ }
+-/** Preview of Sell all: same per-customer walk as the 'sellAll' action. */
+-export function sellAllPreview(s: GameState, b: Balance): { eggs: number; cents: number } {
++/** Preview of Sell all: same per-customer walk as the 'sellAll' action. Pass the SAME ctx the credit will use
++ *  (Game.playerSaleCtx() = playerSaleCtx(attended)), so preview == credit for either attended value (CCR m1 #80). */
++export function sellAllPreview(s: GameState, b: Balance, ctx: SaleCtx = PLAYER_SALE): { eggs: number; cents: number } {
+   let left = Math.floor(s.basket), eggs = 0, cents = 0;
+-  for (const c of s.customers) { if (left < 1) break; const k = Math.min(left, c.demand - c.filled); if (k <= 0) continue; left -= k; eggs += k; cents += saleValueCents(s, k, b); }
++  for (const c of s.customers) { if (left < 1) break; const k = Math.min(left, c.demand - c.filled); if (k <= 0) continue; left -= k; eggs += k; cents += saleValueCents(s, k, b, ctx); }
+   return { eggs, cents };
+ }

@@ -1,0 +1,49 @@
+{
+  "module_m4_flags": {
+    "golden": 0,
+    "streak": 0,
+    "tapCoins": 0,
+    "abilities": 0,
+    "broody": 0,
+    "salesStopped": 0,
+    "fatigueCue": 0,
+    "pause": 0,
+    "rc2Refill": 0,
+    "autoRefill": 0,
+    "clockWage": 0,
+    "breeds": 0,
+    "zeroGainUi": 0,
+    "bestBuyV2": 0
+  },
+  "file_m4_flags": {
+    "golden": 0,
+    "streak": 0,
+    "tapCoins": 0,
+    "abilities": 0,
+    "broody": 0,
+    "salesStopped": 0,
+    "fatigueCue": 0,
+    "pause": 0,
+    "rc2Refill": 0,
+    "autoRefill": 0,
+    "clockWage": 0,
+    "breeds": 0,
+    "zeroGainUi": 0,
+    "bestBuyV2": 0
+  },
+  "file_breeds": 0,
+  "module_breeds": 0,
+  "on_breeds": 1,
+  "off_breeds": 0,
+  "diffs_breedsOn_vs_shipped_module": [
+    {
+      "path": "m4.flags.breeds",
+      "shipped": 0,
+      "breedsOn": 1
+    }
+  ],
+  "diffs_breedsOff_vs_shipped_module": [],
+  "file_equals_module": true,
+  "only_breeds_changed": true,
+  "file_still_zero": true
+}

@@ -1,0 +1,3 @@
+20b12dc961146ba83359a716f367cb87a2b182f567f73cccb1f6e31a40a5c420  tests/gate4-explainer.qa.test.ts
+288c36a4764a992b3f9942c0c9d95e18b62f0c87087c0813dbd10180c4a96587  tests/qel7-save-bytes.qa.test.ts
+773705bf0903843909e5bdf062411ba22b9c1711638d4b8b43c858f842132bd2  tests/oq2-offline-grant-once.qa.test.ts

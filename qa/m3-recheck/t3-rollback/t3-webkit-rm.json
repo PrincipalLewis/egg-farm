@@ -1,0 +1,13 @@
+{
+ "eng": "webkit",
+ "mode": "rm",
+ "durS": 120,
+ "sells": 154,
+ "floaters": 1001,
+ "sale": 67,
+ "maxLifeMs": 852,
+ "p99": 761,
+ "over1s": [],
+ "stillLive": [],
+ "worst": []
+}

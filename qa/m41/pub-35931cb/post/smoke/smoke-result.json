@@ -1,0 +1,178 @@
+{
+  "checks": [
+    {
+      "k": "A1 runtime build-id m4.1+5d9efa6, no +dirty",
+      "pass": true,
+      "d": {
+        "meta": "m4.1+5d9efa6",
+        "app": "m4.1+5d9efa6",
+        "dirty": false
+      }
+    },
+    {
+      "k": "A2 fresh boot: no recovery dialog",
+      "pass": true,
+      "d": {
+        "coins": "$0.00",
+        "basket": "0",
+        "recovery": false
+      }
+    },
+    {
+      "k": "A3 play: collected eggs and sold, coins changed",
+      "pass": true,
+      "d": {
+        "u0": {
+          "coins": "$0.00",
+          "basket": "0",
+          "recovery": false
+        },
+        "afterCollect": {
+          "coins": "$0.00",
+          "basket": "19",
+          "recovery": false
+        },
+        "sellAll": "Sell all (8 eggs · $8.00)",
+        "afterSell": {
+          "coins": "$8.00",
+          "basket": "11",
+          "recovery": false
+        }
+      }
+    },
+    {
+      "k": "A4 autosave wrote eggfarm.save with coins > 0",
+      "pass": true,
+      "d": {
+        "present": true,
+        "version": 6,
+        "coinsCents": 800,
+        "basket": 11,
+        "coop": 11.000000000000014,
+        "farmLevel": 0,
+        "collectionLevel": 0,
+        "keys": [
+          "eggfarm.install_id",
+          "eggfarm.lease",
+          "eggfarm.save",
+          "eggfarm.save.bak",
+          "eggfarm.telemetry",
+          "eggfarm.ui"
+        ]
+      }
+    },
+    {
+      "k": "A5 reload: state persisted (coins/levels from save, no recovery)",
+      "pass": true,
+      "d": {
+        "beforeReload": {
+          "ui": {
+            "coins": "$8.00",
+            "basket": "11",
+            "recovery": false
+          },
+          "save": {
+            "present": true,
+            "version": 6,
+            "coinsCents": 800,
+            "basket": 11,
+            "coop": 11.000000000000014,
+            "farmLevel": 0,
+            "collectionLevel": 0,
+            "keys": [
+              "eggfarm.install_id",
+              "eggfarm.lease",
+              "eggfarm.save",
+              "eggfarm.save.bak",
+              "eggfarm.telemetry",
+              "eggfarm.ui"
+            ]
+          }
+        },
+        "afterReload": {
+          "ui": {
+            "coins": "$8.00",
+            "basket": "11",
+            "recovery": false
+          },
+          "save": {
+            "present": true,
+            "version": 6,
+            "coinsCents": 800,
+            "basket": 11,
+            "coop": 12.650000000000018,
+            "farmLevel": 0,
+            "collectionLevel": 0,
+            "keys": [
+              "eggfarm.install_id",
+              "eggfarm.lease",
+              "eggfarm.save",
+              "eggfarm.save.bak",
+              "eggfarm.telemetry",
+              "eggfarm.ui"
+            ]
+          }
+        },
+        "id2": {
+          "meta": "m4.1+5d9efa6",
+          "app": "m4.1+5d9efa6",
+          "dirty": false
+        }
+      }
+    },
+    {
+      "k": "A6 no page/console errors (fresh path)",
+      "pass": true,
+      "d": []
+    },
+    {
+      "k": "B1 v5 fixture boots without recovery dialog",
+      "pass": true,
+      "d": {
+        "coins": "$230.67",
+        "basket": "0",
+        "recovery": false
+      }
+    },
+    {
+      "k": "B2 migrated: save rewritten at current version, F10/C11 kept, coins >= 15061",
+      "pass": true,
+      "d": {
+        "present": true,
+        "version": 6,
+        "coinsCents": 31068,
+        "basket": 0,
+        "coop": 20.000000000000153,
+        "farmLevel": 10,
+        "collectionLevel": 11,
+        "keys": [
+          "eggfarm.install_id",
+          "eggfarm.lease",
+          "eggfarm.save",
+          "eggfarm.save.bak",
+          "eggfarm.save.v6_backup",
+          "eggfarm.telemetry",
+          "eggfarm.ui"
+        ]
+      }
+    },
+    {
+      "k": "B3 runtime build-id",
+      "pass": true,
+      "d": {
+        "meta": "m4.1+5d9efa6",
+        "app": "m4.1+5d9efa6",
+        "dirty": false
+      }
+    },
+    {
+      "k": "B4 no page/console errors (v5 path)",
+      "pass": true,
+      "d": []
+    }
+  ],
+  "browser": "156.0.8078.47",
+  "errorsA": [],
+  "errorsB": [],
+  "bad": 0
+}

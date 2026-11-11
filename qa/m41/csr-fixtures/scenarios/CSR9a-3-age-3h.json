@@ -1,0 +1,27 @@
+{
+ "id": "CSR9a-3-age-3h",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-9a",
+  "CSR-9b"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/TRIG-parse-truncated.raw"
+  },
+  "eggfarm.save.v6_backup": {
+   "ref": "raw/V6B-valid-unmarked-F12-T-3h.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "recovered_from": "v6_backup",
+  "notice": "M2",
+  "variant": "age",
+  "prevLevel": null,
+  "body": "We restored a save from about 3 hours ago."
+ }
+}

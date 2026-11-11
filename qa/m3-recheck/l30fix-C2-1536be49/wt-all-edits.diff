@@ -1,0 +1,62 @@
+diff --git a/data/economy.csv b/data/economy.csv
+index f2ac73e..acfdf2f 100644
+--- a/data/economy.csv
++++ b/data/economy.csv
+@@ -29,4 +29,4 @@ level,collection_cost,eggs_per_tap,farm_cost,hens,eggs_per_sec,coop_capacity,egg
+ 27,3245185,140,177624,140,28.0,1400,2.35,1.5,34,68,7.0,50400,30,10,10,3.24,40,6.75,150,13.5,800,5,4.0,51567,3,1,3,7,2,4,8,1.25,1.1,0.5,0.5,0.15,100,9,30,50,30,3,1,10,0.5,2,6,2,42931,74187,3,3,8,120,300,30,0.45,0.35,0.2,45,60,2,30,1,0.01,1,3,0.03,0.4,0.05,0.05,0.1,30,300,20,10,1.25,1.25,20,1.5,1.5,30,2.0,2.0,5,1.1,0,10,1.25,0,20,1.5,15,5,1.1,10,1.15,15,1.2,20,1.25,25,1.3,0.05,0.12,1.15,1.15,1.15,0.5,150,2,50,10,45,0.05,0.25,2,5,2,0.20,0.50,300,7,30
+ 28,5192296,145,239792,145,29.0,1450,2.4,1.5,35,70,7.25,52200,30,10,10,3.36,40,7.0,150,14.0,800,5,4.0,51567,3,1,3,7,2,4,8,1.25,1.1,0.5,0.5,0.15,100,9,30,50,30,3,1,10,0.5,2,6,2,55810,98670,3,3,8,120,300,30,0.45,0.35,0.2,45,60,2,30,1,0.01,1,3,0.03,0.4,0.05,0.05,0.1,30,300,20,10,1.25,1.25,20,1.5,1.5,30,2.0,2.0,5,1.1,0,10,1.25,0,20,1.5,15,5,1.1,10,1.15,15,1.2,20,1.25,25,1.3,0.05,0.12,1.15,1.15,1.15,0.5,150,2,50,10,45,0.05,0.25,2,5,2,0.20,0.50,300,7,30
+ 29,8307674,150,323719,150,30.0,1500,2.45,1.5,36,72,7.5,54000,30,10,10,3.48,40,7.25,150,14.5,800,5,4.0,51567,3,1,3,7,2,4,8,1.25,1.1,0.5,0.5,0.15,100,9,30,50,30,3,1,10,0.5,2,6,2,72553,131231,3,3,8,120,300,30,0.45,0.35,0.2,45,60,2,30,1,0.01,1,3,0.03,0.4,0.05,0.05,0.1,30,300,20,10,1.25,1.25,20,1.5,1.5,30,2.0,2.0,5,1.1,0,10,1.25,0,20,1.5,15,5,1.1,10,1.15,15,1.2,20,1.25,25,1.3,0.05,0.12,1.15,1.15,1.15,0.5,150,2,50,10,45,0.05,0.25,2,5,2,0.20,0.50,300,7,30
+-30,13292279,155,624316,155,31.0,1550,2.5,1.5,38,75,7.75,55800,30,10,10,3.6,40,7.5,150,15.0,800,5,4.0,51567,3,1,3,7,2,4,8,1.25,1.1,0.5,0.5,0.15,100,9,30,50,30,3,1,10,0.5,2,6,2,94319,249339,3,3,8,120,300,30,0.45,0.35,0.2,45,60,2,30,1,0.01,1,3,0.03,0.4,0.05,0.05,0.1,30,300,20,10,1.25,1.25,20,1.5,1.5,30,2.0,2.0,5,1.1,0,10,1.25,0,20,1.5,15,5,1.1,10,1.15,15,1.2,20,1.25,25,1.3,0.05,0.12,1.15,1.15,1.15,0.5,150,2,50,10,45,0.05,0.25,2,5,2,0.20,0.50,300,7,30
++30,13292279,155,330194,155,31.0,1550,2.5,1.5,38,75,7.75,55800,30,10,10,3.6,40,7.5,150,15.0,800,5,4.0,51567,3,1,3,7,2,4,8,1.25,1.1,0.5,0.5,0.15,100,9,30,50,30,3,1,10,0.5,2,6,2,74005,133856,3,3,8,120,300,30,0.45,0.35,0.2,45,60,2,30,1,0.01,1,3,0.03,0.4,0.05,0.05,0.1,30,300,20,10,1.25,1.25,20,1.5,1.5,30,2.0,2.0,5,1.1,0,10,1.25,0,20,1.5,15,5,1.1,10,1.15,15,1.2,20,1.25,25,1.3,0.05,0.12,1.15,1.15,1.15,0.5,150,2,50,10,45,0.05,0.25,2,5,2,0.20,0.50,300,7,30
+diff --git a/src/config/balance.json b/src/config/balance.json
+index fec059d..9c4c7e3 100644
+--- a/src/config/balance.json
++++ b/src/config/balance.json
+@@ -141,7 +141,7 @@
+       177624,
+       239792,
+       323719,
+-      624316
++      330194
+     ]
+   },
+   "customers": {
+diff --git a/tests/ac7-worst-seed.slow.test.ts b/tests/ac7-worst-seed.slow.test.ts
+index 25fd110..7420aee 100644
+--- a/tests/ac7-worst-seed.slow.test.ts
++++ b/tests/ac7-worst-seed.slow.test.ts
+@@ -17,7 +17,7 @@ import { balance as b } from '../src/config/balance';
+ import { runM2 } from './bot-m2';
+ import { VAR_DEFAULT } from './seller-variance';
+ import { loadTargets, l18to25Guard, l18to25FixedGuard, t20P95Warning, quantile } from './pacing-guards';
+-const F1_CSV = '6dca24cd', MAIN_PRE_F1_CSV = '57d964d5';
++const F1_CSV = '0d3fd009', MAIN_PRE_F1_CSV = '57d964d5';
+ // Same seeds as the AC7 band suite (tests/fixtures/seller_variance.json, 1..100; CCR m2).
+ const fx = JSON.parse(readFileSync(new URL('./fixtures/seller_variance.json', import.meta.url), 'utf8')) as { seeds: number[] };
+ const SEEDS = fx.seeds, HORIZON_S = 2 * 3600;
+diff --git a/tests/fixtures/seller_variance.json b/tests/fixtures/seller_variance.json
+index d7f76a7..6b20d40 100644
+--- a/tests/fixtures/seller_variance.json
++++ b/tests/fixtures/seller_variance.json
+@@ -2,7 +2,7 @@
+  "source":"vendor/economy-sim/sim/seller_variance_sim.py (vendored from product/sim/) run/run_m2 policy=seller15",
+  "sim_sha256":"68a64c59",
+  "proposal_sha256":"17877b41",
+- "economy_csv_sha256":"6dca24cd",
++ "economy_csv_sha256":"0d3fd009",
+  "config":"F1 (P1Q + farm_cost/w4_tier_cost tables from data/economy.csv) + spec_from_csv(data/economy.csv)",
+  "python":"3.13.5",
+  "T":3600,
+diff --git a/tests/seller-variance.slow.test.ts b/tests/seller-variance.slow.test.ts
+index b547855..8dcc07b 100644
+--- a/tests/seller-variance.slow.test.ts
++++ b/tests/seller-variance.slow.test.ts
+@@ -116,7 +116,7 @@ for (const wk of ['m1', 'm2'] as const) describe(`${wk} variance bot vs Python,
+ //           so any drift (or a crash) fails. Needs #17 economy.f1-m4cols 86f0e80e for the real band.
+ //  any other sha: fails with 'unknown economy CSV <sha>: update AC7 band test'.
+ // After the CSV changes, regenerate the fixture first: scripts/gen-seller-variance-fixtures.py.
+-export const F1_CSV = '6dca24cd', MAIN_PRE_F1_CSV = '57d964d5';
++export const F1_CSV = '0d3fd009', MAIN_PRE_F1_CSV = '57d964d5';
+ const csvSha = createHash('sha256').update(readFileSync(new URL('../data/economy.csv', import.meta.url))).digest('hex').slice(0, 8);
+ const BAND = { m1: { lo: 18, hi: 22 }, m2: { lo: 20, hi: 24 } } as const;
+ export function ac7BandCheck(sha: string, l30: { m1: number[]; m2: number[] }): void {

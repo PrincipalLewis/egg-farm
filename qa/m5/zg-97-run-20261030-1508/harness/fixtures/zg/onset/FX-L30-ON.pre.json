@@ -1,0 +1,98 @@
+{
+ "source": "Econ/fx-l30-onset tools/fxon-oracle.ts on rc/v5 65a7443 + CSV 9f72ca84 (sync-economy in scratch copy), all 14 ship flags = 1",
+ "checks": [
+  {
+   "id": "FX-L30-ON",
+   "name": "options == [COLL] (got COLL); gain(COLL)=0 <= 0; COLL affordable; flags.breeds == 1",
+   "pass": true,
+   "info": {
+    "keys": [
+     "COLL"
+    ],
+    "gain": 0,
+    "flags.breeds": 1
+   }
+  }
+ ],
+ "fixtures": {
+  "FX-L30-ON": {
+   "COLL": {
+    "gain": 0,
+    "dCap": 0,
+    "oracleZG": true,
+    "cost": 3245185,
+    "affordable": true
+   }
+  }
+ },
+ "oracle": {
+  "FX-L30-ON": {
+   "COLL": {
+    "gain": 0,
+    "dCap": 0,
+    "oracleZG": true,
+    "cost": 3245185,
+    "affordable": true
+   },
+   "nonZG": []
+  }
+ },
+ "states": {
+  "FX-L30-ON": {
+   "farmLevel": 30,
+   "hensLevel": 30,
+   "eggValueLevel": 30,
+   "collectionLevel": 27,
+   "graderTier": 5,
+   "workers": {
+    "market_hand": {
+     "energy": 100,
+     "cdS": 0
+    },
+    "coop_hand": {
+     "energy": 100,
+     "cdS": 0
+    },
+    "hawker": {
+     "energy": 100,
+     "cdS": 0
+    },
+    "grader": {
+     "energy": 100,
+     "cdS": 0
+    }
+   },
+   "coinsCents": 324520501,
+   "breeds": {
+    "owned": {
+     "cream_legbar": {
+      "stars": 2
+     },
+     "brahma": {
+      "stars": 2
+     },
+     "cochin": {
+      "stars": 2
+     }
+    },
+    "slots": [
+     "cream_legbar",
+     "brahma",
+     "cochin"
+    ],
+    "incubator": null,
+    "settleMs": [
+     0,
+     0,
+     0
+    ],
+    "hatches": 9,
+    "pity": 0,
+    "rng": 123456789,
+    "freeHatchUsed": 1,
+    "flockCompleteLogged": 0
+   }
+  }
+ },
+ "drainMarginCents": 2000
+}

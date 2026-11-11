@@ -1,0 +1,322 @@
+[
+ {
+  "w": 360,
+  "rm": "no-preference",
+  "amt": "$12.35",
+  "shown": true,
+  "card": {
+   "l": 32,
+   "r": 328,
+   "t": 72,
+   "b": 278,
+   "w": 296
+  },
+  "vw": 360,
+  "clipX": [],
+  "clipY": [],
+  "refundH": 44,
+  "transform": "matrix(1, 0, 0, 1, -148, 0)",
+  "anim": "expin",
+  "shot": "shot-360-no-preference-1235.png"
+ },
+ {
+  "w": 360,
+  "rm": "no-preference",
+  "amt": "$1.23M",
+  "shown": true,
+  "card": {
+   "l": 32,
+   "r": 328,
+   "t": 72,
+   "b": 278,
+   "w": 296
+  },
+  "vw": 360,
+  "clipX": [],
+  "clipY": [],
+  "refundH": 44,
+  "transform": "matrix(1, 0, 0, 1, -148, 0)",
+  "anim": "expin",
+  "shot": "shot-360-no-preference-123M.png"
+ },
+ {
+  "w": 360,
+  "rm": "no-preference",
+  "amt": "$999.99B",
+  "shown": true,
+  "card": {
+   "l": 32,
+   "r": 328,
+   "t": 72,
+   "b": 278,
+   "w": 296
+  },
+  "vw": 360,
+  "clipX": [],
+  "clipY": [],
+  "refundH": 44,
+  "transform": "matrix(1, 0, 0, 1, -148, 0)",
+  "anim": "expin",
+  "shot": "shot-360-no-preference-99999B.png"
+ },
+ {
+  "w": 360,
+  "rm": "reduce",
+  "amt": "$999.99B",
+  "shown": true,
+  "card": {
+   "l": 32,
+   "r": 328,
+   "t": 72,
+   "b": 278,
+   "w": 296
+  },
+  "vw": 360,
+  "clipX": [],
+  "clipY": [],
+  "refundH": 44,
+  "transform": "matrix(1, 0, 0, 1, -148, 0)",
+  "anim": "expfade",
+  "shot": "shot-360-reduce-99999B.png"
+ },
+ {
+  "w": 375,
+  "rm": "no-preference",
+  "amt": "$12.35",
+  "shown": true,
+  "card": {
+   "l": 39.5,
+   "r": 335.5,
+   "t": 72,
+   "b": 278,
+   "w": 296
+  },
+  "vw": 375,
+  "clipX": [],
+  "clipY": [],
+  "refundH": 44,
+  "transform": "matrix(1, 0, 0, 1, -148, 0)",
+  "anim": "expin",
+  "shot": "shot-375-no-preference-1235.png"
+ },
+ {
+  "w": 375,
+  "rm": "no-preference",
+  "amt": "$1.23M",
+  "shown": true,
+  "card": {
+   "l": 39.5,
+   "r": 335.5,
+   "t": 72,
+   "b": 278,
+   "w": 296
+  },
+  "vw": 375,
+  "clipX": [],
+  "clipY": [],
+  "refundH": 44,
+  "transform": "matrix(1, 0, 0, 1, -148, 0)",
+  "anim": "expin",
+  "shot": "shot-375-no-preference-123M.png"
+ },
+ {
+  "w": 375,
+  "rm": "no-preference",
+  "amt": "$999.99B",
+  "shown": true,
+  "card": {
+   "l": 39.5,
+   "r": 335.5,
+   "t": 72,
+   "b": 278,
+   "w": 296
+  },
+  "vw": 375,
+  "clipX": [],
+  "clipY": [],
+  "refundH": 44,
+  "transform": "matrix(1, 0, 0, 1, -148, 0)",
+  "anim": "expin",
+  "shot": "shot-375-no-preference-99999B.png"
+ },
+ {
+  "w": 375,
+  "rm": "reduce",
+  "amt": "$999.99B",
+  "shown": true,
+  "card": {
+   "l": 39.5,
+   "r": 335.5,
+   "t": 72,
+   "b": 278,
+   "w": 296
+  },
+  "vw": 375,
+  "clipX": [],
+  "clipY": [],
+  "refundH": 44,
+  "transform": "matrix(1, 0, 0, 1, -148, 0)",
+  "anim": "expfade",
+  "shot": "shot-375-reduce-99999B.png"
+ },
+ {
+  "w": 390,
+  "rm": "no-preference",
+  "amt": "$12.35",
+  "shown": true,
+  "card": {
+   "l": 47,
+   "r": 343,
+   "t": 72,
+   "b": 278,
+   "w": 296
+  },
+  "vw": 390,
+  "clipX": [],
+  "clipY": [],
+  "refundH": 44,
+  "transform": "matrix(1, 0, 0, 1, -148, 0)",
+  "anim": "expin",
+  "shot": "shot-390-no-preference-1235.png"
+ },
+ {
+  "w": 390,
+  "rm": "no-preference",
+  "amt": "$1.23M",
+  "shown": true,
+  "card": {
+   "l": 47,
+   "r": 343,
+   "t": 72,
+   "b": 278,
+   "w": 296
+  },
+  "vw": 390,
+  "clipX": [],
+  "clipY": [],
+  "refundH": 44,
+  "transform": "matrix(1, 0, 0, 1, -148, 0)",
+  "anim": "expin",
+  "shot": "shot-390-no-preference-123M.png"
+ },
+ {
+  "w": 390,
+  "rm": "no-preference",
+  "amt": "$999.99B",
+  "shown": true,
+  "card": {
+   "l": 47,
+   "r": 343,
+   "t": 72,
+   "b": 278,
+   "w": 296
+  },
+  "vw": 390,
+  "clipX": [],
+  "clipY": [],
+  "refundH": 44,
+  "transform": "matrix(1, 0, 0, 1, -148, 0)",
+  "anim": "expin",
+  "shot": "shot-390-no-preference-99999B.png"
+ },
+ {
+  "w": 390,
+  "rm": "reduce",
+  "amt": "$999.99B",
+  "shown": true,
+  "card": {
+   "l": 47,
+   "r": 343,
+   "t": 72,
+   "b": 278,
+   "w": 296
+  },
+  "vw": 390,
+  "clipX": [],
+  "clipY": [],
+  "refundH": 44,
+  "transform": "matrix(1, 0, 0, 1, -148, 0)",
+  "anim": "expfade",
+  "shot": "shot-390-reduce-99999B.png"
+ },
+ {
+  "w": 1280,
+  "rm": "no-preference",
+  "amt": "$12.35",
+  "shown": true,
+  "card": {
+   "l": 492,
+   "r": 788,
+   "t": 72,
+   "b": 278,
+   "w": 296
+  },
+  "vw": 1280,
+  "clipX": [],
+  "clipY": [],
+  "refundH": 44,
+  "transform": "matrix(1, 0, 0, 1, -148, 0)",
+  "anim": "expin",
+  "shot": "shot-1280-no-preference-1235.png"
+ },
+ {
+  "w": 1280,
+  "rm": "no-preference",
+  "amt": "$1.23M",
+  "shown": true,
+  "card": {
+   "l": 492,
+   "r": 788,
+   "t": 72,
+   "b": 278,
+   "w": 296
+  },
+  "vw": 1280,
+  "clipX": [],
+  "clipY": [],
+  "refundH": 44,
+  "transform": "matrix(1, 0, 0, 1, -148, 0)",
+  "anim": "expin",
+  "shot": "shot-1280-no-preference-123M.png"
+ },
+ {
+  "w": 1280,
+  "rm": "no-preference",
+  "amt": "$999.99B",
+  "shown": true,
+  "card": {
+   "l": 492,
+   "r": 788,
+   "t": 72,
+   "b": 278,
+   "w": 296
+  },
+  "vw": 1280,
+  "clipX": [],
+  "clipY": [],
+  "refundH": 44,
+  "transform": "matrix(1, 0, 0, 1, -148, 0)",
+  "anim": "expin",
+  "shot": "shot-1280-no-preference-99999B.png"
+ },
+ {
+  "w": 1280,
+  "rm": "reduce",
+  "amt": "$999.99B",
+  "shown": true,
+  "card": {
+   "l": 492,
+   "r": 788,
+   "t": 72,
+   "b": 278,
+   "w": 296
+  },
+  "vw": 1280,
+  "clipX": [],
+  "clipY": [],
+  "refundH": 44,
+  "transform": "matrix(1, 0, 0, 1, -148, 0)",
+  "anim": "expfade",
+  "shot": "shot-1280-reduce-99999B.png"
+ }
+]

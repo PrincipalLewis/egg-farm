@@ -1,0 +1,9 @@
+hosted gate check (cursor-github MCP) 2026-11-06T00:57 CET Europe/Belgrade
+ci run 42131703592 headSha=66c918442d4eab6c6d064d7a59bd1a9ecf29ce34
+  status: completed (jobs observed)
+  gate job 127609657985 conclusion=success completed_at=2026-11-05T23:56:01Z (=00:56:01 CET)
+  release-globals job 127614331310 conclusion=skipped (skipped-by-design on non-rc/* PR; ≠ pass, not a block)
+pacing-x1-stack run 42131703569 headSha=66c918442d4eab6c6d064d7a59bd1a9ecf29ce34
+  status: in_progress at first check (shards casual/optimal/seller15 running)
+  shard ids: casual 127610019782, optimal 127610020137, seller15 127610020270
+k10-breeds-offset run 42131703603 (known-red non-required; not a block)

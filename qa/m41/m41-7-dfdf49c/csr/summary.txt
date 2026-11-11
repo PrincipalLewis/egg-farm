@@ -1,0 +1,9 @@
+2026-10-22 20:59:34 CEST === CSR ACs on dfdf49cd904398c7e302eec16161f8fb63b10a8d
+2026-10-22 20:59:34 CEST spec sha256: cc6b7e23f9a0d8798257e038d8243edd9cd13718af019039e097eb7c8b08817c (want cc6b7e23…8817c)
+2026-10-22 20:59:34 CEST fixtures: SHA256SUMS OK SHA256SUMS=e2d2eee776928553
+2026-10-22 20:59:34 CEST ancestors: dd223f5 Y, 1682a0c Y, 66680eb Y, 4c94704 Y; pushed on: origin/fix/saves-csr-loadsafe 
+2026-10-22 20:59:36 CEST npm ci exit=0
+2026-10-22 20:59:40 CEST build:qa exit=0 build-id: m3-rc1-pre+dfdf49c 
+2026-10-22 20:59:55 CEST vitest exit=1 15s       Tests  1 failed | 154 passed (155)
+2026-10-22 20:59:55 CEST worktree tracked/untracked changes after run: 0 (want 0)
+2026-10-22 21:02:48 CEST chromium DOM subset exit=0 173s PASS=157 FAIL=2

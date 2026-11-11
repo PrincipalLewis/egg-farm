@@ -1,0 +1,11 @@
+HEAD 54118ecea55af3ed2f00f987b2e8fadc98b16dbd porcelain=0
+sync-check exit=0 1s
+tsc exit=0 4s
+vitest exit=0 183s
+build exit=0 4s
+build-html exit=0 5s
+build-qa exit=0 4s
+porcelain-after-nonbrowser=
+rc0-chromium exit=0 (348/348 passed; PORT=4931, SHOTS=gates/rc0-shots; summary line appended after the wrapper shell was interrupted, process ran to completion)
+check-globals exit=0 32s
+porcelain-after-all=

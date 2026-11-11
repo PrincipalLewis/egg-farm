@@ -1,0 +1,1150 @@
+[
+ {
+  "m4On": true,
+  "pauseFlagShipping": 0,
+  "capS": 7200,
+  "minS": 60
+ },
+ {
+  "flag": "flag1",
+  "gap": "u59.9s(<min)",
+  "ref": 0,
+  "out": {
+   "open": {
+    "direct": 0,
+    "hideShow": {
+     "shown": 0,
+     "pending": 0,
+     "coinsDelta": 2294025,
+     "mh": {
+      "energy": 33.344444444443404,
+      "cdS": 0.20000000000000015
+     }
+    },
+    "reload": {
+     "pending": 0,
+     "offline": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "allPaused": {
+    "direct": 0,
+    "hideShow": {
+     "shown": 0,
+     "pending": 0,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 41.66388888889021,
+      "cdS": 0,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 0,
+     "offline": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedMH": {
+    "direct": 0,
+    "hideShow": {
+     "shown": 0,
+     "pending": 0,
+     "coinsDelta": -1500,
+     "mh": {
+      "energy": 41.66388888889021,
+      "cdS": 0,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 0,
+     "offline": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedCH": {
+    "direct": 0,
+    "hideShow": {
+     "shown": 0,
+     "pending": 0,
+     "coinsDelta": -750,
+     "mh": {
+      "energy": 33.344444444443404,
+      "cdS": 0.20000000000000015
+     }
+    },
+    "reload": {
+     "pending": 0,
+     "offline": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "noneHired": {
+    "direct": 0,
+    "hideShow": {
+     "shown": 0,
+     "pending": 0,
+     "coinsDelta": 0,
+     "mh": null
+    },
+    "reload": {
+     "pending": 0,
+     "offline": 0,
+     "mh": null
+    }
+   }
+  }
+ },
+ {
+  "flag": "flag1",
+  "gap": "60s",
+  "ref": 930,
+  "out": {
+   "open": {
+    "direct": 930,
+    "hideShow": {
+     "shown": 930,
+     "pending": 930,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    },
+    "reload": {
+     "pending": 930,
+     "offline": 930,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "allPaused": {
+    "direct": 0,
+    "hideShow": {
+     "shown": 0,
+     "pending": 0,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 0,
+     "offline": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedMH": {
+    "direct": 930,
+    "hideShow": {
+     "shown": 930,
+     "pending": 930,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 930,
+     "offline": 930,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedCH": {
+    "direct": 930,
+    "hideShow": {
+     "shown": 930,
+     "pending": 930,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    },
+    "reload": {
+     "pending": 930,
+     "offline": 930,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "noneHired": {
+    "direct": 930,
+    "hideShow": {
+     "shown": 930,
+     "pending": 930,
+     "coinsDelta": 0,
+     "mh": null
+    },
+    "reload": {
+     "pending": 930,
+     "offline": 930,
+     "mh": null
+    }
+   }
+  }
+ },
+ {
+  "flag": "flag1",
+  "gap": "600s(under-cap)",
+  "ref": 9300,
+  "out": {
+   "open": {
+    "direct": 9300,
+    "hideShow": {
+     "shown": 9300,
+     "pending": 9300,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    },
+    "reload": {
+     "pending": 9300,
+     "offline": 9300,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "allPaused": {
+    "direct": 0,
+    "hideShow": {
+     "shown": 0,
+     "pending": 0,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 0,
+     "offline": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedMH": {
+    "direct": 9300,
+    "hideShow": {
+     "shown": 9300,
+     "pending": 9300,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 9300,
+     "offline": 9300,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedCH": {
+    "direct": 9300,
+    "hideShow": {
+     "shown": 9300,
+     "pending": 9300,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    },
+    "reload": {
+     "pending": 9300,
+     "offline": 9300,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "noneHired": {
+    "direct": 9300,
+    "hideShow": {
+     "shown": 9300,
+     "pending": 9300,
+     "coinsDelta": 0,
+     "mh": null
+    },
+    "reload": {
+     "pending": 9300,
+     "offline": 9300,
+     "mh": null
+    }
+   }
+  }
+ },
+ {
+  "flag": "flag1",
+  "gap": "2h(=cap)",
+  "ref": 111600,
+  "out": {
+   "open": {
+    "direct": 111600,
+    "hideShow": {
+     "shown": 111600,
+     "pending": 111600,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    },
+    "reload": {
+     "pending": 111600,
+     "offline": 111600,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "allPaused": {
+    "direct": 0,
+    "hideShow": {
+     "shown": 0,
+     "pending": 0,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 0,
+     "offline": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedMH": {
+    "direct": 111600,
+    "hideShow": {
+     "shown": 111600,
+     "pending": 111600,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 111600,
+     "offline": 111600,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedCH": {
+    "direct": 111600,
+    "hideShow": {
+     "shown": 111600,
+     "pending": 111600,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    },
+    "reload": {
+     "pending": 111600,
+     "offline": 111600,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "noneHired": {
+    "direct": 111600,
+    "hideShow": {
+     "shown": 111600,
+     "pending": 111600,
+     "coinsDelta": 0,
+     "mh": null
+    },
+    "reload": {
+     "pending": 111600,
+     "offline": 111600,
+     "mh": null
+    }
+   }
+  }
+ },
+ {
+  "flag": "flag1",
+  "gap": "3h(over-cap)",
+  "ref": 111600,
+  "out": {
+   "open": {
+    "direct": 111600,
+    "hideShow": {
+     "shown": 111600,
+     "pending": 111600,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    },
+    "reload": {
+     "pending": 111600,
+     "offline": 111600,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "allPaused": {
+    "direct": 0,
+    "hideShow": {
+     "shown": 0,
+     "pending": 0,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 0,
+     "offline": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedMH": {
+    "direct": 111600,
+    "hideShow": {
+     "shown": 111600,
+     "pending": 111600,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 111600,
+     "offline": 111600,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedCH": {
+    "direct": 111600,
+    "hideShow": {
+     "shown": 111600,
+     "pending": 111600,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    },
+    "reload": {
+     "pending": 111600,
+     "offline": 111600,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "noneHired": {
+    "direct": 111600,
+    "hideShow": {
+     "shown": 111600,
+     "pending": 111600,
+     "coinsDelta": 0,
+     "mh": null
+    },
+    "reload": {
+     "pending": 111600,
+     "offline": 111600,
+     "mh": null
+    }
+   }
+  }
+ },
+ {
+  "flag": "flag0",
+  "gap": "u59.9s(<min)",
+  "ref": 0,
+  "out": {
+   "open": {
+    "direct": 0,
+    "hideShow": {
+     "shown": 0,
+     "pending": 0,
+     "coinsDelta": 2294025,
+     "mh": {
+      "energy": 33.344444444443404,
+      "cdS": 0.20000000000000015,
+      "callLockoutS": 20
+     }
+    },
+    "reload": {
+     "pending": 0,
+     "offline": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "allPaused": {
+    "direct": 0,
+    "hideShow": {
+     "shown": 0,
+     "pending": 0,
+     "coinsDelta": 2294025,
+     "mh": {
+      "energy": 33.344444444443404,
+      "cdS": 0.20000000000000015,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 0,
+     "offline": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedMH": {
+    "direct": 0,
+    "hideShow": {
+     "shown": 0,
+     "pending": 0,
+     "coinsDelta": 2294025,
+     "mh": {
+      "energy": 33.344444444443404,
+      "cdS": 0.20000000000000015,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 0,
+     "offline": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedCH": {
+    "direct": 0,
+    "hideShow": {
+     "shown": 0,
+     "pending": 0,
+     "coinsDelta": 2294025,
+     "mh": {
+      "energy": 33.344444444443404,
+      "cdS": 0.20000000000000015,
+      "callLockoutS": 20
+     }
+    },
+    "reload": {
+     "pending": 0,
+     "offline": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "noneHired": {
+    "direct": 0,
+    "hideShow": {
+     "shown": 0,
+     "pending": 0,
+     "coinsDelta": 0,
+     "mh": null
+    },
+    "reload": {
+     "pending": 0,
+     "offline": 0,
+     "mh": null
+    }
+   }
+  }
+ },
+ {
+  "flag": "flag0",
+  "gap": "60s",
+  "ref": 930,
+  "out": {
+   "open": {
+    "direct": 930,
+    "hideShow": {
+     "shown": 930,
+     "pending": 930,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    },
+    "reload": {
+     "pending": 930,
+     "offline": 930,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "allPaused": {
+    "direct": 930,
+    "hideShow": {
+     "shown": 930,
+     "pending": 930,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 930,
+     "offline": 930,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedMH": {
+    "direct": 930,
+    "hideShow": {
+     "shown": 930,
+     "pending": 930,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 930,
+     "offline": 930,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedCH": {
+    "direct": 930,
+    "hideShow": {
+     "shown": 930,
+     "pending": 930,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    },
+    "reload": {
+     "pending": 930,
+     "offline": 930,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "noneHired": {
+    "direct": 930,
+    "hideShow": {
+     "shown": 930,
+     "pending": 930,
+     "coinsDelta": 0,
+     "mh": null
+    },
+    "reload": {
+     "pending": 930,
+     "offline": 930,
+     "mh": null
+    }
+   }
+  }
+ },
+ {
+  "flag": "flag0",
+  "gap": "600s(under-cap)",
+  "ref": 9300,
+  "out": {
+   "open": {
+    "direct": 9300,
+    "hideShow": {
+     "shown": 9300,
+     "pending": 9300,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    },
+    "reload": {
+     "pending": 9300,
+     "offline": 9300,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "allPaused": {
+    "direct": 9300,
+    "hideShow": {
+     "shown": 9300,
+     "pending": 9300,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 9300,
+     "offline": 9300,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedMH": {
+    "direct": 9300,
+    "hideShow": {
+     "shown": 9300,
+     "pending": 9300,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 9300,
+     "offline": 9300,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedCH": {
+    "direct": 9300,
+    "hideShow": {
+     "shown": 9300,
+     "pending": 9300,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    },
+    "reload": {
+     "pending": 9300,
+     "offline": 9300,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "noneHired": {
+    "direct": 9300,
+    "hideShow": {
+     "shown": 9300,
+     "pending": 9300,
+     "coinsDelta": 0,
+     "mh": null
+    },
+    "reload": {
+     "pending": 9300,
+     "offline": 9300,
+     "mh": null
+    }
+   }
+  }
+ },
+ {
+  "flag": "flag0",
+  "gap": "2h(=cap)",
+  "ref": 111600,
+  "out": {
+   "open": {
+    "direct": 111600,
+    "hideShow": {
+     "shown": 111600,
+     "pending": 111600,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    },
+    "reload": {
+     "pending": 111600,
+     "offline": 111600,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "allPaused": {
+    "direct": 111600,
+    "hideShow": {
+     "shown": 111600,
+     "pending": 111600,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 111600,
+     "offline": 111600,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedMH": {
+    "direct": 111600,
+    "hideShow": {
+     "shown": 111600,
+     "pending": 111600,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 111600,
+     "offline": 111600,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedCH": {
+    "direct": 111600,
+    "hideShow": {
+     "shown": 111600,
+     "pending": 111600,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    },
+    "reload": {
+     "pending": 111600,
+     "offline": 111600,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "noneHired": {
+    "direct": 111600,
+    "hideShow": {
+     "shown": 111600,
+     "pending": 111600,
+     "coinsDelta": 0,
+     "mh": null
+    },
+    "reload": {
+     "pending": 111600,
+     "offline": 111600,
+     "mh": null
+    }
+   }
+  }
+ },
+ {
+  "flag": "flag0",
+  "gap": "3h(over-cap)",
+  "ref": 111600,
+  "out": {
+   "open": {
+    "direct": 111600,
+    "hideShow": {
+     "shown": 111600,
+     "pending": 111600,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    },
+    "reload": {
+     "pending": 111600,
+     "offline": 111600,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "allPaused": {
+    "direct": 111600,
+    "hideShow": {
+     "shown": 111600,
+     "pending": 111600,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 111600,
+     "offline": 111600,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedMH": {
+    "direct": 111600,
+    "hideShow": {
+     "shown": 111600,
+     "pending": 111600,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    },
+    "reload": {
+     "pending": 111600,
+     "offline": 111600,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20,
+      "paused": true
+     }
+    }
+   },
+   "mixedCH": {
+    "direct": 111600,
+    "hideShow": {
+     "shown": 111600,
+     "pending": 111600,
+     "coinsDelta": 0,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    },
+    "reload": {
+     "pending": 111600,
+     "offline": 111600,
+     "mh": {
+      "energy": 40,
+      "cdS": 0,
+      "callLockoutS": 20
+     }
+    }
+   },
+   "noneHired": {
+    "direct": 111600,
+    "hideShow": {
+     "shown": 111600,
+     "pending": 111600,
+     "coinsDelta": 0,
+     "mh": null
+    },
+    "reload": {
+     "pending": 111600,
+     "offline": 111600,
+     "mh": null
+    }
+   }
+  }
+ },
+ {
+  "hidden59_9_energyDelta": 1.663888888890213
+ },
+ {
+  "online30": {
+   "coinsDelta": 0,
+   "mhEnergy": 40.833333333334,
+   "mhLock": null
+  }
+ },
+ {
+  "resume": {
+   "stepCoins": -62,
+   "twinCoins": -62
+  }
+ }
+]

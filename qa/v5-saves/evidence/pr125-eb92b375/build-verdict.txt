@@ -1,0 +1,4 @@
+BUILD_EXIT=0 CHECK_EXIT=0
+check-release-build: m4.1+eb92b37 ok
+no +dirty
+VERDICT=PASS

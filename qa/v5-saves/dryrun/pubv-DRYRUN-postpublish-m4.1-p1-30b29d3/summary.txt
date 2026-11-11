@@ -1,0 +1,16 @@
+G1-fetch | PASS | HARD | origin/main=22eac98c75b9e82944f34a1feb77830521f34aee
+G1-sha | PASS | HARD | 30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134
+G1-tag | PASS | HARD | m4.1-p1-30b29d3 -> 30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134
+G2-clean-build | PASS | HARD | npm ci + build:html ok, porcelain 0
+G2-build-id | PASS | HARD | clean sha256 dd919d616fe0138a89c362b1db269458558a0a2c85827b3e4fc104d36b22979b size 547466 ids  3 m4.1+30b29d3;
+G3-release | INFO | INFO | id 422922551 tag m4.1-p1-30b29d3 draft=false prerelease=false target=30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134 published 2026-10-24 21:11:02 CEST url https://github.com/PrincipalLewis/egg-farm/releases/tag/m4.1-p1-30b29d3
+G3-latest | PASS | HARD | Latest = m4.1-p1-30b29d3
+G3-asset-digest | PASS | HARD | downloaded sha256 dd919d616fe0138a89c362b1db269458558a0a2c85827b3e4fc104d36b22979b = GitHub digest, size 547466
+G3-asset-expected | PASS | HARD | asset == expected sha256 dd919d616fe0138a89c362b1db269458558a0a2c85827b3e4fc104d36b22979b
+G3-asset-cmp | PASS | HARD | cmp identical to clean build
+G3-asset-build-id | PASS | HARD | m4.1+30b29d3 
+G3-release-asset-run | PASS | HARD | run 40124125129 release success, finished 2026-10-24 21:11:21 CEST, build-id match in log
+G4-ci | PASS | HARD | 15 check runs green on 30b29d3
+G5-runtime-chromium | PASS | HARD | release-egg-farm.html: 5 checks pass
+VERDICT: CONFIRMED
+hard_fail=0 not_run_hard=0 finished=2026-10-29 19:51:44 CET

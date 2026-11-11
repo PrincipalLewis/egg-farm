@@ -1,0 +1,88 @@
+title: M41-5 (D-HOP-25): drop 2 dead economy.csv columns (6 others b.csv-only) + unread-column CI check (v2, bisectable)
+state: open merged: False draft: False head: daf9157374a032ac4689b00fe61a8b7cc54280a9 updated: 2026-10-19T08:24:41Z
+commits 8 files 14
+---body---
+**DO NOT MERGE: CI down; local gates only.**
+
+**v2 (bisectable)** replaces #55. Same changes, reordered so every commit passes gates on its own: the allowlist file comes first, and the CSV drop is committed together with the c7bb783f pins. Tree `c682a5b10046a450f45bc3161c3d74ad12a5361c` is identical to #55's head 2cf9dc5 (`git diff 2cf9dc5 b901e84` is empty).
+
+**tests/fixtures/seller_variance.json: the ONLY difference is the recorded economy_csv_sha256 provenance field (b48be8a4 -> c7bb783f); all runs, traces and draws are identical.**
+
+M41-5 (D-HOP-25, HoE). Small PR off main dd223f5, separate from #45/#50.
+
+**Scope in one line:** this PR drops **2** columns from main's data/economy.csv, `guard_heartbeat_s` and `guard_stale_s`. The other 6 D-HOP-25 columns (`farm_ms_price_mult`, `feed_mill_price_mult`, `auto_collect_every_s`, `contracts_manual_bonus`, `farm_max_level`, `hv_extra_second_markup`) only ever existed in HoP's L30+ candidate b.csv (84bd0b70) and were never on main, so there was nothing to drop for them. Economy must leave them out when rebasing the reshape CSV on c7bb783f.
+
+### 1. Columns dropped from data/economy.csv (2 dropped, 6 b.csv-only)
+- Present on main, dropped: `guard_heartbeat_s` (col 47), `guard_stale_s` (col 48). The game uses the code constants in src/save/tab-lease.ts:9.
+- Absent on main (only in HoP's b.csv 84bd0b70), nothing to drop: `farm_ms_price_mult`, `feed_mill_price_mult`, `auto_collect_every_s`, `contracts_manual_bonus`, `farm_max_level`, `hv_extra_second_markup`.
+- No code or docs read any of them. Only the vendored Python sims write `guard_*` if present; they're left untouched because they're pinned.
+- The new CSV sha256 is **c7bb783fe890928f747c142411503261f0711388e73fe1cdadbfd76cc8d68b44**: 123 cols, 31 rows, LF and a trailing newline, every kept cell byte-identical. It matches Product's product/economy.csv byte for byte. It was b48be8a4.
+
+### 2. G10 unread-column gate in `sync-economy --check`
+- In `scripts/csv-columns.ts`, `buildBalance` runs on CSV rows wrapped in a recording Proxy. A column counts as read only when its value is fetched; `in` and `Object.keys` don't count.
+- `verify()` now lists keys first and reads values only for verified columns. Behaviour is unchanged.
+- Unread columns must be in `product/economy/csv-column-allowlist.md`. That file is new in the repo and copies HoP's v1 list (17 planned tunables plus `tc_*`), adding an explicit per-row `expires` of 2026-10-22.
+  - The allowlist is parsed at runtime, with no hard-coded copy.
+  - `name*` is a prefix entry.
+  - `owner` and `expires` are required.
+  - An expired entry only triggers a WARNING in builds, CI and release paths. It fails only in `npm run economy:allowlist-triage` (see the follow-up below).
+- On main: 107 columns are read and 16 are unread. All 16 are allowlisted. `start_coop_eggs` isn't on main yet, and the `tc_*` columns are read by the sync into balance.json m4.tc.
+- Tests are in `tests/csv-columns.test.ts`: an unknown column fails, re-added guard_* columns fail, an allowlisted column passes, a prefix entry works, an expired entry warns or fails under strict, a malformed allowlist fails, and main's CSV passes.
+- With a column added by hand, the CLI exits 1 with `ERROR economy.csv column zz_new_knob is not read ...`.
+
+### 3. Byte-identity
+| artifact | result |
+|---|---|
+| src/config/balance.json | byte-identical: sha256 2e7f0f3e0c1135e9ef0843dbdb43ecaceabf53c5c5c738e3ccad3d34b42aa04b, `sync-economy --check` ok |
+| tests/fixtures/economy_sim.json (scripts/gen-sim-fixtures.py) | byte-identical: 7b3ed73b1f61e1f2e44fe2676da11a2c8204d71f2082c635358f4799a238e86c |
+| tests/fixtures/seller_variance.json (scripts/gen-seller-variance-fixtures.py) | regenerated. The only diff is the provenance field `economy_csv_sha256` b48be8a4 → c7bb783f, so the sha goes from 4ea66e5c to c7ed96e9. All runs, traces and draws are identical. |
+| goldens (engineering/golden flag-off a01faea + M4-on 90a9c84) | 4/4 pass, unchanged pins (M4-on a54c9cf9, flag-off f90d1678). GOLDEN_PRINT gave identical output on 2 runs. |
+
+### 4. Pin
+- These CSV-sha switches now accept c7bb783f alongside T3 b48be8a4, with the same guards and bands and no threshold or assertion changes: `tests/cost-segments.test.ts` SHIPPING_SHA256, `tests/economy.test.ts` CONFIG_BY_CSV_SHA → f1, `tests/ac7-worst-seed.slow.test.ts` GUARDED, and `tests/seller-variance.slow.test.ts` HARD_BAND_CSV.
+- `check-economy-copy --product --strict` passes against Product's product/economy.csv, which is already c7bb783f.
+- vendor/economy-sim is unchanged: economy.f1-m4cols.csv is still b48be8a4, which equals product/economy.f1-m4cols.csv.
+
+### Local gates (measured on 2cf9dc5, same tree as v2 head b901e84; the last commit only changes a test title)
+- `sync-economy --check` ok
+- tsc ok
+- unit (vitest, maxForks=2/minForks=1) 988/988, i.e. main's 980 plus 8 new
+- slow 16 pass / 1 skip. The skip is the same as on main. AC7 band, worst-seed and ac7-dceo-04 all run on c7bb783f.
+- goldens 4/4
+- `npm run build` including check-release-build: ok
+- check-globals chromium: 3/3 PASS
+- check-vendor-pins ok
+- check-economy-copy --product --strict ok
+
+### v2 per-commit gates
+Each commit ran `sync-economy --check`, tsc, and the unit tests touching the changed files: economy, cost-segments, sync-economy, m4a-sync, economy-copy, staging-f1-m4cols and csv-columns once it exists.
+| commit | sync --check | tsc | unit | data/economy.csv |
+|---|---|---|---|---|
+| 31e06c7 allowlist file | ok | ok | 110/110 | b48be8a4 |
+| a0fc78f drop guard_* + pin c7bb783f | ok | ok | 110/110 | c7bb783f |
+| 9189a9b unread-column check | ok | ok | 110/110 | c7bb783f |
+| 8436d99 csv-columns tests | ok | ok | 118/118 | c7bb783f |
+| 6f5d850 ci-gates.md | ok | ok | 118/118 | c7bb783f |
+| 158e95a status.md | ok | ok | 118/118 | c7bb783f |
+| b901e84 AC7 band title | ok | ok | 118/118 | c7bb783f |
+
+Full unit suite at b901e84: 988/988. (The tree identity with #55 refers to b901e84; daf9157 below is the follow-up commit.)
+
+### Follow-up commit daf9157 (HoE, after HoQA intake PASS at b901e84)
+- **Builds never depend on the date.** Strict expiry runs only through the explicit `npm run economy:allowlist-triage` (`sync-economy-cli.ts -- --check --strict-allowlist`), which is for the Oct 22 triage.
+  - `npm test`, `build`, `build:html`, `build:qa`, the release check and `.github/workflows/*` never pass the flag, so an expired entry only warns there.
+  - The `ECONOMY_ALLOWLIST_STRICT` env switch is removed. If it's set, it's ignored and a warning is printed, so a stray CI variable can't turn strict on.
+- **Allowlist entries that match no CSV column now warn and never fail.** On main that's `start_coop_eggs`. `tc_*` matches columns, so it doesn't warn.
+- **Tests (3 new, 11 in csv-columns):**
+  - With an injected clock of 2026-10-23, the build path (`--check`, no flag) passes with expiry warnings only, and the triage path fails.
+  - No npm script except `economy:allowlist-triage` and no workflow passes `--strict-allowlist`, and the env var doesn't enable strict.
+  - The no-match warning fires, including for an unmatched prefix.
+- **Gates at daf9157:**
+  - `sync-economy --check` ok (1 warning: start_coop_eggs)
+  - `economy:allowlist-triage` ok today
+  - tsc ok
+  - full unit 991/991
+  - `npm run build` + check-release-build ok (build id m3-rc1-pre+daf9157)
+  - src/config/balance.json still byte-identical to main (2e7f0f3e…, `git diff dd223f5 -- src/config/balance.json` empty)
+  - data/economy.csv still c7bb783f
+

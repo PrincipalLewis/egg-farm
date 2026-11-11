@@ -1,0 +1,22 @@
+=== hosted one-shot read 2026-11-10 00:22:32 CET (Europe/Belgrade) ===
+No poll loops. Per TASK: in_progress => OPEN.
+
+ci 42719317192
+  headSha=0bbcea5277a7be7f8e8d4303b7aac49e0dc04a7e
+  status=in_progress conclusion=null
+  gate job 129508923300 status=in_progress (step 5 Unit tests in_progress; chromium release-globals pending)
+  release-globals standalone: not listed in this page (0 or skipped later)
+
+pacing-x1-stack 42719317458
+  headSha=0bbcea5277a7be7f8e8d4303b7aac49e0dc04a7e
+  status=in_progress conclusion=null
+  shard optimal 129508926030 in_progress
+  shard seller15 129508926243 in_progress
+  shard casual 129508926403 in_progress
+  aggregate: not yet present on this page
+
+k10-breeds-offset 42719317403
+  headSha=0bbcea5277a7be7f8e8d4303b7aac49e0dc04a7e
+  status=in_progress conclusion=null
+  job 129508922143 in_progress (KNOWN-RED monitor, non-required, D-HOP-2026-10-30-52/53)
+  step 5 K10 trigger + 200-seed offset test in_progress

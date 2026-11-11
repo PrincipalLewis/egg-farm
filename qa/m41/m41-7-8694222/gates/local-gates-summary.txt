@@ -1,0 +1,23 @@
+2026-10-23 00:32:23 CEST === local gates on 86942226ed792598efa2dbc5b473dc7bc93073ab; head-ancestry: dd223f5 Y, 1682a0c Y, 66680eb Y, 9cce82d Y, 4c94704 Y, c61ed2b Y, dfdf49c Y, b986cd3 Y,  pushed on: origin/fix/saves-csr-loadsafe 
+2026-10-23 00:32:23 CEST DRY plan: worktree /workspace/egg-farm-studio/qa/wt-m41-7-8694222; npm ci; sync --check; tsc; build; build:qa; build:html (+build-id grep, sha256, check-release-build html+dist); vitest full; goldens subset; test:slow
+2026-10-23 00:32:32 CEST === local gates on 86942226ed792598efa2dbc5b473dc7bc93073ab; head-ancestry: dd223f5 Y, 1682a0c Y, 66680eb Y, 9cce82d Y, 4c94704 Y, c61ed2b Y, dfdf49c Y, b986cd3 Y,  pushed on: origin/fix/saves-csr-loadsafe 
+2026-10-23 00:32:32 CEST porcelain after start: 0 lines
+2026-10-23 00:32:33 CEST npm ci exit=0
+2026-10-23 00:32:34 CEST sync --check exit=0
+2026-10-23 00:32:37 CEST tsc exit=0
+2026-10-23 00:32:41 CEST build exit=0
+2026-10-23 00:32:41 CEST porcelain after build: 0 lines
+2026-10-23 00:32:45 CEST build:qa exit=0
+2026-10-23 00:32:45 CEST porcelain after build-qa: 0 lines
+2026-10-23 00:32:50 CEST build:html exit=0
+2026-10-23 00:32:50 CEST porcelain after build-html: 0 lines
+2026-10-23 00:32:50 CEST static build-id dist-html:  3 m3-rc1-pre+8694222 (want +8694222 only, 0 +dirty); dist-qa: m3-rc1-pre+8694222 
+2026-10-23 00:32:50 CEST html 0cdd9bac0b59acb5a195718a4e1e74f5c59973200f08e59dce34c50ba22cea26  dist-html/egg-farm.html
+2026-10-23 00:32:50 CEST check-release-build dist-html exit=0
+2026-10-23 00:32:50 CEST check-release-build dist exit=0
+2026-10-23 00:35:38 CEST vitest full exit=0 168s  Test Files 97 passed (97)  Tests 1195 passed (1195) 
+2026-10-23 00:35:38 CEST porcelain after vitest: 0 lines
+2026-10-23 00:35:40 CEST goldens subset exit=0  Test Files 5 passed (5)  Tests 89 passed (89) 
+2026-10-23 00:43:03 CEST test:slow exit=0 443s  Test Files 3 passed (3)  Tests 16 passed | 1 skipped (17) 
+2026-10-23 00:43:03 CEST porcelain after slow: 0 lines
+2026-10-23 00:43:03 CEST LOCAL_DONE

@@ -1,0 +1,1 @@
+PR #116 is Draft; hosted gate/pacing intentionally NOT RUN / not PASS pending Ready + final tip hosted. No CI dispatch. PR107 hosted slots reserved separately — not read.

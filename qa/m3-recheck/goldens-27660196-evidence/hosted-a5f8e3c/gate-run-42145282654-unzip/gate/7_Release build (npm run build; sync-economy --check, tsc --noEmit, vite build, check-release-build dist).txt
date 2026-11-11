@@ -1,0 +1,25 @@
+﻿2026-11-06T01:50:32.8392033Z ##[group]Run npm run build
+2026-11-06T01:50:32.8392290Z [36;1mnpm run build[0m
+2026-11-06T01:50:32.8410411Z shell: /usr/bin/bash -e {0}
+2026-11-06T01:50:32.8410634Z ##[endgroup]
+2026-11-06T01:50:32.9323422Z 
+2026-11-06T01:50:32.9324076Z > egg-farm@0.1.0 build
+2026-11-06T01:50:32.9324813Z > vite-node scripts/sync-economy-cli.ts -- --check && tsc --noEmit && vite build && node scripts/check-release-build.mjs dist
+2026-11-06T01:50:32.9325190Z 
+2026-11-06T01:50:33.2433395Z balance.json up to date with economy.csv
+2026-11-06T01:50:38.4859819Z [36mvite v5.4.21 [32mbuilding for production...[36m[39m
+2026-11-06T01:50:38.5293630Z transforming...
+2026-11-06T01:50:39.1291228Z [32m✓[39m 74 modules transformed.
+2026-11-06T01:50:39.3321315Z rendering chunks...
+2026-11-06T01:50:39.3371837Z computing gzip size...
+2026-11-06T01:50:39.3435030Z [2mdist/[22m[32mindex.html                 [39m[1m[2m  0.68 kB[22m[1m[22m[2m │ gzip:  0.39 kB[22m
+2026-11-06T01:50:39.3436368Z [2mdist/[22m[2massets/[22m[35mindex-DUjXgk7c.css  [39m[1m[2m 53.57 kB[22m[1m[22m[2m │ gzip: 11.58 kB[22m
+2026-11-06T01:50:39.3437860Z [2mdist/[22m[2massets/[22m[36mindex-DeigIhum.js   [39m[1m[2m213.01 kB[22m[1m[22m[2m │ gzip: 72.50 kB[22m
+2026-11-06T01:50:39.3438898Z [32m✓ built in 835ms[39m
+2026-11-06T01:50:39.3931893Z check-release-build: m4.1+69f9c61 ok
+2026-11-06T01:50:39.3936707Z check-release-build: release prefix m4.1 ok
+2026-11-06T01:50:39.3938400Z check-release-build: no eggfarmUi in release ok
+2026-11-06T01:50:39.3949949Z check-release-build: no ?debug/?perf/?ios/QA hooks ok
+2026-11-06T01:50:39.4042099Z check-release-build: window global writes only eggfarmExportTelemetry ok
+2026-11-06T01:50:39.4086101Z check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok
+2026-11-06T01:50:39.4087893Z check-release-build: eggfarm* identifiers eggfarmRecovery, eggfarmTabGuard, eggfarmExportTelemetry ok

@@ -1,0 +1,6 @@
+o1o2-vitest 0
+tsc 0
+full-vitest 0
+build 0
+release-build 0
+o1o2-verbose 0

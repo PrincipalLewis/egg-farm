@@ -1,0 +1,12 @@
+#v1-probe-invalid buildid chromium exit=0 fails=0 summary="runtime build ids [chromium]: []" 04:14:26
+SUPERSEDED_NOTE: prior SHA browser results (3ea9f04,79edfa1,b0e8278,6f19823,c428fae,a913934,c08cff5,abe0991) superseded by final heads cf50663/d8d680e 04:50:40
+ac7-workers exit=0 04:54:00
+ac7-noworkers exit=0 04:54:51
+buildid chromium exit=0 fails=0 summary="runtime build ids [chromium]: ["m3-rc1-pre+cf50663"]" 04:56:15
+globals chromium exit=0 sha=cf50663 bid=m3-rc1-pre+cf50663 PASS=2 FAIL=0 04:56:26
+rc0 chromium (lock2) exit=1 sha=cf50663 bid=m3-rc1-pre+cf50663 PASS=192 FAIL=3 05:07:00
+rc0 chromium (lock2) RERUN-axe exit=1 sha=cf50663 PASS=195 FAIL=2 05:23:41
+globals firefox exit=0 sha=cf50663 bid=m3-rc1-pre+cf50663 PASS=2 FAIL=0 05:25:35
+rc0 firefox exit=1 sha=cf50663 bid=m3-rc1-pre+cf50663 PASS=195 FAIL=2 05:44:24
+globals webkit exit=0 sha=cf50663 bid=m3-rc1-pre+cf50663 PASS=2 FAIL=0 06:18:01
+rc0 webkit exit=1 sha=cf50663 bid=m3-rc1-pre+cf50663 PASS=195 FAIL=2 06:25:02

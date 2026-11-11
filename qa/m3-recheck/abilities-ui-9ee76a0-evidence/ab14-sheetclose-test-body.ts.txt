@@ -1,0 +1,32 @@
+describe('AB-14 / AC-M5A-22 sheetCloseComplete hold [Architect CHANGES]', () => {
+  it('fireAbility from portrait sheet keeps attendance frozen until sheetCloseComplete', async () => {
+    const { g, ui, probe } = await mountAbilitiesUi();
+    expect(probe()).toBe(false); // upgrades open
+    const btn = document.querySelector('[data-testid="call-market_hand"]') as HTMLButtonElement;
+    expect(btn).toBeTruthy();
+    expect(btn.getAttribute('aria-disabled')).not.toBe('true');
+    btn.click();
+    expect(g.state.abilities?.market_hand?.activeS).toBeGreaterThan(0);
+    expect(probe()).toBe(false); // still frozen while closing
+    expect(anySheetOpen()).toBe(true);
+    expect(document.getElementById('p-upgrades')?.hidden).toBe(false);
+    ui.sheetCloseComplete();
+    expect(anySheetOpen()).toBe(false);
+    expect(probe()).toBe(true);
+    expect(document.getElementById('p-upgrades')?.hidden).toBe(true);
+  });
+
+  it('activateAll from portrait sheet keeps freeze until sheetCloseComplete', async () => {
+    const { g, ui, probe } = await mountAbilitiesUi();
+    const btn = document.querySelector(`[data-testid="${ACTIVATE_ALL_TESTID}"]`) as HTMLButtonElement;
+    expect(btn).toBeTruthy();
+    btn.click();
+    expect(Object.values(g.state.abilities ?? {}).some(a => (a?.activeS ?? 0) > 0)).toBe(true);
+    expect(probe()).toBe(false);
+    expect(anySheetOpen()).toBe(true);
+    ui.sheetCloseComplete();
+    expect(probe()).toBe(true);
+    expect(anySheetOpen()).toBe(false);
+  });
+});
+

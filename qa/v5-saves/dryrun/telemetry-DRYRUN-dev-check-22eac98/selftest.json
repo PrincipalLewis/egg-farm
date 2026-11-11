@@ -1,0 +1,14 @@
+{
+  "neg": [
+    "offline_grant: required secondsAway missing (G-TEL-3)",
+    "offline_grant: forbidden field awayS (G-TEL-3: use secondsAway)"
+  ],
+  "both": [
+    "offline_grant: forbidden field awayS (G-TEL-3: use secondsAway)"
+  ],
+  "pos": [],
+  "unk": [],
+  "bogus": [
+    "not in allowlist: not_a_real_event"
+  ]
+}

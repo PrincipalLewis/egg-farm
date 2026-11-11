@@ -1,0 +1,69 @@
+../../../../scratch/bundles/breeds-ui-pra-bd5b068a.bundle is okay
+The bundle contains these 2 refs:
+bd5b068acff63694f02b334a3fad065e9a53b017 refs/heads/v5/breeds-ui-a
+d65391b0868cc993aa39e5bde49d279967c3b8af refs/remotes/origin/rc/v5
+The bundle records a complete history.
+The bundle uses this hash algorithm: sha1
+bd5b068acff63694f02b334a3fad065e9a53b017
+d767dfd48894bc716443f19846e870a6e0496503
+d65391b0868cc993aa39e5bde49d279967c3b8af
+d65391b0868cc993aa39e5bde49d279967c3b8af
+bd5b068acff63694f02b334a3fad065e9a53b017 0e60c78454e237a1125038ef281fdba0b3e96167 2026-11-10 01:50:04 +0100 docs(breeds): status Ready tip after HoQA bundle
+0e60c78454e237a1125038ef281fdba0b3e96167 eb8e8fb417646cc238d92b8dc801b2859a210fa3 2026-11-10 01:49:55 +0100 docs(breeds): pin Ready tip SHA in PR body
+eb8e8fb417646cc238d92b8dc801b2859a210fa3 443b7ad0ccb962cc9637570b136c1cd13536d8d1 2026-11-10 01:49:31 +0100 docs(breeds): align PR body head/tree/bundle to tip
+443b7ad0ccb962cc9637570b136c1cd13536d8d1 0ae9d907d2095f2f8626120bf3f7c4b1ac4c7a21 2026-11-10 01:48:58 +0100 docs(breeds): Ready — gate results, HoQA bundle, deps
+0ae9d907d2095f2f8626120bf3f7c4b1ac4c7a21 65c80683a88bd73922856bdba7a991c94310d73f 2026-11-10 01:41:00 +0100 fix(breeds): inline breedsFlagOn so F3-no-literal skips UI adapter
+65c80683a88bd73922856bdba7a991c94310d73f 5e2ca095858751e695e628c46db01aade4ecb741 2026-11-10 01:30:53 +0100 fix(breeds): label-in-name Hatch + familyClampState rename
+5e2ca095858751e695e628c46db01aade4ecb741 43fbbde659df8b88d47a75c499708de173ef5f48 2026-11-10 01:26:47 +0100 fix(breeds): leaf breeds-ext-registry + rollingIncomeRate (TDZ)
+43fbbde659df8b88d47a75c499708de173ef5f48 e40db046d9785e283b9812d831b8c358e79878fd d65391b0868cc993aa39e5bde49d279967c3b8af 2026-11-10 01:22:54 +0100 merge: origin/rc/v5 (#111 golden-game d65391b) into breeds-ui PR-A
+e40db046d9785e283b9812d831b8c358e79878fd bcb96860cc898c1e2c60e235c0a0fdb7cb63a8f0 2026-11-10 01:22:03 +0100 docs(breeds): clean AC trace Head line
+bcb96860cc898c1e2c60e235c0a0fdb7cb63a8f0 8b0b5c988da9909d5874aeb51faf42a475d84e24 2026-11-10 01:21:35 +0100 docs(breeds): AC trace HEAD = Ready-candidate tip
+8b0b5c988da9909d5874aeb51faf42a475d84e24 cf1ad731e27925d92905c273a0850e6ce8f92cd0 2026-11-10 01:21:29 +0100 docs(breeds): status Ready-candidate final SHA + 0h left
+cf1ad731e27925d92905c273a0850e6ce8f92cd0 ded779a9ccc3e838a22c1c89c8d9bbff960ea015 2026-11-10 01:21:05 +0100 docs(breeds): pin Ready-candidate HEAD SHA after deps commit
+ded779a9ccc3e838a22c1c89c8d9bbff960ea015 4737eb7c5042dcc13fb4f4e096480163dd498d09 2026-11-10 01:13:45 +0100 docs(breeds): Ready-candidate deps — #126 clamp-bind follow-up (HoE B)
+4737eb7c5042dcc13fb4f4e096480163dd498d09 9816b3ea8633b39b30bbd562b3635414c41f14e3 2026-11-10 01:09:50 +0100 docs(breeds): pin Ready-candidate head SHA in AC trace
+9816b3ea8633b39b30bbd562b3635414c41f14e3 5cebc3ff17562d1bf2d79696362079881c04cb86 2026-11-10 01:09:33 +0100 feat(breeds): Ready-candidate — remaining ACs + hatch aria
+5cebc3ff17562d1bf2d79696362079881c04cb86 3f1e94087f7c311664d665a3ec92f6580be823e0 2026-11-10 01:07:31 +0100 feat(breeds): PR-B seams — glob exts, presentMirror, enriched ctx
+3f1e94087f7c311664d665a3ec92f6580be823e0 56d4d46c3250619a4a9fdd1f7b961eb004b28ce4 2026-11-10 01:00:40 +0100 docs(breeds): AC trace table + PR-A status (~5.5h left)
+56d4d46c3250619a4a9fdd1f7b961eb004b28ce4 e17e18fafd016b3c235d3c87d26a4a5c872fdfe4 2026-11-10 01:00:07 +0100 feat(breeds): HoQA breeds-on fixture + ?qaBreeds=1 QA boot
+e17e18fafd016b3c235d3c87d26a4a5c872fdfe4 4501009a7c5b8ba308f37b7d9c69afbca8c314ce 2026-11-10 00:55:50 +0100 test(breeds): AC31c/e Farm-soon, AC3b highlight, reveal RM polish
+4501009a7c5b8ba308f37b7d9c69afbca8c314ce dffebab2900d76c583896236f03e32cd2181b30b 2026-11-10 00:49:44 +0100 fix(breeds): apply PMC OQ-3/5/6 (ceil, reveal-on-open, Remove)
+dffebab2900d76c583896236f03e32cd2181b30b f20b91839fdf09ba0ed45a890281ccbf7bf2909d 2026-11-10 00:45:24 +0100 docs(breeds): lock PR-A/PR-B seams + mountBreeds registration
+---
+ engineering/design/breeds-ui-seams.md              | 102 +++
+ engineering/reviews/v5-breeds-ui-a-ac-trace.md     |  43 ++
+ .../reviews/v5-breeds-ui-a-pr-body-draft.md        |  59 ++
+ engineering/status.md                              |   9 +
+ public/assets/char-breed-ayam-cemani.svg           |   1 +
+ public/assets/char-breed-brahma.svg                |   1 +
+ public/assets/char-breed-cochin.svg                |   1 +
+ public/assets/char-breed-cream-legbar.svg          |   1 +
+ public/assets/char-breed-leghorn.svg               |   1 +
+ public/assets/char-breed-orpington.svg             |   1 +
+ public/assets/char-breed-rhode-island-red.svg      |   1 +
+ public/assets/char-breed-silhouette.svg            |   1 +
+ public/assets/char-breed-sussex.svg                |   1 +
+ scripts/check-release-build.mjs                    |   4 +-
+ src/main.ts                                        |  11 +-
+ src/ui/app.ts                                      |  25 +-
+ src/ui/breeds-adapter.ts                           | 137 ++++
+ src/ui/breeds-ext-registry.ts                      |  51 ++
+ src/ui/breeds-mount.ts                             | 365 ++++++++++
+ src/ui/breeds-ui.ts                                | 126 ++++
+ src/ui/styles.css                                  |  57 ++
+ tests/helpers/breeds-on.test.ts                    |  19 +
+ tests/helpers/breeds-on.ts                         |  39 +
+ tests/release-bundle.test.ts                       |  27 +
+ tests/v5-breeds-qa-seam.test.ts                    |  36 +
+ tests/v5-breeds-ui.test.ts                         | 789 +++++++++++++++++++++
+ 26 files changed, 1901 insertions(+), 7 deletions(-)
+--- after-gate
+0ae9d907d2095f2f8626120bf3f7c4b1ac4c7a21
+bd5b068 docs(breeds): status Ready tip after HoQA bundle
+0e60c78 docs(breeds): pin Ready tip SHA in PR body
+eb8e8fb docs(breeds): align PR body head/tree/bundle to tip
+443b7ad docs(breeds): Ready — gate results, HoQA bundle, deps
+ engineering/reviews/v5-breeds-ui-a-ac-trace.md     |  2 +-
+ .../reviews/v5-breeds-ui-a-pr-body-draft.md        | 47 ++++++++++++++--------
+ engineering/status.md                              |  2 +
+ 3 files changed, 33 insertions(+), 18 deletions(-)

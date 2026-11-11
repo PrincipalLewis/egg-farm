@@ -1,0 +1,8 @@
+PROBE_EXIT=0
+qa-pr125-f7-probe.test.ts 4/4 PASS through Game.frame × 60 s attended:
+  30fps  n=1800  focusMs=60000 activeMs=60000 present_active_s=60 presentEggs=19.5==wantEggs bp=250 prod=13
+  60fps  n=3600  same
+  144fps n=8640  same
+  uneven n=3226  same
+All exactly 60,000 (well within ±100 tick rounding).
+VERDICT=PASS

@@ -1,0 +1,54 @@
+[
+  {
+    "install_id": "7a2271be-5325-4737-8463-943c783a5379",
+    "build": "m4.1+30b29d3",
+    "type": "session_start",
+    "ts": 1793299674255,
+    "sessionMs": 0
+  },
+  {
+    "secondsAway": 7200,
+    "eggs": 29250,
+    "type": "offline_grant",
+    "ts": 1793299674256,
+    "sessionMs": 1
+  },
+  {
+    "id": 82,
+    "N": 53,
+    "type": "customer_arrive",
+    "ts": 1793299674763,
+    "sessionMs": 508
+  },
+  {
+    "id": 82,
+    "N": 53,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793299675466,
+    "sessionMs": 1211
+  },
+  {
+    "id": 83,
+    "N": 51,
+    "type": "customer_arrive",
+    "ts": 1793299675663,
+    "sessionMs": 1408
+  },
+  {
+    "type": "session_end",
+    "ts": 1793299675901,
+    "sessionMs": 1646
+  },
+  {
+    "wage_coop_hand_cents": 17,
+    "coop_hand_eggs": 26,
+    "wage_market_hand_cents": 8,
+    "market_hand_eggs": 53,
+    "market_hand_cents": 25122,
+    "type": "worker_summary",
+    "ts": 1793299674463,
+    "sessionMs": 208,
+    "windowMs": 1438
+  }
+]

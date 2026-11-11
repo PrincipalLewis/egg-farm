@@ -1,0 +1,22 @@
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/pr125-a8a1ae8a/wt
+
+stdout | tests/telemetry-schema.test.ts > [G-8] worst-case pinned size <= 200 KB (D-HOE-19 G-1, D-HOE-31, D-HOE-32 M-2) > [G-8] worst-case 1 h session: every event valid and pinned; serialized <= 200 KB
+G-8 pinned bytes (base): 155494
+
+stdout | tests/telemetry-schema.test.ts > [G-8] worst-case pinned size <= 200 KB (D-HOE-19 G-1, D-HOE-31, D-HOE-32 M-2) > [G-8] worst-case 1 h session + buy-spam fixture: every event valid and pinned; serialized <= 200 KB
+G-8 pinned bytes (buy-spam): 176025
+
+ ✓ tests/telemetry-schema.test.ts (51 tests) 43ms
+ ✓ tests/v5-breeds-state.test.ts (53 tests) 235ms
+ ✓ tests/v5-breeds-present.test.ts (10 tests) 8ms
+ ✓ tests/v5-breeds-family-caps.test.ts (7 tests) 2ms
+ ✓ tests/v5-breeds-away-broody.test.ts (7 tests) 2ms
+ ✓ tests/v5-breeds-away-bp.test.ts (4 tests) 1ms
+
+ Test Files  6 passed (6)
+      Tests  132 passed (132)
+   Start at  01:30:50
+   Duration  966ms (transform 333ms, setup 0ms, collect 491ms, tests 292ms, environment 0ms, prepare 48ms)
+
+TRAITS_D1D6_EXIT=0

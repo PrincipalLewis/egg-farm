@@ -1,0 +1,86 @@
+[
+  {
+    "install_id": "a1985e0c-8854-4a57-8c57-d41625bcfe7b",
+    "build": "m4.1+30b29d3",
+    "type": "session_start",
+    "ts": 1793299668078,
+    "sessionMs": 0
+  },
+  {
+    "reason": "parse",
+    "had_backup": true,
+    "restored_from_backup": true,
+    "build": "m4.1+30b29d3",
+    "recovered_from": "bak",
+    "store": "ls",
+    "tried": [
+      {
+        "source": "bak",
+        "result": "valid"
+      },
+      {
+        "source": "idb",
+        "result": "absent"
+      }
+    ],
+    "restored_version": 6,
+    "migrated": false,
+    "type": "save_corrupt",
+    "ts": 1793299668079,
+    "sessionMs": 1
+  },
+  {
+    "secondsAway": 283.813,
+    "eggs": 1152,
+    "type": "offline_grant",
+    "ts": 1793299668079,
+    "sessionMs": 1
+  },
+  {
+    "notice": "M1",
+    "source": "bak",
+    "store": "ls",
+    "type": "save_recovery_notice_shown",
+    "ts": 1793299668140,
+    "sessionMs": 62
+  },
+  {
+    "id": 82,
+    "N": 53,
+    "type": "customer_arrive",
+    "ts": 1793299668580,
+    "sessionMs": 502
+  },
+  {
+    "id": 82,
+    "N": 53,
+    "partial": false,
+    "type": "customer_served",
+    "ts": 1793299669282,
+    "sessionMs": 1204
+  },
+  {
+    "notice": "M1",
+    "source": "bak",
+    "store": "ls",
+    "type": "save_recovery_notice_dismissed",
+    "ts": 1793299669418,
+    "sessionMs": 1340
+  },
+  {
+    "type": "session_end",
+    "ts": 1793299669933,
+    "sessionMs": 1855
+  },
+  {
+    "wage_coop_hand_cents": 17,
+    "coop_hand_eggs": 26,
+    "wage_market_hand_cents": 8,
+    "market_hand_eggs": 53,
+    "market_hand_cents": 25122,
+    "type": "worker_summary",
+    "ts": 1793299668282,
+    "sessionMs": 204,
+    "windowMs": 1651
+  }
+]

@@ -1,0 +1,16 @@
+{
+ "tag": "s0-oldsave",
+ "url": "file:///tmp/egg-claude-gamer/old/egg-farm.html",
+ "profile": "prof-old",
+ "aheadHours": 0,
+ "viewport": [
+  390,
+  844
+ ],
+ "console": [],
+ "pageerrors": [],
+ "build_id": {
+  "meta": "m3-rc1-pre+dd52bfd",
+  "data": "m3-rc1-pre+dd52bfd"
+ }
+}

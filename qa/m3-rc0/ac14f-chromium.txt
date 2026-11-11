@@ -1,0 +1,9 @@
+FAIL [chromium] 14f buy upgrade (100*C+F) 1719->1819, SIGKILL 12 procs after 0 ms, reopen -> purchase persisted, <=1 modal, no recovery dialog — {"F0":1719,"F1":1819,"after":{"F":1719,"modals":0,"recovery":0},"killed":12}
+FAIL [chromium] 14f buy upgrade (100*C+F) 1719->1819, SIGKILL 12 procs after 100 ms, reopen -> purchase persisted, <=1 modal, no recovery dialog — {"F0":1719,"F1":1819,"after":{"F":1719,"modals":0,"recovery":0},"killed":12}
+FAIL [chromium] 14f buy upgrade (100*C+F) 1719->1819, SIGKILL 12 procs after 500 ms, reopen -> purchase persisted, <=1 modal, no recovery dialog — {"F0":1719,"F1":1819,"after":{"F":1719,"modals":0,"recovery":0},"killed":12}
+FAIL [chromium] 14f buy upgrade (100*C+F) 1719->1819, SIGKILL 12 procs after 1000 ms, reopen -> purchase persisted, <=1 modal, no recovery dialog — {"F0":1719,"F1":1819,"after":{"F":1719,"modals":0,"recovery":0},"killed":12}
+FAIL [chromium] 14f buy upgrade (100*C+F) 1719->1819, SIGKILL 12 procs after 2000 ms, reopen -> purchase persisted, <=1 modal, no recovery dialog — {"F0":1719,"F1":1819,"after":{"F":1719,"modals":0,"recovery":0},"killed":12}
+PASS [chromium] 14e -1 h (clock back) (key savedAt) — {"pending":0,"cd":29.19999999999999,"energies":[99.91111111111115,99.91111111111115,99.91111111111115,99.91111111111115],"neg":null,"fixtureEnergies":[100,100,100,100]}
+PASS [chromium] 14e +10 h (key savedAt) — {"pending":36000,"cd":29.19999999999999,"energies":[99.91111111111115,99.91111111111115,99.91111111111115,99.91111111111115],"neg":null,"modal":"Welcome back!\nYou were away 2h+\n+36K eggs\nCollect","fixtureEnergies":[100,100,100,100]}
+PASS [chromium] 14e +2 h exactly (key savedAt) — {"pending":36000,"cd":29.19999999999999,"energies":[99.91111111111115,99.91111111111115,99.91111111111115,99.91111111111115],"neg":null,"modal":"Welcome back!\nYou were away 2h+\n+36K eggs\nCollect","fixtureEnergies":[100,100,100,100]}
+TOTAL 3/8

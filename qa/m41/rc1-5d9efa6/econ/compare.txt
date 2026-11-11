@@ -1,0 +1,21 @@
+metric | dd223f5 | 5d9efa6 | delta
+acw1 1-200 pctF10<=960s | 98 | 98 | 0
+acw1 1-200 medF18 min | 25 | 25 | 0
+acw1 1-200 medF10 min | 13.67 | 13.67 | 0
+acw1 201-299 pctF10<=960s | 96.97 | 96.97 | 0
+acw1 201-299 medF18 min | 25 | 25 | 0
+acw1 201-299 medF10 min | 14 | 14 | 0
+L10 1-200 nw P95 min | 12.02 | 12.02 | 0
+L10 1-200 nw fastest min | 7.87 | 7.87 | 0
+L10 1-200 w P95 min | 12.08 | 12.08 | 0
+L10 1-200 w fastest min | 8.32 | 8.32 | 0
+L10 201-300 nw P95 min | 11.81 | 11.81 | 0
+L10 201-300 nw fastest min | 8.13 | 8.13 | 0
+L10 201-300 w P95 min | 11.81 | 11.81 | 0
+L10 201-300 w fastest min | 8.76 | 8.76 | 0
+AC7 w L@30 P5 | 21 | 21 | 0
+AC7 w L@30 median | 22 | 22 | 0
+AC7 w L@30 P95 | 22 | 22 | 0
+AC7 w L18-25 step P95 s | 180 | 180 | 0
+AC7 w L18-25 step worst s | 180 | 180 | 0
+ECON_COMPARE metrics_changed=0 seeds_worse=0 per_seed_identical=true

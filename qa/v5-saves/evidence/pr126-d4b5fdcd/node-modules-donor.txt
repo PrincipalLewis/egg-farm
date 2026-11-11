@@ -1,0 +1,4 @@
+tip_package_lock_sha256=56569550486f3450a31b435e94b807a7dc95d1e7ee7d3e9d5e09606e0ff6f75e
+donor=/workspace/egg-farm-studio/qa/scratch/pr124-baf410ff/wt
+donor_package_lock_sha256=56569550486f3450a31b435e94b807a7dc95d1e7ee7d3e9d5e09606e0ff6f75e
+LOCK_IDENTICAL=YES

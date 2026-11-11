@@ -1,0 +1,11 @@
+main header cols 125 b header cols 133
+main rows (excl header) 31 b rows 56
+b header starts with main header (same order): True
+level column: level
+shared-column cell diffs in rows of main (L0-30): 3
+  L30 farm_cost 624316 -> 330194
+  L30 hens_cost 94319 -> 74005
+  L30 egg_value_cost 249339 -> 133856
+main line ending CRLF: False  b CRLF: False
+rows whose first 125 fields are NOT byte-identical (row idx): [30]
+full-line byte-identical rows: 0 of 32 (incl header)

@@ -1,0 +1,37 @@
+{
+  "S01_seed130": {
+    "n": 1,
+    "worst_current": 183,
+    "worst_a": 79,
+    "worst_b": 79.5,
+    "n_over_180_current": 1,
+    "n_over_180_a": 0,
+    "n_over_180_b": 0
+  },
+  "S01_1_200": {
+    "n": 200,
+    "worst_current": 183,
+    "worst_a": 121,
+    "worst_b": 161,
+    "n_over_180_current": 1,
+    "n_over_180_a": 0,
+    "n_over_180_b": 0,
+    "p95_current": 153,
+    "p95_a": 93,
+    "p95_b": 133,
+    "sha256_csv": "398a989f164e0d46d48327e5d80cb82661de6ea008ac888b82bd931e04dce711"
+  },
+  "R04_1_200": {
+    "n": 200,
+    "worst_current": 189,
+    "worst_a": 121,
+    "worst_b": 161,
+    "n_over_180_current": 4,
+    "n_over_180_a": 0,
+    "n_over_180_b": 0,
+    "p95_current": 160,
+    "p95_a": 93,
+    "p95_b": 133,
+    "sha256_csv": "d1cff5ac76e6015f6127d859a9b9c94d5c15da2ac64aad1314f8e7adfd173b65"
+  }
+}

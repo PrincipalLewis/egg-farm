@@ -1,0 +1,1 @@
+{"eng":"firefox","mode":"fg","durS":300,"sells":495,"floaters":2430,"sale":215,"maxLifeMs":906,"p99":757,"over1s":[],"stillLive":[],"worst":[]}

@@ -1,0 +1,29 @@
+F-1 / telemetry-schema identity tip vs rc 49ee46ddce010f0087515c173d34c6076d47ea44 (2026-11-06T00:59:56+01:00)
+IDENTICAL data/staging/economy.f1-m4cols.csv f2ac73e746b90e3f77eba197a6a18ed3e036c876
+IDENTICAL engineering/reviews/telemetry-v062-generalist-slice.md f5490285738cf6ba001d71e9b57a476ec174ab12
+IDENTICAL src/telemetry/schema.ts e1a5e5dc6ad4ee907935b1070eed977c3235ba0a
+IDENTICAL src/telemetry/telemetry.ts 3cd0134a940043dc66a70a0f033428c26bfa25b8
+IDENTICAL tests/staging-f1-m4cols.test.ts 3b673eb0164c92141d8cc52e7a7d704af38df99f
+IDENTICAL tests/telemetry-m3.test.ts 4eba3cfe5e9af870bc4c51fadee65ce28276fb78
+IDENTICAL tests/telemetry-ring-export.test.ts 4e9385619a429c673f84f33bdfa7641cba01ac1c
+IDENTICAL tests/telemetry-schema.test.ts 46523747948b306f5111d0cbbdb3536ab5ca424a
+IDENTICAL tests/telemetry.test.ts 58cae0a7990d8caa52674e9d9e8d9e712d766044
+DIFFERS tests/v5-f1a-fields.test.ts tip=de56c308badb8c80aea2b1e65c2f99e1917f56ba rc=32119ce43414c43c0fb5182b8f3c90c4a6f4dbe9
+ tests/v5-f1a-fields.test.ts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+IDENTICAL tests/zg-telemetry-annotate.test.ts f195237f2e7d67e9504f1d06894d305547ccd1cd
+IDENTICAL vendor/economy-sim/economy.f1-m4cols.csv bbee87609d00de2cb560c88eb7982b7a24fa1488
+--- diff for tests/v5-f1a-fields.test.ts (in 11-file stack diff; abilities stack noise) ---
+diff --git a/tests/v5-f1a-fields.test.ts b/tests/v5-f1a-fields.test.ts
+index 32119ce..de56c30 100644
+--- a/tests/v5-f1a-fields.test.ts
++++ b/tests/v5-f1a-fields.test.ts
+@@ -47,7 +47,7 @@ const M5_EVENT_SPEC = {
+   streak_started: ['farm_level', 'collection_level'],
+   streak_peak: ['value', 'duration_s', 'credited_taps', 'time_at_cap_s', 'extra_coins', 'frenzy_overlap_s', 'reason', 'max_tier'],
+   abilities_unlocked: ['farm', 'hired'],
+-  ability_used: ['worker', 'farm', 'energy_pct', 'mood', 'via_all', 't_since_ready_s', 'in_sheet'],
++  ability_used: ['worker', 'farm', 'energy_pct', 'mood', 'via_all', 't_since_ready_s', 'in_sheet', 'combo'], // combo: spec v1.3.8 D-HOP-42; Architect fireAbility addendum 2026-11-05 21:29 CET (amend on land)
+   ability_blocked: ['worker', 'reason', 'count'],
+   ability_ended: ['worker', 'cause', 'effect_s'],
+ } as const;

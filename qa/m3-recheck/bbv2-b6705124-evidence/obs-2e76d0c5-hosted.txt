@@ -1,0 +1,30 @@
+Look time: 2026-11-06 04:37:14 CET (Europe/Belgrade)
+Task: hoqa/pr100-hosted record-only (QA-D-1106-PR100-HOSTED); prior 04:20 BLOCKED accepted as QA-D-1106-PR100-0420
+ls-remote refs/pull/100/head: 2e76d0c55d8bcb29f5fb561e30378457dc69aae7 (MATCH assigned tip; also gh pulls/100 head)
+PR #116 head: 629ab76d0c529497591498bd0c716e82b405bcf6 (MATCH)
+
+Gate run 42152006627:
+  status=completed conclusion=success head_sha=2e76d0c55d8bcb29f5fb561e30378457dc69aae7
+  url=https://github.com/PrincipalLewis/egg-farm/actions/runs/42152006627
+  job gate 127677204295 SUCCESS https://github.com/PrincipalLewis/egg-farm/actions/runs/42152006627/job/127677204295
+  job release-globals SKIPPED (feature-PR exception)
+  checkout: HEAD is now at 4f52785 Merge 2e76d0c55d8bcb29f5fb561e30378457dc69aae7 into eed62687db4aa05167e5e7f8b14e1674715dfc4a
+  Node20 from completed log: node-version: 20; Acquiring 20.20.2; node: v20.20.2
+  Chromium check-globals (ran): PASS [chromium] B-4 release ?perf=1...; PASS refused newer-save...; PASS release window globals...
+
+Pacing run 42152006631:
+  status=completed conclusion=failure head_sha=2e76d0c55d8bcb29f5fb561e30378457dc69aae7
+  url=https://github.com/PrincipalLewis/egg-farm/actions/runs/42152006631
+  shard seller15 127677204969 SUCCESS
+  shard casual 127677205120 SUCCESS
+  shard optimal 127677205152 SUCCESS
+  aggregate job pacing-x1-stack 127692354889 FAILURE
+  raw verdict: rows 45 PASS, 0 FAIL, 1 WARN, ... 12 NOT-WIRED (3 blocking)
+  FAIL: blocking row 904 optimal NOT-WIRED
+  FAIL: blocking row 904 seller15 NOT-WIRED
+  FAIL: blocking row 904 casual NOT-WIRED
+  WARN L897 optimal N / H: worst 191 > 180 s (pre-existing L0–30 dead zone, known risk) — non-blocking
+  checkout: HEAD is now at 4f52785 Merge 2e76d0c55d8bcb29f5fb561e30378457dc69aae7 into eed62687...
+
+Mismatch vs HoQA QA-D-1106-PR100-HOSTED claims: NONE
+Flip HELD flag 0. No merge-go. Old runs not credited.

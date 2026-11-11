@@ -1,0 +1,66 @@
+2026-10-22 22:20:30 CEST === M41-7 delta on b986cd3b9c58c8278437d7e130de0e085348501c steps='prep testdiff dialogs csr9c resetat qel rc0' DRY=1
+2026-10-22 22:20:30 CEST spec sha256: 073fafd3b1190c84… (want 073fafd3b1190c84…, D-HOP-2026-10-22-07)
+2026-10-22 22:20:30 CEST ancestors: dd223f5 Y, 1682a0c Y, 66680eb Y, 9cce82d Y, 4c94704 Y, dfdf49c Y, b986cd3 Y,  pushed on: origin/fix/saves-csr-loadsafe 
+2026-10-22 22:20:30 CEST DRY syntax ok csr9c-explainer-queue.mjs
+2026-10-22 22:20:30 CEST DRY syntax ok csr-m41-7-ui.mjs
+2026-10-22 22:20:30 CEST DRY syntax ok csr-m41-7-browser.mjs
+2026-10-22 22:20:30 CEST DRY syntax ok qe-late-browser.mjs
+2026-10-22 22:20:30 CEST DRY syntax ok csr-m41-7-resetat.mjs
+2026-10-22 22:20:30 CEST DRY syntax ok m41-7-testdiff.sh
+DRY M1-preM4: mode=r06 dialog=M1 probe=- clock=live idbHang=false flows=dismiss-then-reload,reload-before-dismiss lsKeys=eggfarm.save,eggfarm.save.bak bytes=450/402
+DRY M2-preM4: mode=r06 dialog=M2 probe=- clock=live idbHang=false flows=dismiss-then-reload,reload-before-dismiss lsKeys=eggfarm.save,eggfarm.save.v6_backup bytes=447/429
+DRY WELCOME-preM4: mode=welcome dialog=- probe=- clock=live idbHang=false flows=single lsKeys=eggfarm.save bytes=402
+DRY PROBE-welcome-hidden-tab: mode=welcome dialog=- probe=hidden clock=live idbHang=false flows=single lsKeys=eggfarm.save bytes=402
+DRY PROBE-welcome-settings-overlay: mode=welcome dialog=- probe=settings clock=live idbHang=false flows=single lsKeys=eggfarm.save bytes=402
+DRY EXPB1-1-unmarked-v6-commit: mode=b1 dialog=- probe=- clock=1792371605000 idbHang=false flows=single lsKeys=eggfarm.save bytes=402
+DRY EXPB1-AH-commit-autohide-3-reloads: mode=b1 dialog=- probe=- clock=1792371605000 idbHang=false flows=single lsKeys=eggfarm.save bytes=402
+DRY EXPB1-2-committed-unseen-reload: mode=b1 dialog=- probe=- clock=live idbHang=false flows=single lsKeys=eggfarm.save,eggfarm.install_id,eggfarm.save.bak,eggfarm.telemetry,eggfarm.save.v6_backup bytes=562/36/344/292/495
+DRY EXPB1-3-new-m4-farm: mode=b1 dialog=- probe=- clock=live idbHang=false flows=single lsKeys= bytes=
+DRY EXPB1-4-m4-off: mode=na dialog=- probe=- clock=live idbHang=false flows=single lsKeys= bytes= NOTE M4 on/off is compile-time (balance m4.enabled); not reachable in a dist-qa browser build. Covered by unit: game tests/m4-exp1-explainer.test.ts:64 "M4 off: never shown, and a stored seenTracksExplainer is kept on load and save" (run by m41-7-delta.sh csr9c step).
+DRY EXPB1-5-deferred-load: mode=b1 dialog=- probe=- clock=1792371605000 idbHang=true flows=single lsKeys=eggfarm.save bytes=402
+DRY M3-fresh: mode=m3 dialog=M3 probe=- clock=live idbHang=false flows=single lsKeys=eggfarm.save,eggfarm.save.bak,eggfarm.save.v6_backup bytes=450/447/434
+DRY N=12000ms OK
+DRY BRA1-pre-reset-seeded-ls+idb: kind=noDialog want=- loads=3 quotaRA=false export=false ls=eggfarm.save.reset_at,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=corrupt.<ts>
+DRY BRA1-pre-reset-seeded-idb-only: kind=noDialog want=- loads=3 quotaRA=false export=false ls=eggfarm.save.reset_at idb=corrupt.<ts>
+DRY BRA2-ui-reset-then-reloads: kind=uiReset want=- loads=3 quotaRA=false export=false ls=eggfarm.save,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=main,corrupt.<ts>
+DRY BRA3-post-reset-idb-orphan-M3-export: kind=dialog want=M3 loads=2 quotaRA=false export=true ls=eggfarm.save.reset_at idb=corrupt.<ts>
+DRY BRA3-post-reset-ls-main-corrupt-bak-valid-M1: kind=dialog want=M1 loads=2 quotaRA=false export=false ls=eggfarm.save.reset_at,eggfarm.save,eggfarm.save.bak idb=
+DRY BRA3-post-reset-ls-main-corrupt-nothing-valid-M3: kind=dialog want=M3 loads=2 quotaRA=false export=false ls=eggfarm.save.reset_at,eggfarm.save,eggfarm.save.bak idb=
+DRY BRA4-ui-reset-quota-blocked-reset_at: kind=uiReset want=- loads=3 quotaRA=true export=false ls=eggfarm.save,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=main,corrupt.<ts>
+DRY OK
+2026-10-22 22:20:30 CEST DRY -07(a) hard asserts in csr9c: 8 lines; RESET_AT block in vitest: 2
+2026-10-22 22:20:30 CEST DRY plan: prep (worktree /workspace/egg-farm-studio/qa/wt-m41-7-b986cd3-acs, npm ci, build:qa, build-id m3-rc1-pre+b986cd3 or m4.1+b986cd3, no +dirty) | testdiff (m41-7-testdiff.sh: m4-exp1 vs dfdf49c HARD, review diffs) | resetat (vitest -t RESET_AT + csr-m41-7-resetat.mjs) | dialogs (vitest -t 'CSR-?9' + csr-m41-7-ui.mjs + csr-m41-7-browser.mjs) | csr9c (csr9c-explainer-queue.mjs) | qel (qe-late-browser.mjs) | rc0 (buildid-probe.mjs, check-globals, scripts/rc0-browser.mjs) all on :5961
+2026-10-22 22:20:30 CEST DRY :5961 free
+2026-10-22 22:20:48 CEST === M41-7 delta on b986cd3b9c58c8278437d7e130de0e085348501c steps='prep testdiff dialogs csr9c resetat qel rc0' DRY=1
+2026-10-22 22:20:48 CEST spec sha256: 073fafd3b1190c84… (want 073fafd3b1190c84…, D-HOP-2026-10-22-07)
+2026-10-22 22:20:48 CEST ancestors: dd223f5 Y, 1682a0c Y, 66680eb Y, 9cce82d Y, 4c94704 Y, dfdf49c Y, b986cd3 Y,  pushed on: origin/fix/saves-csr-loadsafe 
+2026-10-22 22:20:49 CEST DRY syntax ok csr9c-explainer-queue.mjs
+2026-10-22 22:20:49 CEST DRY syntax ok csr-m41-7-ui.mjs
+2026-10-22 22:20:49 CEST DRY syntax ok csr-m41-7-browser.mjs
+2026-10-22 22:20:49 CEST DRY syntax ok qe-late-browser.mjs
+2026-10-22 22:20:49 CEST DRY syntax ok csr-m41-7-resetat.mjs
+2026-10-22 22:20:49 CEST DRY syntax ok m41-7-testdiff.sh
+DRY M1-preM4: mode=r06 dialog=M1 probe=- clock=live idbHang=false flows=dismiss-then-reload,reload-before-dismiss lsKeys=eggfarm.save,eggfarm.save.bak bytes=450/402
+DRY M2-preM4: mode=r06 dialog=M2 probe=- clock=live idbHang=false flows=dismiss-then-reload,reload-before-dismiss lsKeys=eggfarm.save,eggfarm.save.v6_backup bytes=447/429
+DRY WELCOME-preM4: mode=welcome dialog=- probe=- clock=live idbHang=false flows=single lsKeys=eggfarm.save bytes=402
+DRY PROBE-welcome-hidden-tab: mode=welcome dialog=- probe=hidden clock=live idbHang=false flows=single lsKeys=eggfarm.save bytes=402
+DRY PROBE-welcome-settings-overlay: mode=welcome dialog=- probe=settings clock=live idbHang=false flows=single lsKeys=eggfarm.save bytes=402
+DRY EXPB1-1-unmarked-v6-commit: mode=b1 dialog=- probe=- clock=1792371605000 idbHang=false flows=single lsKeys=eggfarm.save bytes=402
+DRY EXPB1-AH-commit-autohide-3-reloads: mode=b1 dialog=- probe=- clock=1792371605000 idbHang=false flows=single lsKeys=eggfarm.save bytes=402
+DRY EXPB1-2-committed-unseen-reload: mode=b1 dialog=- probe=- clock=live idbHang=false flows=single lsKeys=eggfarm.save,eggfarm.install_id,eggfarm.save.bak,eggfarm.telemetry,eggfarm.save.v6_backup bytes=562/36/344/292/495
+DRY EXPB1-3-new-m4-farm: mode=b1 dialog=- probe=- clock=live idbHang=false flows=single lsKeys= bytes=
+DRY EXPB1-4-m4-off: mode=na dialog=- probe=- clock=live idbHang=false flows=single lsKeys= bytes= NOTE M4 on/off is compile-time (balance m4.enabled); not reachable in a dist-qa browser build. Covered by unit: game tests/m4-exp1-explainer.test.ts:64 "M4 off: never shown, and a stored seenTracksExplainer is kept on load and save" (run by m41-7-delta.sh csr9c step).
+DRY EXPB1-5-deferred-load: mode=b1 dialog=- probe=- clock=1792371605000 idbHang=true flows=single lsKeys=eggfarm.save bytes=402
+DRY M3-fresh: mode=m3 dialog=M3 probe=- clock=live idbHang=false flows=single lsKeys=eggfarm.save,eggfarm.save.bak,eggfarm.save.v6_backup bytes=450/447/434
+DRY N=12000ms OK
+DRY BRA1-pre-reset-seeded-ls+idb: kind=noDialog want=- loads=3 quotaRA=false export=false ls=eggfarm.save.reset_at,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=corrupt.<ts>
+DRY BRA1-pre-reset-seeded-idb-only: kind=noDialog want=- loads=3 quotaRA=false export=false ls=eggfarm.save.reset_at idb=corrupt.<ts>
+DRY BRA2-ui-reset-then-reloads: kind=uiReset want=- loads=3 quotaRA=false export=false ls=eggfarm.save,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=main,corrupt.<ts>
+DRY BRA3-post-reset-idb-orphan-M3-export: kind=dialog want=M3 loads=2 quotaRA=false export=true ls=eggfarm.save.reset_at idb=corrupt.<ts>
+DRY BRA3-post-reset-ls-main-corrupt-bak-valid-M1: kind=dialog want=M1 loads=2 quotaRA=false export=false ls=eggfarm.save.reset_at,eggfarm.save,eggfarm.save.bak idb=
+DRY BRA3-post-reset-ls-main-corrupt-nothing-valid-M3: kind=dialog want=M3 loads=2 quotaRA=false export=false ls=eggfarm.save.reset_at,eggfarm.save,eggfarm.save.bak idb=
+DRY BRA4-ui-reset-quota-blocked-reset_at: kind=uiReset want=- loads=3 quotaRA=true export=false ls=eggfarm.save,eggfarm.save.corrupt.<ts>,eggfarm.save.corrupt.index idb=main,corrupt.<ts>
+DRY OK
+2026-10-22 22:20:49 CEST DRY -07(a) hard asserts in csr9c: 8 lines; RESET_AT describe in vitest: 1 (want 1)
+2026-10-22 22:20:49 CEST DRY plan: prep (worktree /workspace/egg-farm-studio/qa/wt-m41-7-b986cd3-acs, npm ci, build:qa, build-id m3-rc1-pre+b986cd3 or m4.1+b986cd3, no +dirty) | testdiff (m41-7-testdiff.sh: m4-exp1 vs dfdf49c HARD, review diffs) | resetat (vitest -t RESET_AT + csr-m41-7-resetat.mjs) | dialogs (vitest -t 'CSR-?9' + csr-m41-7-ui.mjs + csr-m41-7-browser.mjs) | csr9c (csr9c-explainer-queue.mjs) | qel (qe-late-browser.mjs) | rc0 (buildid-probe.mjs, check-globals, scripts/rc0-browser.mjs) all on :5961
+2026-10-22 22:20:49 CEST DRY :5961 free

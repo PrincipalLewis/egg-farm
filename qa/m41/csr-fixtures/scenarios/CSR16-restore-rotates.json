@@ -1,0 +1,22 @@
+{
+ "id": "CSR16-restore-rotates",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-16"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/MAIN-OQ1-abc.json"
+  },
+  "eggfarm.save.bak": {
+   "ref": "raw/BAK-valid-F20-seq4-older.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "bakRotatesOnNextRotatingSave": true
+ }
+}

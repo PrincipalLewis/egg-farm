@@ -1,0 +1,26 @@
+fetch 2026-10-22 22:11:15 CEST
+origin/fix/saves-csr-loadsafe=b986cd3b9c58c8278437d7e130de0e085348501c
+refs/pull/63/head=b986cd3b9c58c8278437d7e130de0e085348501c	refs/pull/63/head
+dd223f5 ancestor
+1682a0c ancestor
+66680eb ancestor
+9cce82d ancestor
+4c94704 ancestor
+c61ed2b ancestor
+dfdf49c ancestor
+b986cd3 M41-7 Art M-1 follow-up (70e9f84): drop the per-session WeakSet; rc0 G5 asserts seen on dismissal
+11684c2 M41-7 CSR-8 8b (HoQA Major on dfdf49c): a tab that boots after another tab's IDB corrupt copy never starts silently
+70e9f84 M41-7 Art M-1 + D-HOP-2026-10-22-06: tracks explainer waits for the recovery dialog; seen only on dismissal
+ scripts/rc0-browser.mjs                    |  10 ++-
+ src/main.ts                                |   8 +-
+ src/save/idb-mirror.ts                     |  43 ++++++++++-
+ src/save/save.ts                           |   6 +-
+ src/ui/tracks-explainer.ts                 |  39 ++++++----
+ tests/fake-idb.ts                          |  15 +++-
+ tests/m4-exp1-explainer.test.ts            |  41 +++++-----
+ tests/m41-6-explainer-storage.test.ts      |  18 +++--
+ tests/m41-6-save-mirror-canpersist.test.ts |   9 ++-
+ tests/m41-7-csr8b-race.test.ts             | 117 +++++++++++++++++++++++++++++
+ tests/m41-7-explainer-recovery.test.ts     |  68 +++++++++++++++++
+ tests/m41-7-hop-rulings.test.ts            |   2 +-
+ 12 files changed, 320 insertions(+), 56 deletions(-)

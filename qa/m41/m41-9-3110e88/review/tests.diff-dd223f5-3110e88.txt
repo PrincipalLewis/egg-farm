@@ -1,0 +1,512 @@
+diff --git a/tests/art-ux-rc0.test.ts b/tests/art-ux-rc0.test.ts
+index 8e1ca29..39c2806 100644
+--- a/tests/art-ux-rc0.test.ts
++++ b/tests/art-ux-rc0.test.ts
+@@ -8,7 +8,7 @@ describe('F1 slot toast only when a slot is added', () => {
+   it('true only at F5/10/15/20', () => { expect([...Array(31).keys()].filter(F => slotAdded(F, b))).toEqual([5, 10, 15, 20]); });
+ });
+ describe('F2 greyed Sell all', () => {
+-  it('"No eggs to sell", never $0.00', () => { expect(sellAllLabel(0, 0, String, c => `$${c / 100}`)).toBe('No eggs to sell'); expect(sellAllLabel(3, 300, String, c => `$${c / 100}`)).toBe('Sell all (3 eggs\u00a0· $3)'); });
++  it('"No eggs to sell", never $0.00', () => { expect(sellAllLabel(0, 0, String, c => `$${c / 100}`)).toBe('No eggs to sell'); expect(sellAllLabel(3, 300, String, c => `$${c / 100}`)).toBe('Sell all (3\u00a0eggs\u00a0· $3)'); });
+ });
+ describe('F4 separator', () => { it('" · " with spaces on both sides', () => {
+   expect(orderView({ id: 1, demand: 50, filled: 48, waitedS: 0 }, 0, 748).line).toMatch(/^48\/50\u00a0eggs · \$/);
+diff --git a/tests/m41-9-art-rulings.test.ts b/tests/m41-9-art-rulings.test.ts
+new file mode 100644
+index 0000000..d877b2e
+--- /dev/null
++++ b/tests/m41-9-art-rulings.test.ts
+@@ -0,0 +1,104 @@
++/** M41-9: Art rulings on #56 (art-ux/number-format-big.md: the 09:45 ruling and the 10:10 addendum, rulings 1-4), one test block
++ *  per ruling, so each is pinned by name. Mapping (CCR n4): R1 = 10:10 ruling 1, R2 = ruling 2, R3 = ruling 3 (aria), R4 = ruling 3
++ *  (visible), R5 = ruling 4.
++ *  R1 compact money 1 decimal; counts + plain money 2 decimals under 10x the tier base.  R2 exactly 1e36 -> '1.00e36'.
++ *  R3 spell out only Qa+ and only in aria/live; K–T aria/live byte-identical to main ('$1M').  R4 visible pops/floaters never
++ *  spelled ('$1.2Qa').  R5 Sell floor approved (previews never above the credit). */
++import { describe, expect, it } from 'vitest';
++import { readFileSync } from 'node:fs';
++import * as F from '../src/ui/format';
++import * as OLD from './fixtures/format-dd223f5';
++import { orderView } from '../src/ui/orders';
++const { fmtCount, fmtMoney, fmtMoneyShort, fmtMoneyPreview, fmtMoneyExact, fmtMoneyAria, fmtCountFloor, fmtMoneyFloor, fmtCountAria, liveText, SUFFIXES } = F;
++const QA_UP = SUFFIXES.filter(t => t.base >= 1e15);
++const SPELLED = /illion|times 10/;
++
++describe('R1: compact money keeps 1 decimal; counts and plain money use 2 decimals under 10x', () => {
++  it('compact (fmtMoneyShort / preview) is 1 decimal at every tier K..Dc', () => {
++    for (const t of SUFFIXES) {
++      expect(fmtMoneyShort(1.234 * t.base * 100)).toBe(`$1.2${t.sym}`);
++      expect(fmtMoneyPreview(1.299 * t.base * 100)).toBe(`$1.2${t.sym}`);
++      expect(fmtMoneyShort(12.34 * t.base * 100)).toBe(`$12.3${t.sym}`);
++    }
++  });
++  it('counts and plain money: 2 decimals under 10x the base (M and up; K starts at 10K), 1 decimal from 10x', () => {
++    for (const t of SUFFIXES.filter(x => x.base >= 1e6)) {
++      expect(fmtCount(1.234 * t.base)).toBe(`1.23${t.sym}`);
++      expect(fmtMoney(1.234 * t.base * 100)).toBe(`$1.23${t.sym}`);
++      expect(fmtCount(12.34 * t.base)).toBe(`12.3${t.sym}`);
++      expect(fmtMoney(12.34 * t.base * 100)).toBe(`$12.3${t.sym}`);
++    }
++    expect(fmtCount(12_345)).toBe('12.3K'); expect(fmtMoney(1_234_567)).toBe('$12.3K');
++    expect(fmtMoneyShort(999.9e33 * 100)).toBe('$999.9Dc'); expect(fmtMoney(999.9e33 * 100)).toBe('$999.9Dc');
++  });
++  it('K–T unchanged vs main for the same inputs', () => {
++    for (const n of [12_345, 1_234_567, 9_994_999, 1.234e9, 4.567e12]) {
++      expect(fmtCount(n)).toBe(OLD.fmtCount(n)); expect(fmtMoney(n * 100)).toBe(OLD.fmtMoney(n * 100)); expect(fmtMoneyShort(n * 100)).toBe(OLD.fmtMoneyShort(n * 100));
++    }
++  });
++});
++
++describe("R2: exactly 1e36 shows '1.00e36'", () => {
++  it('every formatter', () => {
++    expect(fmtCount(1e36)).toBe('1.00e36'); expect(fmtCountFloor(1e36)).toBe('1.00e36');
++    expect(fmtMoney(1e38)).toBe('$1.00e36'); expect(fmtMoneyFloor(1e38)).toBe('$1.00e36');
++    expect(fmtMoneyShort(1e38)).toBe('$1.00e36'); expect(fmtMoneyPreview(1e38)).toBe('$1.00e36'); expect(fmtMoneyExact(1e38)).toBe('$1.00e36');
++    expect(fmtMoneyShort(999.95e33 * 100)).toBe('$1.00e36'); // Dc that rounds to 1000 rolls up to scientific
++    expect(fmtCount(1.234e36)).toBe('1.23e36');
++  });
++});
++
++describe('R3: spell out only Qa and above, only in aria/live; K–T byte-identical to main', () => {
++  it("K–T aria and live text stay compact ('$1M', '13K')", () => {
++    expect(liveText(1e8, 13_000)).toBe('$1M, 13K eggs');
++    for (const t of SUFFIXES.filter(x => x.base < 1e15)) { expect(fmtCountAria(2 * t.base * (t.base === 1e3 ? 10 : 1))).not.toMatch(SPELLED); expect(fmtMoneyAria(2 * t.base * 100)).not.toMatch(SPELLED); }
++    expect(fmtMoneyAria(1e8)).toBe(fmtMoneyExact(1e8));
++  });
++  it('Qa..Dc and scientific are spelled in aria', () => {
++    for (const t of QA_UP) expect(fmtCountAria(1.2 * t.base)).toBe(`1.2 ${t.name}`);
++    expect(fmtMoneyAria(1.25e15 * 100)).toBe('$1.25 quadrillion');
++    expect(fmtMoneyAria(1e38)).toBe('$1.00 times 10 to the 36');
++    expect(liveText(1.2e17, 1.2e15)).toBe('$1.2 quadrillion, 1.2 quadrillion eggs');
++  });
++  it('order-row aria spells only from Qa', () => {
++    const v = orderView({ id: 1, demand: 2e15, filled: 0 } as any, 1e30, 100) as any;
++    expect(JSON.stringify(v)).toMatch(/quadrillion/);
++    const k = orderView({ id: 1, demand: 2e6, filled: 0 } as any, 1e30, 100) as any;
++    expect(JSON.stringify(k)).not.toMatch(SPELLED);
++  });
++});
++
++describe("R4: visible coin pops and +$ floaters never spell words ('$1.2Qa')", () => {
++  it('fmtMoneyExact is compact from $1e15, never spelled, 1e15..1e40', () => {
++    expect(fmtMoneyExact(1.2e15 * 100)).toBe('$1.2Qa'); expect(fmtMoneyExact(999.9e33 * 100)).toBe('$999.9Dc');
++    for (let e = 15; e <= 40; e += 0.25) expect(fmtMoneyExact(10 ** e * 100)).not.toMatch(SPELLED);
++    expect(fmtMoneyExact(123_456)).toBe('$1,234.56'); // below $1e15 byte-identical to main
++  });
++  it('app.ts pop / floater / served chip use fmtMoneyExact (visible), never the aria formatter', () => {
++    const app = readFileSync('src/ui/app.ts', 'utf8');
++    expect(app).toMatch(/qpop num[^\n]*\+\$\{fmtMoneyExact\(cents\)\}/);
++    expect(app).toMatch(/floatText\(`\+\$\{fmtMoneyExact\(e\.value\)\}`/);
++    expect(app).not.toMatch(/fmtMoneyAria|fmtCountAria|spellShort/);
++  });
++});
++
++describe('R5: Sell floor (approved): previews never show more than the credit', () => {
++  it('floored money / counts never exceed the value', () => {
++    const parse = (s: string) => { const m = /^\$?([\d.,]+)(?:e(\d+)|([A-Za-z]+))?$/.exec(s)!; const v = parseFloat(m[1].replace(/,/g, ''));
++      return m[2] ? v * 10 ** +m[2] : m[3] ? v * SUFFIXES.find(t => t.sym === m[3])!.base : v; };
++    for (let e = 3; e <= 38; e += 0.13) { const n = Math.floor(10 ** e * 1.9999);
++      expect(parse(fmtCountFloor(n))).toBeLessThanOrEqual(n * (1 + 1e-12));
++      expect(parse(fmtMoneyPreview(n * 100))).toBeLessThanOrEqual(n * (1 + 1e-12));
++      expect(parse(fmtMoneyFloor(n * 100))).toBeLessThanOrEqual(n * (1 + 1e-12)); }
++    expect(fmtMoneyPreview(1.999e15 * 100)).toBe('$1.9Qa'); expect(fmtCountFloor(9.999e36)).toBe('9.99e36');
++  });
++});
++
++describe("QA4-1: the order card keeps 'eggs' whole (count and $ never truncate)", () => {
++  const css = readFileSync('src/ui/styles.css', 'utf8'), list = readFileSync('src/ui/order-list.ts', 'utf8');
++  it('fit tiers 14px / 12px tight, applied by OrderList.syncLineFit after the Sell width sync', () => {
++    expect(css).toMatch(/\.order \.l1\.fit1\{font-size:14px\}\.order \.l1\.fit2\{font-size:12px;letter-spacing:-\.02em\}/);
++    expect(list).toMatch(/this\.syncSellWidth\(\); this\.syncLineFit\(\);/); expect(list).toMatch(/export function fitLine/);
++    expect(css).toMatch(/\.order \.l1 \.n\{[^}]*flex-shrink:0/); expect(css).toMatch(/\.order \.l1 \.v\{[^}]*flex-shrink:0/);
++  });
++});
+diff --git a/tests/m41-9-big-number.test.ts b/tests/m41-9-big-number.test.ts
+new file mode 100644
+index 0000000..2a269b0
+--- /dev/null
++++ b/tests/m41-9-big-number.test.ts
+@@ -0,0 +1,203 @@
++/** M41-9 QA4-1/2/3 (art-ux/number-format-big.md, Art & UX 2026-10-19 09:45): suffixes Qa..Dc from one table, scientific
++ *  from 1e36, '—' for NaN/Infinity, K–T byte-identical, NBSP before unit words, spelled aria, QA4-2 floored Sell labels. */
++import { describe, expect, it } from 'vitest';
++import { readFileSync } from 'node:fs';
++import * as NEW from '../src/ui/format';
++import * as OLD from './fixtures/format-dd223f5';
++import * as OLDO from './fixtures/orders-dd223f5';
++import { orderView, sellAllLabel, slotPreview } from '../src/ui/orders';
++const { fmtCount, fmtMoney, fmtMoneyShort, fmtMoneyPreview, fmtMoneyExact, fmtCountFloor, fmtMoneyFloor, fmtCountAria, fmtMoneyAria, liveText, spellShort, SUFFIXES } = NEW;
++const NB = '\u00a0';
++const cust = (demand: number, filled = 0) => ({ id: 1, demand, filled }) as any;
++
++/** Dense sample 0..1e15: every integer to 20,000, ~400 log-spaced points per decade, and ±2 around each x.xx5 / x.x5 /
++ *  999.95 rounding edge of every K..T tier. */
++function sample(): number[] {
++  const out = new Set<number>();
++  for (let i = 0; i <= 20_000; i++) out.add(i);
++  for (let e = 4; e < 15; e++) for (let k = 0; k < 400; k++) out.add(Math.floor(10 ** (e + k / 400)));
++  for (const base of [1e3, 1e6, 1e9, 1e12]) for (const m of [1, 1.005, 1.25, 9.95, 9.995, 9.999, 10, 12.35, 99.95, 125.45, 999.4, 999.5, 999.94, 999.95, 999.96, 999.995]) {
++    const c = Math.round(m * base); for (let d = -2; d <= 2; d++) if (c + d >= 0 && c + d < 1e15) out.add(c + d);
++  }
++  return [...out].filter(n => n < 1e15).sort((a, b) => a - b);
++}
++const ROLL = /^\$?[\d,]+,\d{3}T$/; // old "1,000T" family: the only K–T outputs the ruling changes (rolls up to 1Qa)
++
++describe('K–T golden byte-identity (old dd223f5 vs new, 0..1e15)', () => {
++  const xs = sample();
++  it(`fmtCount over ${xs.length} values`, () => {
++    let rolled = 0;
++    for (const n of xs) { const o = OLD.fmtCount(n), v = fmtCount(n); if (ROLL.test(o)) { rolled++; expect(v).toBe('1Qa'); } else if (v !== o) expect(`${n}: ${v}`).toBe(`${n}: ${o}`); }
++    expect(rolled).toBeGreaterThan(0); // only n in [999.95T, 1e15)
++    for (const n of xs) if (n < 999.95e12) expect(fmtCount(n)).toBe(OLD.fmtCount(n));
++  });
++  it('fmtMoney / fmtMoneyShort / fmtMoneyPreview / fmtMoneyExact over the same values as dollars (cents < 1e17)', () => {
++    for (const n of xs) for (const cents of [n, n * 100 + 49, n * 100 + 50]) {
++      if (cents >= 1e17) continue;
++      for (const [o, v] of [[OLD.fmtMoney(cents), fmtMoney(cents)], [OLD.fmtMoneyShort(cents), fmtMoneyShort(cents)], [OLD.fmtMoneyPreview(cents), fmtMoneyPreview(cents)], [OLD.fmtMoneyExact(cents), fmtMoneyExact(cents)]])
++        if (ROLL.test(o)) expect(v).toBe('$1Qa'); else if (v !== o) expect(`${cents}: ${v}`).toBe(`${cents}: ${o}`);
++    }
++  });
++});
++
++describe('suffix table (data-driven, case exact)', () => {
++  it('K..Dc in order; one entry drives symbol and spoken name', () => {
++    expect(SUFFIXES.map(s => s.sym)).toEqual(['K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc']);
++    expect(SUFFIXES.slice(4).map(s => s.name)).toEqual(['quadrillion', 'quintillion', 'sextillion', 'septillion', 'octillion', 'nonillion', 'decillion']);
++    SUFFIXES.forEach((s, i) => { expect(s.base).toBe(10 ** (3 * (i + 1))); if (i) expect(fmtCount(s.base)).toBe('1' + s.sym); expect(spellShort('1.2' + s.sym)).toBe(s.base >= 1e15 ? '1.2 ' + s.name : '1.2' + s.sym); });
++  });
++});
++
++describe('new tier boundaries (2 dp under 10x base, 1 dp from 10x, zeros stripped, roll-up at 1000)', () => {
++  const tiers = SUFFIXES.slice(4);
++  it.each(tiers.map((t, i) => [t.sym, t.base, tiers[i + 1]?.sym ?? null] as const))('%s', (sym, base, next) => {
++    const at = (m: number) => fmtCount(m * base);
++    expect(at(1)).toBe(`1${sym}`); expect(at(1.25)).toBe(`1.25${sym}`); expect(at(1.2)).toBe(`1.2${sym}`); expect(at(9.99)).toBe(`9.99${sym}`);
++    expect(at(9.995)).toBe(`10${sym}`); expect(at(10)).toBe(`10${sym}`); expect(at(12.5)).toBe(`12.5${sym}`); expect(at(12.54)).toBe(`12.5${sym}`);
++    expect(at(125.4)).toBe(`125.4${sym}`); expect(at(999.9)).toBe(`999.9${sym}`); expect(at(999.94)).toBe(`999.9${sym}`);
++    for (const m of [999.95, 999.96, 999.995]) expect(at(m)).toBe(next ? `1${next}` : '1.00e36');
++    expect(fmtMoney(base * 100 * 999.9)).toBe(`$999.9${sym}`); expect(fmtMoney(base * 100 * 1.25)).toBe(`$1.25${sym}`);
++    expect(fmtMoneyShort(base * 100 * 1.25)).toBe(`$1.3${sym}`); expect(fmtMoneyPreview(base * 100 * 1.29)).toBe(`$1.2${sym}`);
++    expect(fmtMoneyShort(base * 100 * 999.95)).toBe(next ? `$1${next}` : '$1.00e36'); expect(fmtMoneyPreview(base * 100 * 999.99)).toBe(`$999.9${sym}`);
++  });
++  it('T -> Qa: 999.95T rolls up; 999.94T stays', () => {
++    expect(fmtCount(999.95e12)).toBe('1Qa'); expect(fmtCount(999.94e12)).toBe('999.9T'); expect(fmtMoneyShort(999.95e14)).toBe('$1Qa'); expect(fmtMoneyPreview(999.95e14)).toBe('$999.9T');
++  });
++});
++
++describe('scientific from 1e36 (3 significant figures, no "+")', () => {
++  it('count and money', () => {
++    expect(fmtCount(1e36)).toBe('1.00e36'); expect(fmtCount(1.234e36)).toBe('1.23e36'); expect(fmtCount(1.235e37)).toBe('1.24e37'); expect(fmtCount(9.996e40)).toBe('1.00e41');
++    expect(fmtMoney(1.234e38)).toBe('$1.23e36'); expect(fmtMoneyShort(1.234e38)).toBe('$1.23e36'); expect(fmtMoneyShort(1.236e38)).toBe('$1.24e36');
++    expect(fmtMoneyPreview(1.239e38)).toBe('$1.23e36'); expect(fmtMoneyFloor(1.239e38)).toBe('$1.23e36'); expect(fmtCountFloor(1.239e36)).toBe('1.23e36');
++    for (const v of [1e36, 3.3e50, 1e300]) { expect(fmtCount(v)).not.toContain('+'); expect(fmtMoneyShort(v * 100)).toMatch(/^\$\d\.\d\de\d+$/); }
++  });
++});
++
++describe('NaN / Infinity -> em dash', () => {
++  it.each([NaN, Infinity, -Infinity])('%s', v => {
++    for (const f of [fmtCount, fmtMoney, fmtMoneyShort, fmtMoneyPreview, fmtMoneyExact, fmtCountFloor, fmtMoneyFloor]) expect(f(v)).toBe('—');
++  });
++});
++
++describe('QA4-1: no thousands separator in a suffixed value, widest strings are 8 chars', () => {
++  it('log-spaced 1e4..1e40', () => {
++    const SFX = /^\$?\d{1,3}(\.\d{1,2})?(K|M|B|T|Qa|Qi|Sx|Sp|Oc|No|Dc)$|^\$?\d\.\d\de\d+$/;
++    for (let e = 4; e < 40; e += 0.01) {
++      const n = 10 ** e;
++      expect(fmtCount(n)).toMatch(SFX); expect(fmtCountFloor(n)).toMatch(SFX);
++      if (n >= 1e4) for (const s of [fmtMoney(n * 100), fmtMoneyShort(n * 100), fmtMoneyPreview(n * 100)]) { expect(s).toMatch(SFX); expect(s.length).toBeLessThanOrEqual(8); }
++    }
++    expect(fmtMoney(999.94e35)).toBe('$999.9Dc');
++  });
++  it('the 1,000,000T order card is now 1Qi; the card line keeps count, NBSP and eggs', () => {
++    const v = orderView(cust(1e18), 0, 1);
++    expect(v.line).toBe(`0/1Qi${NB}eggs · $10Qa`); expect(v.button).toBe('Need 1Qi');
++  });
++});
++
++describe('QA4-2: one rounding rule on a Sell (never more eggs than are sold)', () => {
++  it('basket 12,960, demand 20,000 (QA repro): card and Sell all both read 12.9K / $12.9K', () => {
++    const v = orderView(cust(20_000), 12_960, 100);
++    expect(v.button).toBe(`Sell 12.9K${NB}· +$12.9K`);
++    expect(v.buttonAria).toBe(`Sell 12.9K${NB}· +$12,960.00`); // Art ruling (4) on #64 (CCR m3): the aria count follows the visible floored count
++    expect(sellAllLabel(12_960, 1_296_000, fmtCountFloor, fmtMoneyFloor)).toBe(`Sell all (12.9K${NB}eggs${NB}· $12.9K)`);
++  });
++  it('floored count never exceeds the real count', () => {
++    for (let e = 4; e < 30; e += 0.037) {
++      const n = Math.floor(10 ** e), s = fmtCountFloor(n), m = /^([\d.]+)(\D+)$/.exec(s)!;
++      expect(Number(m[1]) * SUFFIXES.find(x => x.sym === m[2])!.base).toBeLessThanOrEqual(n * (1 + 1e-12));
++    }
++  });
++});
++
++describe('NBSP (U+00A0) before unit words', () => {
++  it('order line, Sell all, slot preview', () => {
++    expect(orderView(cust(2e15, 1.2e15), 1e15, 1).line).toBe(`1.2Qa/2Qa${NB}eggs · $20T`);
++    expect(sellAllLabel(1.2e15, 1.2e17, fmtCountFloor, fmtMoneyFloor)).toBe(`Sell all (1.2Qa${NB}eggs${NB}· $1.2Qa)`);
++    expect(slotPreview(6, 7, [1200, 2400], [1300, 2600], 'i')).toContain(`→ 1.3K–2.6K${NB}eggs`);
++  });
++  it('app.ts: welcome-back eggs and hen pill use NBSP; Sell all uses the floored formatters', () => {
++    const src = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
++    expect(src).toContain('+${fmtCount(eggs)}\\u00a0eggs</div>'); expect(src).toContain('`×${fmtCount(S.hens(F, b))}\\u00a0hens`');
++    expect(src).toContain('sellAllLabel(eggs, cents, fmtCountFloor, fmtMoneyFloor)');
++    expect(src).not.toMatch(/\$\{fmtCount\([^)]*\)\} (eggs|hens)</);
++  });
++});
++
++describe('aria / spoken: suffix spelled out, never a full digit string above 1e15', () => {
++  it('spellShort / fmtCountAria / fmtMoneyExact', () => {
++    expect(spellShort('$12.3K')).toBe('$12.3K'); expect(spellShort('999.9T')).toBe('999.9T'); expect(spellShort('1.2Qa')).toBe('1.2 quadrillion'); expect(spellShort('$999.9Dc')).toBe('$999.9 decillion');
++    expect(spellShort('$1.23e36')).toBe('$1.23 times 10 to the 36'); expect(spellShort('1,234')).toBe('1,234'); expect(spellShort('—')).toBe('—');
++    expect(fmtCountAria(1.2e18)).toBe('1.2 quintillion'); expect(fmtCountAria(1.234e36)).toBe('1.23 times 10 to the 36');
++    expect(fmtMoneyAria(1.25e17)).toBe('$1.25 quadrillion'); expect(fmtMoneyAria(4.56e25)).toBe('$456 sextillion');
++    expect(fmtMoneyAria(9.999e31)).toBe('$999.9 octillion'); expect(fmtMoneyAria(9.999e34)).toBe('$999.9 nonillion'); expect(fmtMoneyAria(1.234e38)).toBe('$1.23 times 10 to the 36');
++    expect(fmtMoneyAria(123_456_789_012_345)).toBe('$1,234,567,890,123.45'); // < 1e15 dollars: exact digit string kept
++    expect(fmtMoneyAria(1e17)).toBe('$1 quadrillion'); expect(liveText(1.2e17, 1.2e18)).toBe('$1.2 quadrillion, 1.2 quintillion eggs');
++  });
++  it('order aria at Qa+ spells the suffix, no 16+ digit run', () => {
++    const v = orderView(cust(3e21, 1e21), 2e21, 1e3);
++    expect(v.lineAria).toBe('1 sextillion of 3 sextillion eggs delivered, order worth $30 sextillion');
++    expect(v.buttonAria).toBe(`Sell 2 sextillion${NB}· +$20 sextillion`);
++    expect(v.lineAria + v.buttonAria).not.toMatch(/\d{16}/);
++  });
++});
++
++describe('Art ruling on #56: spelled words only in aria/live; visible pops stay compact', () => {
++  it('visible coin pop / +$ floater formatter at 1.2e15 dollars is $1.2Qa, never a spelled word', () => {
++    expect(fmtMoneyExact(1.2e17)).toBe('$1.2Qa'); expect(fmtMoneyExact(9.999e37)).toBe('$999.9Dc'); expect(fmtMoneyExact(1e38)).toBe('$1.00e36');
++    for (let e = 15; e < 40; e += 0.05) expect(fmtMoneyExact(10 ** e * 100)).not.toMatch(/illion|times/);
++    const src = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
++    expect(src).toContain('<div class="qpop num" style="left:${x}px;top:${y}px">+${fmtMoneyExact(cents)}</div>');
++    expect(src).toContain("floatText(`+${fmtMoneyExact(e.value)}`, src, 'coin')");
++    expect(src).toContain("setText($('#live'), liveText(s.coinsCents, s.basket));");
++  });
++  it('K–T aria and live text equal the frozen dd223f5 output', () => {
++    const xs = [0, 1, 7, 999, 1000, 1299, 9999, 10_000, 12_960, 20_000, 99_950, 999_949, 999_950, 1_234_567, 9_995_000, 12_345_678_901, 999_949_999_999_999];
++    for (const n of xs) for (const c of [n, n * 100 + 37]) if (c < 1e17) expect(liveText(c, n)).toBe(`${OLD.fmtMoney(c)}, ${OLD.fmtCount(n)} eggs`);
++    for (const want of xs.filter(x => x > 0 && x < 999.95e12)) for (const [filled, basket] of [[0, 0], [0, Math.floor(want / 3)], [Math.floor(want / 2), want], [0, want]]) for (const price of [1, 37, 100]) {
++      const c = cust(want, filled), a = orderView(c, basket, price), o = OLDO.orderView(c, basket, price);
++      expect(a.lineAria).toBe(o.lineAria);
++      // Art ruling (4) on #64: the Sell aria is byte-identical to main wherever the visible Sell text is; where the visible
++      // count changed (floored), the aria follows it.
++      if (a.button === o.button) expect(a.buttonAria).toBe(o.buttonAria);
++      else if (a.state !== 'wait') expect(a.buttonAria).toBe(o.buttonAria.replace(/^Sell [^\u00a0]+/, `Sell ${NEW.spellShort(/^Sell (\S+)\u00a0/.exec(a.button)![1])}`));
++    }
++  });
++});
++
++describe('Art ruling (4) on #64 / CCR m3: the Sell aria count == the visible (floored) count', () => {
++  it('every floored Sell label above 10K: the aria names exactly the visible count (spelled only Qa+), money exact', () => {
++    let n = 0;
++    for (let e = 4; e < 37; e += 0.0371) {
++      const basket = Math.floor(10 ** e), v = orderView(cust(basket * 3), basket, 100);
++      const vis = /^Sell (\S+)\u00a0· \+/.exec(v.button)![1], aria = /^Sell (.+?)\u00a0· \+/.exec(v.buttonAria)![1];
++      expect(aria).toBe(NEW.spellShort(vis)); n++;
++    }
++    expect(n).toBeGreaterThan(800);
++  });
++  it('where the visible text is unchanged from main (under 10K, or floor == nearest), the Sell aria is byte-identical to main', () => {
++    for (const basket of [1, 7, 999, 9_999, 10_000, 12_000, 1_000_000, 2_500_000_000]) {
++      const v = orderView(cust(basket * 2), basket, 100), o = OLDO.orderView(cust(basket * 2), basket, 100);
++      if (v.button === o.button) expect(v.buttonAria).toBe(o.buttonAria);
++    }
++  });
++});
++
++describe('CCR m1 on #64: scientific notation rounds half-up on x.xx5 (15 s.f. snap, as dec() does for the tiers)', () => {
++  it.each([[9.995e36, '1.00e37'], [1.005e36, '1.01e36'], [1.255e36, '1.26e36'], [1.0049e36, '1.00e36'], [1e36, '1.00e36'], [9.994e40, '9.99e40']])('fmtSci(%s) = %s', (n, want) => {
++    expect(NEW.fmtSci(n)).toBe(want); expect(NEW.fmtCount(n)).toBe(want);
++  });
++  it('0 half-up misses over every x.xx5e36..e40 mantissa', () => {
++    for (let k = 100; k < 1000; k++) for (const ex of [36, 37, 40]) {
++      const n = Number(`${k}5e${ex - 3}`) , want = Math.round(k + 1) ; // k.5 (x100) -> rounds up to k+1
++      const got = NEW.fmtSci(n), [m, e] = got.split('e');
++      expect(Math.round(Number(m) * 100) * 10 ** (Number(e) - ex + 0)).toBe(want >= 1000 ? 1000 : want);
++    }
++  });
++  it('CCR n1: floor mode (the old +1e-9 floor, now the snap) floors an exact value to itself and never above n', () => {
++    for (const [n, want] of [[1.23e36, '1.23e36'], [4.56e38, '4.56e38'], [1.239e36, '1.23e36'], [9.999e36, '9.99e36'], [7e40, '7.00e40']] as const)
++      expect(NEW.fmtSci(n, Math.floor)).toBe(want);
++    for (let k = 100; k < 1000; k += 7) expect(NEW.fmtSci(Number(`${k}e34`), Math.floor)).toBe(`${(k / 100).toFixed(2)}e36`);
++  });
++});
+diff --git a/tests/m41-9-card-wrap.test.ts b/tests/m41-9-card-wrap.test.ts
+new file mode 100644
+index 0000000..40c9a68
+--- /dev/null
++++ b/tests/m41-9-card-wrap.test.ts
+@@ -0,0 +1,87 @@
++// @vitest-environment jsdom
++// Art ruling on #64 (Oct 22): order-card line 16 -> 14 -> 12px (-0.02em); still too wide at 12px -> WRAP to a second line.
++// Never clip, never ellipsize a number; wrap replaces the '.egg ellipsis' last resort.
++import { describe, expect, it } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { fitLine } from '../src/ui/order-list';
++const css = readFileSync('src/ui/styles.css', 'utf8');
++/** A card line whose content is `need` px wide at each step (none/fit1/fit2) inside a line box of `box` px; at fit3 it wraps
++ *  (content fits). Widths scale like the real fonts: 16px -> 14px (x0.875) -> 12px -0.02em (x0.75 minus 0.24px a character). */
++function line(text: [string, string, string], need16: number, box: number) {
++  const l1 = document.createElement('div'); l1.className = 'l1';
++  l1.innerHTML = `<span class="n">${text[0]}\u00a0</span><span class="egg">${text[1]}</span><span class="v">\u00a0· ${text[2]}</span>`;
++  const chars = (l1.textContent ?? '').length;
++  const need = () => l1.classList.contains('fit3') ? box : l1.classList.contains('fit2') ? need16 * 0.75 - chars * 0.24 : l1.classList.contains('fit1') ? need16 * 0.875 : need16;
++  Object.defineProperty(l1, 'scrollWidth', { get: () => Math.max(box, Math.ceil(need())) }); Object.defineProperty(l1, 'clientWidth', { get: () => box });
++  return l1;
++}
++const DC: [string, string, string] = ['999Dc/999.9Dc', 'eggs', '$999.9Dc'];
++describe('Art ruling on #64: fit steps, then wrap', () => {
++  it('fits at 16px: no class', () => { const l = line(DC, 140, 149); expect(fitLine(l)).toBe(0); expect(l.className).toBe('l1'); });
++  it('fits at 14px: fit1', () => { const l = line(DC, 165, 149); expect(fitLine(l)).toBe(1); expect(l.classList.contains('fit1')).toBe(true); });
++  it('fits at 12px -0.02em: fit2', () => { const l = line(DC, 190, 149); expect(fitLine(l)).toBe(2); expect(l.classList.contains('fit2')).toBe(true); });
++  it('FORCED over-12px case: still cut at 12px -> fit3 (wrap), and only one fit class', () => {
++    const l = line(DC, 241, 149); expect(fitLine(l)).toBe(3);
++    expect([...l.classList]).toEqual(['l1', 'fit3']);
++  });
++  it('re-fit from a wrapped state when the line gets shorter', () => {
++    const l = line(DC, 140, 149); l.classList.add('fit3'); expect(fitLine(l)).toBe(0); expect(l.classList.contains('fit3')).toBe(false);
++  });
++  it('CSS: fit3 is 12px -0.02em, wraps, nothing on the line shrinks (no ellipsis), and the card grows instead of clipping', () => {
++    expect(css).toMatch(/\.order \.l1\.fit3\{font-size:12px;letter-spacing:-\.02em;flex-wrap:wrap\}\.order \.l1\.fit3>\*\{flex-shrink:0\}\.order:has\(\.l1\.fit3\)\{height:auto;min-height:60px\}/);
++    expect(css).toMatch(/\.order \.l1\.fit1\{font-size:14px\}\.order \.l1\.fit2\{font-size:12px;letter-spacing:-\.02em\}/);
++    expect(css).toMatch(/\.order \.l1 \.n\{[^}]*flex-shrink:0/); expect(css).toMatch(/\.order \.l1 \.v\{[^}]*flex-shrink:0[^}]*\}/);
++    expect(css).not.toMatch(/\.order \.l1 \.(n|v)\{[^}]*text-overflow:ellipsis/);
++  });
++});
++
++describe('HoE / QA UI Oct 22: the 75-egg cap with $1,682.25 at 360px (QA max-real repro: "74/75 e… · $1,682.25")', () => {
++  it('real line text at the cap', async () => {
++    const { orderView } = await import('../src/ui/orders');
++    const v = orderView({ id: 921, demand: 75, filled: 74, waitedS: 0 } as any, 200, 2243); // $22.43 an egg at L30 (QA max-real)
++    expect(v.line).toBe('74/75\u00a0eggs · $1,682.25'); expect(v.lineAria).toBe('74 of 75 eggs delivered, order worth $1,682.25');
++  });
++  it('360px line box (149px): 192px of content at 16px (QA: n 48 + eggs 36 + v 88 + gaps) steps down, never ellipsizes', () => {
++    const l = line(['74/75', 'eggs', '$1,682.25'], 192, 149); const step = fitLine(l);
++    expect(step).toBeGreaterThanOrEqual(1); expect(l.scrollWidth).toBeLessThanOrEqual(l.clientWidth); // fits (no clip) at the chosen step
++  });
++  it('a narrower box than the 12px line forces the wrap (fit3) instead of any ellipsis', () => {
++    const l = line(['74/75', 'eggs', '$1,682.25'], 192, 120); expect(fitLine(l)).toBe(3); expect(l.classList.contains('fit3')).toBe(true);
++  });
++  it('CSS: .egg can no longer ellipsize or shrink', () => {
++    expect(css).toMatch(/\.order \.l1 \.egg\{flex:0 0 auto;flex-shrink:0;overflow:visible;text-overflow:clip\}/);
++    expect(css).not.toMatch(/\.order \.l1 \.egg\{[^}]*ellipsis/);
++  });
++});
++
++// CCR m2 on #64: behaviour of the step-down WIRED in OrderList (order-list.ts syncLineFit -> fitLine), through a real update():
++// a mutant whose render never steps the font down (no fitLine call, or a fitLine that stops at 16px) leaves the line unclassed
++// and fails. Line widths are layout-free in jsdom, so each .l1 reports `need(step)` px of content inside a `box` px line box.
++describe('CCR m2: OrderList steps the card line 16 -> 14 -> 12 -> wrap on update()', () => {
++  async function mount(need16: number, box: () => number) {
++    const { OrderList } = await import('../src/ui/order-list');
++    const proto = HTMLElement.prototype as any, sw = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollWidth')!, cw = Object.getOwnPropertyDescriptor(Element.prototype, 'clientWidth')!;
++    const isL1 = (e: HTMLElement) => e.classList?.contains('l1');
++    const need = (e: HTMLElement) => e.classList.contains('fit3') ? box() : e.classList.contains('fit2') ? need16 * 0.75 : e.classList.contains('fit1') ? need16 * 0.875 : need16;
++    Object.defineProperty(proto, 'scrollWidth', { configurable: true, get(this: HTMLElement) { return isL1(this) ? Math.max(box(), Math.ceil(need(this))) : sw.get!.call(this); } });
++    Object.defineProperty(proto, 'clientWidth', { configurable: true, get(this: HTMLElement) { return isL1(this) ? box() : cw.get!.call(this); } });
++    const restore = () => { delete proto.scrollWidth; delete proto.clientWidth; };
++    const list = document.createElement('div'), live = document.createElement('div'); document.body.append(list, live);
++    const q: (() => void)[] = [], ol = new OrderList(list, live, 'a.svg', '', () => 0, f => { q.push(f); return q.length; }); // a frame = q.shift()()
++    const upd = (basket: number) => { ol.update({ customers: [{ id: 7, demand: 999e36, filled: 0, waitedS: 0 }], basket, unit: 1e33, visible: 3, expanded: false, rm: true }); while (q.length) q.shift()!(); };
++    return { list, upd, restore, fit: () => [...list.querySelector('.order .l1')!.classList].filter(c => /^fit/.test(c)).join(' ') };
++  }
++  it('fits at 16px: no class; 14px: fit1; 12px: fit2; too wide even at 12px: fit3 (wrap) - one class at a time', async () => {
++    for (const [need16, box, want] of [[140, 149, ''], [165, 149, 'fit1'], [190, 149, 'fit2'], [260, 149, 'fit3']] as const) {
++      const m = await mount(need16, () => box); try { m.upd(5e36); expect(m.fit()).toBe(want); } finally { m.restore(); document.body.innerHTML = ''; }
++    }
++  });
++  it('re-fits when the card width changes (the dataset.fit key), and not otherwise', async () => {
++    let box = 149; const m = await mount(190, () => box);
++    try {
++      m.upd(5e36); expect(m.fit()).toBe('fit2');
++      box = 300; m.upd(5e36); expect(m.fit()).toBe(''); // wider card: back to 16px
++      box = 120; m.upd(5e36); expect(m.fit()).toBe('fit3');
++    } finally { m.restore(); document.body.innerHTML = ''; }
++  });
++});
+diff --git a/tests/qa-rc1-bugs.test.ts b/tests/qa-rc1-bugs.test.ts
+index 106097b..0f7a4de 100644
+--- a/tests/qa-rc1-bugs.test.ts
++++ b/tests/qa-rc1-bugs.test.ts
+@@ -147,12 +147,12 @@ describe('MK-24-1 v3: always two-line Sell, shared width, money never truncates'
+     expect(css).not.toMatch(/\.order \.btn\.sell \.sk,\.order \.btn\.sell \.sy\{[^}]*text-overflow:ellipsis/);
+     expect(listSrc).toMatch(/--sell-w/);
+   });
+-  it('3: row count and $ never truncate; only .egg may ellipsize (Art & UX)', () => {
++  it('3: row count and $ never truncate; .egg no longer ellipsizes either (Art ruling on #64 / HoE Oct 22: wrap instead)', () => {
+     expect(css).toMatch(/\.order \.l1 \.n\{[^}]*flex-shrink:0/);
+     expect(css).toMatch(/\.order \.l1 \.v\{[^}]*flex-shrink:0/);
+     expect(css).toMatch(/\.order \.l1 \.v\{[^}]*overflow:visible/);
+     expect(css).not.toMatch(/\.order \.l1 \.v\{[^}]*text-overflow:ellipsis/);
+-    expect(css).toMatch(/\.order \.l1 \.egg\{[^}]*text-overflow:ellipsis/);
++    expect(css).not.toMatch(/\.order \.l1 \.egg\{[^}]*text-overflow:ellipsis/); expect(css).toMatch(/\.order \.l1 \.egg\{[^}]*flex-shrink:0/);
+   });
+   it('≤375 does not cap the Sell button at 96px', () => {
+     expect(css).not.toMatch(/@media \(max-width:375px\)\{[^}]*\.order \.btn\.sell[^}]*max-width:96px/);
+diff --git a/tests/rc2-fmt.test.ts b/tests/rc2-fmt.test.ts
+index f0a84a4..52b8994 100644
+--- a/tests/rc2-fmt.test.ts
++++ b/tests/rc2-fmt.test.ts
+@@ -21,12 +21,12 @@ describe('rc2 FMT-1/FMT-2 money + count formatting', () => {
+     expect(fmtCount(9_999)).toBe('9,999'); expect(fmtCount(10_000)).toBe('10K'); expect(fmtCount(1_000_000)).toBe('1M');
+     expect(fmtCount(1e9)).toBe('1B'); expect(fmtCount(1e12)).toBe('1T');
+   });
+-  it('fmtCount above 1,000T: separator, no decimals', () => {
+-    expect(fmtCount(2.5e12)).toBe('2.5T'); expect(fmtCount(1e15)).toBe('1,000T'); expect(fmtCount(1.2345e15)).toBe('1,235T');
++  it('fmtCount at 1,000T rolls up to Qa (M41-9, number-format-big)', () => {
++    expect(fmtCount(2.5e12)).toBe('2.5T'); expect(fmtCount(1e15)).toBe('1Qa'); expect(fmtCount(1.2345e15)).toBe('1.23Qa');
+   });
+   it('fmtMoney rounding and roll-up', () => {
+     expect(fmtMoney(9_995_000_00)).toBe('$10M'); expect(fmtMoney(9_990_000_00)).toBe('$9.99M');
+-    expect(fmtMoney(99_999_999)).toBe('$1M'); expect(fmtMoney(999_999.6)).toBe('$10K'); expect(fmtMoney(1e17)).toBe('$1,000T');
++    expect(fmtMoney(99_999_999)).toBe('$1M'); expect(fmtMoney(999_999.6)).toBe('$10K'); expect(fmtMoney(1e17)).toBe('$1Qa');
+     expect(fmtMoney(1_234_500)).toBe('$12.3K');
+   });
+   it('fmtMoneyShort half-up, matching fmtMoney', () => {
+@@ -36,15 +36,15 @@ describe('rc2 FMT-1/FMT-2 money + count formatting', () => {
+   it('fmtMoneyShort edges and roll-up', () => {
+     expect(fmtMoneyShort(99_999)).toBe('$999.99'); expect(fmtMoneyShort(99_999.9)).toBe('$1K');
+     expect(fmtMoneyShort(99_995_000)).toBe('$1M'); expect(fmtMoneyShort(99_995_000_000)).toBe('$1B'); expect(fmtMoneyShort(99_995_000_000_000)).toBe('$1T');
+-    expect(fmtMoneyShort(1e17)).toBe('$1,000T'); expect(fmtMoneyShort(1.2345e17)).toBe('$1,234.5T');
++    expect(fmtMoneyShort(1e17)).toBe('$1Qa'); expect(fmtMoneyShort(1.2345e17)).toBe('$1.2Qa');
+   });
+   it('fmtCount: — for NaN/±Infinity', () => { for (const x of [NaN, Infinity, -Infinity]) expect(fmtCount(x)).toBe('—'); });
+   it('fmtMoney: — for NaN/±Infinity', () => { for (const x of [NaN, Infinity, -Infinity]) expect(fmtMoney(x)).toBe('—'); });
+   it('fmtMoneyShort: — for NaN/±Infinity', () => { for (const x of [NaN, Infinity, -Infinity]) expect(fmtMoneyShort(x)).toBe('—'); });
+-  it('order card eggs labels at 1,000T and in the K band', () => {
++  it('order card eggs labels at 1Qa (was 1,000T) and in the K band', () => {
+     const c = (d: number, f = 0) => ({ id: 1, demand: d, filled: f, waitedS: 0 });
+-    expect(orderView(c(1e15), 0, 1).line).toMatch(/^0\/1,000T\u00a0eggs · /);
+-    expect(orderView(c(1e15), 0, 1).button).toBe('Need 1,000T');
++    expect(orderView(c(1e15), 0, 1).line).toMatch(/^0\/1Qa\u00a0eggs · /);
++    expect(orderView(c(1e15), 0, 1).button).toBe('Need 1Qa');
+     expect(orderView(c(9_999, 1_250), 0, 1).line).toMatch(/^1\.2K\/9\.9K\u00a0eggs/); // Product (#25): line shows delivered (filled) eggs
+     expect(orderView(c(12_350), 0, 1).line).toMatch(/^0\/12\.4K\u00a0eggs/);
+   });
+diff --git a/tests/sellall-label-grader.test.ts b/tests/sellall-label-grader.test.ts
+index 989a9e0..0db4b8c 100644
+--- a/tests/sellall-label-grader.test.ts
++++ b/tests/sellall-label-grader.test.ts
+@@ -44,7 +44,7 @@ describe('Sell all label = actual sellAll money delta', () => {
+   });
+   it('app.ts builds the #sellAll label from sellAllPreview (no second copy of the price math)', () => {
+     const src = readFileSync(new URL('../src/ui/app.ts', import.meta.url), 'utf8');
+-    expect(src).toMatch(/const \{ eggs, cents \} = sellAllPreview\(s, b\);[^\n]*\n\s*setText\(sellAllBtn, sellAllLabel\(eggs, cents, fmtCount, fmtMoney\)\)/);
++    expect(src).toMatch(/const \{ eggs, cents \} = sellAllPreview\(s, b\);[^\n]*\n\s*setText\(sellAllBtn, sellAllLabel\(eggs, cents, fmtCountFloor, fmtMoneyFloor\)\)/ /* QA4-2: floored count + money */);
+     expect(src.match(/sellAllLabel\(/g)?.length).toBe(1);
+   });
+   it('empty basket: nothing to sell', () => { expect(sellAllPreview(st(1, 100, 0.5), b)).toEqual({ eggs: 0, cents: 0 }); });
+diff --git a/tests/slot-preview.test.ts b/tests/slot-preview.test.ts
+index 9d58478..c6961b3 100644
+--- a/tests/slot-preview.test.ts
++++ b/tests/slot-preview.test.ts
+@@ -17,8 +17,8 @@ describe('slotPreview (§6)', () => {
+   });
+   it('order-range line from config, K formatter, omitted when unchanged', () => {
+     const [a, c] = [demandRange(4, b), demandRange(5, b)];
+-    expect(text(row(4))).toContain(`Orders ${a[0]}–${a[1]} → ${c[0]}–${c[1]} eggs`);
+-    expect(slotPreview(6, 7, [1200, 2400], [1300, 2600], 'i')).toContain('Orders 1.2K–2.4K → 1.3K–2.6K eggs');
++    expect(text(row(4))).toContain(`Orders ${a[0]}–${a[1]} → ${c[0]}–${c[1]}\u00a0eggs`);
++    expect(slotPreview(6, 7, [1200, 2400], [1300, 2600], 'i')).toContain('Orders 1.2K–2.4K → 1.3K–2.6K\u00a0eggs');
+     expect(slotPreview(6, 7, [10, 20], [10, 20], 'i')).not.toContain('Orders');
+   });
+ });

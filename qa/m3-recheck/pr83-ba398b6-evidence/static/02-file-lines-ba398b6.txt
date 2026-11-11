@@ -1,0 +1,10 @@
+# ba398b6 file:line extracts 2026-10-30T11:54:10+01:00
+98:    <button class="manage nav-manage farm-manage-all desk-manage-all" type="button" data-act="manageAll" hidden aria-label="Refill tired workers"><span class="manage-ico"><img src="${A('icon-manage
+629:        { setText(fb.querySelector('.nav-txt')!, v.label); const cdEl = fb.querySelector('.nav-cd') as HTMLElement; if (cdEl.dataset.cd !== v.countdown) cdEl.dataset.cd = v.countdown; } const bd =
+598:/* D-HOP-2026-10-30-02 (b): cooldown label = "Refill" + the countdown, drawn from data-cd on the aria-hidden, text-free .nav-cd span: axe
+601:.nav-cd[data-cd]::after{content:attr(data-cd);white-space:pre;font-variant-numeric:tabular-nums}
+604:@media (min-width:960px) and (orientation:landscape){.sheet header button.nav-manage .nav-cd[data-cd]:not([data-cd=""])::after{display:inline-block;min-width:2.65em;text-align:left}}
+169:export const fmtCooldown = (cd: number) => `${Math.floor(cd / 60)}:${String(cd % 60).padStart(2, '0')}`;
+174:    // 23a3798 #1: stable for the whole cooldown, never stale). The countdown is CSS generated content (.nav-cd[data-cd]::after on an aria-hidden, text-free span), not text
+ba398b6aeb0f00874ab83d93cf0c9a0670401a62 2026-10-30T11:06:40+01:00 #83 fix+tests: D-HOP-2026-10-30-02 cooldown countdown out of the a11y tree (SRC FIX) + a11y-tree, m:ss, Art-b focus rows
+abe9cc620421779bda2be1dc2ce0be94f6c7670c

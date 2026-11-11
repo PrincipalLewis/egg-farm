@@ -1,0 +1,33 @@
+{
+  "head": "7a492e5fea47f9bb92ae2d07e82820c64471ec5a",
+  "base": "f8036e8f0826ca76fcc0ee13092d575533d4969b",
+  "overlap": [
+    "src/sim/timers.ts"
+  ],
+  "actual_income_ref_paths": [
+    "src/config/formulas.ts",
+    "src/config/m5-rules.ts",
+    "src/game.ts",
+    "src/save/m5-fields.ts",
+    "src/sim/actions.ts",
+    "src/sim/income-ref.ts",
+    "src/sim/timers.ts",
+    "tests/v5-income-ref.test.ts"
+  ],
+  "candidate_paths": [
+    "src/sim/abilities.ts",
+    "src/sim/effects.ts",
+    "src/sim/events.ts",
+    "src/sim/m5-state.ts",
+    "src/sim/payout.ts",
+    "src/sim/timers.ts",
+    "src/sim/workers.ts",
+    "tests/v5-abilities-sim.test.ts",
+    "tests/v5-f1a-fields.test.ts"
+  ],
+  "computed_tree": "6fb76ee0b105dd163013e5a8db39e99ac62a7e3f\n100644 80dfd74cb4a878dba50bd5729aa1208ee2b8d3c0 1\tsrc/sim/timers.ts\n100644 34cc3abdbce49803454315555956f384ba42e683 2\tsrc/sim/timers.ts\n100644 440e28419b6e7a33be686da3d541c38cefe6ee5b 3\tsrc/sim/timers.ts\n\nAuto-merging src/sim/timers.ts\nCONFLICT (content): Merge conflict in src/sim/timers.ts",
+  "candidate_tree": "924d11cc269544853b539f54f27923bc039b6922",
+  "clean_merge_tree_matches": false,
+  "timers_array": "[seedEvRng, streak, breeds, incomeRef, abilities]",
+  "local_tsc_full_vitest_required": true
+}

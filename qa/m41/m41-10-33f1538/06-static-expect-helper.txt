@@ -1,0 +1,2 @@
+/workspace/egg-farm-studio/qa/wt-m41-10-33f1538/dist-html/egg-farm.html: ["m4.1+33f1538"]
+PASS build-id ["m4.1+33f1538"] want m4.1+33f1538 [BUILD_PREFIX='m4.1' from scripts/build-id.ts@33f1538; no suffix allowed]

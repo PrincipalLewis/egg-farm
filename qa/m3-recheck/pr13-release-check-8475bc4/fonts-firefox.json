@@ -1,0 +1,152 @@
+[
+ {
+  "E": "firefox",
+  "mode": "http",
+  "ok": {
+   "fonts4": true,
+   "buildId": true,
+   "noFailedReq": true,
+   "noOtherReq": true,
+   "noConsoleErr": true,
+   "globals": true
+  },
+  "faces": [
+   "Fredoka 500 loaded",
+   "Fredoka 700 loaded",
+   "Nunito 400 loaded",
+   "Nunito 700 loaded"
+  ],
+  "check": {
+   "500 16px Fredoka": true,
+   "700 16px Fredoka": true,
+   "400 16px Nunito": true,
+   "700 16px Nunito": true
+  },
+  "metas": [
+   "m3-rc1-pre+8475bc4"
+  ],
+  "app": "m3-rc1-pre+8475bc4",
+  "nAttr": 1,
+  "tel": "m3-rc1-pre+8475bc4",
+  "sampleFontFamily": "\"Nunito\", system-ui, sans-serif",
+  "settingsText": "Egg Farm m3-rc1-pre+8475bc4",
+  "reqs": [
+   "http://127.0.0.1:5231/"
+  ],
+  "fails": [],
+  "errs": [],
+  "extra": [
+   "eggfarmExportTelemetry"
+  ]
+ },
+ {
+  "E": "firefox",
+  "mode": "file",
+  "ok": {
+   "fonts4": true,
+   "buildId": true,
+   "noFailedReq": true,
+   "noOtherReq": true,
+   "noConsoleErr": true,
+   "globals": false
+  },
+  "faces": [
+   "Fredoka 500 loaded",
+   "Fredoka 700 loaded",
+   "Nunito 400 loaded",
+   "Nunito 700 loaded"
+  ],
+  "check": {
+   "500 16px Fredoka": true,
+   "700 16px Fredoka": true,
+   "400 16px Nunito": true,
+   "700 16px Nunito": true
+  },
+  "metas": [
+   "m3-rc1-pre+8475bc4"
+  ],
+  "app": "m3-rc1-pre+8475bc4",
+  "nAttr": 1,
+  "tel": "m3-rc1-pre+8475bc4",
+  "sampleFontFamily": "\"Nunito\", system-ui, sans-serif",
+  "settingsText": "Egg Farm m3-rc1-pre+8475bc4",
+  "reqs": [],
+  "fails": [],
+  "errs": [],
+  "extra": [
+   "AudioDecoder",
+   "AudioEncoder",
+   "AudioParamMap",
+   "AudioWorklet",
+   "AudioWorkletNode",
+   "AuthenticatorAssertionResponse",
+   "AuthenticatorAttestationResponse",
+   "AuthenticatorResponse",
+   "Cache",
+   "CacheStorage",
+   "Clipboard",
+   "ClipboardItem",
+   "CookieChangeEvent",
+   "CookieStore",
+   "CookieStoreManager",
+   "Credential",
+   "CredentialsContainer",
+   "CryptoKey",
+   "DocumentPictureInPicture",
+   "DocumentPictureInPictureEvent",
+   "FileSystemDirectoryHandle",
+   "FileSystemFileHandle",
+   "FileSystemHandle",
+   "FileSystemWritableFileStream",
+   "GeolocationCoordinates",
+   "GeolocationPosition",
+   "ImageDecoder",
+   "ImageTrack",
+   "ImageTrackList",
+   "Lock",
+   "LockManager",
+   "MIDIAccess",
+   "MIDIConnectionEvent",
+   "MIDIInput",
+   "MIDIInputMap",
+   "MIDIMessageEvent",
+   "MIDIOutput",
+   "MIDIOutputMap",
+   "MIDIPort",
+   "MediaDeviceInfo",
+   "MediaDevices",
+   "NavigationPreloadManager",
+   "NavigatorLogin",
+   "PerformanceServerTiming",
+   "PublicKeyCredential",
+   "PushManager",
+   "PushSubscription",
+   "PushSubscriptionOptions",
+   "Serial",
+   "SerialPort",
+   "ServiceWorker",
+   "ServiceWorkerContainer",
+   "ServiceWorkerRegistration",
+   "StorageManager",
+   "SubtleCrypto",
+   "VideoDecoder",
+   "VideoEncoder",
+   "WakeLock",
+   "WakeLockSentinel",
+   "WebTransport",
+   "WebTransportBidirectionalStream",
+   "WebTransportDatagramDuplexStream",
+   "WebTransportDatagramsWritable",
+   "WebTransportError",
+   "WebTransportReceiveStream",
+   "WebTransportSendGroup",
+   "WebTransportSendStream",
+   "Worklet",
+   "caches",
+   "cookieStore",
+   "documentPictureInPicture",
+   "eggfarmExportTelemetry",
+   "onpointerrawupdate"
+  ]
+ }
+]

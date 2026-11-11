@@ -1,0 +1,104 @@
+{
+ "port": "5961",
+ "sha7": "dfdf49c",
+ "cases": {
+  "B-CSR8b-race-loser-during-idb-copy": {
+   "checks": [
+    {
+     "n": "B (loser) shows 'Game open in another tab'",
+     "pass": true,
+     "v": "Game open in another tab\n\nYour farm is running in another tab. Play here to continue from your latest save.\n\nPlay here"
+    },
+    {
+     "n": "B: no Game created (no window.eggfarm)",
+     "pass": true,
+     "v": null
+    },
+    {
+     "n": "B: 0 LS eggfarm.save* writes",
+     "pass": true,
+     "v": [
+      "set:eggfarm.lease"
+     ]
+    },
+    {
+     "n": "B: 0 IDB puts to main",
+     "pass": true,
+     "v": [
+      "put:corrupt.1792696734028",
+      "delete:main"
+     ]
+    },
+    {
+     "n": "B: IDB ops limited to the awaited corrupt.* copy tx (info: main delete in that tx)",
+     "pass": true,
+     "v": [
+      "put:corrupt.1792696734028",
+      "delete:main"
+     ]
+    },
+    {
+     "n": "the seeded corrupt IDB bytes survive (main or corrupt.*) -- never destroyed",
+     "pass": true,
+     "v": {
+      "corrupt.1792696734028": 225,
+      "main": 512
+     }
+    },
+    {
+     "n": "HARD: C (winner) never boots silently (dialog or save_corrupt)",
+     "pass": false,
+     "v": {
+      "dialog": false,
+      "notice": null,
+      "save_corrupt": [],
+      "isNewGame": true
+     }
+    },
+    {
+     "n": "HARD: loser B made no IDB put/delete OR winner C shows M3 with save_corrupt{store:idb}",
+     "pass": false,
+     "v": {
+      "loserIdbOps": [
+       "put:corrupt.1792696734028",
+       "delete:main"
+      ],
+      "winnerNotice": null,
+      "save_corrupt": []
+     }
+    },
+    {
+     "n": "no page errors (B, C)",
+     "pass": true,
+     "v": []
+    }
+   ],
+   "bText": "Game open in another tab\n\nYour farm is running in another tab. Play here to continue from your latest save.\n\nPlay here",
+   "bWrites": {
+    "ls": [
+     "set:eggfarm.lease"
+    ],
+    "idb": [
+     "put:corrupt.1792696734028",
+     "delete:main"
+    ],
+    "errors": []
+   },
+   "bIdbOps": [
+    "put:corrupt.1792696734028",
+    "delete:main"
+   ],
+   "idbAfter": {
+    "corrupt.1792696734028": 225,
+    "main": 512
+   },
+   "c": {
+    "dialog": false,
+    "notice": null,
+    "save_corrupt": [],
+    "isNewGame": true
+   }
+  }
+ },
+ "fails": 2
+}

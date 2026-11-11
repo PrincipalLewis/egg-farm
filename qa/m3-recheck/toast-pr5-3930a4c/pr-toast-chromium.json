@@ -1,0 +1,533 @@
+{
+ "360x740": {
+  "ok": true,
+  "ob": 2,
+  "oq": 0,
+  "out": 0,
+  "sample": {
+   "vis": true,
+   "op": "1",
+   "toast": {
+    "l": 47,
+    "t": 196,
+    "r": 313,
+    "b": 228
+   },
+   "banner": {
+    "l": 12,
+    "t": 64,
+    "r": 348,
+    "b": 188
+   },
+   "queue": {
+    "l": 8,
+    "t": 64,
+    "r": 352,
+    "b": 136
+   },
+   "ovBanner": false,
+   "ovQueue": false,
+   "inVp": true
+  },
+  "errs": []
+ },
+ "390x640": {
+  "ok": true,
+  "ob": 2,
+  "oq": 1,
+  "out": 0,
+  "sample": {
+   "vis": true,
+   "op": "0.999579",
+   "toast": {
+    "l": 62,
+    "t": 177,
+    "r": 328,
+    "b": 209
+   },
+   "banner": {
+    "l": 12,
+    "t": 64,
+    "r": 378,
+    "b": 169
+   },
+   "queue": {
+    "l": 8,
+    "t": 64,
+    "r": 382,
+    "b": 128
+   },
+   "ovBanner": false,
+   "ovQueue": false,
+   "inVp": true
+  },
+  "errs": []
+ },
+ "375x812": {
+  "ok": true,
+  "ob": 1,
+  "oq": 0,
+  "out": 0,
+  "sample": {
+   "vis": true,
+   "op": "0.965098",
+   "toast": {
+    "l": 55,
+    "t": 192,
+    "r": 320,
+    "b": 224
+   },
+   "banner": {
+    "l": 12,
+    "t": 64,
+    "r": 363,
+    "b": 188
+   },
+   "queue": {
+    "l": 8,
+    "t": 64,
+    "r": 367,
+    "b": 136
+   },
+   "ovBanner": false,
+   "ovQueue": false,
+   "inVp": true
+  },
+  "errs": []
+ },
+ "390x844": {
+  "ok": true,
+  "ob": 2,
+  "oq": 1,
+  "out": 0,
+  "sample": {
+   "vis": true,
+   "op": "0.99958",
+   "toast": {
+    "l": 62,
+    "t": 177,
+    "r": 328,
+    "b": 209
+   },
+   "banner": {
+    "l": 12,
+    "t": 64,
+    "r": 378,
+    "b": 169
+   },
+   "queue": {
+    "l": 8,
+    "t": 64,
+    "r": 382,
+    "b": 136
+   },
+   "ovBanner": false,
+   "ovQueue": false,
+   "inVp": true
+  },
+  "errs": []
+ },
+ "430x932": {
+  "ok": true,
+  "ob": 1,
+  "oq": 1,
+  "out": 0,
+  "sample": {
+   "vis": true,
+   "op": "1",
+   "toast": {
+    "l": 82,
+    "t": 156,
+    "r": 348,
+    "b": 188
+   },
+   "banner": {
+    "l": 12,
+    "t": 64,
+    "r": 418,
+    "b": 148
+   },
+   "queue": {
+    "l": 12,
+    "t": 68,
+    "r": 418,
+    "b": 140
+   },
+   "ovBanner": false,
+   "ovQueue": false,
+   "inVp": true
+  },
+  "errs": []
+ },
+ "1024x474": {
+  "ok": true,
+  "ob": 1,
+  "oq": 0,
+  "out": 0,
+  "sample": {
+   "vis": true,
+   "op": "1",
+   "toast": {
+    "l": 379,
+    "t": 156,
+    "r": 645,
+    "b": 188
+   },
+   "banner": {
+    "l": 272,
+    "t": 64,
+    "r": 752,
+    "b": 148
+   },
+   "queue": {
+    "l": 12,
+    "t": 68,
+    "r": 612,
+    "b": 132
+   },
+   "ovBanner": false,
+   "ovQueue": false,
+   "inVp": true
+  },
+  "errs": []
+ },
+ "1280x720": {
+  "ok": true,
+  "ob": 2,
+  "oq": 0,
+  "out": 0,
+  "sample": {
+   "vis": true,
+   "op": "0.999572",
+   "toast": {
+    "l": 507,
+    "t": 156,
+    "r": 773,
+    "b": 188
+   },
+   "banner": {
+    "l": 400,
+    "t": 64,
+    "r": 880,
+    "b": 148
+   },
+   "queue": {
+    "l": 12,
+    "t": 68,
+    "r": 868,
+    "b": 140
+   },
+   "ovBanner": false,
+   "ovQueue": false,
+   "inVp": true
+  },
+  "errs": []
+ },
+ "1280x800": {
+  "ok": true,
+  "ob": 1,
+  "oq": 0,
+  "out": 0,
+  "sample": {
+   "vis": true,
+   "op": "1",
+   "toast": {
+    "l": 507,
+    "t": 156,
+    "r": 773,
+    "b": 188
+   },
+   "banner": {
+    "l": 400,
+    "t": 64,
+    "r": 880,
+    "b": 148
+   },
+   "queue": {
+    "l": 12,
+    "t": 68,
+    "r": 868,
+    "b": 140
+   },
+   "ovBanner": false,
+   "ovQueue": false,
+   "inVp": true
+  },
+  "errs": []
+ },
+ "1366x768": {
+  "ok": true,
+  "ob": 2,
+  "oq": 0,
+  "out": 0,
+  "sample": {
+   "vis": true,
+   "op": "0.999579",
+   "toast": {
+    "l": 550,
+    "t": 156,
+    "r": 816,
+    "b": 188
+   },
+   "banner": {
+    "l": 443,
+    "t": 64,
+    "r": 923,
+    "b": 148
+   },
+   "queue": {
+    "l": 12,
+    "t": 68,
+    "r": 954,
+    "b": 140
+   },
+   "ovBanner": false,
+   "ovQueue": false,
+   "inVp": true
+  },
+  "errs": []
+ },
+ "360x740-nobanner": {
+  "ok": true,
+  "ob": 0,
+  "oq": 2,
+  "out": 0,
+  "sample": {
+   "vis": true,
+   "op": "0.999579",
+   "toast": {
+    "l": 47,
+    "t": 144,
+    "r": 313,
+    "b": 176
+   },
+   "banner": null,
+   "queue": {
+    "l": 8,
+    "t": 64,
+    "r": 352,
+    "b": 136
+   },
+   "ovBanner": null,
+   "ovQueue": false,
+   "inVp": true
+  },
+  "errs": []
+ },
+ "390x640-nobanner": {
+  "ok": true,
+  "ob": 0,
+  "oq": 2,
+  "out": 0,
+  "sample": {
+   "vis": true,
+   "op": "0.999577",
+   "toast": {
+    "l": 62,
+    "t": 136,
+    "r": 328,
+    "b": 168
+   },
+   "banner": null,
+   "queue": {
+    "l": 8,
+    "t": 64,
+    "r": 382,
+    "b": 128
+   },
+   "ovBanner": null,
+   "ovQueue": false,
+   "inVp": true
+  },
+  "errs": []
+ },
+ "375x812-nobanner": {
+  "ok": true,
+  "ob": 0,
+  "oq": 2,
+  "out": 0,
+  "sample": {
+   "vis": true,
+   "op": "0.999577",
+   "toast": {
+    "l": 55,
+    "t": 144,
+    "r": 320,
+    "b": 176
+   },
+   "banner": null,
+   "queue": {
+    "l": 8,
+    "t": 64,
+    "r": 367,
+    "b": 136
+   },
+   "ovBanner": null,
+   "ovQueue": false,
+   "inVp": true
+  },
+  "errs": []
+ },
+ "390x844-nobanner": {
+  "ok": true,
+  "ob": 0,
+  "oq": 1,
+  "out": 0,
+  "sample": {
+   "vis": true,
+   "op": "1",
+   "toast": {
+    "l": 62,
+    "t": 144,
+    "r": 328,
+    "b": 176
+   },
+   "banner": null,
+   "queue": {
+    "l": 8,
+    "t": 64,
+    "r": 382,
+    "b": 136
+   },
+   "ovBanner": null,
+   "ovQueue": false,
+   "inVp": true
+  },
+  "errs": []
+ },
+ "430x932-nobanner": {
+  "ok": true,
+  "ob": 0,
+  "oq": 2,
+  "out": 0,
+  "sample": {
+   "vis": true,
+   "op": "0.994618",
+   "toast": {
+    "l": 82,
+    "t": 147,
+    "r": 348,
+    "b": 179
+   },
+   "banner": null,
+   "queue": {
+    "l": 12,
+    "t": 68,
+    "r": 418,
+    "b": 140
+   },
+   "ovBanner": null,
+   "ovQueue": false,
+   "inVp": true
+  },
+  "errs": []
+ },
+ "1024x474-nobanner": {
+  "ok": true,
+  "ob": 0,
+  "oq": 0,
+  "out": 2,
+  "sample": {
+   "vis": true,
+   "op": "0.994622",
+   "toast": {
+    "l": 379,
+    "t": 63,
+    "r": 645,
+    "b": 95
+   },
+   "banner": null,
+   "queue": {
+    "l": 12,
+    "t": 68,
+    "r": 612,
+    "b": 132
+   },
+   "ovBanner": null,
+   "ovQueue": false,
+   "inVp": true
+  },
+  "errs": []
+ },
+ "1280x720-nobanner": {
+  "ok": true,
+  "ob": 0,
+  "oq": 0,
+  "out": 2,
+  "sample": {
+   "vis": true,
+   "op": "0.994619",
+   "toast": {
+    "l": 507,
+    "t": 63,
+    "r": 773,
+    "b": 95
+   },
+   "banner": null,
+   "queue": {
+    "l": 12,
+    "t": 68,
+    "r": 868,
+    "b": 140
+   },
+   "ovBanner": null,
+   "ovQueue": false,
+   "inVp": true
+  },
+  "errs": []
+ },
+ "1280x800-nobanner": {
+  "ok": true,
+  "ob": 0,
+  "oq": 0,
+  "out": 2,
+  "sample": {
+   "vis": true,
+   "op": "0.994641",
+   "toast": {
+    "l": 507,
+    "t": 63,
+    "r": 773,
+    "b": 95
+   },
+   "banner": null,
+   "queue": {
+    "l": 12,
+    "t": 68,
+    "r": 868,
+    "b": 140
+   },
+   "ovBanner": null,
+   "ovQueue": false,
+   "inVp": true
+  },
+  "errs": []
+ },
+ "1366x768-nobanner": {
+  "ok": true,
+  "ob": 0,
+  "oq": 0,
+  "out": 1,
+  "sample": {
+   "vis": true,
+   "op": "1",
+   "toast": {
+    "l": 550,
+    "t": 64,
+    "r": 816,
+    "b": 96
+   },
+   "banner": null,
+   "queue": {
+    "l": 12,
+    "t": 68,
+    "r": 954,
+    "b": 140
+   },
+   "ovBanner": null,
+   "ovQueue": false,
+   "inVp": true
+  },
+  "errs": []
+ }
+}

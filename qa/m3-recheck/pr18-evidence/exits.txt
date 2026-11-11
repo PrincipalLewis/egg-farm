@@ -1,0 +1,16 @@
+globals chromium exit=0
+globals chromium exit=0 sha=79edfa1-OLD bid=m3-rc1-pre+79edfa1 (prequeued-on-old-head) 01:54:53
+globals chromium (lock2) exit=0 sha=6f19823 bid=m3-rc1-pre+6f19823 02:00:53
+rc0 chromium (lock2) exit=1 sha=6f19823 bid=m3-rc1-pre+6f19823 02:03:14
+rc0 chromium exit=1
+OLD_SHA_CHROMIUM: #17 b0e8278 and #18 6f19823 lane2 results retained; remote now c428fae / a913934
+globals firefox exit=0
+rc0 firefox exit=1
+globals chromium (lock2) exit=0 sha=a913934 bid=m3-rc1-pre+a913934 03:02:00
+globals firefox exit=0 sha=79edfa1-OLD bid=m3-rc1-pre+79edfa1 (other-agent-on-old-worktree) 03:05:29
+rc0 firefox exit=1 sha=79edfa1-OLD bid=m3-rc1-pre+79edfa1 (other-agent-on-old-worktree; B5 likely) 03:05:29
+globals webkit exit=0
+rc0 chromium (lock2) exit=1 sha=a913934 bid=m3-rc1-pre+a913934 03:09:17
+rc0 webkit exit=1
+globals webkit exit=0 sha=79edfa1-OLD bid=m3-rc1-pre+79edfa1 (other-agent-on-old-worktree) 03:23:38
+rc0 webkit exit=1 sha=79edfa1-OLD bid=m3-rc1-pre+79edfa1 (other-agent-on-old-worktree; B5) 03:23:38

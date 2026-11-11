@@ -1,0 +1,20 @@
+2026-10-24 14:44:35 CEST === local gates on 5d9efa61c5e6ee31ca9ebdec20ee70167d31d463; head-ancestry: dd223f5 Y, 1682a0c Y, 66680eb Y, 9cce82d Y, 4c94704 Y, c61ed2b Y, dfdf49c Y, b986cd3 Y,  pushed on: origin/rc/m4.1-rc1 
+2026-10-24 14:44:35 CEST porcelain after start: 0 lines
+2026-10-24 14:44:36 CEST sync --check exit=0
+2026-10-24 14:44:40 CEST tsc exit=0
+2026-10-24 14:44:45 CEST build exit=0
+2026-10-24 14:44:45 CEST porcelain after build: 0 lines
+2026-10-24 14:44:50 CEST build:qa exit=0
+2026-10-24 14:44:50 CEST porcelain after build-qa: 0 lines
+2026-10-24 14:44:55 CEST build:html exit=0
+2026-10-24 14:44:55 CEST porcelain after build-html: 0 lines
+2026-10-24 14:44:55 CEST static build-id dist-html:  3 m4.1+5d9efa6 (want +5d9efa6 only, 0 +dirty); dist-qa: m4.1+5d9efa6 
+2026-10-24 14:44:55 CEST html ccb87daa60b5b8f722504642561f8a6061c8335555fd669a16872add2e88d5e1  dist-html/egg-farm.html
+2026-10-24 14:44:55 CEST check-release-build dist-html exit=0
+2026-10-24 14:44:55 CEST check-release-build dist exit=0
+2026-10-24 14:48:12 CEST vitest full exit=0 197s  Test Files 107 passed (107)  Tests 1403 passed (1403) 
+2026-10-24 14:48:12 CEST porcelain after vitest: 0 lines
+2026-10-24 14:48:15 CEST goldens subset exit=0  Test Files 5 passed (5)  Tests 89 passed (89) 
+2026-10-24 14:56:15 CEST test:slow exit=0 480s  Test Files 3 passed (3)  Tests 16 passed | 1 skipped (17) 
+2026-10-24 14:56:15 CEST porcelain after slow: 0 lines
+2026-10-24 14:56:15 CEST LOCAL_DONE

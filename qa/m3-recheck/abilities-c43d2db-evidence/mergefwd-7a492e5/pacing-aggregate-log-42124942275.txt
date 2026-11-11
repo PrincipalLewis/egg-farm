@@ -1,0 +1,264 @@
+<cursor_untrusted_data_1337 source="CallDynamicTool">
+
+2026-11-05T23:39:40.8520726Z Current runner version: '2.338.2'
+2026-11-05T23:39:40.8545394Z ##[group]Runner Image Provisioner
+2026-11-05T23:39:40.8546310Z Hosted Compute Agent
+2026-11-05T23:39:40.8546921Z Version: 20261028.624
+2026-11-05T23:39:40.8547667Z Commit: 54898b74c23fde5556c9b3c3a2290865feef0dfe
+2026-11-05T23:39:40.8548414Z Build Date: 2026-10-28T21:51:42Z
+2026-11-05T23:39:40.8549099Z Worker ID: {c9e0ef4e-c216-406e-8d88-cfdc1d7b6e72}
+2026-11-05T23:39:40.8549910Z Region: southcentralus
+2026-11-05T23:39:40.8550919Z Cloud: Azure
+2026-11-05T23:39:40.8551630Z ##[endgroup]
+2026-11-05T23:39:40.8553565Z ##[group]Operating System
+2026-11-05T23:39:40.8554220Z Ubuntu
+2026-11-05T23:39:40.8554866Z 24.04.5
+2026-11-05T23:39:40.8555393Z LTS
+2026-11-05T23:39:40.8556033Z ##[endgroup]
+2026-11-05T23:39:40.8556697Z ##[group]Runner Image
+2026-11-05T23:39:40.8557339Z Image: ubuntu-24.04
+2026-11-05T23:39:40.8557973Z Version: 20261101.360.1
+2026-11-05T23:39:40.8559325Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261101.360/images/ubuntu/Ubuntu2404-Readme.md
+2026-11-05T23:39:40.8561349Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261101.360
+2026-11-05T23:39:40.8562348Z ##[endgroup]
+2026-11-05T23:39:40.8563579Z ##[group]GITHUB_TOKEN Permissions
+2026-11-05T23:39:40.8565694Z Contents: read
+2026-11-05T23:39:40.8566493Z Metadata: read
+2026-11-05T23:39:40.8567082Z ##[endgroup]
+2026-11-05T23:39:40.8569201Z Secret source: Actions
+2026-11-05T23:39:40.8570638Z Cache mode: write
+2026-11-05T23:39:40.8571911Z Prepare workflow directory
+2026-11-05T23:39:40.8911152Z Prepare all required actions
+2026-11-05T23:39:40.8959535Z Getting action download info
+2026-11-05T23:39:41.1784319Z Download action repository 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-11-05T23:39:41.3030532Z Download action repository 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-11-05T23:39:41.4015174Z Download action repository 'actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+2026-11-05T23:39:41.8308249Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-11-05T23:39:42.0431345Z Complete job name: pacing-x1-stack
+2026-11-05T23:39:42.1361736Z ##[group]Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+2026-11-05T23:39:42.1362935Z with:
+2026-11-05T23:39:42.1363467Z   repository: PrincipalLewis/egg-farm
+2026-11-05T23:39:42.1367402Z   token: ***
+2026-11-05T23:39:42.1367916Z   ssh-strict: true
+2026-11-05T23:39:42.1368411Z   ssh-user: git
+2026-11-05T23:39:42.1368931Z   persist-credentials: true
+2026-11-05T23:39:42.1369484Z   clean: true
+2026-11-05T23:39:42.1369991Z   sparse-checkout-cone-mode: true
+2026-11-05T23:39:42.1370810Z   fetch-depth: 1
+2026-11-05T23:39:42.1371309Z   fetch-tags: false
+2026-11-05T23:39:42.1371817Z   show-progress: true
+2026-11-05T23:39:42.1372370Z   lfs: false
+2026-11-05T23:39:42.1372850Z   submodules: false
+2026-11-05T23:39:42.1373368Z   set-safe-directory: true
+2026-11-05T23:39:42.1373949Z   allow-unsafe-pr-checkout: false
+2026-11-05T23:39:42.1374824Z ##[endgroup]
+2026-11-05T23:39:42.4435546Z Syncing repository: PrincipalLewis/egg-farm
+2026-11-05T23:39:42.4438207Z ##[group]Getting Git version info
+2026-11-05T23:39:42.4439117Z Working directory is '/home/runner/work/egg-farm/egg-farm'
+2026-11-05T23:39:42.4441210Z [command]/usr/bin/git version
+2026-11-05T23:39:42.4541427Z git version 2.56.0
+2026-11-05T23:39:42.4566411Z ##[endgroup]
+2026-11-05T23:39:42.4582544Z Temporarily overriding HOME='/home/runner/work/_temp/96faa663-f96e-443b-931d-d4eaba856e61' before making global git config changes
+2026-11-05T23:39:42.4585485Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-05T23:39:42.4588124Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/egg-farm/egg-farm
+2026-11-05T23:39:42.4657105Z Deleting the contents of '/home/runner/work/egg-farm/egg-farm'
+2026-11-05T23:39:42.4664033Z ##[group]Initializing the repository
+2026-11-05T23:39:42.4669399Z [command]/usr/bin/git init /home/runner/work/egg-farm/egg-farm
+2026-11-05T23:39:42.4802532Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-05T23:39:42.4804627Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-05T23:39:42.4806720Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-05T23:39:42.4808256Z hint: call:
+2026-11-05T23:39:42.4808745Z hint:
+2026-11-05T23:39:42.4809468Z hint: 	git config --global init.defaultBranch <name>
+2026-11-05T23:39:42.4811180Z hint:
+2026-11-05T23:39:42.4812576Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-05T23:39:42.4815053Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-05T23:39:42.4816400Z hint:
+2026-11-05T23:39:42.4816994Z hint: 	git branch -m <name>
+2026-11-05T23:39:42.4817717Z hint:
+2026-11-05T23:39:42.4819101Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-05T23:39:42.4822339Z Initialized empty Git repository in /home/runner/work/egg-farm/egg-farm/.git/
+2026-11-05T23:39:42.4832529Z [command]/usr/bin/git remote add origin https://github.com/PrincipalLewis/egg-farm
+2026-11-05T23:39:42.4892717Z ##[endgroup]
+2026-11-05T23:39:42.4894428Z ##[group]Disabling automatic garbage collection
+2026-11-05T23:39:42.4898043Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-05T23:39:42.4936532Z ##[endgroup]
+2026-11-05T23:39:42.4938154Z ##[group]Setting up auth
+2026-11-05T23:39:42.4945540Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-05T23:39:42.4991397Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-05T23:39:42.5441114Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-05T23:39:42.5490316Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-05T23:39:42.5826513Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-05T23:39:42.5831838Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-05T23:39:42.6036991Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-05T23:39:42.6086628Z ##[endgroup]
+2026-11-05T23:39:42.6088469Z ##[group]Fetching the repository
+2026-11-05T23:39:42.6103376Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +8e47eeb50736c4230f22352e5a3637d2150db0d2:refs/remotes/pull/112/merge
+2026-11-05T23:39:43.2825796Z From https://github.com/PrincipalLewis/egg-farm
+2026-11-05T23:39:43.2829850Z  * [new ref]         8e47eeb50736c4230f22352e5a3637d2150db0d2 -> pull/112/merge
+2026-11-05T23:39:43.2834582Z ##[endgroup]
+2026-11-05T23:39:43.2836021Z ##[group]Determining the checkout info
+2026-11-05T23:39:43.2837688Z ##[endgroup]
+2026-11-05T23:39:43.2848467Z [command]/usr/bin/git sparse-checkout disable
+2026-11-05T23:39:43.2915152Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-05T23:39:43.2954990Z ##[group]Checking out the ref
+2026-11-05T23:39:43.2958655Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/112/merge
+2026-11-05T23:39:43.3352162Z Note: switching to 'refs/remotes/pull/112/merge'.
+2026-11-05T23:39:43.3353423Z 
+2026-11-05T23:39:43.3354202Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-05T23:39:43.3356246Z changes and commit them, and you can discard any commits you make in this
+2026-11-05T23:39:43.3358984Z state without impacting any branches by switching back to a branch.
+2026-11-05T23:39:43.3360985Z 
+2026-11-05T23:39:43.3362409Z If you want to create a new branch to retain commits you create, you may
+2026-11-05T23:39:43.3365610Z do so (now or later) by using -c with the switch command. Example:
+2026-11-05T23:39:43.3367589Z 
+2026-11-05T23:39:43.3368423Z   git switch -c <new-branch-name>
+2026-11-05T23:39:43.3369815Z 
+2026-11-05T23:39:43.3370993Z Or undo this operation with:
+2026-11-05T23:39:43.3372279Z 
+2026-11-05T23:39:43.3373039Z   git switch -
+2026-11-05T23:39:43.3373999Z 
+2026-11-05T23:39:43.3375493Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-05T23:39:43.3377707Z 
+2026-11-05T23:39:43.3380505Z HEAD is now at 8e47eeb Merge 7a492e5fea47f9bb92ae2d07e82820c64471ec5a into f8036e8f0826ca76fcc0ee13092d575533d4969b
+2026-11-05T23:39:43.3387748Z ##[endgroup]
+2026-11-05T23:39:43.3425908Z [command]/usr/bin/git log -1 --format=%H
+2026-11-05T23:39:43.3461578Z 8e47eeb50736c4230f22352e5a3637d2150db0d2
+2026-11-05T23:39:43.3933486Z ##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+2026-11-05T23:39:43.3935192Z with:
+2026-11-05T23:39:43.3936068Z   node-version: 20
+2026-11-05T23:39:43.3937015Z   cache: npm
+2026-11-05T23:39:43.3937908Z   always-auth: false
+2026-11-05T23:39:43.3938884Z   check-latest: false
+2026-11-05T23:39:43.3948568Z   token: ***
+2026-11-05T23:39:43.3949489Z ##[endgroup]
+2026-11-05T23:39:43.5479474Z Attempting to download 20...
+2026-11-05T23:39:43.5647078Z (node:2319) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-05T23:39:43.5650577Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-05T23:39:44.3963193Z Acquiring 20.20.2 - x64 from https://github.com/actions/node-versions/releases/download/20.20.2-23521894959/node-20.20.2-linux-x64.tar.gz
+2026-11-05T23:39:44.8846325Z Extracting ...
+2026-11-05T23:39:44.9000497Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/70c92bc7-a47b-4d3f-99e0-40b64cfb93fe -f /home/runner/work/_temp/5cf86eb5-647a-4110-a281-02c485e81d5a
+2026-11-05T23:39:45.9161661Z Adding to the cache ...
+2026-11-05T23:39:47.4926444Z ##[group]Environment details
+2026-11-05T23:39:47.7450394Z node: v20.20.2
+2026-11-05T23:39:47.7450868Z npm: 10.8.2
+2026-11-05T23:39:47.7451116Z yarn: 1.22.22
+2026-11-05T23:39:47.7451712Z ##[endgroup]
+2026-11-05T23:39:47.7473739Z [command]/opt/hostedtoolcache/node/20.20.2/x64/bin/npm config get cache
+2026-11-05T23:39:47.8583719Z /home/runner/.npm
+2026-11-05T23:39:48.0163518Z Cache hit for: node-cache-Linux-x64-npm-570ff3660310d24e3be09c9ec0ca06ee18b34fdf834293b38f8aa5f6d204e898
+2026-11-05T23:39:48.0271564Z (node:2319) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-05T23:39:48.6858423Z Received 22690550 of 22690550 (100.0%), 41.1 MBs/sec
+2026-11-05T23:39:48.6859343Z Cache Size: ~22 MB (22690550 B)
+2026-11-05T23:39:48.6990421Z [command]/usr/bin/tar -xf /home/runner/work/_temp/9a4f045c-fc01-4ded-9511-dfb4e517dba0/cache.tzst -P -C /home/runner/work/egg-farm/egg-farm --use-compress-program unzstd
+2026-11-05T23:39:48.7654927Z Cache restored successfully
+2026-11-05T23:39:48.7673854Z Cache restored from key: node-cache-Linux-x64-npm-570ff3660310d24e3be09c9ec0ca06ee18b34fdf834293b38f8aa5f6d204e898
+2026-11-05T23:39:48.7906966Z ##[group]Run npm ci
+2026-11-05T23:39:48.7907263Z [36;1mnpm ci[0m
+2026-11-05T23:39:48.7932791Z shell: /usr/bin/bash -e {0}
+2026-11-05T23:39:48.7933076Z ##[endgroup]
+2026-11-05T23:39:49.6929739Z npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+2026-11-05T23:39:50.7697565Z 
+2026-11-05T23:39:50.7698409Z added 87 packages, and audited 88 packages in 2s
+2026-11-05T23:39:50.7699232Z 
+2026-11-05T23:39:50.7699532Z 21 packages are looking for funding
+2026-11-05T23:39:50.7700400Z   run `npm fund` for details
+2026-11-05T23:39:50.7983268Z 
+2026-11-05T23:39:50.7984218Z 6 vulnerabilities (3 moderate, 1 high, 2 critical)
+2026-11-05T23:39:50.7984750Z 
+2026-11-05T23:39:50.7985169Z To address all issues (including breaking changes), run:
+2026-11-05T23:39:50.7985566Z   npm audit fix --force
+2026-11-05T23:39:50.7985739Z 
+2026-11-05T23:39:50.7985875Z Run `npm audit` for details.
+2026-11-05T23:39:50.8231630Z ##[group]Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+2026-11-05T23:39:50.8232080Z with:
+2026-11-05T23:39:50.8232294Z   pattern: x1-shard-*
+2026-11-05T23:39:50.8232517Z   path: x1-out
+2026-11-05T23:39:50.8232725Z   merge-multiple: true
+2026-11-05T23:39:50.8232968Z   repository: PrincipalLewis/egg-farm
+2026-11-05T23:39:50.8233247Z   run-id: 42124942275
+2026-11-05T23:39:50.8233463Z ##[endgroup]
+2026-11-05T23:39:50.9942088Z (node:2405) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-05T23:39:50.9943599Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-05T23:39:51.1628664Z Found 3 artifact(s)
+2026-11-05T23:39:51.1630686Z Filtering artifacts by pattern 'x1-shard-*'
+2026-11-05T23:39:51.1649802Z Preparing to download the following artifacts:
+2026-11-05T23:39:51.1651720Z - x1-shard-casual (ID: 13463910533, Size: 1717, Expected Digest: sha256:80020fb7a05dc2a7b5654a18f969c612efc47712492f5f31aeb8ad27dab255f4)
+2026-11-05T23:39:51.1653920Z - x1-shard-optimal (ID: 13463865351, Size: 1727, Expected Digest: sha256:ac734f7cbcbd34c30834cf28e3fa69446cb04ef7e5854912745f52f65c616cf7)
+2026-11-05T23:39:51.1656128Z - x1-shard-seller15 (ID: 13462971305, Size: 1721, Expected Digest: sha256:b79d432fd78ff9a08a36cbab1f05da0b7136c3e54a8850b5a551feb05da30661)
+2026-11-05T23:39:51.3495457Z Redirecting to blob download url: https://productionresultssa19.blob.core.windows.net/actions-results/068034e8-c5b8-8e6e-b6e5-9db39584c93f/workflow-job-run-1223c130-8f6a-5767-ae89-30186885d3ae/artifacts/62f2c1c579a3e212203ae34affa6ce4633fd644c2dcca85ae74f7ef47daffbda.zip
+2026-11-05T23:39:51.3497901Z Starting download of artifact to: /home/runner/work/egg-farm/egg-farm/x1-out
+2026-11-05T23:39:51.4286271Z Redirecting to blob download url: https://productionresultssa19.blob.core.windows.net/actions-results/068034e8-c5b8-8e6e-b6e5-9db39584c93f/workflow-job-run-123d3eb5-5997-58ac-98cb-59338fcad078/artifacts/443b5654441a1286918576b79f3eec69116f3c2cae0004e5c00114ef3e932565.zip
+2026-11-05T23:39:51.4289360Z Starting download of artifact to: /home/runner/work/egg-farm/egg-farm/x1-out
+2026-11-05T23:39:51.4440985Z Redirecting to blob download url: https://productionresultssa19.blob.core.windows.net/actions-results/068034e8-c5b8-8e6e-b6e5-9db39584c93f/workflow-job-run-b195f850-96df-5f08-bb00-e97d1ab0d9a5/artifacts/6a35bffd60beec0e91168f97d14194a9870ac17f7564a2e9e2806fe9fd61f35b.zip
+2026-11-05T23:39:51.4442921Z Starting download of artifact to: /home/runner/work/egg-farm/egg-farm/x1-out
+2026-11-05T23:39:51.4864380Z (node:2405) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-11-05T23:39:51.4917210Z SHA256 digest of downloaded artifact is 80020fb7a05dc2a7b5654a18f969c612efc47712492f5f31aeb8ad27dab255f4
+2026-11-05T23:39:51.4918092Z Artifact download completed successfully.
+2026-11-05T23:39:51.5642172Z SHA256 digest of downloaded artifact is ac734f7cbcbd34c30834cf28e3fa69446cb04ef7e5854912745f52f65c616cf7
+2026-11-05T23:39:51.5642920Z Artifact download completed successfully.
+2026-11-05T23:39:51.5727720Z SHA256 digest of downloaded artifact is b79d432fd78ff9a08a36cbab1f05da0b7136c3e54a8850b5a551feb05da30661
+2026-11-05T23:39:51.5728608Z Artifact download completed successfully.
+2026-11-05T23:39:51.5729046Z Total of 3 artifact(s) downloaded
+2026-11-05T23:39:51.5735779Z Download artifact has finished successfully
+2026-11-05T23:39:51.5900764Z ##[group]Run npx vite-node scripts/pacing-x1-stack.ts -- verdict --in x1-out --out x1-out
+2026-11-05T23:39:51.5901492Z [36;1mnpx vite-node scripts/pacing-x1-stack.ts -- verdict --in x1-out --out x1-out[0m
+2026-11-05T23:39:51.5921569Z shell: /usr/bin/bash -e {0}
+2026-11-05T23:39:51.5921856Z ##[endgroup]
+2026-11-05T23:39:52.4801806Z ## pacing-x1-stack: **FAIL**
+2026-11-05T23:39:52.4802224Z 
+2026-11-05T23:39:52.4804795Z - data: `shipped-tree` (shipped data/economy.csv + src/config/balance.json from the tree, full M5.0 stack (pause rows out)); CSV data/economy.csv sha256 a8c4e26836bf7af98cb51f8e3e8a646750e82a4cdc18be450afe2f86eeeeb07f, src/config/balance.json sha256 ddd02fbaea437e14c55f1df3251c2331b60e33697512a4e5107b69cd5f34b41a (read from the tree, sha256 recorded)
+2026-11-05T23:39:52.4806840Z - run: seeds 1-200, T 4000 s, windows every 300 s (A1/A2), step ratio from L11; commit 8e47eeb50736; shard runtimes casual 2426s, optimal 1973s, seller15 1914s
+2026-11-05T23:39:52.4809543Z - **balance.json (QA-D-1030-SHIPFLAGS):** src/config/balance.json sha256 ddd02fbaea437e14c55f1df3251c2331b60e33697512a4e5107b69cd5f34b41a; m4.enabled=1; m4.flags golden=0 streak=0 tapCoins=0 abilities=0 broody=0 salesStopped=0 fatigueCue=0 pause=0 rc2Refill=0 autoRefill=0 clockWage=0 breeds=0 zeroGainUi=0 bestBuyV2=0; flags ON: none; bot-modelled src M5 flags (golden/streak/tapCoins/broody/abilities/pause) ON: none (bot model runs; O-3 guard would throw if any were on)
+2026-11-05T23:39:52.4812329Z - table: tests/fixtures/x1/pred-13.2a-7bbb5925.csv sha256 7bbb5925 (§13.2a of record, economy.c0d9492b.md L879-913)
+2026-11-05T23:39:52.4813602Z - rows: 45 PASS, 0 FAIL, 1 WARN, 20 INFO, 0 PENDING-REPRED (not judged until HoP signs the re-prediction), 3 N/A (row 903, D-CEO-20261030-04), 12 NOT-WIRED (3 blocking), 24 EXCLUDED (G5-P pause rows)
+2026-11-05T23:39:52.4814476Z - **FAIL: blocking row 904 optimal NOT-WIRED**
+2026-11-05T23:39:52.4814883Z - **FAIL: blocking row 904 seller15 NOT-WIRED**
+2026-11-05T23:39:52.4815559Z WARN L897 optimal N / H: worst 191 > 180 s (pre-existing L0–30 dead zone, known risk)
+2026-11-05T23:39:52.4816078Z FAIL: blocking row 904 optimal NOT-WIRED
+2026-11-05T23:39:52.4816441Z FAIL: blocking row 904 seller15 NOT-WIRED
+2026-11-05T23:39:52.4816806Z FAIL: blocking row 904 casual NOT-WIRED
+2026-11-05T23:39:52.4978203Z ##[error]Process completed with exit code 1.
+2026-11-05T23:39:52.5128684Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-11-05T23:39:52.5129150Z with:
+2026-11-05T23:39:52.5129386Z   name: x1-verdict
+2026-11-05T23:39:52.5129619Z   path: x1-out/
+2026-11-05T23:39:52.5129854Z   retention-days: 14
+2026-11-05T23:39:52.5130440Z   if-no-files-found: warn
+2026-11-05T23:39:52.5130731Z   compression-level: 6
+2026-11-05T23:39:52.5130991Z   overwrite: false
+2026-11-05T23:39:52.5131247Z   include-hidden-files: false
+2026-11-05T23:39:52.5131512Z ##[endgroup]
+2026-11-05T23:39:52.6838674Z (node:2455) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-05T23:39:52.6839681Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-05T23:39:52.6916930Z With the provided path, there will be 5 files uploaded
+2026-11-05T23:39:52.6923230Z Artifact name is valid!
+2026-11-05T23:39:52.6923826Z Root directory input is valid!
+2026-11-05T23:39:52.9990318Z Beginning upload of artifact content to blob storage
+2026-11-05T23:39:53.0255380Z (node:2455) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-05T23:39:53.1951729Z Uploaded bytes 14005
+2026-11-05T23:39:53.2363231Z Finished uploading artifact content to blob storage!
+2026-11-05T23:39:53.2364545Z SHA256 digest of uploaded artifact zip is 4ec9d227b8d9e2b883a2df0da695cde6aa1f83679963c63a722b4fb9f4a37a74
+2026-11-05T23:39:53.2365886Z Finalizing artifact upload
+2026-11-05T23:39:53.6872885Z Artifact x1-verdict.zip successfully finalized. Artifact ID 13462573888
+2026-11-05T23:39:53.6874038Z Artifact x1-verdict has been successfully uploaded! Final size is 14005 bytes. Artifact ID is 13462573888
+2026-11-05T23:39:53.6877860Z Artifact download URL: https://github.com/PrincipalLewis/egg-farm/actions/runs/42124942275/artifacts/13462573888
+2026-11-05T23:39:53.7099252Z Post job cleanup.
+2026-11-05T23:39:53.7969194Z [command]/usr/bin/git version
+2026-11-05T23:39:53.8019285Z git version 2.56.0
+2026-11-05T23:39:53.8094946Z Temporarily overriding HOME='/home/runner/work/_temp/4c90cceb-6bf3-493e-8d70-bf32a2aa9bba' before making global git config changes
+2026-11-05T23:39:53.8096574Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-05T23:39:53.8100876Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/egg-farm/egg-farm
+2026-11-05T23:39:53.8147407Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-05T23:39:53.8190725Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-05T23:39:53.8467584Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-05T23:39:53.8492941Z http.https://github.com/.extraheader
+2026-11-05T23:39:53.8505513Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-11-05T23:39:53.8554078Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-05T23:39:53.8835485Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-05T23:39:53.8889682Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-05T23:39:53.9294926Z Cleaning up orphan processes
+2026-11-05T23:39:53.9734912Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11d5960a326750d5838078e36cf38b85af677262, actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093, actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+
+
+</cursor_untrusted_data_1337>

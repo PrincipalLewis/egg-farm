@@ -1,0 +1,3 @@
+6dca24cd50a6fd6f11c361e16d8b3c797fddea7fe0155c1d9e79006f99845455  data/economy.csv
+4ad1349ad27ca4c1657c94afd0fbfabd081aa658faa3ff5882a8bc6121e4737f  data/economy.f1.csv
+6dca24cd50a6fd6f11c361e16d8b3c797fddea7fe0155c1d9e79006f99845455  data/staging/economy.f1-m4cols.csv

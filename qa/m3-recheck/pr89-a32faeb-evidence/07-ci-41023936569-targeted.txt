@@ -1,0 +1,10 @@
+gate	Unit tests (npm test; includes sync-economy --check)	2026-10-30T08:05:02.9815528Z  ^[[32m✓^[[39m tests/recorded-pid.test.ts ^[[2m(^[[22m^[[2m18 tests^[[22m^[[2m)^[[22m^[[33m 6316^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-10-30T08:05:09.3544880Z  ^[[32m✓^[[39m tests/d2-guard.test.ts ^[[2m(^[[22m^[[2m16 tests^[[22m^[[2m)^[[22m^[[33m 3587^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-10-30T08:05:24.4872338Z ^[[90mstderr^[[2m | tests/serve-own.test.ts^[[2m > ^[[22m^[[2mexpectHeadBuild wiring (a real git tree + a served page)^[[2m > ^[[22m^[[2mgit unavailable (not a repo) is an error, also with ALLOW_DIRTY; only ALLOW_NO_GIT skips it
+gate	Unit tests (npm test; includes sync-economy --check)	2026-10-30T08:05:24.4879701Z  ^[[32m✓^[[39m tests/serve-own.test.ts ^[[2m(^[[22m^[[2m15 tests^[[22m^[[2m | ^[[22m^[[33m1 skipped^[[39m^[[2m)^[[22m^[[33m 4108^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-10-30T08:05:41.5506145Z  ^[[32m✓^[[39m tests/rule21-source.test.ts ^[[2m(^[[22m^[[2m55 tests^[[22m^[[2m)^[[22m^[[90m 155^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-10-30T08:06:53.7505999Z  ^[[32m✓^[[39m tests/verify.test.ts ^[[2m(^[[22m^[[2m54 tests^[[22m^[[2m)^[[22m^[[33m 119978^[[2mms^[[22m^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-10-30T08:10:10.6255520Z ^[[2m Test Files ^[[22m ^[[1m^[[32m130 passed^[[39m^[[22m^[[90m (130)^[[39m
+gate	Unit tests (npm test; includes sync-economy --check)	2026-10-30T08:10:10.6275414Z ^[[2m      Tests ^[[22m ^[[1m^[[32m1813 passed^[[39m^[[22m^[[2m | ^[[22m^[[33m1 skipped^[[39m^[[90m (1814)^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-10-30T08:20:06.8215145Z ^[[2m Test Files ^[[22m ^[[1m^[[32m3 passed^[[39m^[[22m^[[90m (3)^[[39m
+gate	Slow suites (npm run test:slow; vendor pins + 100-seed seller-variance TS-vs-Python parity, PR	2026-10-30T08:20:06.8216512Z ^[[2m      Tests ^[[22m ^[[1m^[[32m16 passed^[[39m^[[22m^[[2m | ^[[22m^[[33m1 skipped^[[39m^[[90m (17)^[[39m

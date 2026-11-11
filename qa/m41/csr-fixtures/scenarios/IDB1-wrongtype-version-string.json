@@ -1,0 +1,26 @@
+{
+ "id": "IDB1-wrongtype-version-string",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-AC-IDB1",
+  "IDB1-1",
+  "IDB1-2",
+  "IDB1-5",
+  "IDB1-6",
+  "IDB1-8",
+  "KF-IDB-ONLY"
+ ],
+ "idbManifest": "../../csr/fixtures/idb1/IDB1-wrongtype-version-string.manifest.json",
+ "expect": {
+  "recovery": true,
+  "store": "idb",
+  "reason": "wrong_type",
+  "notice": "M3",
+  "idbCorruptExact": 1,
+  "idbCorruptByteEqual": true,
+  "corruptPutBeforeFirstMainPut": true,
+  "coinsCents": "initialState",
+  "noSaveRepaired": true,
+  "saveCorruptCount": 1
+ }
+}

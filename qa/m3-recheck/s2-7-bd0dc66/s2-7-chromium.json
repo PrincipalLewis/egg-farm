@@ -1,0 +1,159 @@
+[
+ {
+  "n": "S2-7.1 toast visible above sheet at Farm L5",
+  "pass": true,
+  "i": {
+   "show": true,
+   "text": "Coop upgraded!",
+   "vis": "visible",
+   "op": "1",
+   "top": 144,
+   "bot": 176,
+   "z": "31",
+   "sheetZ": "10",
+   "farm": 5
+  }
+ },
+ {
+  "n": "S2-7.2/S2-6 queue chips, sprite and Queue full tag inside strip, no overlap @375px",
+  "pass": false,
+  "i": {
+   "tag": 1,
+   "ov": [
+    [
+     "qtag",
+     4,
+     "+5"
+    ]
+   ],
+   "out": [],
+   "q": {
+    "x": 8,
+    "y": 64,
+    "r": 367,
+    "b": 136,
+    "cls": "queue five full",
+    "t": "28505050+5Queue full"
+   },
+   "scW": 375
+  }
+ },
+ {
+  "n": "S2-7.2/S2-6 queue chips, sprite and Queue full tag inside strip, no overlap @390px",
+  "pass": false,
+  "i": {
+   "tag": 1,
+   "ov": [
+    [
+     "qtag",
+     4,
+     "+5"
+    ]
+   ],
+   "out": [],
+   "q": {
+    "x": 8,
+    "y": 64,
+    "r": 382,
+    "b": 136,
+    "cls": "queue five full",
+    "t": "28505050+5Queue full"
+   },
+   "scW": 390
+  }
+ },
+ {
+  "n": "S2-7.3 Market X closes every time (12/12), tap target >=44px",
+  "pass": true,
+  "i": {
+   "miss": 0,
+   "w": 44,
+   "h": 44
+  }
+ },
+ {
+  "n": "S2-7.4 Collect label matches ready count (coop 12.7, C17)",
+  "pass": false,
+  "i": {
+   "lbl": "Collect +90 · 28 ready",
+   "want": "Collect +90 · 28 ready",
+   "got": 30
+  }
+ },
+ {
+  "n": "S2-7.4 Collect label matches ready count (coop 500, C17)",
+  "pass": true,
+  "i": {
+   "lbl": "Collect +90",
+   "want": "Collect +90",
+   "got": 90
+  }
+ },
+ {
+  "n": "S2-7.4 Collect label matches ready count (coop 3.2, C0)",
+  "pass": true,
+  "i": {
+   "lbl": "Collect +5",
+   "want": "Collect +5",
+   "got": 5
+  }
+ },
+ {
+  "n": "S2-7.4 Collect label matches ready count (coop 40, C0)",
+  "pass": true,
+  "i": {
+   "lbl": "Collect +5",
+   "want": "Collect +5",
+   "got": 5
+  }
+ },
+ {
+  "n": "S2-7.5 eggs per tap uncapped at C0 (expect 5)",
+  "pass": true,
+  "i": {
+   "d": 5
+  }
+ },
+ {
+  "n": "S2-7.5 eggs per tap uncapped at C10 (expect 55)",
+  "pass": true,
+  "i": {
+   "d": 55
+  }
+ },
+ {
+  "n": "S2-7.5 eggs per tap uncapped at C17 (expect 90)",
+  "pass": true,
+  "i": {
+   "d": 90
+  }
+ },
+ {
+  "n": "S2-7.5 eggs per tap uncapped at C25 (expect 130)",
+  "pass": true,
+  "i": {
+   "d": 130
+  }
+ },
+ {
+  "n": "S2-7.5 eggs per tap uncapped at C30 (expect 155)",
+  "pass": true,
+  "i": {
+   "d": 155
+  }
+ },
+ {
+  "n": "S2-7.6 goal chip ETA/progress not frozen over 12 s",
+  "pass": true,
+  "i": {
+   "uniq": [
+    "Collection L18: +5/tap—›",
+    "Collection L18: +5/tap~3 h 44 min›",
+    "Collection L18: +5/tap~1 h 18 min›",
+    "Collection L18: +5/tap~47 min›",
+    "Collection L18: +5/tap~33 min›",
+    "Collection L18: +5/tap~25 min›"
+   ]
+  }
+ }
+]

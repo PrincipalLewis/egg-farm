@@ -1,0 +1,168 @@
+{
+ "port": "5961",
+ "N": 12000,
+ "cases": {
+  "EXPB1-1-unmarked-v6-commit--single": {
+   "mode": "b1",
+   "checks": [
+    {
+     "n": "B1 precondition: no Welcome back! (clock pinned, normal show path)",
+     "pass": true,
+     "x": false,
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): card appears at the in-session commit, once",
+     "pass": true,
+     "x": {
+      "card": true,
+      "inserts": 1,
+      "flags": {
+       "tracksV7": 1,
+       "seen": true
+      }
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): never under a modal/dialog",
+     "pass": true,
+     "hard": true
+    },
+    {
+     "n": "B1 AC(1): reload -> not shown",
+     "pass": true,
+     "x": 0,
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "welcome": false,
+   "flags": {
+    "tracksV7": 1,
+    "seen": true
+   }
+  },
+  "EXPB1-2-committed-unseen-reload--single": {
+   "mode": "b1",
+   "checks": [
+    {
+     "n": "B1 AC(2): card shown on the load after an unshown commit, once",
+     "pass": true,
+     "x": {
+      "card": true,
+      "inserts": 1,
+      "flags": {
+       "tracksV7": 1,
+       "seen": true
+      }
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(2): never under a modal/dialog",
+     "pass": true,
+     "hard": true
+    },
+    {
+     "n": "B1 AC(2): reload -> not shown",
+     "pass": true,
+     "x": 0,
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "welcome": true,
+   "flags": {
+    "tracksV7": 1,
+    "seen": true
+   }
+  },
+  "EXPB1-3-new-m4-farm--single": {
+   "mode": "b1",
+   "checks": [
+    {
+     "n": "B1 AC(3): new M4 farm -> never shown, on any load (2 loads)",
+     "pass": true,
+     "x": {
+      "load1": 0,
+      "load2": 0
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(3): seen not set on a new farm",
+     "pass": true,
+     "x": null,
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "welcome": false
+  },
+  "EXPB1-4-m4-off--single": {
+   "mode": "na",
+   "checks": [
+    {
+     "n": "N/A",
+     "pass": null,
+     "x": "M4 on/off is compile-time (balance m4.enabled); not reachable in a dist-qa browser build. Covered by unit (gate4-explainer.qa.test.ts / tests/m4-exp1-explainer.test.ts)."
+    }
+   ]
+  },
+  "EXPB1-5-deferred-load--single": {
+   "mode": "b1",
+   "checks": [
+    {
+     "n": "B1 AC(5) precondition: migration deferred (IDB unknown), tracksV7 not committed",
+     "pass": true,
+     "x": {
+      "tracksV7": null,
+      "pending": false
+     },
+     "hard": true
+    },
+    {
+     "n": "B1 AC(5): deferred load -> not shown",
+     "pass": true,
+     "x": 0,
+     "hard": true
+    },
+    {
+     "n": "B1 AC(5): seen not set",
+     "pass": true,
+     "x": null,
+     "hard": true
+    },
+    {
+     "n": "no page errors",
+     "pass": true,
+     "x": [],
+     "hard": true
+    }
+   ],
+   "welcome": false,
+   "flags": {
+    "tracksV7": null,
+    "pending": false
+   }
+  }
+ },
+ "buildId": "m3-rc1-pre+dfdf49c",
+ "fails": 0
+}

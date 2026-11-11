@@ -1,0 +1,31 @@
+{
+ "id": "RUL-d-idb-newer",
+ "now": 1792378840000,
+ "csr": [
+  "D-HOP-2026-10-22-04",
+  "D-HOP-2026-10-22-03(4)",
+  "CSR-2"
+ ],
+ "ls": {
+  "eggfarm.save.bak": {
+   "ref": "raw/BAK-valid-F20-seq4-older.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": [
+   {
+    "key": "main",
+    "ref": "raw/IDB-valid-F17-seq4-T-10m.json"
+   }
+  ]
+ },
+ "expect": {
+  "recovery": false,
+  "noNotice": true,
+  "noSaveCorrupt": true,
+  "farmLevel": 17,
+  "saveRestoreIdbCount": 1,
+  "saveRestoredCount": 0
+ }
+}

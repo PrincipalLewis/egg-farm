@@ -1,0 +1,847 @@
+{
+ "tag": "desk",
+ "viewport": [
+  1280,
+  800
+ ],
+ "console": [],
+ "pageerrors": [],
+ "events": [
+  {
+   "t": "0:01",
+   "k": "shot",
+   "d": "desk-01-0m01-title.png"
+  },
+  {
+   "t": "0:03",
+   "k": "build",
+   "d": "m3-rc1-pre+ccd7bf9"
+  },
+  {
+   "t": "0:03",
+   "k": "shot",
+   "d": "desk-02-0m03-start.png"
+  },
+  {
+   "t": "0:03",
+   "k": "shot",
+   "d": "desk-03-0m03-collect-tap.png"
+  },
+  {
+   "t": "0:12",
+   "k": "sell",
+   "d": "Sell all (10 eggs · $10.00)"
+  },
+  {
+   "t": "0:12",
+   "k": "shot",
+   "d": "desk-04-0m12-sell-feedback.png"
+  },
+  {
+   "t": "0:13",
+   "k": "shot",
+   "d": "desk-05-0m13-first-upgrade.png"
+  },
+  {
+   "t": "0:13",
+   "k": "buy",
+   "d": "[Collection] gap=10s :: Collect per tap +12% egg price · +5/tap Egg price +0% → +12% Eggs per tap 5 → 10 +12% income Pays back in ~56 s ★ Best buy Level 0 / 30 $10."
+  },
+  {
+   "t": "0:19",
+   "k": "sell",
+   "d": "Sell all (12 eggs · $13.44)"
+  },
+  {
+   "t": "0:22",
+   "k": "sell",
+   "d": "Sell all (8 eggs · $8.96)"
+  },
+  {
+   "t": "0:22",
+   "k": "buy",
+   "d": "[Collection] gap=10s :: Collect per tap +12% egg price · +5/tap Egg price +12% → +24% Eggs per tap 10 → 15 +11% income Pays back in ~1 min 29 s ★ Best buy Level 1 /"
+  },
+  {
+   "t": "0:25",
+   "k": "sell",
+   "d": "Sell all (2 eggs · $2.48)"
+  },
+  {
+   "t": "0:28",
+   "k": "sell",
+   "d": "Sell all (6 eggs · $7.44)"
+  },
+  {
+   "t": "0:31",
+   "k": "sell",
+   "d": "Sell all (2 eggs · $2.48)"
+  },
+  {
+   "t": "0:34",
+   "k": "sell",
+   "d": "Sell all (7 eggs · $8.68)"
+  },
+  {
+   "t": "0:34",
+   "k": "buy",
+   "d": "[Collection] gap=12s :: Collect per tap +12% egg price · +5/tap Egg price +24% → +36% Eggs per tap 15 → 20 +10% income Pays back in ~2 min 19 s Level 2 / 30 $25.00"
+  },
+  {
+   "t": "0:37",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $6.80)"
+  },
+  {
+   "t": "0:40",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $5.44)"
+  },
+  {
+   "t": "0:42",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $5.44)"
+  },
+  {
+   "t": "0:45",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $5.44)"
+  },
+  {
+   "t": "0:48",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $6.80)"
+  },
+  {
+   "t": "0:51",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $5.44)"
+  },
+  {
+   "t": "0:54",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $5.44)"
+  },
+  {
+   "t": "0:54",
+   "k": "buy",
+   "d": "[Collection] gap=20s :: Collect per tap +12% egg price · +5/tap Egg price +36% → +48% Eggs per tap 20 → 25 +9% income Pays back in ~3 min 43 s Level 3 / 30 $40.00"
+  },
+  {
+   "t": "0:57",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $7.40)"
+  },
+  {
+   "t": "1:00",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $5.92)"
+  },
+  {
+   "t": "1:00",
+   "k": "shot",
+   "d": "desk-06-1m00-upgrades-Collection.png"
+  },
+  {
+   "t": "1:00",
+   "k": "shot",
+   "d": "desk-07-1m00-upgrades-Farm.png"
+  },
+  {
+   "t": "1:01",
+   "k": "shot",
+   "d": "desk-08-1m01-upgrades-Workers.png"
+  },
+  {
+   "t": "1:03",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $7.40)"
+  },
+  {
+   "t": "1:06",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $5.92)"
+  },
+  {
+   "t": "1:08",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $5.92)"
+  },
+  {
+   "t": "1:11",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $5.92)"
+  },
+  {
+   "t": "1:14",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $7.40)"
+  },
+  {
+   "t": "1:17",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $5.92)"
+  },
+  {
+   "t": "1:20",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $5.92)"
+  },
+  {
+   "t": "1:22",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $5.92)"
+  },
+  {
+   "t": "1:23",
+   "k": "buy",
+   "d": "[Collection] gap=29s :: Collect per tap +12% egg price · +5/tap Egg price +48% → +60% Eggs per tap 25 → 30 +8% income Pays back in ~6 min 2 s Level 4 / 30 $65.00"
+  },
+  {
+   "t": "1:26",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $8.00)"
+  },
+  {
+   "t": "1:29",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $8.00)"
+  },
+  {
+   "t": "1:32",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $6.40)"
+  },
+  {
+   "t": "1:35",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $8.00)"
+  },
+  {
+   "t": "1:38",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $6.40)"
+  },
+  {
+   "t": "1:41",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $8.00)"
+  },
+  {
+   "t": "1:43",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $6.40)"
+  },
+  {
+   "t": "1:46",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $6.40)"
+  },
+  {
+   "t": "1:49",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $8.00)"
+  },
+  {
+   "t": "1:52",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $6.40)"
+  },
+  {
+   "t": "1:54",
+   "k": "shot",
+   "d": "desk-09-1m54-periodic.png"
+  },
+  {
+   "t": "1:55",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $8.00)"
+  },
+  {
+   "t": "1:58",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $6.40)"
+  },
+  {
+   "t": "2:01",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $6.40)"
+  },
+  {
+   "t": "2:04",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $6.40)"
+  },
+  {
+   "t": "2:04",
+   "k": "buy",
+   "d": "[Farm] gap=42s :: Farm level Coop upgrade at L5 Hens 5 → 10 Coop capacity 50 → 100 Egg price $1.60 → $1.68 Customers every 5s → 4.75s Customer demand 6–12 → 8"
+  },
+  {
+   "t": "2:07",
+   "k": "sell",
+   "d": "Sell all (7 eggs · $11.76)"
+  },
+  {
+   "t": "2:10",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $8.40)"
+  },
+  {
+   "t": "2:13",
+   "k": "sell",
+   "d": "Sell all (6 eggs · $10.08)"
+  },
+  {
+   "t": "2:16",
+   "k": "sell",
+   "d": "Sell all (6 eggs · $10.08)"
+  },
+  {
+   "t": "2:19",
+   "k": "sell",
+   "d": "Sell all (7 eggs · $11.76)"
+  },
+  {
+   "t": "2:22",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $8.40)"
+  },
+  {
+   "t": "2:25",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $8.40)"
+  },
+  {
+   "t": "2:27",
+   "k": "sell",
+   "d": "Sell all (6 eggs · $10.08)"
+  },
+  {
+   "t": "2:30",
+   "k": "sell",
+   "d": "Sell all (6 eggs · $10.08)"
+  },
+  {
+   "t": "2:33",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $8.40)"
+  },
+  {
+   "t": "2:35",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $8.40)"
+  },
+  {
+   "t": "2:36",
+   "k": "buy",
+   "d": "[Collection] gap=31s :: Collect per tap +12% egg price · +5/tap Egg price +60% → +72% Eggs per tap 30 → 35 +8% income Pays back in ~6 min 40 s Level 5 / 30 $104.00"
+  },
+  {
+   "t": "2:39",
+   "k": "sell",
+   "d": "Sell all (6 eggs · $10.86)"
+  },
+  {
+   "t": "2:42",
+   "k": "sell",
+   "d": "Sell all (7 eggs · $12.67)"
+  },
+  {
+   "t": "2:45",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $9.05)"
+  },
+  {
+   "t": "2:47",
+   "k": "sell",
+   "d": "Sell all (6 eggs · $10.86)"
+  },
+  {
+   "t": "2:50",
+   "k": "sell",
+   "d": "Sell all (6 eggs · $10.86)"
+  },
+  {
+   "t": "2:53",
+   "k": "sell",
+   "d": "Sell all (6 eggs · $10.86)"
+  },
+  {
+   "t": "2:56",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $9.05)"
+  },
+  {
+   "t": "2:59",
+   "k": "sell",
+   "d": "Sell all (6 eggs · $10.86)"
+  },
+  {
+   "t": "3:02",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $9.05)"
+  },
+  {
+   "t": "3:04",
+   "k": "sell",
+   "d": "Sell all (6 eggs · $10.86)"
+  },
+  {
+   "t": "3:07",
+   "k": "sell",
+   "d": "Sell all (6 eggs · $10.86)"
+  },
+  {
+   "t": "3:10",
+   "k": "sell",
+   "d": "Sell all (6 eggs · $10.86)"
+  },
+  {
+   "t": "3:13",
+   "k": "sell",
+   "d": "Sell all (5 eggs · $9.05)"
+  },
+  {
+   "t": "3:14",
+   "k": "buy",
+   "d": "[Farm] gap=38s :: Farm level Coop upgrade at L5 Hens 10 → 15 Coop capacity 100 → 150 Egg price $1.81 → $1.89 Customers every 4.75s → 4.51s Customer demand 8–1"
+  },
+  {
+   "t": "3:16",
+   "k": "sell",
+   "d": "Sell all (9 eggs · $17.01)"
+  },
+  {
+   "t": "3:19",
+   "k": "sell",
+   "d": "Sell all (8 eggs · $15.12)"
+  },
+  {
+   "t": "3:22",
+   "k": "sell",
+   "d": "Sell all (9 eggs · $17.01)"
+  },
+  {
+   "t": "3:25",
+   "k": "sell",
+   "d": "Sell all (9 eggs · $17.01)"
+  },
+  {
+   "t": "3:27",
+   "k": "sell",
+   "d": "Sell all (8 eggs · $15.12)"
+  },
+  {
+   "t": "3:31",
+   "k": "sell",
+   "d": "Sell all (9 eggs · $17.01)"
+  },
+  {
+   "t": "3:34",
+   "k": "sell",
+   "d": "Sell all (9 eggs · $17.01)"
+  },
+  {
+   "t": "3:37",
+   "k": "sell",
+   "d": "Sell all (9 eggs · $17.01)"
+  },
+  {
+   "t": "3:40",
+   "k": "sell",
+   "d": "Sell all (9 eggs · $17.01)"
+  },
+  {
+   "t": "3:43",
+   "k": "sell",
+   "d": "Sell all (9 eggs · $17.01)"
+  },
+  {
+   "t": "3:43",
+   "k": "buy",
+   "d": "[Collection] gap=29s :: Collect per tap +12% egg price · +5/tap Egg price +72% → +84% Eggs per tap 35 → 40 +7% income Pays back in ~7 min 9 s Level 6 / 30 $167.00"
+  },
+  {
+   "t": "3:46",
+   "k": "sell",
+   "d": "Sell all (9 eggs · $18.18)"
+  },
+  {
+   "t": "3:49",
+   "k": "sell",
+   "d": "Sell all (9 eggs · $18.18)"
+  },
+  {
+   "t": "3:51",
+   "k": "sell",
+   "d": "Sell all (9 eggs · $18.18)"
+  },
+  {
+   "t": "3:54",
+   "k": "sell",
+   "d": "Sell all (8 eggs · $16.16)"
+  },
+  {
+   "t": "3:57",
+   "k": "sell",
+   "d": "Sell all (9 eggs · $18.18)"
+  },
+  {
+   "t": "3:59",
+   "k": "shot",
+   "d": "desk-10-3m59-periodic.png"
+  },
+  {
+   "t": "4:00",
+   "k": "sell",
+   "d": "Sell all (9 eggs · $18.18)"
+  },
+  {
+   "t": "4:03",
+   "k": "sell",
+   "d": "Sell all (8 eggs · $16.16)"
+  },
+  {
+   "t": "4:06",
+   "k": "sell",
+   "d": "Sell all (9 eggs · $18.18)"
+  },
+  {
+   "t": "4:09",
+   "k": "sell",
+   "d": "Sell all (9 eggs · $18.18)"
+  },
+  {
+   "t": "4:12",
+   "k": "sell",
+   "d": "Sell all (9 eggs · $18.18)"
+  },
+  {
+   "t": "4:15",
+   "k": "sell",
+   "d": "Sell all (8 eggs · $16.16)"
+  },
+  {
+   "t": "4:15",
+   "k": "buy",
+   "d": "[Farm] gap=32s :: Farm level Coop upgrade at L5 Hens 15 → 20 Coop capacity 150 → 200 Egg price $2.02 → $2.12 Customers every 4.51s → 4.29s Customer demand 11–"
+  },
+  {
+   "t": "4:17",
+   "k": "sell",
+   "d": "Sell all (10 eggs · $21.20)"
+  },
+  {
+   "t": "4:20",
+   "k": "sell",
+   "d": "Sell all (11 eggs · $23.32)"
+  },
+  {
+   "t": "4:21",
+   "k": "buy",
+   "d": "[Workers] gap=6s :: Market Hand Serves customers for you Wage $0.75/min Hire $40.00"
+  },
+  {
+   "t": "4:21",
+   "k": "shot",
+   "d": "desk-11-4m21-workers-manage.png"
+  },
+  {
+   "t": "4:21",
+   "k": "manage-state",
+   "d": "[{\"t\":\"Refill\",\"dis\":\"true\",\"title\":\"Refill Market Hand\"}]"
+  },
+  {
+   "t": "4:53",
+   "k": "sell",
+   "d": "Sell all (4 eggs · $8.48)"
+  },
+  {
+   "t": "4:54",
+   "k": "shot",
+   "d": "desk-12-4m54-collect-empty.png"
+  },
+  {
+   "t": "4:54",
+   "k": "collect-empty",
+   "d": "Collect +40"
+  },
+  {
+   "t": "4:55",
+   "k": "sell",
+   "d": "Sell all (40 eggs · $84.80)"
+  },
+  {
+   "t": "6:25",
+   "k": "shot",
+   "d": "desk-13-6m25-periodic.png"
+  },
+  {
+   "t": "7:00",
+   "k": "shot",
+   "d": "desk-14-7m00-end.png"
+  }
+ ],
+ "states": [
+  {
+   "top": "Egg Farm $0.00 +$1.50/s 1 build ccd7bf9 $0.00, 1 eggs",
+   "goal": "★ Collection L1 · +12% income~0:07›",
+   "collect": "Collect +5 · 2 ready",
+   "toast": "A customer is on the way… 8 s | ○ ● ○",
+   "t": "0:04",
+   "sinceBuy": 1
+  },
+  {
+   "top": "Egg Farm $13.44 +$1.68/s 3 build ccd7bf9 $13.44, 3 eggs",
+   "goal": "★ Collection L2 · +11% income ~0:02 ›",
+   "collect": "Collect +10 · 2 ready",
+   "toast": "",
+   "t": "0:20",
+   "sinceBuy": 7
+  },
+  {
+   "top": "Egg Farm $2.48 +$2.04/s 0 build ccd7bf9 $2.48, 0 eggs",
+   "goal": "★ Farm L1 · +40% income ~0:48 ›",
+   "collect": "Collect +20 · 3 ready",
+   "toast": "",
+   "t": "0:35",
+   "sinceBuy": 1
+  },
+  {
+   "top": "Egg Farm $37.84 +$2.04/s 0 build ccd7bf9 $37.84, 0 eggs",
+   "goal": "★ Farm L1 · +40% income ~0:31 ›",
+   "collect": "Collect +20 · 2 ready",
+   "toast": "",
+   "t": "0:52",
+   "sinceBuy": 18
+  },
+  {
+   "top": "Egg Farm $29.92 +$2.22/s 0 build ccd7bf9 $29.92, 0 eggs",
+   "goal": "★ Farm L1 · +40% income ~0:32 ›",
+   "collect": "Collect +25 · 2 ready",
+   "toast": "",
+   "t": "1:07",
+   "sinceBuy": 13
+  },
+  {
+   "top": "Egg Farm $1.92 +$2.40/s 0 build ccd7bf9 $1.92, 0 eggs",
+   "goal": "★ Farm L1 · +40% income ~0:41 ›",
+   "collect": "Collect +30 · 2 ready",
+   "toast": "",
+   "t": "1:23",
+   "sinceBuy": 1
+  },
+  {
+   "top": "Egg Farm $38.72 +$2.40/s 0 build ccd7bf9 $32.32, 4 eggs",
+   "goal": "★ Farm L1 · +40% income ~0:26 ›",
+   "collect": "Collect +30 · 2 ready",
+   "toast": "",
+   "t": "1:39",
+   "sinceBuy": 16
+  },
+  {
+   "top": "Egg Farm $73.92 +$2.40/s 0 build ccd7bf9 $73.92, 0 eggs",
+   "goal": "★ Farm L1 · +40% income ~0:11 ›",
+   "collect": "Collect +30 · 3 ready",
+   "toast": "",
+   "t": "1:54",
+   "sinceBuy": 31
+  },
+  {
+   "top": "Egg Farm $12.88 +$3.36/s 0 build ccd7bf9 $12.88, 0 eggs",
+   "goal": "★ Farm L2 · +57% income ~0:37 ›",
+   "collect": "Collect +30 · 3 ready",
+   "toast": "",
+   "t": "2:09",
+   "sinceBuy": 4
+  },
+  {
+   "top": "Egg Farm $61.60 +$3.36/s 3 build ccd7bf9 $61.60, 0 eggs",
+   "goal": "★ Farm L2 · +57% income ~0:22 ›",
+   "collect": "Collect +30 · 1 ready",
+   "toast": "",
+   "t": "2:24",
+   "sinceBuy": 19
+  },
+  {
+   "top": "Egg Farm $13.82 +$3.62/s 0 build ccd7bf9 $13.82, 0 eggs",
+   "goal": "★ Farm L2 · +57% income ~0:34 ›",
+   "collect": "Collect +35 · 3 ready",
+   "toast": "",
+   "t": "2:39",
+   "sinceBuy": 3
+  },
+  {
+   "top": "Egg Farm $68.12 +$3.62/s 0 build ccd7bf9 $68.12, 0 eggs",
+   "goal": "★ Farm L2 · +57% income ~0:19 ›",
+   "collect": "Collect +35 · 3 ready",
+   "toast": "",
+   "t": "2:55",
+   "sinceBuy": 19
+  },
+  {
+   "top": "Egg Farm $129.66 +$3.62/s 0 build ccd7bf9 $129.66, 0 eggs",
+   "goal": "★ Farm L2 · +57% income ~0:02 ›",
+   "collect": "Collect +35 · 3 ready",
+   "toast": "",
+   "t": "3:11",
+   "sinceBuy": 35
+  },
+  {
+   "top": "Egg Farm $69.86 +$5.67/s 5 build ccd7bf9 $69.86, 5 eggs",
+   "goal": "★ Farm L3 · +40% income ~0:20 ›",
+   "collect": "Collect +35 · 1 ready",
+   "toast": "",
+   "t": "3:27",
+   "sinceBuy": 13
+  },
+  {
+   "top": "Egg Farm $3.03 +$5.67/s 0 build ccd7bf9 $170.03, 0 eggs",
+   "goal": "★ Farm L3 · +40% income ~0:30 ›",
+   "collect": "Collect +40 · 4 ready",
+   "toast": "",
+   "t": "3:44",
+   "sinceBuy": 1
+  },
+  {
+   "top": "Egg Farm $91.91 +$6.06/s 4 build ccd7bf9 $91.91, 0 eggs",
+   "goal": "★ Farm L3 · +40% income ~0:15 ›",
+   "collect": "Collect +40 · 1 ready",
+   "toast": "",
+   "t": "3:59",
+   "sinceBuy": 16
+  },
+  {
+   "top": "Egg Farm $14.95 +$6.06/s 0 build ccd7bf9 $196.95, 0 eggs",
+   "goal": "★ Farm L4 · +30% income ~0:28 ›",
+   "collect": "Collect +40 · 5 ready",
+   "toast": "",
+   "t": "4:16",
+   "sinceBuy": 0
+  },
+  {
+   "top": "Egg Farm $42.46 +$8.47/s 0 build ccd7bf9 $42.46, 0 eggs",
+   "goal": "★ Farm L4 · +30% income ~0:25 ›",
+   "collect": "Collect +40",
+   "toast": "",
+   "t": "4:54",
+   "sinceBuy": 33
+  },
+  {
+   "top": "Egg Farm $127.10 +$8.47/s 0 build ccd7bf9 $127.11, 0 eggs",
+   "goal": "★ Farm L4 · +30% income ~0:15 ›",
+   "collect": "Collect +40",
+   "toast": "",
+   "t": "5:09",
+   "sinceBuy": 48
+  },
+  {
+   "top": "Egg Farm $126.95 +$8.47/s 0 build ccd7bf9 $126.95, 0 eggs",
+   "goal": "★ Farm L4 · +30% income ~0:15 ›",
+   "collect": "Collect +40",
+   "toast": "",
+   "t": "5:24",
+   "sinceBuy": 63
+  },
+  {
+   "top": "Egg Farm $126.80 +$8.47/s 0 build ccd7bf9 $126.80, 0 eggs",
+   "goal": "★ Farm L4 · +30% income ~0:15 ›",
+   "collect": "Collect +40",
+   "toast": "",
+   "t": "5:39",
+   "sinceBuy": 79
+  },
+  {
+   "top": "Egg Farm $126.65 +$8.47/s 0 build ccd7bf9 $126.65, 0 eggs",
+   "goal": "★ Farm L4 · +30% income ~0:15 ›",
+   "collect": "Collect +40",
+   "toast": "",
+   "t": "5:55",
+   "sinceBuy": 94
+  },
+  {
+   "top": "Egg Farm $126.49 +$8.47/s 0 build ccd7bf9 $126.50, 0 eggs",
+   "goal": "★ Farm L4 · +30% income ~0:15 ›",
+   "collect": "Collect +40",
+   "toast": "",
+   "t": "6:10",
+   "sinceBuy": 109
+  },
+  {
+   "top": "Egg Farm $126.34 +$8.47/s 0 build ccd7bf9 $126.35, 0 eggs",
+   "goal": "★ Farm L4 · +30% income ~0:15 ›",
+   "collect": "Collect +40",
+   "toast": "",
+   "t": "6:25",
+   "sinceBuy": 124
+  },
+  {
+   "top": "Egg Farm $126.19 +$8.47/s 0 build ccd7bf9 $126.19, 0 eggs",
+   "goal": "★ Farm L4 · +30% income ~0:15 ›",
+   "collect": "Collect +40",
+   "toast": "",
+   "t": "6:40",
+   "sinceBuy": 140
+  },
+  {
+   "top": "Egg Farm $126.04 +$8.47/s 0 build ccd7bf9 $126.04, 0 eggs",
+   "goal": "★ Farm L4 · +30% income ~0:15 ›",
+   "collect": "Collect +40",
+   "toast": "",
+   "t": "6:56",
+   "sinceBuy": 155
+  }
+ ],
+ "build_id_title": "m3-rc1-pre+ccd7bf9",
+ "build_id": "m3-rc1-pre+ccd7bf9",
+ "firstBuy": "0:13",
+ "maxGap": 41.695,
+ "gaps": [
+  [
+   "0:13",
+   9.857
+  ],
+  [
+   "0:22",
+   9.799
+  ],
+  [
+   "0:34",
+   11.579
+  ],
+  [
+   "0:54",
+   20.155
+  ],
+  [
+   "1:23",
+   28.558
+  ],
+  [
+   "2:04",
+   41.695
+  ],
+  [
+   "2:36",
+   31.451
+  ],
+  [
+   "3:14",
+   37.789
+  ],
+  [
+   "3:43",
+   29.269
+  ],
+  [
+   "4:15",
+   32.177
+  ],
+  [
+   "4:21",
+   5.6
+  ]
+ ],
+ "endGapSinceBuy": 159.56
+}

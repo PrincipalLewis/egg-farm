@@ -1,0 +1,33 @@
+38,39c38,39
+< PASS [chromium] ACb fresh (SD- main missing + bad .bak) : exact vtrings + badge, icon hidden — ["A fresh start","We couldn't open your farm. Your old save is kept safe.","Start farming","★"]
+< PASS [chromium] ACb fresh (SD- main missing + bad .bak) : exact vtrings + badge, icon hidden — ["A fresh start","We couldn't open your farm. Your old save is kept safe.","Start farming","★"]
+---
+> PASS [chromium] ACb fresh (SD- main missing + bad .bak) : exact vtrings + badge, icon hidden — ["A fresh start","We couldn't recover your save, so we started a new farm for you.","Start farming","★"]
+> PASS [chromium] ACb fresh (SD- main missing + bad .bak) : exact vtrings + badge, icon hidden — ["A fresh start","We couldn't recover your save, so we started a new farm for you.","Start farming","★"]
+61,62c61,62
+< PASS [chromium] ACb fresh : exact vtrings + badge, icon hidden — ["A fresh start","We couldn't open your farm. Your old save is kept safe.","Start farming","★"]
+< PASS [chromium] ACb fresh : exact vtrings + badge, icon hidden — ["A fresh start","We couldn't open your farm. Your old save is kept safe.","Start farming","★"]
+---
+> PASS [chromium] ACb fresh : exact vtrings + badge, icon hidden — ["A fresh start","We couldn't recover your save, so we started a new farm for you.","Start farming","★"]
+> PASS [chromium] ACb fresh : exact vtrings + badge, icon hidden — ["A fresh start","We couldn't recover your save, so we started a new farm for you.","Start farming","★"]
+84,85c84,85
+< PASS [chromium] ACb restored : exact vtrings + badge, icon hidden — ["Welcome back!","We loaded your backup. You may be a few moments behind.","Keep farming","✓"]
+< PASS [chromium] ACb restored : exact vtrings + badge, icon hidden — ["Welcome back!","We loaded your backup. You may be a few moments behind.","Keep farming","✓"]
+---
+> PASS [chromium] ACb restored : exact vtrings + badge, icon hidden — ["Your farm is back!","We fixed a hiccup and restored your latest save.","Continue","✓"]
+> PASS [chromium] ACb restored : exact vtrings + badge, icon hidden — ["Your farm is back!","We fixed a hiccup and restored your latest save.","Continue","✓"]
+126a127,128
+> PASS [chromium] B FARM ready target: no aria-label, name starts with the visible text, Bentence is the description — 
+> PASS [chromium] B FARM target: no aria-label, name starts with the visible text, Bentence is the description — 
+128a131,132
+> PASS [chromium] B W Hawker target: no aria-label, name starts with the visible text, Bentence is the description — 
+> PASS [chromium] B W Market Hand target: no aria-label, name starts with the visible text, Bentence is the description — 
+130a135
+> PASS [chromium] B done target: no aria-label, name starts with the visible text, Bentence is the description — 
+138a144
+> PASS [chromium] B worker target: no aria-label, name starts with the visible text, Bentence is the description — 
+263a270,273
+> PASS [chromium] G refund card on screen (place default, not none) with the sheet at the top at  — default
+> PASS [chromium] G refund card on screen (place default, not none) with the sheet at the top at  — default
+> PASS [chromium] G refund card on screen (place default, not none) with the sheet at the top at  — default
+> PASS [chromium] G refund card on screen (place default, not none) with the sheet at the top at  — default

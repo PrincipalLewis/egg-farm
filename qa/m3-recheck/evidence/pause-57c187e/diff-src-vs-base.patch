@@ -1,0 +1,175 @@
+diff --git a/src/config/m5-rules.ts b/src/config/m5-rules.ts
+index 54f5f6b..be48aca 100644
+--- a/src/config/m5-rules.ts
++++ b/src/config/m5-rules.ts
+@@ -10,7 +10,7 @@ const fail = (m: string): never => { throw new Error(`balance.m4.${m}`); };
+ const has = (tc: TC, ...k: string[]) => k.every(x => typeof tc[x] === 'number');
+ /** tc keys that must exist while their flag is on (feature PRs append; empty until a reader lands). */
+ export const M5_REQUIRED_TC: Partial<Record<(typeof M5_FLAGS)[number], readonly string[]>> = {
+-  pause: ['pause_unlock_farm', 'pause_call_lockout_s'], // CCR-F4: read by save/m5-fields.ts m5Load (pause spec rule 1, B5)
++  pause: ['pause_unlock_farm', 'pause_call_lockout_s', 'rest_recovery_mult'], // rule 1 / B5 (m5Load) + rule 3 recovery (sim/pause.ts)
+ };
+ export function validateM5(m4: any, workers: any): void {
+   if (!m4) return;
+diff --git a/src/econ/income.ts b/src/econ/income.ts
+index b475237..6702850 100644
+--- a/src/econ/income.ts
++++ b/src/econ/income.ts
+@@ -31,7 +31,7 @@ export function collectPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}):
+   if (!w) return tap;
+   if (opts.assumeWorking) return tap * 1.5;
+   const m = mood(w, b);
+-  if (!m || isOff(m)) return tap; // asleep / unpaid / paused → no auto collect
++  if (!m || isOff(m) || isPaused(w, b)) return tap; // asleep / unpaid / paused → no auto collect
+   if (m === 'working') return tap * 1.5;
+   const { every_s, tired_every_s } = b.workers.coop_hand;
+   return tap * (1 + (every_s / tired_every_s) * 0.5);
+@@ -62,7 +62,7 @@ export function wagesPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): nu
+     if (!worker) continue;
+     if (!opts.assumeWorking) {
+       const m = mood(worker, b);
+-      if (!m || isOff(m)) continue;
++      if (!m || isOff(m) || isPaused(worker, b)) continue;
+     }
+     w += b.workers[id].wage_per_farm_per_min * s.farmLevel / 60;
+   }
+diff --git a/src/sim/offline.ts b/src/sim/offline.ts
+index 1273feb..f61597a 100644
+--- a/src/sim/offline.ts
++++ b/src/sim/offline.ts
+@@ -18,6 +18,8 @@ export function offlineEggs(awayS: number, farmLevel: number, b: Balance, eps =
+   return Math.floor(Math.min(awayS, o.offlineCapSeconds) * o.offlineRateMultiplier * eps * mult);
+ }
+ /** Coop untouched; eggs parked in pendingOfflineEggs until the modal's Collect (bypasses coop cap). */
++/** D-HOP-2026-11-06-01 (a) / Pause v1.3.15: the egg grant depends on hen state, the eligible gap, and the cap.
++ *  Pause, hire, and m4.flags.pause do not change it. */
+ export function applyOffline(s: GameState, awayMs: number, b: Balance) {
+   const eggs = m4On(b) && b.m4?.offline ? m4OfflineEggs(awayMs / 1000, s.hensLevel, b, offlineMult(s, b))
+     : offlineEggs(awayMs / 1000, s.farmLevel, b, prodEggsPerSec(s, b), offlineMult(s, b));
+diff --git a/src/sim/pause.ts b/src/sim/pause.ts
+index 30c1fba..aab6ca0 100644
+--- a/src/sim/pause.ts
++++ b/src/sim/pause.ts
+@@ -6,8 +6,43 @@
+  */
+ import type { Balance } from '../config/balance';
+ import { flagOn } from '../config/flags';
+-import type { Worker } from './workers';
++import { tcNum } from '../config/formulas';
++import type { GameState } from './state';
++import type { Worker, WorkerId, Workers } from './workers';
+ export const isPaused = (w: Worker | undefined, b: Balance): boolean => !!w && w.paused === true && flagOn(b, 'pause');
+ /** CCR-F4 load sanitiser (pause spec E9 "non-boolean = false", rule 1/E12 "below the unlock: not paused"): drops `paused` unless it is a
+  *  boolean and the farm is at or above tc_pause_unlock_farm (`open`). The same object when nothing changes. Called by save/m5-fields.ts m5Load. */
+ export const sanitizePausedOnLoad = (w: Worker, open: boolean): Worker => { if (!('paused' in w) || (open && typeof w.paused === 'boolean')) return w; const { paused: _p, ...rest } = w; return rest; };
++const EPS = 1e-9;
++/** Energy is a percent. Full tank is that scale, not a CSV column (same 0..100 as Worker.energy). */
++export const ENERGY_FULL = 100;
++/** Rule 3 / §6: energy after `dt` sim seconds paused. Recovers at rest_recovery_mult of the drain rate, capped at a full tank. No drain. */
++export function pausedRecoveredEnergy(w: Worker, dt: number, b: Balance): number {
++  return Math.min(ENERGY_FULL, w.energy + tcNum(b, 'rest_recovery_mult') * dt / b.workers.energy.drain_s_per_pct);
++}
++/** Rule 1: pause a hired worker at or above tc_pause_unlock_farm. Flag off, below the unlock, missing or already paused: the same state. */
++export function pauseWorker(s: GameState, id: WorkerId, b: Balance): GameState {
++  if (!flagOn(b, 'pause')) return s;
++  const w = s.workers[id];
++  if (!w || isPaused(w, b) || s.farmLevel < tcNum(b, 'pause_unlock_farm')) return s;
++  return { ...s, workers: { ...s.workers, [id]: { ...w, paused: true } } };
++}
++/** Resume. Market Hand (B5) starts callLockoutS at tc_pause_call_lockout_s (45 sim seconds). Other workers get no lockout. */
++export function resumeWorker(s: GameState, id: WorkerId, b: Balance): GameState {
++  if (!flagOn(b, 'pause')) return s;
++  const w = s.workers[id];
++  if (!w || !isPaused(w, b)) return s;
++  const next: Worker = { ...w, paused: false };
++  if (id === 'market_hand') next.callLockoutS = tcNum(b, 'pause_call_lockout_s');
++  return { ...s, workers: { ...s.workers, [id]: next } };
++}
++/** B5: Market Hand lockout counts down in sim seconds (not focus seconds). Absent at 0 (E9). Offline / hidden ≥ 60 s never call this
++ *  on the kept state, so the lockout stays frozen there. The same workers object when the flag is off or nothing is running. */
++export function tickCallLockout(ws: Workers, dt: number, b: Balance): Workers {
++  if (!flagOn(b, 'pause')) return ws;
++  const w = ws.market_hand;
++  if (!w || typeof w.callLockoutS !== 'number' || !(w.callLockoutS > 0)) return ws;
++  const left = w.callLockoutS - dt;
++  if (left <= EPS) { const { callLockoutS: _c, ...rest } = w; return { ...ws, market_hand: rest }; }
++  return { ...ws, market_hand: { ...w, callLockoutS: left } };
++}
+diff --git a/src/sim/tick.ts b/src/sim/tick.ts
+index c2fbcd9..422223e 100644
+--- a/src/sim/tick.ts
++++ b/src/sim/tick.ts
+@@ -5,6 +5,7 @@ import { sellTo } from './actions';
+ import { prodEggsPerSec, coopCap } from './tracks';
+ import { anyM5FlagOn, stepTimers } from './timers';
+ import { focusTicks, tickClock, type FrameClock, type StepClock } from './clock';
++import { isPaused, pausedRecoveredEnergy, tickCallLockout } from './pause';
+ import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge, resumeNeedCents } from './workers';
+ /** Pure: advance sim by dt seconds. Optional `ev` collects events.
+  *  Order within a tick: worker energy -> coop fill -> timeouts -> arrivals -> Coop Hand -> Market Hand.
+@@ -13,17 +14,20 @@ import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge,
+  *  the M5 stepTimers() sub-calls, which run only while an m4.flags.* flag is on. */
+ export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: StepClock): GameState {
+   const L = s.farmLevel, E = b.workers.energy;
+-  // Energy: Working and Tired workers drain 1% per drain_s_per_pct; Asleep stays at 0 until managed; Unpaid doesn't drain (ruling 1).
++  // Energy: Working and Tired drain 1% per drain_s_per_pct; Asleep stays at 0; Unpaid doesn't drain (ruling 1).
++  // Paused (m4.flags.pause, isPaused): no drain, recover at rest_recovery_mult of that rate, cap 100 (pause spec rule 3).
+   let workers: Workers = s.workers;
+   if (Object.keys(workers).length) {
+     workers = {};
+     for (const id of WORKERS) {
+       const w0 = s.workers[id]; if (!w0) continue;
+-      const before = mood(w0, b), w = { ...w0, energy: before === 'asleep' ? 0 : before === 'unpaid' ? w0.energy : Math.max(0, w0.energy - dt / E.drain_s_per_pct) };
++      const before = mood(w0, b), paused = isPaused(w0, b);
++      const w = { ...w0, energy: paused ? pausedRecoveredEnergy(w0, dt, b) : before === 'asleep' ? 0 : before === 'unpaid' ? w0.energy : Math.max(0, w0.energy - dt / E.drain_s_per_pct) };
+       const after = mood(w, b); if (after !== before) ev?.push({ type: 'worker_state', worker: id, state: after! });
+       if (!isYawning(w0, b) && isYawning(w, b)) ev?.push({ type: 'worker_yawn', worker_id: id, energy_pct: Math.round(w.energy * 10) / 10, farm_level: L });
+       workers[id] = w;
+     }
++    workers = tickCallLockout(workers, dt, b); // B5: sim seconds, frozen when this tick does not run (offline / hidden ≥ 60 s)
+   }
+   const live = anyM5FlagOn(b), fx = live ? { suspended: !clock?.focus } : undefined; // F1c: timed effects only on focus ticks
+   const cap = coopCap(s, b), coop = Math.min(cap, s.coop + prodEggsPerSec(s, b, fx) * dt);
+@@ -67,7 +71,7 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, fxSuspen
+   let reserved = 0;
+   for (const id of ['market_hand', 'coop_hand'] as const) { const w = ws[id]; if (w && !w.unpaid && w.energy > 0) reserved += resumeNeedCents(id, s.farmLevel, b); }
+   for (const id of ['market_hand', 'coop_hand'] as const) {
+-    const w = ws[id]; if (!w?.unpaid) continue;
++    const w = ws[id]; if (!w?.unpaid || isPaused(w, b)) continue; // paused: no wage resume
+     const need = resumeNeedCents(id, s.farmLevel, b);
+     if (s.coinsCents < reserved + need) break;
+     reserved += need; ws[id] = { ...w, unpaid: false, cdS: 0 };
+@@ -76,7 +80,7 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, fxSuspen
+   s = { ...s, workers: ws };
+   for (const id of ['coop_hand', 'market_hand'] as const) {
+     const w = ws[id]; if (!w) continue;
+-    const m = mood(w, b); if (isOff(m)) continue;
++    const m = mood(w, b); if (isOff(m) || isPaused(w, b)) continue; // paused: no action, no wage, cdS frozen
+     let cdS = w.cdS - dt;
+     if (cdS <= 1e-9) {
+       const cfg = b.workers[id], interval = m === 'working' ? cfg.every_s : cfg.tired_every_s;
+diff --git a/src/sim/workers.ts b/src/sim/workers.ts
+index fdabb2e..69e1167 100644
+--- a/src/sim/workers.ts
++++ b/src/sim/workers.ts
+@@ -1,5 +1,6 @@
+ import type { Balance } from '../config/balance';
+ import { farmCost } from '../config/formulas';
++import { isPaused } from './pause';
+ /** M2 Workers (m2-proposal v1.0). All tunables in balance.workers. Pure helpers used by tick/actions. */
+ export type WorkerId = 'market_hand' | 'coop_hand' | 'hawker' | 'grader';
+ export const WORKERS: WorkerId[] = ['market_hand', 'coop_hand', 'hawker', 'grader'];
+@@ -41,11 +42,13 @@ export const graderTierCostCents = (i: number, b: Balance) => {
+ /** Price multiplier from the Grader: full bonus Working, half Tired, asleep keeps asleep_bonus_share.
+  *  `tierAdd` = #4 Inspect (abilities rule 2: + tc_ability_w4_tier_add to the tier mult while the call runs; 0 otherwise). */
+ export function graderMult(ws: Workers, tier: number, b: Balance, tierAdd = 0): number {
++  if (isPaused(ws.grader, b)) return 1; // paused: no price bonus (not even the asleep share)
+   const m = mood(ws.grader, b); if (!m || tier <= 0) return 1;
+   const g = b.workers.grader, bonus = g.tiers[tier - 1].mult + tierAdd - 1;
+   return 1 + bonus * (m === 'working' ? 1 : m === 'tired' ? g.tired_bonus_share : g.asleep_bonus_share /* asleep or unpaid */);
+ }
+ export function hawkerDemandMult(ws: Workers, b: Balance): number {
++  if (isPaused(ws.hawker, b)) return 1;
+   const m = mood(ws.hawker, b); return m === 'working' ? b.workers.hawker.demand_mult : m === 'tired' ? b.workers.hawker.tired_demand_mult : 1;
+ }
+ /** Full wage for one action interval, cents (rounded). Caller makes the worker Unpaid if coins < this. */

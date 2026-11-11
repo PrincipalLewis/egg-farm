@@ -1,0 +1,9 @@
+2026-10-19 07:54:05 CEST === GATE4 45eb5e3755aef9bc300f8b94a39653f837c49d80 profile=capped steps=[pre marker release] engines=[firefox webkit chromium]
+2026-10-19 07:54:05 CEST pushed on: origin/fix/m4-exp1-seen-revert origin/rc/m4-t3-capped   origin/main=dd52bfdc1c695cfc7695b3d63ba6a7883c5fd49b
+2026-10-19 07:54:05 CEST m4.enabled at SHA: 1 (want 1)
+2026-10-19 07:54:20 CEST build exit=0
+2026-10-19 07:54:20 CEST static build-id: dist-html/egg-farm.html:m3-rc1-pre+45eb5e3 dist-qa/index.html:m3-rc1-pre+45eb5e3 dist/index.html:m3-rc1-pre+45eb5e3  (want m3-rc1-pre+45eb5e3, no +dirty)
+2026-10-19 07:54:23 CEST marker/migrate-once/rollback/F50/flag-off + explainer profile=capped exit=1       Tests  1 failed | 39 passed | 2 skipped (42) 
+2026-10-19 07:54:23 CEST loader fix a399d27 in history: YES  explainer e43bc00 in history: NO  maxLevel=30  csv=b48be8a4
+2026-10-19 07:54:23 CEST check-release-build exit=0
+2026-10-19 07:54:23 CEST ALL_DONE 18s

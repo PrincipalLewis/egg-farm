@@ -1,0 +1,12 @@
+{
+ "ok": true,
+ "engine": "chromium",
+ "agoS": 7200,
+ "seededAgoS": 7200,
+ "welcome": true,
+ "wbText": "Welcome back!",
+ "pending": 29250,
+ "recovery": false,
+ "errs": [],
+ "oneShot": true
+}

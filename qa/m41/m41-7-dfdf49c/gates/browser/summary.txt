@@ -1,0 +1,4 @@
+2026-10-22 21:04:21 CEST buildid-dist exit=0 wall=114s
+2026-10-22 21:04:21 CEST   PASS runtime build-id [chromium] want m3-rc1-pre+dfdf49c [BUILD_PREFIX='m3-rc1-pre' from scripts/build-id.ts@dfdf49c; no suffix allowed]
+2026-10-22 21:04:53 CEST check-globals exit=143 wall=32s
+2026-10-22 21:04:53 CEST   

@@ -1,0 +1,133 @@
+LOCK+START 2026-11-06T00:22:08+01:00 loadavg=0.30 0.48 0.75 1/2057 1514850
+
+ RUN  v2.1.9 /workspace/egg-farm-studio/qa/scratch/pause-57c187e/wt
+
+ ✓ tests/v5-pause-sim.test.ts > [AC-P1] flag off: paused and callLockoutS have no behavioural effect > pauseWorker / resumeWorker return the same state; a stray paused:true drains, works and does not recover
+ ✓ tests/v5-pause-sim.test.ts > [AC-P1] flag off: paused and callLockoutS have no behavioural effect > income of a working paused helper matches the unpaused helper while pause = 0
+ ✓ tests/v5-pause-sim.test.ts > [rule 1][AC-P2] toggle only at or above tc_pause_unlock_farm, hired workers, flag on > below the unlock, missing worker, and a second pause are no-ops (same object)
+ ✓ tests/v5-pause-sim.test.ts > [rule 1][AC-P2] toggle only at or above tc_pause_unlock_farm, hired workers, flag on > at the unlock a hired worker pauses; resume clears it
+ ✓ tests/v5-pause-sim.test.ts > [rule 3][§6] paused energy recovers at rest_recovery_mult and does not drain > 36 s at 0.25x of a 9 s/pct drain is +1 energy; an unpaused twin loses 4
+ ✓ tests/v5-pause-sim.test.ts > [rule 3][§6] paused energy recovers at rest_recovery_mult and does not drain > recovery caps at 100; rest_recovery_mult 0 freezes energy (no drain)
+ ✓ tests/v5-pause-sim.test.ts > [rule 3][§6] paused energy recovers at rest_recovery_mult and does not drain > unpaid + paused still recovers and stays unpaid (no wage resume while paused)
+ ✓ tests/v5-pause-sim.test.ts > [pause output] paused workers do no wage, collect, sell, or price/demand work > Market Hand: no wage, no sell, cdS frozen; the player is not stalled
+ ✓ tests/v5-pause-sim.test.ts > [pause output] paused workers do no wage, collect, sell, or price/demand work > Coop Hand: no collect while paused; working collect rate drops to the tap
+ ✓ tests/v5-pause-sim.test.ts > [pause output] paused workers do no wage, collect, sell, or price/demand work > paused Grader price mult is 1 and paused Hawker demand mult is 1
+ ✓ tests/v5-pause-sim.test.ts > [B5][E9] Market Hand callLockoutS is 45 sim seconds from resume and counts down in sim time > resume sets tc_pause_call_lockout_s on the Market Hand only and replaces a partial lockout
+ ✓ tests/v5-pause-sim.test.ts > [B5][E9] Market Hand callLockoutS is 45 sim seconds from resume and counts down in sim time > counts down on sim dt, including a no-focus tick; hits 0 as absent, never negative
+ ✓ tests/v5-pause-sim.test.ts > [B5][E9] Market Hand callLockoutS is 45 sim seconds from resume and counts down in sim time > pause does not clear a running lockout; the countdown continues while that worker is paused
+ ✓ tests/v5-pause-sim.test.ts > [B5][E9] Market Hand callLockoutS is 45 sim seconds from resume and counts down in sim time > [offline][hidden>=60] m5Offline and a hidden gap of 60 s freeze the lockout and recovery; a 5 s hide does not
+ ✓ tests/v5-pause-sim.test.ts > [CCR-F4] pause sim reads rest_recovery_mult while the flag is on > missing rest_recovery_mult is a validateBalance error (no silent 0)
+ ✓ tests/v5-pause-sim.test.ts > [AC-P13][§15] committed tracksV7 save with a hired worker > [AC-P13][§15] the fixture is a committed tracksV7 save and validate → m5Load keeps both hires
+ ✓ tests/v5-pause-sim.test.ts > [AC-P13][§15] committed tracksV7 save with a hired worker > [AC-P13][§15] loads the fixture, pauses, resumes, round-trips, and exports without throw
+ ✓ tests/v5-pause-sim.test.ts > [AC-P13][§15] committed tracksV7 save with a hired worker > [AC-P13][§15] pause freezes online wages; an offline egg grant matches the unpaused grant
+ ✓ tests/v5-pause-sim.test.ts > [AC-P13][§15] committed tracksV7 save with a hired worker > [AC-P13][§15] resume does not double-credit wages or recovery for the paused gap
+ ✓ tests/v5-pause-sim.test.ts > [AC-P13][§15] committed tracksV7 save with a hired worker > [AC-P13][§15] paused survives save/load
+ ✓ tests/v5-pause-sim.test.ts > [AC-P13][§15] committed tracksV7 save with a hired worker > [AC-P13][§15] legacy save without a pause field loads unpaused
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled > shipping balance has no m4.flags: every M5 flag off; SAVE_VERSION stays 6
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled > [CCR-77-N1][D-C1] m5Flag is config/flags flagOn for every M5_FLAGS name (one flag type, one rule)
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled > flags off: m5Load / m5Offline / m5ShortGap return the SAME object, no events (byte-identical to the base)
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled > m5Persist: no session key -> same object, so serialize writes exactly the base bytes (an M5 saved shape too)
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > valid values kept; a call spanning the reload ends once (offline, effect_s = tc_ability_s - activeS); activeS cleared
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > nextSpawnRemainingS = -1 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > nextSpawnRemainingS = 1000000000 -> 300
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > nextSpawnRemainingS = null -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > nextSpawnRemainingS = 87 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > frenzyRemainingS = 999 -> 30
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > frenzyRemainingS = -0.5 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyNestCents = 12.9 -> 12
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyNestCents = 50000000000000000 -> 1000000000000000
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyNestCents = -3 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyHenIdx = 12 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyHenIdx = 2.5 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > broodyHenIdx = 11 -> 11
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > evRngState = 0 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > evRngState = 4294967296 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > evRngState = -4 -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > evRngState = 4294967295 -> 4294967295
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > abilitiesCoachSeen = yes -> undefined
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > abilitiesUnlocked = false -> false
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > readyAt clamped to [now, now + tc_ability_cd_s]; non-finite -> ready (absent); a clock rolled back a day loads at most one cooldown
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > activeS > tc_ability_s clamps (effect_s 0); non-finite / <= 0 is no call (no event); junk containers dropped
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > only the fields of a flag that is on are touched (flag off then on: kept, not read; abilities spec E7)
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 sanitisers on load (D-C5, AB-1, E2/E2b) > session-only keys in a hand-edited save never load; legacy v1.0 frenzyEndAt dropped (R23 uses frenzyRemainingS)
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 persist (save shape) > every session key is dropped (F1a M5_SESSION_FIELDS); saved fields and activeS kept (E2); input not mutated
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 persist (save shape) > [CCR-77-m1][D-C4] the strip list IS F1a M5_SESSION_FIELDS, pinned to the 8 spec keys; each one is dropped by persist and serialize
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a gap of 60 s or more (§9.1 / §9.1a) > egg expires (offline, fresh evRng gap), calls end at the gap start, s = 0; Frenzy frozen, nest kept, readyAt (wall clock) untouched
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a gap of 60 s or more (§9.1 / §9.1a) > no egg on screen: the countdown is kept, not re-drawn (golden R8, review fix B1); evRng not advanced
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a gap of 60 s or more (§9.1 / §9.1a) > D-C2: drawGap with no evRngState seeds mixSeed(state.rng ^ 0x6576526E) once and never touches state.rng
+ ✓ tests/v5-f2-m5-fields.test.ts > [D-HOE-41] endCalls / m5Load: AbilityState.durS is the granted length (offline end) > [D-HOE-41][AC] legacy save without durS: effect_s = tc_ability_s - activeS; no leftover durS
+ ✓ tests/v5-f2-m5-fields.test.ts > [D-HOE-41] endCalls / m5Load: AbilityState.durS is the granted length (offline end) > [D-HOE-41][AC] durS=45, activeS=40: effect_s≈5; both cleared (load and offline; with or without the combo key)
+ ✓ tests/v5-f2-m5-fields.test.ts > [D-HOE-41] endCalls / m5Load: AbilityState.durS is the granted length (offline end) > [D-HOE-41][AC] durS present but activeS>granted: clamp then clear both
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a hidden gap under 60 s > streak grace/decay in one step over 0 focus seconds: 5 s hidden at 0.28 returns 0.28 (K8); same object, nothing else moves
+ ✓ tests/v5-f2-m5-fields.test.ts > F2 settle: a hidden gap under 60 s > streakAfter: hold 3 s then 0.03/s, 0 at 12.33 s from 0.28 (ST-AC5); dt < 0 counts as 0
+ ✓ tests/v5-f3-config.test.ts > [F3][D-C1] F3 flags block (m4.flags.*, HoE D-C1) > ships every known flag, all 0, with m4.enabled kept as shipped (1)
+ ✓ tests/v5-f3-config.test.ts > [F3][D-C1] F3 flags block (m4.flags.*, HoE D-C1) > sync keeps the flags block whole (a flipped flag survives a re-sync) and fills absent flags with 0
+ ✓ tests/v5-f3-config.test.ts > [F3][D-C1] F3 flags block (m4.flags.*, HoE D-C1) > sync refuses an unknown flag or a non-0/1 value (no silent typos)
+ ✓ tests/v5-f3-config.test.ts > [F3][D-C1] F3 flags block (m4.flags.*, HoE D-C1) > validateBalance refuses an unknown flag or a non-0/1 value
+ ✓ tests/v5-f3-config.test.ts > [F3][§9.5-1] F3 CSV wiring > [§9.5-1] M5_MAPPED_COLS is exactly the two ruled non-tc_ mappings (no vacuous loop below)
+ ✓ tests/v5-f3-config.test.ts > [F3][§9.5-1] F3 CSV wiring > every tc_* column lands in m4.tc (auto), plus the explicit non-tc_ mappings, values verbatim from the CSV
+ ✓ tests/v5-f3-config.test.ts > [F3][§9.5-1] F3 CSV wiring > a mapped column that varies by row, or appears twice (x and tc_x), fails the sync
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > the shipped balance passes
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"egg_w_cash":0.5}
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"egg_gap_min_s":301}
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"warn_at_s":27,"urgent_at_s":27,"egg_despawn_s":30}
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"warn_at_s":20,"urgent_at_s":31,"egg_despawn_s":30}
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"streak_cap":0}
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"streak_cap":1.5}
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"streak_tier_count":0}
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"streak_tier_count":2.5}
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"tap_bonus_income_window_s":0.5}
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"broody_cap_s":0}
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"broody_ready_share":0}
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"stall_hold_s":3}
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"fatigue_cue_min_share":0.3,"fatigue_cue_clear_share":0.3}
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"ability_s":400}
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"rest_recovery_mult":0.4}
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"frenzy_price_mult":0.5}
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > [SS-23] tc_stall_hold_s = 0 is the supported kill switch (SS-23); keys a CSV does not carry yet are skipped
+ ✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > [Pause-§6] rest_recovery_mult range [0, 0.35] (pause spec §6; D-HOE-20261030-02): 0 and 0.35 pass; negative, NaN, Infinity and 0.4 fail
+ ✓ tests/v5-f3-config.test.ts > [F3-no-literal] F3 no literal tunables in src/ > no code-default fallback for an m4.tc key
+ ✓ tests/v5-f3-config.test.ts > [F3-no-literal] F3 no literal tunables in src/ > M5 modules carry no bare numeric literal (only 0/1/1000/1e-9/uint32 and the ruled named constants)
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4] m5Load sanitises Pause fields while m4.flags.pause is on (QA-D-1029-V5SCAP) > [CCR-F4][B5][E2b] callLockoutS: NaN, ±Infinity, negative, null, string, object -> absent (= 0); huge -> cap; valid kept
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4] m5Load sanitises Pause fields while m4.flags.pause is on (QA-D-1029-V5SCAP) > [CCR-F4][E9] paused: a non-boolean is false (absent); true and false are kept
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4] m5Load sanitises Pause fields while m4.flags.pause is on (QA-D-1029-V5SCAP) > [CCR-F4][rule 1][E12][AC-P2] below tc_pause_unlock_farm a saved pause is cleared (not saved back as true), lockout too
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4] m5Load sanitises Pause fields while m4.flags.pause is on (QA-D-1029-V5SCAP) > [CCR-F4][B5] callLockoutS exists only on the Market Hand: dropped from any other worker
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4] m5Load sanitises Pause fields while m4.flags.pause is on (QA-D-1029-V5SCAP) > [CCR-F4] missing fields stay missing; other worker fields untouched; no events
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4] m5Load sanitises Pause fields while m4.flags.pause is on (QA-D-1029-V5SCAP) > [CCR-F4][E2][AC-P13] reload round trip: a valid pause survives serialize -> validate -> m5Load unchanged
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4] m5Load sanitises Pause fields while m4.flags.pause is on (QA-D-1029-V5SCAP) > [CCR-F4][E2] a tampered JSON save (null / string / 1e308) is sanitised after validate
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4][E9][AC-P1] flag off / M4.1-style load: Pause fields are ignored and preserved (byte-identical) > shipping (all flags 0): m5Load returns the same object; isPaused false; serialize writes the fields back
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4][E9][AC-P1] flag off / M4.1-style load: Pause fields are ignored and preserved (byte-identical) > M4.1-style balance (no m4.flags): m5Load returns the same object; isPaused false; serialize writes the fields back
+ ✓ tests/v5-m5load-pause-sanitize.test.ts > [CCR-F4][F-5] validateBalance requires the Pause tc keys m5Load reads while m4.flags.pause is on > missing tc_pause_call_lockout_s / tc_pause_unlock_farm is a load error, never a silent 0
+ ✓ tests/v5-f3-is-paused.test.ts > [row-8 isPaused] isPaused(w, b) > shipped balance has m4.flags.pause = 0
+ ✓ tests/v5-f3-is-paused.test.ts > [row-8 isPaused] isPaused(w, b) > false whenever pause = 0 (or m4.enabled = 0); true only with pause = 1 and paused === true
+ ✓ tests/v5-f3-is-paused.test.ts > [row-8 isPaused][AC-P1] pause = 0: paused:true leaves income byte-identical to the unpaused case > asleep
+ ✓ tests/v5-f3-is-paused.test.ts > [row-8 isPaused][AC-P1] pause = 0: paused:true leaves income byte-identical to the unpaused case > working
+ ✓ tests/v5-f3-is-paused.test.ts > [row-8 isPaused][AC-P1] pause = 0: paused:true leaves income byte-identical to the unpaused case > tired
+ ✓ tests/v5-f3-is-paused.test.ts > [row-8 isPaused][AC-P1] pause = 0: paused:true leaves income byte-identical to the unpaused case > unpaid
+ ✓ tests/v5-f3-is-paused.test.ts > [row-8 isPaused][AC-P1] pause = 0: paused:true leaves income byte-identical to the unpaused case > asleep MH with paused:true and pause = 0 is stalled (sales stop), as if not paused
+ ✓ tests/v5-f3-is-paused.test.ts > [row-8 isPaused] pause = 1: paused is respected > a paused asleep Market Hand is not stalled (the player sells by hand); unpaused it is
+ ✓ tests/v5-f3-is-paused.test.ts > [row-8 isPaused][QA-10] every src read of `paused` goes through isPaused > no `.paused` / `["paused"]` / `paused !==|===` read outside sim/pause.ts isPaused
+ ✓ tests/m4a-offline-csv.test.ts > M4A-4 offline grant from data > table mirrors economy.csv L0 (0.38 eggs/s, 2700 max)
+ ✓ tests/m4a-offline-csv.test.ts > M4A-4 offline grant from data > H0, 1h away => 1,368 (floor(3600 x 0.38)), not 1,350 (unrounded 0.375 x eps)
+ ✓ tests/m4a-offline-csv.test.ts > M4A-4 offline grant from data > L0 2h cap: 2h (and 5h) away => 2,700 from offline_max_eggs_2h
+ ✓ tests/m4a-offline-csv.test.ts > M4A-4 offline grant from data > < offlineMinSeconds => 0; flag off unchanged (AC11 formula)
+ ✓ tests/m4a-offline-csv.test.ts > M4A-4 offline grant from data > the row read is the Hens level (H1 => CSV L1 0.5/s, 3600 cap)
+ ✓ tests/m4a-offline-csv.test.ts > M4A-4 post-migration boot grant (one function, HoE 23:10) > a committed (migrated) H0 farm away 1h gets the CSV grant 1,368 at boot; 2h+ gets the CSV cap 2,700
+ ✓ tests/offline-modal.test.ts > welcome-back modal & one grant per load > closing the modal without Collect still grants
+ ✓ tests/offline-modal.test.ts > welcome-back modal & one grant per load > closing the tab with the modal open: next load settles old grant + at most one new
+ ✓ tests/offline-modal.test.ts > welcome-back modal & one grant per load > gap < 60s between save and load: no grant
+ ✓ tests/offline-modal.test.ts > welcome-back modal & one grant per load > reloading immediately after a grant does not grant again
+ ✓ tests/offline-modal.test.ts > welcome-back modal & one grant per load > offline gap freezes customers (no arrivals/timeouts), timers resume
+ ✓ tests/offline.test.ts > AC11 offline progress (expectations derived from config) > config tunables
+ ✓ tests/offline.test.ts > AC11 offline progress (expectations derived from config) > formula floor(min(t,cap)*mult*eps(saved farm L))
+ ✓ tests/offline.test.ts > AC11 offline progress (expectations derived from config) > > cap same as exactly cap
+ ✓ tests/offline.test.ts > AC11 offline progress (expectations derived from config) > < 60s grants 0; exactly 60s grants
+ ✓ tests/offline.test.ts > AC11 offline progress (expectations derived from config) > negative gap grants 0
+ ✓ tests/offline.test.ts > AC11 offline progress (expectations derived from config) > coop unchanged; collect puts eggs in basket ignoring coop cap
+
+ Test Files  8 passed (8)
+      Tests  122 passed (122)
+   Start at  00:22:08
+   Duration  1.72s (transform 296ms, setup 0ms, collect 571ms, tests 107ms, environment 1ms, prepare 303ms)
+
+EXIT=0 END 2026-11-06T00:22:10+01:00 loadavg=0.30 0.48 0.75 1/2045 1515105

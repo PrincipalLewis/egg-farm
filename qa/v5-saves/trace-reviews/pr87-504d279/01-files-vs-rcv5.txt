@@ -1,0 +1,14 @@
+src/config/balance.ts
+src/config/formulas.ts
+src/game.ts
+src/save/m5-fields.ts
+src/sim/actions.ts
+src/sim/clock.ts
+src/sim/payout.ts
+src/sim/state.ts
+src/sim/streak.ts
+src/sim/tick.ts
+tests/v5-f2-game-settle.test.ts
+tests/v5-f2-helpers.ts
+tests/v5-f2-m5-fields.test.ts
+tests/v5-streak-sim.test.ts

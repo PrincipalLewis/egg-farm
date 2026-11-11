@@ -1,0 +1,592 @@
+{
+ "eng": "chromium",
+ "url": "file:///tmp/relchk/egg-farm.html",
+ "cap-F30-w360": {
+  "btnLabelAtF29": "$323.7K",
+  "afterBuy": {
+   "c": 99999999967628100,
+   "F": 30,
+   "C": 30,
+   "H": 30,
+   "V": 30,
+   "t7": 1,
+   "bk": 0
+  },
+  "rows": [
+   {
+    "k": "hens",
+    "cls": "up track",
+    "t": "L30 Hens Eggs/s 31 Level 30 / 30 MAX",
+    "btn": false
+   },
+   {
+    "k": "eggValue",
+    "cls": "up track",
+    "t": "L30 Egg value Egg price $22.43 Level 30 / 30 MAX",
+    "btn": false
+   },
+   {
+    "k": "farm",
+    "cls": "up",
+    "t": "L30 Farm level Hens & Egg value up to L30 Coop capacity 3,100 Customers every 1.5s Custome",
+    "btn": false
+   }
+  ],
+  "afterSecondClick": {
+   "c": 99999999967628100,
+   "F": 30,
+   "C": 30,
+   "H": 30,
+   "V": 30,
+   "t7": 1,
+   "bk": 0
+  },
+  "afterReload": {
+   "c": 99999999967628100,
+   "F": 30,
+   "C": 30,
+   "H": 30,
+   "V": 30,
+   "t7": 1,
+   "bk": 0
+  },
+  "overflow": []
+ },
+ "cap-F30-w1280": {
+  "btnLabelAtF29": "$323.7K",
+  "afterBuy": {
+   "c": 99999999967628100,
+   "F": 30,
+   "C": 30,
+   "H": 30,
+   "V": 30,
+   "t7": 1,
+   "bk": 0
+  },
+  "rows": [
+   {
+    "k": "hens",
+    "cls": "up track",
+    "t": "L30 Hens Eggs/s 31 Level 30 / 30 MAX",
+    "btn": false
+   },
+   {
+    "k": "eggValue",
+    "cls": "up track",
+    "t": "L30 Egg value Egg price $22.43 Level 30 / 30 MAX",
+    "btn": false
+   },
+   {
+    "k": "farm",
+    "cls": "up",
+    "t": "L30 Farm level Hens & Egg value up to L30 Coop capacity 3,100 Customers every 1.5s Custome",
+    "btn": false
+   }
+  ],
+  "afterSecondClick": {
+   "c": 99999999967628100,
+   "F": 30,
+   "C": 30,
+   "H": 30,
+   "V": 30,
+   "t7": 1,
+   "bk": 0
+  },
+  "afterReload": {
+   "c": 99999999967628100,
+   "F": 30,
+   "C": 30,
+   "H": 30,
+   "V": 30,
+   "t7": 1,
+   "bk": 0
+  },
+  "overflow": []
+ },
+ "best-payback-w360": {
+  "seq": [
+   [
+    {
+     "k": "hens",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$73.00",
+     "t": "L5 Hens Eggs/s 6 → 7 Next at L10: bigger coop · offline ×1.25 Level 5 / 30 $73.00"
+    },
+    {
+     "k": "eggValue",
+     "best": true,
+     "pending": false,
+     "aff": true,
+     "cost": "$50.00",
+     "t": "L3 Egg value Egg price $1.56 → $1.78 Next at L5: Grade A ×1.1 Level 3 / 30 $50.00"
+    },
+    {
+     "k": "farm",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$448.00",
+     "t": "L5 Farm level Coop upgrade at L10 Hens & Egg value up to L8 → L9 Coop capacity 300 → 350 Customers e"
+    }
+   ],
+   [
+    {
+     "k": "hens",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$73.00",
+     "t": "L5 Hens Eggs/s 6 → 7 Next at L10: bigger coop · offline ×1.25 Level 5 / 30 $73.00"
+    },
+    {
+     "k": "eggValue",
+     "best": true,
+     "pending": false,
+     "aff": true,
+     "cost": "$75.00",
+     "t": "L4 Egg value Egg price $1.78 → $2.42 Next at L5: Grade A ×1.1 Level 4 / 30 $75.00"
+    },
+    {
+     "k": "farm",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$448.00",
+     "t": "L5 Farm level Coop upgrade at L10 Hens & Egg value up to L8 → L9 Coop capacity 300 → 350 Customers e"
+    }
+   ],
+   [
+    {
+     "k": "hens",
+     "best": true,
+     "pending": false,
+     "aff": true,
+     "cost": "$73.00",
+     "t": "L5 Hens Eggs/s 6 → 7 Next at L10: bigger coop · offline ×1.25 Level 5 / 30 $73.00"
+    },
+    {
+     "k": "eggValue",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$109.00",
+     "t": "L5 Egg value Egg price $2.42 → $2.71 Level 5 / 30 $109.00"
+    },
+    {
+     "k": "farm",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$448.00",
+     "t": "L5 Farm level Coop upgrade at L10 Hens & Egg value up to L8 → L9 Coop capacity 300 → 350 Customers e"
+    }
+   ],
+   [
+    {
+     "k": "hens",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$103.00",
+     "t": "L6 Hens Eggs/s 7 → 8 Next at L10: bigger coop · offline ×1.25 Level 6 / 30 $103.00"
+    },
+    {
+     "k": "eggValue",
+     "best": true,
+     "pending": false,
+     "aff": true,
+     "cost": "$109.00",
+     "t": "L5 Egg value Egg price $2.42 → $2.71 Level 5 / 30 $109.00"
+    },
+    {
+     "k": "farm",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$448.00",
+     "t": "L5 Farm level Coop upgrade at L10 Hens & Egg value up to L8 → L9 Coop capacity 300 → 350 Customers e"
+    }
+   ],
+   [
+    {
+     "k": "hens",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$103.00",
+     "t": "L6 Hens Eggs/s 7 → 8 Next at L10: bigger coop · offline ×1.25 Level 6 / 30 $103.00"
+    },
+    {
+     "k": "eggValue",
+     "best": true,
+     "pending": false,
+     "aff": true,
+     "cost": "$159.00",
+     "t": "L6 Egg value Egg price $2.71 → $3.01 Next at L10: Large ×1.25 Level 6 / 30 $159.00"
+    },
+    {
+     "k": "farm",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$448.00",
+     "t": "L5 Farm level Coop upgrade at L10 Hens & Egg value up to L8 → L9 Coop capacity 300 → 350 Customers e"
+    }
+   ]
+  ],
+  "final": {
+   "c": 269300,
+   "F": 5,
+   "C": 5,
+   "H": 6,
+   "V": 6,
+   "t7": 1,
+   "bk": 0
+  },
+  "nextGoal": "Egg value L7 Ready!"
+ },
+ "best-payback-w1280": {
+  "seq": [
+   [
+    {
+     "k": "hens",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$73.00",
+     "t": "L5 Hens Eggs/s 6 → 7 Next at L10: bigger coop · offline ×1.25 Level 5 / 30 $73.00"
+    },
+    {
+     "k": "eggValue",
+     "best": true,
+     "pending": false,
+     "aff": true,
+     "cost": "$50.00",
+     "t": "L3 Egg value Egg price $1.56 → $1.78 Next at L5: Grade A ×1.1 Level 3 / 30 $50.00"
+    },
+    {
+     "k": "farm",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$448.00",
+     "t": "L5 Farm level Coop upgrade at L10 Hens & Egg value up to L8 → L9 Coop capacity 300 → 350 Customers e"
+    }
+   ],
+   [
+    {
+     "k": "hens",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$73.00",
+     "t": "L5 Hens Eggs/s 6 → 7 Next at L10: bigger coop · offline ×1.25 Level 5 / 30 $73.00"
+    },
+    {
+     "k": "eggValue",
+     "best": true,
+     "pending": false,
+     "aff": true,
+     "cost": "$75.00",
+     "t": "L4 Egg value Egg price $1.78 → $2.42 Next at L5: Grade A ×1.1 Level 4 / 30 $75.00"
+    },
+    {
+     "k": "farm",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$448.00",
+     "t": "L5 Farm level Coop upgrade at L10 Hens & Egg value up to L8 → L9 Coop capacity 300 → 350 Customers e"
+    }
+   ],
+   [
+    {
+     "k": "hens",
+     "best": true,
+     "pending": false,
+     "aff": true,
+     "cost": "$73.00",
+     "t": "L5 Hens Eggs/s 6 → 7 Next at L10: bigger coop · offline ×1.25 Level 5 / 30 $73.00"
+    },
+    {
+     "k": "eggValue",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$109.00",
+     "t": "L5 Egg value Egg price $2.42 → $2.71 Level 5 / 30 $109.00"
+    },
+    {
+     "k": "farm",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$448.00",
+     "t": "L5 Farm level Coop upgrade at L10 Hens & Egg value up to L8 → L9 Coop capacity 300 → 350 Customers e"
+    }
+   ],
+   [
+    {
+     "k": "hens",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$103.00",
+     "t": "L6 Hens Eggs/s 7 → 8 Next at L10: bigger coop · offline ×1.25 Level 6 / 30 $103.00"
+    },
+    {
+     "k": "eggValue",
+     "best": true,
+     "pending": false,
+     "aff": true,
+     "cost": "$109.00",
+     "t": "L5 Egg value Egg price $2.42 → $2.71 Level 5 / 30 $109.00"
+    },
+    {
+     "k": "farm",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$448.00",
+     "t": "L5 Farm level Coop upgrade at L10 Hens & Egg value up to L8 → L9 Coop capacity 300 → 350 Customers e"
+    }
+   ],
+   [
+    {
+     "k": "hens",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$103.00",
+     "t": "L6 Hens Eggs/s 7 → 8 Next at L10: bigger coop · offline ×1.25 Level 6 / 30 $103.00"
+    },
+    {
+     "k": "eggValue",
+     "best": true,
+     "pending": false,
+     "aff": true,
+     "cost": "$159.00",
+     "t": "L6 Egg value Egg price $2.71 → $3.01 Next at L10: Large ×1.25 Level 6 / 30 $159.00"
+    },
+    {
+     "k": "farm",
+     "best": false,
+     "pending": false,
+     "aff": true,
+     "cost": "$448.00",
+     "t": "L5 Farm level Coop upgrade at L10 Hens & Egg value up to L8 → L9 Coop capacity 300 → 350 Customers e"
+    }
+   ]
+  ],
+  "final": {
+   "c": 269300,
+   "F": 5,
+   "C": 5,
+   "H": 6,
+   "V": 6,
+   "t7": 1,
+   "bk": 0
+  },
+  "nextGoal": "Egg value L7 Ready! ›"
+ },
+ "big-numbers-w320": {
+  "k12960": {
+   "hud": {
+    "pill": "Egg Farm $5.00 13K $5.00, 13K eggs",
+    "live": "$5.00, 13K eggs"
+   },
+   "orders": [
+    {
+     "t": "0/20K eggs · $20K Sell 13K +$12.9K",
+     "l1w": 116,
+     "tw": 116,
+     "clip": false
+    }
+   ],
+   "sellAll": [
+    "Sell all (13K eggs · $13K)"
+   ]
+  },
+  "b999": {
+   "hud": {
+    "pill": "Egg Farm $1M 999.9B $1M, 999.9B eggs",
+    "live": "$1M, 999.9B eggs"
+   },
+   "orders": [
+    {
+     "t": "0/999.9B eggs · $999.9B Sell 999.9B +$999.9B",
+     "l1w": 116,
+     "tw": 148,
+     "clip": true
+    },
+    {
+     "t": "500B/1.2T eggs · $1.2T Sell 700B +$700B",
+     "l1w": 116,
+     "tw": 138,
+     "clip": true
+    }
+   ],
+   "sellAll": [
+    "Sell all (999.9B eggs · $999.9B)"
+   ]
+  },
+  "t1500": {
+   "hud": {
+    "pill": "Egg Farm $9,990T 1,500T $9,990T, 1,500T ",
+    "live": "$9,990T, 1,500T eggs"
+   },
+   "orders": [
+    {
+     "t": "0/2,000T eggs · $2,000T Sell 1,500T +$1,500T",
+     "l1w": 116,
+     "tw": 146,
+     "clip": true
+    },
+    {
+     "t": "0/1,000,000T eggs · $1,000,000T Sell 1,500T +$1,500T",
+     "l1w": 116,
+     "tw": 211,
+     "clip": true
+    }
+   ],
+   "sellAll": [
+    "Sell all (1,500T eggs · $1,500T)"
+   ]
+  },
+  "seed1": 1267360347
+ },
+ "big-numbers-w360": {
+  "k12960": {
+   "hud": {
+    "pill": "Egg Farm $5.00 13K $5.00, 13K eggs",
+    "live": "$5.00, 13K eggs"
+   },
+   "orders": [
+    {
+     "t": "0/20K eggs · $20K Sell 13K +$12.9K",
+     "l1w": 156,
+     "tw": 137,
+     "clip": false
+    }
+   ],
+   "sellAll": [
+    "Sell all (13K eggs · $13K)"
+   ]
+  },
+  "b999": {
+   "hud": {
+    "pill": "Egg Farm $1M 999.9B $1M, 999.9B eggs",
+    "live": "$1M, 999.9B eggs"
+   },
+   "orders": [
+    {
+     "t": "0/999.9B eggs · $999.9B Sell 999.9B +$999.9B",
+     "l1w": 156,
+     "tw": 156,
+     "clip": false
+    },
+    {
+     "t": "500B/1.2T eggs · $1.2T Sell 700B +$700B",
+     "l1w": 156,
+     "tw": 156,
+     "clip": false
+    }
+   ],
+   "sellAll": [
+    "Sell all (999.9B eggs · $999.9B)"
+   ]
+  },
+  "t1500": {
+   "hud": {
+    "pill": "Egg Farm $9,990T 1,500T $9,990T, 1,500T ",
+    "live": "$9,990T, 1,500T eggs"
+   },
+   "orders": [
+    {
+     "t": "0/2,000T eggs · $2,000T Sell 1,500T +$1,500T",
+     "l1w": 156,
+     "tw": 156,
+     "clip": false
+    },
+    {
+     "t": "0/1,000,000T eggs · $1,000,000T Sell 1,500T +$1,500T",
+     "l1w": 156,
+     "tw": 211,
+     "clip": true
+    }
+   ],
+   "sellAll": [
+    "Sell all (1,500T eggs · $1,500T)"
+   ]
+  },
+  "seed1": 1368536188
+ },
+ "big-numbers-w1280": {
+  "k12960": {
+   "hud": {
+    "pill": "Egg Farm $5.00 13K $5.00, 13K eggs",
+    "live": "$5.00, 13K eggs"
+   },
+   "orders": [
+    {
+     "t": "0/20K eggs · $20K Sell 13K +$12.9K",
+     "l1w": 194,
+     "tw": 137,
+     "clip": false
+    }
+   ],
+   "sellAll": [
+    "Sell all (13K eggs · $13K)"
+   ]
+  },
+  "b999": {
+   "hud": {
+    "pill": "Egg Farm $1M 999.9B $1M, 999.9B eggs",
+    "live": "$1M, 999.9B eggs"
+   },
+   "orders": [
+    {
+     "t": "0/999.9B eggs · $999.9B Sell 999.9B +$999.9B",
+     "l1w": 194,
+     "tw": 184,
+     "clip": false
+    },
+    {
+     "t": "500B/1.2T eggs · $1.2T Sell 700B +$700B",
+     "l1w": 194,
+     "tw": 173,
+     "clip": false
+    }
+   ],
+   "sellAll": [
+    "Sell all (999.9B eggs · $999.9B)"
+   ]
+  },
+  "t1500": {
+   "hud": {
+    "pill": "Egg Farm $9,990T 1,500T $9,990T, 1,500T ",
+    "live": "$9,990T, 1,500T eggs"
+   },
+   "orders": [
+    {
+     "t": "0/2,000T eggs · $2,000T Sell 1,500T +$1,500T",
+     "l1w": 194,
+     "tw": 182,
+     "clip": false
+    },
+    {
+     "t": "0/1,000,000T eggs · $1,000,000T Sell 1,500T +$1,500T",
+     "l1w": 194,
+     "tw": 211,
+     "clip": true
+    }
+   ],
+   "sellAll": [
+    "Sell all (1,500T eggs · $1,500T)"
+   ]
+  },
+  "seed1": 4073052195
+ }
+}

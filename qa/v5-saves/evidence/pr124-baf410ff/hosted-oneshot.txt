@@ -1,0 +1,22 @@
+2026-11-10 00:51:34 CET
+One-shot hosted read (TASK: no poll). Times in Europe/Belgrade (CET).
+
+ci 42723343775
+  head_sha: baf410fff30cb6a66e8565693f84ade2250719c2
+  status: in_progress  conclusion: null
+  job gate 129522695341: in_progress (Unit tests step); Chromium release-globals pending
+  → OPEN
+
+pacing-x1-stack 42723343747
+  head_sha: baf410fff30cb6a66e8565693f84ade2250719c2
+  status: queued→in_progress (API status was queued on first get; jobs show casual+seller15 in_progress, optimal queued)
+  conclusion: null
+  shards: casual in_progress (shard step), seller15 in_progress (checkout), optimal queued; aggregate not yet
+  → OPEN
+
+k10: see k10 note below (listed from head_sha filter).
+
+k10-breeds-offset 42723343855
+  head_sha: baf410fff30cb6a66e8565693f84ade2250719c2
+  status: in_progress  conclusion: null (one-shot)
+  → OPEN (KNOWN-RED monitor, non-required)

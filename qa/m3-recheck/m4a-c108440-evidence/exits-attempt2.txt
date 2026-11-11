@@ -1,0 +1,5 @@
+rc0 firefox exit=124 fails=26 summary="7/33 passed" 05:10:26
+buildid webkit exit=1 fails=0 summary="runtime build ids [webkit]: ["m3-rc1-pre+c108440"]" 05:25:41
+globals webkit exit=1 fails=0 summary="" 05:44:25
+rc0 webkit exit=124 fails=26 summary="7/33 passed" 06:05:49
+buildid firefox exit=1 fails=0 summary="runtime build ids [firefox]: ["m3-rc1-pre+c108440"]" 06:16:42

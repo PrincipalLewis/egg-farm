@@ -1,0 +1,3 @@
+dist/index.html       2 m3-rc1-pre+dfdf49c  dirty=0
+dist-qa/index.html       2 m3-rc1-pre+dfdf49c  dirty=0
+dist-html/egg-farm.html       3 m3-rc1-pre+dfdf49c  dirty=0

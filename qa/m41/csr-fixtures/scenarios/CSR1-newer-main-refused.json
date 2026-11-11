@@ -1,0 +1,22 @@
+{
+ "id": "CSR1-newer-main-refused",
+ "now": 1792378840000,
+ "csr": [
+  "CSR-1"
+ ],
+ "ls": {
+  "eggfarm.save": {
+   "ref": "raw/TRIG-newer-version7.json"
+  }
+ },
+ "idb": {
+  "status": "ok",
+  "records": []
+ },
+ "expect": {
+  "recovery": false,
+  "newer": 7,
+  "noWrites": true,
+  "noSaveCorrupt": true
+ }
+}

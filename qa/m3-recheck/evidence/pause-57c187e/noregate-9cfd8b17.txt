@@ -1,0 +1,33 @@
+NOREGATE/RETARGET one-shot 2026-11-06T01:30:02+01:00 (Europe/Belgrade UTC+1)
+Tip 9cfd8b17d07018bd443aeb783347d135e39f4db7
+Parents: 36f4e88f335c177163cd34d26398fdbec5a56a28 147e116ca79db38f270189efbb978c7013e7936b
+Subject: Merge fix/saves-endcalls-durs 147e116 into cursor/saves-pause-sim-4c0b (HoE merge-forward for #115 after #114←rc/v5 8253da50)
+
+Tree identity:
+  9cfd8b17^{tree}=2db06bcaf99c049f5dd12fa8dc9ba7bdb5ca8e5b
+  36f4e88^{tree}=2db06bcaf99c049f5dd12fa8dc9ba7bdb5ca8e5b
+  identical=YES
+  git diff 36f4e88 9cfd8b17 = empty (same tree; merge commit only)
+
+merge-tree --write-tree 36f4e88 147e116c:
+  tree=2db06bcaf99c049f5dd12fa8dc9ba7bdb5ca8e5b
+  exit=0 (clean; no conflict-resolution edits)
+
+offlineAccrualFrozen at 9cfd8b17: ABSENT (git grep exit 1)
+
+Prior chain: 36f4e88 stands for 57c187e under prior NOREGATE note; therefore 9cfd8b17 stands for 57c187e (same tree as 36f4e88).
+
+Hosted one-shot via cursor-github MCP (no poll, box gh rate-limited):
+  ci run_id=42136506858  name=ci  head=9cfd8b17d07018bd443aeb783347d135e39f4db7
+    status=in_progress  conclusion=null
+    job gate id=127625905328 status=in_progress
+      Unit tests SUCCESS; Slow suites in_progress; Release build / chromium globals pending
+  pacing run_id=42136506812  name=pacing-x1-stack  head=9cfd8b17d07018bd443aeb783347d135e39f4db7
+    status=in_progress  conclusion=null
+    shard (seller15) job=127626070122 in_progress/null
+    shard (optimal)  job=127626069828 in_progress/null
+    shard (casual)   job=127626070220 in_progress/null
+    aggregate: not yet scheduled (3 jobs total at check time)
+  k10-breeds-offset run_id=42136506791 in_progress (non-required; not assessed)
+
+57c187e pacing 42127874257 was cancelled — this tip's pacing 42136506812 is the evidence that matters.

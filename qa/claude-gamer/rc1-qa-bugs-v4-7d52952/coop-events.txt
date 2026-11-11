@@ -1,0 +1,18 @@
+0:02 build undefined
+0:02 shot coop-01-0m02-start.png
+0:02 skip tutorial
+0:02 state {"money":"Egg Farm $0.00 0 $0.00, 0 eggs","goal":"Collection L1: +5/tap—›","collect":"Collect +5 · 1 ready","onb":"Your hens are laying eggs… | ● ○ ○","orders":"","sellAll":""}
+0:03 shot coop-02-0m02-coop.png
+0:15 state {"money":"Egg Farm $0.00 0 $0.00, 0 eggs","goal":"Collection L1: +5/tap — ›","collect":"Collect +5","onb":"","orders":"","sellAll":""}
+0:27 state {"money":"Egg Farm $0.00 0 $0.00, 0 eggs","goal":"Collection L1: +5/tap — ›","collect":"Collect +5","onb":"","orders":"","sellAll":""}
+0:39 state {"money":"Egg Farm $0.00 0 $0.00, 0 eggs","goal":"Collection L1: +5/tap — ›","collect":"Collect +5","onb":"","orders":"","sellAll":""}
+0:39 shot coop-03-0m39-coop.png
+0:51 state {"money":"Egg Farm $0.00 0 $0.00, 0 eggs","goal":"Collection L1: +5/tap — ›","collect":"Collect +5","onb":"","orders":"","sellAll":""}
+1:03 state {"money":"Egg Farm $0.00 0 $0.00, 0 eggs","goal":"Collection L1: +5/tap — ›","collect":"Collect +5","onb":"","orders":"","sellAll":""}
+1:15 state {"money":"Egg Farm $0.00 0 $0.00, 0 eggs","goal":"Collection L1: +5/tap — ›","collect":"Collect +5","onb":"","orders":"","sellAll":""}
+1:15 shot coop-04-1m15-coop.png
+1:27 state {"money":"Egg Farm $0.00 0 $0.00, 0 eggs","goal":"Collection L1: +5/tap — ›","collect":"Collect +5","onb":"","orders":"","sellAll":""}
+1:39 state {"money":"Egg Farm $0.00 0 $0.00, 0 eggs","goal":"Collection L1: +5/tap — ›","collect":"Collect +5","onb":"","orders":"","sellAll":""}
+1:51 state {"money":"Egg Farm $0.00 0 $0.00, 0 eggs","goal":"Collection L1: +5/tap — ›","collect":"Collect +5","onb":"","orders":"","sellAll":""}
+1:51 shot coop-05-1m51-coop.png
+2:03 shot coop-06-2m03-coop-end.png

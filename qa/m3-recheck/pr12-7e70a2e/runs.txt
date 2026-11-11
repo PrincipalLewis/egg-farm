@@ -1,0 +1,5 @@
+02:36:21 exit chromium 0
+02:56:42 exit firefox 0
+03:06:37 exit webkit 0
+03:07:02 recap2 exit chromium 0
+03:11:54 recap2 exit firefox 0

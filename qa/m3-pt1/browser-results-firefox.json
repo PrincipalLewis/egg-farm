@@ -1,0 +1,25 @@
+{
+ "firefox": {
+  "install_id": "e8989d1e-1704-4947-b635-51d93fac7066",
+  "session_start": [
+   {
+    "install_id": "e8989d1e-1704-4947-b635-51d93fac7066",
+    "build": "m3-pt1"
+   }
+  ],
+  "export": {
+   "via": "download",
+   "file": "eggfarm-log-e8989d1e-2026-10-15.json",
+   "events": 2,
+   "msg": "Log downloaded."
+  },
+  "afterReset": {
+   "id": "e8989d1e-1704-4947-b635-51d93fac7066",
+   "tel": null,
+   "ui": null
+  },
+  "afterCorrupt": "e8989d1e-1704-4947-b635-51d93fac7066",
+  "idStable": true,
+  "errors": []
+ }
+}

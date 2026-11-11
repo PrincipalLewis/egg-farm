@@ -1,0 +1,95 @@
+{
+  "html_sha256": "ccb87daa60b5b8f722504642561f8a6061c8335555fd669a16872add2e88d5e1",
+  "expectBuild": "m4.1+5d9efa6",
+  "engine": "chromium",
+  "checks": [
+    {
+      "k": "R1 runtime build-id (meta + #app) == expected, no +dirty",
+      "pass": true,
+      "d": {
+        "meta": "m4.1+5d9efa6",
+        "app": "m4.1+5d9efa6",
+        "dirty": false
+      }
+    },
+    {
+      "k": "R2 fresh boot, no recovery dialog",
+      "pass": true,
+      "d": {
+        "coins": "$0.00",
+        "basket": "0",
+        "recovery": false,
+        "recoveryOutcome": null,
+        "welcome": false,
+        "welcomeText": null,
+        "newer": false,
+        "guardBlocked": false
+      }
+    },
+    {
+      "k": "R3 collect + sell changes coins",
+      "pass": true,
+      "d": {
+        "u0": {
+          "coins": "$0.00",
+          "basket": "0",
+          "recovery": false,
+          "recoveryOutcome": null,
+          "welcome": false,
+          "welcomeText": null,
+          "newer": false,
+          "guardBlocked": false
+        },
+        "u1": {
+          "coins": "$12.00",
+          "basket": "6",
+          "recovery": false,
+          "recoveryOutcome": null,
+          "welcome": false,
+          "welcomeText": null,
+          "newer": false,
+          "guardBlocked": false
+        },
+        "pl": {
+          "sellLabel": "Sell all (12 eggs · $12.00)",
+          "bought": 0
+        }
+      }
+    },
+    {
+      "k": "R4 save -> reload persists (no-loss oracle)",
+      "pass": true,
+      "d": {
+        "fails": [],
+        "u1": "$12.00",
+        "u2": "$12.00"
+      }
+    },
+    {
+      "k": "R5 0 page/console/HTTP errors",
+      "pass": true,
+      "d": []
+    },
+    {
+      "k": "RB-8e bad-build save loads on the restored build: no recovery, not read-only, no loss",
+      "pass": true,
+      "d": {
+        "ui": {
+          "coins": "$390.73",
+          "basket": "19.5K",
+          "recovery": false,
+          "recoveryOutcome": null,
+          "welcome": true,
+          "welcomeText": "Welcome back!You were away 9m +2,269 eggs Collect",
+          "newer": false,
+          "guardBlocked": false
+        },
+        "fails": [],
+        "errs": []
+      }
+    }
+  ],
+  "serverPid": 1300371,
+  "browser": "156.0.8078.47",
+  "bad": 0
+}

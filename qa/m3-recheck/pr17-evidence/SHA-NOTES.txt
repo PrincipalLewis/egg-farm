@@ -1,0 +1,2 @@
+NOTE: Chromium on lane2 at b0e8278 (globals PASS, rc0 195/197 FAIL B5 yawn50). Remote head now c428fae.
+Firefox/WebKit will run on whatever head is built in /tmp/pr17-new when the main lock is acquired.

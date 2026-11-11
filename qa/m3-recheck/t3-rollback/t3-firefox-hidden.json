@@ -1,0 +1,13 @@
+{
+ "eng": "firefox",
+ "mode": "hidden",
+ "durS": 150,
+ "sells": 60,
+ "floaters": 158,
+ "sale": 16,
+ "maxLifeMs": 761,
+ "p99": 755,
+ "over1s": [],
+ "stillLive": [],
+ "worst": []
+}

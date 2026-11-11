@@ -1,0 +1,117 @@
+[
+ {
+  "n": "(1) baseline (rAF running): header follows each sim tick within 250 ms",
+  "pass": true,
+  "i": {
+   "maxLag": 0,
+   "lags": [
+    0,
+    0
+   ],
+   "simTicks": 2,
+   "gap": {
+    "coins": 1007,
+    "hint": 1557,
+    "goal": 1523,
+    "buy": 2000
+   },
+   "n": {
+    "coins": 2,
+    "hint": 1,
+    "goal": 1,
+    "buy": 0
+   },
+   "dCoins": 25242,
+   "rafRan": 95,
+   "hdr": "$2,952.20"
+  }
+ },
+ {
+  "n": "(1) rAF stalled 8 s: header, Upgrades hint/ETA and buy button keep updating, header lag <= ~250 ms (300 ms allowed for 20 ms polling)",
+  "pass": false,
+  "i": {
+   "maxLag": 9008348,
+   "lags": [
+    9008348
+   ],
+   "simTicks": 9,
+   "gap": {
+    "coins": 9500,
+    "hint": 9500,
+    "goal": 9500,
+    "buy": 9500
+   },
+   "n": {
+    "coins": 0,
+    "hint": 0,
+    "goal": 0,
+    "buy": 0
+   },
+   "dCoins": 100963,
+   "rafRan": 0,
+   "hdr": "$2,952.20",
+   "live": {
+    "cs": 396183,
+    "hdr": "$2,952.20"
+   },
+   "errs": []
+  }
+ },
+ {
+  "n": "(1b) rAF stalled 6 s: goal chip ETA/progress keeps updating",
+  "pass": false,
+  "i": {
+   "maxLag": 9004941,
+   "lags": [
+    9004941
+   ],
+   "simTicks": 5,
+   "gap": {
+    "coins": 6001,
+    "hint": 6001,
+    "goal": 6001,
+    "buy": 6001
+   },
+   "n": {
+    "coins": 0,
+    "hint": 0,
+    "goal": 0,
+    "buy": 0
+   },
+   "dCoins": 120836,
+   "rafRan": 0,
+   "hdr": "$9.92"
+  }
+ },
+ {
+  "n": "(2b-i) button drawn grey but money now enough: tap buys from live money",
+  "pass": false,
+  "i": {
+   "drawn": "true",
+   "set": 371400,
+   "f0": 12,
+   "f1": 12,
+   "c1": 371400
+  }
+ },
+ {
+  "n": "(2b-ii) money drops below cost after draw: tap rejected, no spend, save unchanged",
+  "pass": true,
+  "i": {
+   "B": {
+    "drawn": "false",
+    "f0": 12,
+    "f1": 12,
+    "c1": 1000
+   },
+   "saved": {
+    "coins": 1000,
+    "farm": 12,
+    "coll": 17,
+    "workers": "{}",
+    "grader": 2
+   },
+   "prevFarm": 12
+  }
+ }
+]

@@ -1,0 +1,36 @@
+merge-base(abe9cc6,a923206)=458f74cc76767452c9c980b2fed382bc0e461376
+## PR files vs 458f74c:
+scripts/m41-p2-browser.mjs
+scripts/m41-p2-nav-compare.mjs
+scripts/rc0-browser.mjs
+src/econ/income.ts
+src/ui/app.ts
+src/ui/icons.ts
+src/ui/s2-economy-ui.ts
+src/ui/styles.css
+src/ui/tracks-explainer.ts
+src/ui/workers-ui.ts
+tests/m41-9-ux-minors.test.ts
+tests/m41-p1-acr7.test.ts
+tests/m41-p1-acr8-coop-copy.test.ts
+tests/m41-p1-asleep-signal.test.ts
+tests/m41-p1-mh-copy.test.ts
+tests/m41-p2-ui-dom.test.ts
+tests/m41-p2-ui-minors.test.ts
+tests/m41-p2-unpaid.test.ts
+## rc/v5 458f74c..a923206 files:
+src/config/m5-rules.ts
+src/save/m5-fields.ts
+src/sim/pause.ts
+tests/bot-m5.test.ts
+tests/bot-m5.ts
+tests/v5-f2-helpers.ts
+tests/v5-f3-is-paused.test.ts
+tests/v5-m5load-pause-sanitize.test.ts
+tests/v5-streak-sim.test.ts
+## overlap (comm -12):
+(end overlap)
+## git merge-tree --write-tree abe9cc6 a923206:
+61186ab252e09fc84b28d47b756e6a51ca736e87
+
+rc=0

@@ -1,0 +1,53 @@
+HEAD=d4b5fdcd7e45a5c3b5d0062cf2a3a982bf9e74a9
+PARENT=baf410fff30cb6a66e8565693f84ade2250719c2
+TREE=f6ea41375a918dc1090d9fc51688a20894de6042
+SUBJECT=WIP: feat(breeds): familyClamp + familyActiveBp (prB commit 0)
+=== ancestry contains baf410ff? ===
+YES
+=== ancestry contains 0bbcea52? ===
+YES
+=== origin/rc/v5 now ===
+f20b91839fdf09ba0ed45a890281ccbf7bf2909d
+=== based on current origin/rc/v5? (parent==rc/v5) ===
+NO_STACKED_ON_124
+=== log vs baf410ff ===
+d4b5fdc WIP: feat(breeds): familyClamp + familyActiveBp (prB commit 0)
+=== diffstat vs baf410ff (PR-126-only) ===
+ engineering/status.md               |  5 ++
+ src/config/breeds.ts                |  8 ++++
+ src/sim/breeds-family.ts            | 57 ++++++++++++++++++++++
+ tests/v5-breeds-family-caps.test.ts | 96 +++++++++++++++++++++++++++++++++++++
+ 4 files changed, 166 insertions(+)
+=== name-status vs baf410ff ===
+M	engineering/status.md
+M	src/config/breeds.ts
+A	src/sim/breeds-family.ts
+A	tests/v5-breeds-family-caps.test.ts
+=== diffstat vs origin/rc/v5 f20b9183 ===
+ engineering/status.md               |   5 ++
+ src/config/balance.ts               |   1 +
+ src/config/breeds.ts                |  15 ++++-
+ src/sim/breeds-family.ts            |  57 ++++++++++++++++++
+ src/sim/breeds.ts                   |  47 +++++++++------
+ src/sim/events.ts                   |   2 +-
+ src/telemetry/schema.ts             |   2 +-
+ tests/telemetry-schema.test.ts      |  13 +++-
+ tests/v5-breeds-family-caps.test.ts |  96 ++++++++++++++++++++++++++++++
+ tests/v5-breeds-state.test.ts       | 115 ++++++++++++++++++++++++++++++++++--
+ 10 files changed, 325 insertions(+), 28 deletions(-)
+=== name-status vs f20b9183 ===
+M	engineering/status.md
+M	src/config/balance.ts
+M	src/config/breeds.ts
+A	src/sim/breeds-family.ts
+M	src/sim/breeds.ts
+M	src/sim/events.ts
+M	src/telemetry/schema.ts
+M	tests/telemetry-schema.test.ts
+A	tests/v5-breeds-family-caps.test.ts
+M	tests/v5-breeds-state.test.ts
+=== revert commits in range? ===
+d4b5fdc WIP: feat(breeds): familyClamp + familyActiveBp (prB commit 0)
+baf410f fix(breeds): D1 full save_migrated shape (events.ts + schema-validated)
+3354fc7 fix(breeds): D2 invalid_root + D3/D4/D5/D6 drift (HoE/breeds-drift-d1-d6)
+0bbcea5 docs(breeds): re-cite spec to v0.2 rev 3.8.9 ea922eb8 + Q6/E10 tests

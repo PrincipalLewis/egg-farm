@@ -1,0 +1,4 @@
+ src/main.ts                | 2 +-
+ src/ui/app.ts              | 6 +++---
+ src/ui/tracks-explainer.ts | 7 +++++--
+ 3 files changed, 9 insertions(+), 6 deletions(-)

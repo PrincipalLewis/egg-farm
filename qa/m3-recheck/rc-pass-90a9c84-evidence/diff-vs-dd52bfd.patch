@@ -1,0 +1,13 @@
+diff --git a/src/config/balance.json b/src/config/balance.json
+index 0d5b6d4..d41bf45 100644
+--- a/src/config/balance.json
++++ b/src/config/balance.json
+@@ -161,7 +161,7 @@
+     "hiddenSimMaxSeconds": 60
+   },
+   "m4": {
+-    "enabled": 0,
++    "enabled": 1,
+     "hens": {
+       "costs": [
+         36,

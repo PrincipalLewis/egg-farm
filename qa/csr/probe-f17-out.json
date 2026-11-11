@@ -1,0 +1,62 @@
+{
+ "F17-3BAD.json": {
+  "bad": [
+   "farmLevel",
+   "hensLevel",
+   "eggValueLevel"
+  ],
+  "F": 10,
+  "H": 10,
+  "V": 5
+ },
+ "F17-MIG-V12.json": {
+  "bad": [
+   "farmLevel"
+  ],
+  "F": 0
+ },
+ "F17-GRADER5.json": {
+  "bad": [
+   "farmLevel"
+  ],
+  "F": 24
+ },
+ "F17-H-ONLY.json": {
+  "bad": [
+   "hensLevel"
+  ],
+  "H": 20
+ },
+ "F17-C-ONLY.json": {
+  "bad": [
+   "collectionLevel"
+  ],
+  "C": 0
+ },
+ "F17-UNMARKED-V6.json": {
+  "bad": [
+   "farmLevel"
+  ],
+  "F": 10
+ },
+ "F17-MALFORMED.json": {
+  "bad": [
+   "farmLevel"
+  ],
+  "F": 0
+ },
+ "F17-IDB-SAME.json": {
+  "bad": [
+   "farmLevel"
+  ],
+  "F": 15
+ },
+ "junkNotBad": [
+  "2.5"
+ ],
+ "malformedRepaired": {
+  "validate": "ok",
+  "simFinite": true,
+  "err": null
+ }
+}

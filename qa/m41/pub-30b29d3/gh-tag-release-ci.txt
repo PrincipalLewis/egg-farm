@@ -1,0 +1,26 @@
+== view tag release
+{"assets":[{"apiUrl":"https://api.github.com/repos/PrincipalLewis/egg-farm/releases/assets/673050571","contentType":"text/html; charset=utf-8","createdAt":"2026-10-24T18:58:27Z","digest":"sha256:dd919d616fe0138a89c362b1db269458558a0a2c85827b3e4fc104d36b22979b","downloadCount":0,"id":"RA_kwDOVLcacc4oHe_L","label":"egg-farm.html","name":"p1-egg-farm.html","size":547466,"state":"uploaded","updatedAt":"2026-10-24T18:58:27Z","url":"https://github.com/PrincipalLewis/egg-farm/releases/download/untagged-4121429a7bc21114363e/p1-egg-farm.html"}],"isDraft":true,"isPrerelease":false,"publishedAt":null,"tagName":"m4.1-p1-30b29d3","targetCommitish":"main"}
+== tag object
+{"sha":"30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134","type":"commit","url":"https://api.github.com/repos/PrincipalLewis/egg-farm/git/commits/30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134"}
+== viewer permission
+{"admin":true,"maintain":true,"pull":true,"push":true,"triage":true}
+== release-asset runs
+[{"conclusion":"success","databaseId":40107345648,"headBranch":"m4.1-5d9efa6","headSha":"5d9efa61c5e6ee31ca9ebdec20ee70167d31d463","updatedAt":"2026-10-24T15:31:27Z"},{"conclusion":"failure","databaseId":39212260477,"headBranch":"m4b-dd223f5","headSha":"dd223f510e9acabf9b1915b56e39da8b88dcac63","updatedAt":"2026-10-19T06:50:37Z"},{"conclusion":"success","databaseId":39033573155,"headBranch":"m3-rc1-pre-dd52bfd","headSha":"dd52bfdc1c695cfc7695b3d63ba6a7883c5fd49b","updatedAt":"2026-10-17T12:42:32Z"}]
+== CI on 30b29d3 / d1fb206
+-- 30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134
+release-html	completed	success	2026-10-24T18:58:35Z
+release-globals (webkit)	in_progress	null	null
+release-globals (chromium)	in_progress	null	null
+slow	in_progress	null	null
+release-globals (firefox)	in_progress	null	null
+unit	in_progress	null	null
+release-globals	completed	skipped	2026-10-24T16:50:13Z
+gate	completed	success	2026-10-24T16:50:13Z
+release-globals (chromium)	completed	success	2026-10-24T16:38:17Z
+release-globals (firefox)	completed	success	2026-10-24T16:38:38Z
+unit	completed	success	2026-10-24T16:42:15Z
+release-html	completed	success	2026-10-24T16:38:05Z
+release-globals (webkit)	completed	success	2026-10-24T16:38:47Z
+slow	completed	success	2026-10-24T16:42:43Z
+-- d1fb206b8f59a1a1f19623526fdbf3003d12efce
+gate	in_progress	null	null

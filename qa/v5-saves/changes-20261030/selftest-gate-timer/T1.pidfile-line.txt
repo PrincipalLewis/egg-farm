@@ -1,0 +1,1 @@
+294340 291847 ad2ad629-479d-4f8c-afb7-128ffbd4260f 2026-10-30T08:08:55+01:00 bash /workspace/egg-farm-studio/qa/v5-saves/scripts/v5-saves-gate.sh --win-timer /workspace/egg-farm-studio/qa/v5-saves/changes-20261030/selftest-gate-timer/mock-results/status.log /workspace/egg-farm-studio/qa/v5-saves/changes-20261030/selftest-gate-timer/mock-results/summary.txt 2 6 294332

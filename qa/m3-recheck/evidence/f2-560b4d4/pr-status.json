@@ -1,0 +1,1 @@
+{"baseRefName":"rc/v5","headRefOid":"560b4d437f06df1e399d3f91c7af850b2b1e2bb5","isDraft":false,"mergeable":"MERGEABLE","number":113,"state":"OPEN","title":"v5 telemetry: store ring as {v, events} and export schema_version (G8-12/G8-13)"}

@@ -1,0 +1,22 @@
+03:40 start hidden-tab b3341bd; worktree /tmp/qa-hto-b3341bd
+build rc=0
+build:qa rc=0
+04:00 chromium try1 11/21: popup selector wrong (v1 popup on this branch), reload slop; (4) found same-ms startAt reuse -> game stuck hidden (edge). Script fixed; rerun
+unit rc=0 03:39
+04:10 chromium try2 19/22: (1)(2)(3)(4) PASS (2 FAILs = my v2-copy expectations; branch has v1 popup '2h+'/'+28.8K', identical hide vs reload). (4b) REAL: same-ms re-hide -> game stuck hidden (isHidden true, 671s not granted, 60s hidden sim to coop 800, 18 arrivals)
+04:18 local merge 5248dd9 x b3341bd: CONFLICT src/game.ts (PR16 stub suspendForHidden/resumeFromHidden vs real hook) -> C-AC36 recheck not done; diff saved; merge aborted, worktree removed
+hidden firefox rc=1 03:54 Node.js v20.19.2
+03:59 hidden FF crashed in getSave (save not yet written at 600 ms in FF); fixed wait; FF rerun queued after chain
+hidden webkit rc=0 04:02 19/22 (webkit)
+rc0 chromium rc=0 04:11 201/201 passed
+04:23 report filed
+04:26 resume: rc0 FF waiting on lock (then rc0 WK, then hidden FF rerun). Popup wording extracted for report.
+04:37 verbatim popup wording table added to report
+rc0 firefox rc=0 04:41 201/201 passed
+04:48 post-reset: worktree recreated, build:qa rc=0
+hidden firefox rc=1 04:48 Node.js v20.19.2
+04:49 reset wiped ms-playwright; reinstalled firefox-1555 + webkit-2370 (shared box)
+hidden firefox rc=0 04:56 19/22 (firefox)
+rc0 webkit rc=0 05:13 201/201 passed
+05:13 report finalized (3 engines, rc0 3/3)
+06:08 handed to Saves QA (59cce62); no processes of mine running

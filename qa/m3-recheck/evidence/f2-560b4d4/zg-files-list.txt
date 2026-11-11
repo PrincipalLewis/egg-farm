@@ -1,0 +1,11 @@
+11: ✓ tests/telemetry-schema.test.ts (50 tests) 40ms
+12: ✓ tests/zg-verdict.test.ts (21 tests) 1673ms
+23: ✓ tests/telemetry.test.ts (6 tests) 107ms
+24: ✓ tests/export-global.test.ts (1 test) 5ms
+31: ✓ tests/zg-telemetry-annotate.test.ts (2 tests) 3ms
+32: ✓ tests/zg-ac13-sim.test.ts (2 tests) 3294ms
+35: ✓ tests/zg-ui.test.ts (34 tests) 1983ms
+36: ✓ tests/zg-matrix.test.ts (16 tests) 3822ms
+45: ✓ tests/zg-followup.test.ts (6 tests) 294ms
+49: ✓ tests/zg-flagoff-dom.test.ts (1 test) 790ms
+51: ✓ tests/zg-ui-onestrip.test.ts (1 test) 143ms

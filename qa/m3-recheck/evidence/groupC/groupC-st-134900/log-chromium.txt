@@ -1,0 +1,42 @@
+2026-10-30T12:47:02.769Z # fatigue-cue selftest chromium 156.0.8078.47 fixture sha256 a8f8c52e3473eef62e9f414af5475f5a1b892696bc8c0992ead1a70244864a3b port 5281 pid 3534726
+2026-10-30T12:47:07.164Z FAIL SS-40a 360x640: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110
+2026-10-30T12:47:08.378Z FAIL SS-40a 360x640: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110
+2026-10-30T12:47:26.982Z FAIL SS-40a 375x667: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110
+2026-10-30T12:47:28.198Z FAIL SS-40a 375x667: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110
+2026-10-30T12:47:45.813Z FAIL SS-40a 360x739: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110
+2026-10-30T12:47:47.027Z FAIL SS-40a 360x739: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110
+2026-10-30T12:48:09.016Z FAIL SS-38f 960x600: popover {"l":14.375,"t":62,"r":248.671875,"b":114} != 26.1,62-260.4,114
+2026-10-30T12:48:10.383Z FAIL SS-38f 959x600: popover {"l":14.375,"t":62,"r":248.671875,"b":114} != 26.1,62-260.4,114
+2026-10-30T12:48:11.749Z FAIL SS-38f 1024x474: popover {"l":14.375,"t":62,"r":248.671875,"b":114} != 26.1,62-260.4,114
+2026-10-30T12:49:03.160Z FAIL SS-40all 360x640: target received 0 click events (want exactly 1: swallowed)
+2026-10-30T12:49:33.333Z FAIL SS-TEL 390x844: icon vs sub-line: event stream differs from the popover-closed control: open [{"loss_per_s":99990,"loss_share":0.2,"n_asleep":0,"n_paused":0,"n_tired":1,"suppressed_by_stall":false,"surface":"hud_chip","type":"fatigue_cue_shown"} | {"loss_per_s":99990,"surface":"hud_chip","type":"fatigue_cue_tapped"}] vs control [{"loss_per_s":99990,"loss_share":0.2,"n_asleep":0,"n_paused":0,"n_tired":1,"suppressed_by_stall":false,"surface":"hud_chip","type":"fatigue_cue_shown"}]
+2026-10-30T12:49:55.360Z # positive: 426 pass, 11 fail, 8 unverified, 1 blocked (173 s)
+2026-10-30T12:49:55.645Z PASS  NEG chip740    -> SS-38a: caught: .fslot not rendered at >=740; .hud .fchip rendered at >=740; no CSSOM rule with media (max-height: 739px)
+2026-10-30T12:49:56.077Z PASS  NEG debounce   -> SS-38b: caught: 739->740: 2 rAF after resize variant=icon, want subline (JS-debounced or not CSS-driven)
+2026-10-30T12:49:57.203Z PASS  NEG bucket     -> SS-38e: caught: viewport_h '<740' != '740-899' at innerHeight 740
+2026-10-30T12:49:57.678Z PASS  NEG geom       -> SS-41: caught: chip 220.4,5–264.4,49 != 216.4,5–260.4,49
+2026-10-30T12:49:58.098Z PASS  NEG coinsbtn   -> SS-41: caught: coins pill is focusable (FC-SV16: no tabindex, non-focusable); coins pill has an interactive role/handler (button)
+2026-10-30T12:50:00.613Z PASS  NEG arialabel  -> SS-39a: caught: icon has aria-label "Tired workers" (must be content-based); name raw "Tired workers" != "Tired workers are costing $999.9K per second. Show details."
+2026-10-30T12:50:04.412Z PASS  NEG cover      -> SS-40a,SS-37: caught: popover 14.4,190–248.7,242 != 26.1,62–260.4,114; Manage 160.7,194–242.7,238 != 172.4,66–254.4,110; popover covers golden spot(s) S1
+2026-10-30T12:50:06.808Z PASS  NEG shift      -> SS-40a: caught: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110; layout shift 10 px on open/close
+2026-10-30T12:50:09.181Z PASS  NEG trap       -> SS-40a: caught: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110
+2026-10-30T12:50:11.666Z PASS  NEG labelclip  -> LAYOUT: caught: label fpop-t clipped (scrollWidth 121 > clientWidth 40)
+2026-10-30T12:50:16.829Z PASS  NEG swallow    -> SS-40p1: caught: target received 0 click events (want exactly 1: swallowed); 0 activations by state/handler delta (want exactly 1); golden egg still present
+2026-10-30T12:50:21.617Z PASS  NEG double     -> SS-40p3: caught: target received 2 click events (want exactly 1: double activation)
+2026-10-30T12:50:38.260Z PASS  NEG timeout    -> SS-40c: caught: idle10s: popover closed (want open, no timeout)
+2026-10-30T12:50:55.780Z PASS  NEG resizeopen -> SS-38c: caught: i 360x739->360x740 open-chip: popover still open after the crossing
+2026-10-30T12:50:56.021Z PASS  NEG rmscale    -> SS-40e: caught: scale animation under reduced motion on popover,popover
+2026-10-30T12:50:56.550Z PASS  NEG tapnav     -> SS-42: caught: h 740: sub-line tap did not open Workers; h 740: sub-line tap opened the popover; Workers order unreadable
+2026-10-30T12:50:57.815Z PASS  NEG ratex      -> SS-RATE: caught: #rate "−$999.9K/s" shows the fatigue loss X $999.9K
+2026-10-30T12:50:59.355Z PASS  NEG sub740     -> SS-37: caught: counts 5/5/2 != flag-off 8/7/4; failing spot set S4,S5,S8 != flag-off S4; Broody-eligible 0,11 != flag-off 0,5,8,9,10,11
+2026-10-30T12:51:07.959Z PASS  NEG tapclose   -> SS-48t: caught: chipClose: 0 fatigue_cue_tapped (want exactly 1, SS-48 v1.3.24)
+2026-10-30T12:51:16.679Z PASS  NEG esclog     -> SS-48t: caught: esc: 1 fatigue_cue_tapped (want exactly 0, SS-48 v1.3.24)
+2026-10-30T12:51:19.652Z PASS  NEG stallkeep  -> SS-47: caught: popover still open after the stall chip showed
+2026-10-30T12:51:22.631Z PASS  NEG refire     -> SS-47: caught: 1 fatigue_cue_* event(s) across stall show/clear (fatigue_cue_shown): no log, no re-fired shown
+2026-10-30T12:51:23.068Z PASS  NEG subsr      -> SS-39s: caught: name raw "Tired −$999.9K/s Open workers." != "Tired −$999.9K/s"
+2026-10-30T12:51:23.431Z PASS  NEG sub400     -> SS-39s: caught: name raw "Tired −$999.9K/s" != "Tired workers −$999.9K/s"
+2026-10-30T12:51:25.903Z PASS  NEG dialog     -> SS-40a: caught: popover 14.4,62–248.7,114 != 26.1,62–260.4,114; Manage 160.7,66–242.7,110 != 172.4,66–254.4,110; popover role=dialog (want group, not dialog; FC-SV15)
+2026-10-30T12:51:28.496Z PASS  NEG oldname    -> SS-39a: caught: name raw "Tired workers are costing $999.9K per second. Open workers." != "Tired workers are costing $999.9K per second. Show details."
+2026-10-30T12:51:29.000Z PASS  NEG nohyst     -> SS-49: caught: 2 fatigue_cue_shown, model expects 1 episode(s) (Rule 2 hysteresis)
+2026-10-30T12:51:32.996Z PASS  NEG swallow@960 -> SS-40p3: caught: target received 0 click events (want exactly 1: swallowed); 0 activations by state/handler delta (want exactly 1); basket not emptied
+2026-10-30T12:51:32.997Z # chromium: SELFTEST FAIL (positive fails 11, negatives missed 0/28) 270 s

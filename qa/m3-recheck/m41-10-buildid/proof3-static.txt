@@ -1,0 +1,52 @@
+# proof 3 static, 2026-10-19 09:46:31 CEST, worktree HEAD 4e1252d6bfe81f94912e899281049bff9ca96f75, porcelain=0
+-rw-r--r-- 1 box box 511090 Oct 19 09:43 dist-html/egg-farm.html
+-rw-r--r-- 1 box box    679 Oct 19 09:43 dist-qa/index.html
+-rw-r--r-- 1 box box    679 Oct 19 09:43 dist/index.html
+ca8ef3d1b148278cc9081eecfd6078ffe5b891bccc0ebff99f7be6443dbb67bf  dist-html/egg-farm.html
+--- raw ids (any prefix):
+      3 dist-html/egg-farm.html:m4.1+4e1252d
+      1 dist-qa/assets/index-Ca0L13zP.js:m4.1+4e1252d
+      2 dist-qa/index.html:m4.1+4e1252d
+      1 dist/assets/index-BL5OyDZj.js:m4.1+4e1252d
+      2 dist/index.html:m4.1+4e1252d
+--- meta/data-build-id in dist-html:
+dist-html/egg-farm.html:<meta name="build-id" content="m4.1+4e1252d">
+dist-html/egg-farm.html:data-build-id="m4.1+4e1252d"
+dist/index.html:<meta name="build-id" content="m4.1+4e1252d">
+dist/index.html:data-build-id="m4.1+4e1252d"
+dist-qa/index.html:<meta name="build-id" content="m4.1+4e1252d">
+dist-qa/index.html:data-build-id="m4.1+4e1252d"
+--- POS: helper scan @4e1252d
+dist/index.html: ["m4.1+4e1252d"]
+dist/assets/index-BL5OyDZj.js: ["m4.1+4e1252d"]
+dist-qa/index.html: ["m4.1+4e1252d"]
+dist-html/egg-farm.html: ["m4.1+4e1252d"]
+PASS build-id ["m4.1+4e1252d"] want m4.1+4e1252d [BUILD_PREFIX='m4.1' from scripts/build-id.ts@4e1252d; no suffix allowed]
+exit=0
+--- NEG: same build checked against 246de09
+dist/index.html: ["m4.1+4e1252d"]
+dist-qa/index.html: ["m4.1+4e1252d"]
+dist-html/egg-farm.html: ["m4.1+4e1252d"]
+FAIL build-id ["m4.1+4e1252d"] want m3-rc1-pre+246de09 [BUILD_PREFIX='m3-rc1-pre' from scripts/build-id.ts@246de09; no suffix allowed] :: m4.1+4e1252d: prefix 'm4.1' != BUILD_PREFIX 'm3-rc1-pre' at 246de09; m4.1+4e1252d: prefix 'm4.1' != BUILD_PREFIX 'm3-rc1-pre' at 246de09; m4.1+4e1252d: prefix 'm4.1' != BUILD_PREFIX 'm3-rc1-pre' at 246de09
+exit=1
+--- NEG: same build checked against 246de09 via fallback-irrelevant d72008a
+dist-html/egg-farm.html: ["m4.1+4e1252d"]
+FAIL build-id ["m4.1+4e1252d"] want (m3-rc1-pre|m4.1)+d72008a [FALLBACK ^(m3-rc1-pre|m4\.1)\+[0-9a-f]{7} (scripts/build-id.ts missing @d72008a); no suffix allowed] :: m4.1+4e1252d: hash '4e1252d' != sha under test d72008a
+exit=1
+--- project's own check-release-build
+check-release-build: single-file dist-html/egg-farm.html (510984 bytes)
+check-release-build: m4.1+4e1252d ok
+check-release-build: release prefix m4.1 ok
+check-release-build: build id m4.1+4e1252d matches HEAD ok
+check-release-build: build-id meta + data-build-id = m4.1+4e1252d ok
+check-release-build: no eggfarmUi in release ok
+check-release-build: no ?debug/?perf/?ios/QA hooks ok
+check-release-build: window global writes only eggfarmExportTelemetry ok
+check-release-build: every asset/font URL inlined (data:) ok
+check-release-build: no external src/href/srcset/url()/@import/import/fetch/XHR/ws/sourcemap ok
+check-release-build: eggfarm* identifiers eggfarmRecovery, eggfarmTabGuard, eggfarmExportTelemetry ok
+exit=0
+EXPECT=m4.1+4e1252d [BUILD_PREFIX='m4.1' from scripts/build-id.ts@4e1252d; no suffix allowed]
+static build-id: dist/index.html: ["m4.1+4e1252d"] dist-qa/index.html: ["m4.1+4e1252d"] dist-html/egg-farm.html: ["m4.1+4e1252d"] PASS build-id ["m4.1+4e1252d"] want m4.1+4e1252d [BUILD_PREFIX='m4.1' from scripts/build-id.ts@4e1252d; no suffix allowed] 
+EXPECT=m3-rc1-pre+246de09 [BUILD_PREFIX='m3-rc1-pre' from scripts/build-id.ts@246de09; no suffix allowed]
+static build-id: dist/index.html: ["m4.1+4e1252d"] dist-qa/index.html: ["m4.1+4e1252d"] dist-html/egg-farm.html: ["m4.1+4e1252d"] FAIL build-id ["m4.1+4e1252d"] want m3-rc1-pre+246de09 [BUILD_PREFIX='m3-rc1-pre' from scripts/build-id.ts@246de09; no suffix allowed] :: m4.1+4e1252d: prefix 'm4.1' != BUILD_PREFIX 'm3-rc1-pre' at 246de09; m4.1+4e1252d: prefix 'm4.1' != BUILD_PREFIX 'm3-rc1-pre' at 246de09; m4.1+4e1252d: prefix 'm4.1' != BUILD_PREFIX 'm3-rc1-pre' at 246de09 

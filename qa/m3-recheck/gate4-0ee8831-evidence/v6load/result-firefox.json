@@ -1,0 +1,926 @@
+[
+ {
+  "id": "F1-tracks",
+  "n": "runtime build-id",
+  "pass": true,
+  "info": "\"m3-rc1-pre+0ee8831\""
+ },
+ {
+  "id": "F1-tracks",
+  "n": "no recovery",
+  "pass": true,
+  "info": "{\"r\":null,\"dialog\":\"Welcome back!\\nYou were away 2h+\\n+29.3K eggs\\nCollect\"}"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "kept coinsCents",
+  "pass": true,
+  "info": "[1234567,1234567]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "kept farmLevel",
+  "pass": true,
+  "info": "[15,15]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "kept collectionLevel",
+  "pass": true,
+  "info": "[9,9]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "kept graderTier",
+  "pass": true,
+  "info": "[2,2]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "eggs: basket+pending >= fixture basket+pending",
+  "pass": true,
+  "info": "[321,0,321,29250]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "M4 kept hensLevel",
+  "pass": true,
+  "info": "[12,12]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "M4 kept eggValueLevel",
+  "pass": true,
+  "info": "[8,8]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "M4 kept tracksV7",
+  "pass": true,
+  "info": "[1,1]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "M4 kept v6BackupId",
+  "pass": true,
+  "info": "[\"7d5dfdbd62dab73e\",\"7d5dfdbd62dab73e\"]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "M4 kept celebratedMilestones",
+  "pass": true,
+  "info": "[[\"hens:10\",\"grade:5\",\"balanced:1\"],[\"hens:10\",\"grade:5\",\"balanced:1\"]]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "written on load: saveSeq advanced",
+  "pass": true,
+  "info": "[2,4]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "writable: explicit save advances saveSeq",
+  "pass": true,
+  "info": "[4,6]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "reload: no recovery",
+  "pass": true,
+  "info": "null"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "round-trip coinsCents",
+  "pass": true,
+  "info": "[1234567,1234567]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "round-trip farmLevel",
+  "pass": true,
+  "info": "[15,15]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "round-trip collectionLevel",
+  "pass": true,
+  "info": "[9,9]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "round-trip graderTier",
+  "pass": true,
+  "info": "[2,2]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "round-trip hensLevel",
+  "pass": true,
+  "info": "[12,12]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "round-trip eggValueLevel",
+  "pass": true,
+  "info": "[8,8]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "round-trip tracksV7",
+  "pass": true,
+  "info": "[1,1]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "round-trip v6BackupId",
+  "pass": true,
+  "info": "[\"7d5dfdbd62dab73e\",\"7d5dfdbd62dab73e\"]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "round-trip celebratedMilestones",
+  "pass": true,
+  "info": "[[\"hens:10\",\"grade:5\",\"balanced:1\"],[\"hens:10\",\"grade:5\",\"balanced:1\"]]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "round-trip eggs not lost",
+  "pass": true,
+  "info": "[29571,0,29571,0]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "reload saveSeq advanced",
+  "pass": true,
+  "info": "[6,11]"
+ },
+ {
+  "id": "F1-tracks",
+  "n": "no page errors",
+  "pass": true,
+  "info": "[]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "runtime build-id",
+  "pass": true,
+  "info": "\"m3-rc1-pre+0ee8831\""
+ },
+ {
+  "id": "F2-highlight",
+  "n": "no recovery",
+  "pass": true,
+  "info": "{\"r\":null,\"dialog\":\"Welcome back!\\nYou were away 2h+\\n+24.8K eggs\\nCollect\"}"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "kept coinsCents",
+  "pass": true,
+  "info": "[50000000,50000000]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "kept farmLevel",
+  "pass": true,
+  "info": "[12,12]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "kept collectionLevel",
+  "pass": true,
+  "info": "[9,9]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "kept graderTier",
+  "pass": true,
+  "info": "[2,2]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "eggs: basket+pending >= fixture basket+pending",
+  "pass": true,
+  "info": "[321,0,321,24750]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "M4 kept hensLevel",
+  "pass": true,
+  "info": "[10,10]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "M4 kept eggValueLevel",
+  "pass": true,
+  "info": "[10,10]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "M4 kept tracksV7",
+  "pass": true,
+  "info": "[1,1]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "M4 kept v6BackupId",
+  "pass": true,
+  "info": "[\"df9518fb2899179a\",\"df9518fb2899179a\"]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "M4 kept celebratedMilestones",
+  "pass": true,
+  "info": "[[\"hens:10\",\"grade:5\",\"grade:10\",\"balanced:1\",\"balanced:2\"],[\"hens:10\",\"grade:5\",\"grade:10\",\"balanced:1\",\"balanced:2\"]]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "written on load: saveSeq advanced",
+  "pass": true,
+  "info": "[2,4]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "writable: explicit save advances saveSeq",
+  "pass": true,
+  "info": "[4,6]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "reload: no recovery",
+  "pass": true,
+  "info": "null"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "round-trip coinsCents",
+  "pass": true,
+  "info": "[50000000,50000000]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "round-trip farmLevel",
+  "pass": true,
+  "info": "[12,12]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "round-trip collectionLevel",
+  "pass": true,
+  "info": "[9,9]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "round-trip graderTier",
+  "pass": true,
+  "info": "[2,2]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "round-trip hensLevel",
+  "pass": true,
+  "info": "[10,10]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "round-trip eggValueLevel",
+  "pass": true,
+  "info": "[10,10]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "round-trip tracksV7",
+  "pass": true,
+  "info": "[1,1]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "round-trip v6BackupId",
+  "pass": true,
+  "info": "[\"df9518fb2899179a\",\"df9518fb2899179a\"]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "round-trip celebratedMilestones",
+  "pass": true,
+  "info": "[[\"hens:10\",\"grade:5\",\"grade:10\",\"balanced:1\",\"balanced:2\"],[\"hens:10\",\"grade:5\",\"grade:10\",\"balanced:1\",\"balanced:2\"]]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "round-trip eggs not lost",
+  "pass": true,
+  "info": "[25071,0,25071,0]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "reload saveSeq advanced",
+  "pass": true,
+  "info": "[6,11]"
+ },
+ {
+  "id": "F2-highlight",
+  "n": "no page errors",
+  "pass": true,
+  "info": "[]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "runtime build-id",
+  "pass": true,
+  "info": "\"m3-rc1-pre+0ee8831\""
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "no recovery",
+  "pass": true,
+  "info": "{\"r\":null,\"dialog\":\"Welcome back!\\nYou were away 2h+\\n+36K eggs\\nCollect\"}"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "kept coinsCents",
+  "pass": true,
+  "info": "[1234567,1234567]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "kept farmLevel",
+  "pass": true,
+  "info": "[15,15]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "kept collectionLevel",
+  "pass": true,
+  "info": "[9,9]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "kept graderTier",
+  "pass": true,
+  "info": "[2,2]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "eggs: basket+pending >= fixture basket+pending",
+  "pass": true,
+  "info": "[321,777,1098,36000]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "M4 kept hensLevel",
+  "pass": true,
+  "info": "[15,15]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "M4 kept eggValueLevel",
+  "pass": true,
+  "info": "[10,10]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "M4 kept tracksV7",
+  "pass": true,
+  "info": "[1,1]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "M4 kept v6BackupId",
+  "pass": true,
+  "info": "[\"868cb15293771a79\",\"868cb15293771a79\"]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "M4 kept celebratedMilestones",
+  "pass": true,
+  "info": "[[\"hens:10\",\"grade:5\",\"grade:10\",\"balanced:1\",\"balanced:2\"],[\"hens:10\",\"grade:5\",\"grade:10\",\"balanced:1\",\"balanced:2\"]]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "written on load: saveSeq advanced",
+  "pass": true,
+  "info": "[2,4]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "writable: explicit save advances saveSeq",
+  "pass": true,
+  "info": "[4,6]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "reload: no recovery",
+  "pass": true,
+  "info": "null"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "round-trip coinsCents",
+  "pass": true,
+  "info": "[1234567,1234567]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "round-trip farmLevel",
+  "pass": true,
+  "info": "[15,15]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "round-trip collectionLevel",
+  "pass": true,
+  "info": "[9,9]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "round-trip graderTier",
+  "pass": true,
+  "info": "[2,2]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "round-trip hensLevel",
+  "pass": true,
+  "info": "[15,15]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "round-trip eggValueLevel",
+  "pass": true,
+  "info": "[10,10]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "round-trip tracksV7",
+  "pass": true,
+  "info": "[1,1]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "round-trip v6BackupId",
+  "pass": true,
+  "info": "[\"868cb15293771a79\",\"868cb15293771a79\"]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "round-trip celebratedMilestones",
+  "pass": true,
+  "info": "[[\"hens:10\",\"grade:5\",\"grade:10\",\"balanced:1\",\"balanced:2\"],[\"hens:10\",\"grade:5\",\"grade:10\",\"balanced:1\",\"balanced:2\"]]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "round-trip eggs not lost",
+  "pass": true,
+  "info": "[37098,0,37098,0]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "reload saveSeq advanced",
+  "pass": true,
+  "info": "[6,11]"
+ },
+ {
+  "id": "F3-offline-pending",
+  "n": "no page errors",
+  "pass": true,
+  "info": "[]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "runtime build-id",
+  "pass": true,
+  "info": "\"m3-rc1-pre+0ee8831\""
+ },
+ {
+  "id": "F4-L30max",
+  "n": "no recovery",
+  "pass": true,
+  "info": "{\"r\":null,\"dialog\":\"Welcome back!\\nYou were away 2h+\\n+111.6K eggs\\nCollect\"}"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "kept coinsCents",
+  "pass": true,
+  "info": "[999999999,999999999]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "kept farmLevel",
+  "pass": true,
+  "info": "[30,30]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "kept collectionLevel",
+  "pass": true,
+  "info": "[30,30]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "kept graderTier",
+  "pass": true,
+  "info": "[2,2]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "eggs: basket+pending >= fixture basket+pending",
+  "pass": true,
+  "info": "[321,0,321,111600]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "M4 kept hensLevel",
+  "pass": true,
+  "info": "[30,30]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "M4 kept eggValueLevel",
+  "pass": true,
+  "info": "[30,30]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "M4 kept tracksV7",
+  "pass": true,
+  "info": "[1,1]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "M4 kept v6BackupId",
+  "pass": true,
+  "info": "[\"e53fbe024494efbb\",\"e53fbe024494efbb\"]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "M4 kept celebratedMilestones",
+  "pass": true,
+  "info": "[[\"hens:10\",\"hens:20\",\"hens:30\",\"grade:5\",\"grade:10\",\"grade:20\",\"balanced:1\",\"balanced:2\",\"balanced:3\",\"balanced:4\",\"balanced:5\"],[\"hens:10\",\"hens:20\",\"hens:30\",\"grade:5\",\"grade:10\",\"grade:20\",\"balanced:1\",\"balanced:2\",\"balanced:3\",\"balanced:4\",\"balanced:5\"]]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "written on load: saveSeq advanced",
+  "pass": true,
+  "info": "[2,4]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "writable: explicit save advances saveSeq",
+  "pass": true,
+  "info": "[4,6]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "reload: no recovery",
+  "pass": true,
+  "info": "null"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "round-trip coinsCents",
+  "pass": true,
+  "info": "[999999999,999999999]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "round-trip farmLevel",
+  "pass": true,
+  "info": "[30,30]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "round-trip collectionLevel",
+  "pass": true,
+  "info": "[30,30]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "round-trip graderTier",
+  "pass": true,
+  "info": "[2,2]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "round-trip hensLevel",
+  "pass": true,
+  "info": "[30,30]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "round-trip eggValueLevel",
+  "pass": true,
+  "info": "[30,30]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "round-trip tracksV7",
+  "pass": true,
+  "info": "[1,1]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "round-trip v6BackupId",
+  "pass": true,
+  "info": "[\"e53fbe024494efbb\",\"e53fbe024494efbb\"]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "round-trip celebratedMilestones",
+  "pass": true,
+  "info": "[[\"hens:10\",\"hens:20\",\"hens:30\",\"grade:5\",\"grade:10\",\"grade:20\",\"balanced:1\",\"balanced:2\",\"balanced:3\",\"balanced:4\",\"balanced:5\"],[\"hens:10\",\"hens:20\",\"hens:30\",\"grade:5\",\"grade:10\",\"grade:20\",\"balanced:1\",\"balanced:2\",\"balanced:3\",\"balanced:4\",\"balanced:5\"]]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "round-trip eggs not lost",
+  "pass": true,
+  "info": "[111921,0,111921,0]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "reload saveSeq advanced",
+  "pass": true,
+  "info": "[6,11]"
+ },
+ {
+  "id": "F4-L30max",
+  "n": "no page errors",
+  "pass": true,
+  "info": "[]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "runtime build-id",
+  "pass": true,
+  "info": "\"m3-rc1-pre+0ee8831\""
+ },
+ {
+  "id": "F5-preM4",
+  "n": "no recovery",
+  "pass": true,
+  "info": "{\"r\":null,\"dialog\":\"Welcome back!\\nYou were away 2h+\\n+27K eggs\\nCollect\"}"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "kept coinsCents",
+  "pass": true,
+  "info": "[1234567,1234567]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "kept farmLevel",
+  "pass": true,
+  "info": "[14,14]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "kept collectionLevel",
+  "pass": true,
+  "info": "[9,9]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "kept graderTier",
+  "pass": true,
+  "info": "[2,2]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "eggs: basket+pending >= fixture basket+pending",
+  "pass": true,
+  "info": "[321,0,321,27000]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "written on load: saveSeq advanced",
+  "pass": true,
+  "info": "[0,3]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "pre-M4 migration committed",
+  "pass": true,
+  "info": "\"none\""
+ },
+ {
+  "id": "F5-preM4",
+  "n": "writable: explicit save advances saveSeq",
+  "pass": true,
+  "info": "[3,6]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "reload: no recovery",
+  "pass": true,
+  "info": "null"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "round-trip coinsCents",
+  "pass": true,
+  "info": "[1234567,1234567]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "round-trip farmLevel",
+  "pass": true,
+  "info": "[14,14]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "round-trip collectionLevel",
+  "pass": true,
+  "info": "[9,9]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "round-trip graderTier",
+  "pass": true,
+  "info": "[2,2]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "round-trip hensLevel",
+  "pass": true,
+  "info": "[14,14]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "round-trip eggValueLevel",
+  "pass": true,
+  "info": "[9,9]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "round-trip tracksV7",
+  "pass": true,
+  "info": "[1,1]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "round-trip v6BackupId",
+  "pass": true,
+  "info": "[\"8ee7e6108e1a333b\",\"8ee7e6108e1a333b\"]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "round-trip celebratedMilestones",
+  "pass": true,
+  "info": "[[\"hens:10\",\"grade:5\",\"balanced:1\"],[\"hens:10\",\"grade:5\",\"balanced:1\"]]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "round-trip eggs not lost",
+  "pass": true,
+  "info": "[27321,0,27321,0]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "reload saveSeq advanced",
+  "pass": true,
+  "info": "[6,11]"
+ },
+ {
+  "id": "F5-preM4",
+  "n": "no page errors",
+  "pass": true,
+  "info": "[]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "runtime build-id",
+  "pass": true,
+  "info": "\"m3-rc1-pre+0ee8831\""
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "no recovery",
+  "pass": true,
+  "info": "{\"r\":null,\"dialog\":\"Welcome back!\\nYou were away 2h+\\n+34.2K eggs\\nCollect\"}"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "kept coinsCents",
+  "pass": true,
+  "info": "[4567890,4567890]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "kept farmLevel",
+  "pass": true,
+  "info": "[18,18]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "kept collectionLevel",
+  "pass": true,
+  "info": "[11,11]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "kept graderTier",
+  "pass": true,
+  "info": "[3,3]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "eggs: basket+pending >= fixture basket+pending",
+  "pass": true,
+  "info": "[412,0,412,34200]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "written on load: saveSeq advanced",
+  "pass": true,
+  "info": "[0,2]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "pre-M4 migration committed",
+  "pass": true,
+  "info": "\"none\""
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "writable: explicit save advances saveSeq",
+  "pass": true,
+  "info": "[2,5]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "reload: no recovery",
+  "pass": true,
+  "info": "null"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "round-trip coinsCents",
+  "pass": true,
+  "info": "[4567890,4567890]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "round-trip farmLevel",
+  "pass": true,
+  "info": "[18,18]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "round-trip collectionLevel",
+  "pass": true,
+  "info": "[11,11]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "round-trip graderTier",
+  "pass": true,
+  "info": "[3,3]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "round-trip hensLevel",
+  "pass": true,
+  "info": "[18,18]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "round-trip eggValueLevel",
+  "pass": true,
+  "info": "[10,10]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "round-trip tracksV7",
+  "pass": true,
+  "info": "[1,1]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "round-trip v6BackupId",
+  "pass": true,
+  "info": "[\"3b441e5a253ee84d\",\"3b441e5a253ee84d\"]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "round-trip celebratedMilestones",
+  "pass": true,
+  "info": "[[\"hens:10\",\"grade:5\",\"grade:10\",\"balanced:1\",\"balanced:2\"],[\"hens:10\",\"grade:5\",\"grade:10\",\"balanced:1\",\"balanced:2\"]]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "round-trip eggs not lost",
+  "pass": true,
+  "info": "[34612,0,34612,0]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "reload saveSeq advanced",
+  "pass": true,
+  "info": "[5,10]"
+ },
+ {
+  "id": "M1-midgame-L18",
+  "n": "no page errors",
+  "pass": true,
+  "info": "[]"
+ }
+]

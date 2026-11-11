@@ -1,0 +1,1 @@
+NOT READ (scheduled gate 42145282654 @ 03:00; pacing 42145282651 @ 03:25, last 03:40 if pending). Prior gate 42139828949 was read for old tip 27660196 only — not repeated, not applied to a5f8e3c.
