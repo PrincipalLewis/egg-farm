@@ -8,10 +8,11 @@ import { apply } from '../src/sim/actions';
 import { step } from '../src/sim/tick';
 import { WORKERS, type WorkerId } from '../src/sim/workers';
 import { workerAtRisk } from '../src/econ/income';
+import { pausedDurationS, resumeWorker } from '../src/sim/pause';
 import {
   restEligibility, refillEligibility, refillableCount, restState, refillAgoSimMs, pct,
   refillWorker, setRest, setAutoRefill, takeAutoRefillToast, noteShiftSheetOpened, noteStallChipTap,
-  tickRefill, chargesOf, chargesView, autoRefillOn, pausedDurationS, rc2RefillOn, refillSessionTotals,
+  tickRefill, chargesOf, chargesView, autoRefillOn, rc2RefillOn, refillSessionTotals,
   shiftOrder, restEtas,
   type RefillCtx,
 } from '../src/sim/refill';
@@ -511,5 +512,67 @@ describe('[G0 §15] refillAgoMs entries expire once age > combo_window_s × 1000
     expect('refillAgoMs' in gone).toBe(false);
     const keep = tickRefill({ ...base(), refillAgoMs: { market_hand: 10000 } }, 100, R); // no window key on R
     expect(keep.refillAgoMs?.market_hand).toBe(10100);
+  });
+});
+
+describe('[G2][G0-exclusive] rest_toggled vs worker_paused / worker_resumed (both flag states)', () => {
+  const isPauseEvent = (e: { type: string }) => e.type === 'worker_paused' || e.type === 'worker_resumed';
+
+  it('[G2][G0-exclusive] rc2Refill=1: setRest and refillWorker emit rest_toggled only; worker_paused and worker_resumed are absent', () => {
+    const s: GameState = {
+      ...base(), refillCharges: 2,
+      workers: { market_hand: { energy: 20, cdS: 0, paused: true, restAuto: true } },
+      pausedForS: { market_hand: 3900 },
+    } as any;
+    const off = setRest(s, 'market_hand', false, R, CTX);
+    expect(off.events.map(e => e.type)).toEqual(['rest_toggled']);
+    expect(off.events.some(isPauseEvent)).toBe(false);
+    expect(off.events[0]).toMatchObject({ type: 'rest_toggled', on: false, paused_duration_s: 3 });
+    expect(pausedDurationS(s, 'market_hand')).toBe(3); // #119 one source (floor 3900/1000)
+
+    const on = setRest(base(), 'market_hand', true, R, CTX);
+    expect(on.events.map(e => e.type)).toEqual(['rest_toggled']);
+    expect(on.events.some(isPauseEvent)).toBe(false);
+    expect(on.events[0]).toMatchObject({ type: 'rest_toggled', on: true });
+
+    const r = refillWorker(s, 'market_hand', R, CTX);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.events.some(e => e.type === 'rest_toggled')).toBe(true);
+    expect(r.events.some(isPauseEvent)).toBe(false);
+  });
+
+  it('[G2][G0-exclusive] flag-off (rc2Refill=0, pause=1): Manage and resumeWorker still emit worker_resumed; setRest is a no-op (no rest_toggled)', () => {
+    const bb = fl({ rc2Refill: 0, pause: 1 });
+    const s: GameState = {
+      ...base(), manageCdS: 0,
+      workers: { market_hand: { energy: 20, cdS: 0, paused: true } },
+      pausedForS: { market_hand: 10_000 },
+    } as any;
+    const ev: any[] = [];
+    const out = apply(s, { type: 'manage', worker: 'market_hand' }, bb, ev);
+    expect(out.workers.market_hand!.energy).toBe(100);
+    expect(out.workers.market_hand!.paused).toBe(false);
+    expect(ev.map(e => e.type)).toEqual(['worker_manage', 'worker_resumed']);
+    expect(ev.some(e => e.type === 'rest_toggled' || e.type === 'worker_paused')).toBe(false);
+    expect(ev[1]).toMatchObject({ type: 'worker_resumed', cause: 'manage', paused_duration_s: 10 });
+
+    const ev2: any[] = [];
+    const resumed = resumeWorker(s, 'market_hand', bb, ev2, 'manual');
+    expect(resumed.workers.market_hand!.paused).toBe(false);
+    expect(ev2.map(e => e.type)).toEqual(['worker_resumed']);
+    expect(ev2[0]).toMatchObject({ type: 'worker_resumed', cause: 'manual', paused_duration_s: 10 });
+    expect(ev2.some(e => e.type === 'rest_toggled')).toBe(false);
+
+    const noop = setRest(s, 'market_hand', false, bb, CTX);
+    expect(noop.state).toBe(s);
+    expect(noop.events).toEqual([]);
+  });
+
+  it('[G2][M3] refill.ts has no local pausedDurationS / floorMsToS; it imports #119\'s from pause.ts', () => {
+    const src = readFileSync(join(__dirname, '../src/sim/refill.ts'), 'utf8');
+    expect(src).not.toMatch(/function pausedDurationS/);
+    expect(src).not.toMatch(/floorMsToS/);
+    expect(src).toMatch(/pausedDurationS, pauseSessionEnd \} from '\.\/pause'/);
   });
 });

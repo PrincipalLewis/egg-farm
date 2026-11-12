@@ -15,7 +15,7 @@ import { tcNum } from '../config/formulas';
 import { flagOn } from '../config/flags';
 import type { GameState } from './state';
 import { WORKERS, mood, type Worker, type WorkerId } from './workers';
-import { ENERGY_FULL, isPaused, pauseWorker, resumeWorker } from './pause';
+import { ENERGY_FULL, isPaused, pauseWorker, resumeWorker, pausedDurationS, pauseSessionEnd } from './pause';
 import { sessionEndPresentFields } from './breeds-traits';
 import type { RefillSession } from './m5-state';
 import type { SimEvent, Sink } from './events';
@@ -71,9 +71,12 @@ export function refillSessionTotals(s: GameState, b: Balance): RefillSessionTota
   return out;
 }
 
-/** T-AC9: one helper for Game.session_end — no comma-bearing calls inside the track literal. */
+/** T-AC9: one helper for Game.session_end — no comma-bearing calls inside the track literal.
+ *  Composes present_* + refill totals + #119's pauseSessionEnd (one source). pauseSessionEnd is
+ *  already {} at rc2Refill=1 or pause=0 (G0 exclusive emission); at flag-off (pause=1) it carries
+ *  paused_worker_s / all_paused_s. */
 export function sessionEndFields(s: GameState, b: Balance): Record<string, unknown> {
-  return { ...sessionEndPresentFields(s, b), ...refillSessionTotals(s, b) };
+  return { ...sessionEndPresentFields(s, b), ...refillSessionTotals(s, b), ...pauseSessionEnd(s, b) };
 }
 
 /** D-HOE-61: the switch's state. False when rc2Refill=0 or autoRefill=0, or the key is not `true`. Pure; writes nothing. */
@@ -144,18 +147,7 @@ export function refillAgoSimMs(s: GameState, id: WorkerId): number | undefined {
   return s.refillAgoMs?.[id];
 }
 
-/**
- * #119's session-only pausedForS is the source for rest_toggled / worker_resumed paused_duration_s
- * (G0 §14b). We only read and floor at emit, matching #119's pausedDurationS; we do not add a
- * parallel field and we do not tick the tracker (that's #119, including the integer-ms fix).
- * Missing entry → 0.
- */
-type PausedForHolder = { pausedForS?: Partial<Record<WorkerId, number>> };
-export function pausedDurationS(s: GameState, id: WorkerId): number {
-  // Match #119 floorMsToS (9260abd1): pausedForS is integer ms; floor ms/1000 at emit (G0 §14b / §15).
-  const v = (s as GameState & PausedForHolder).pausedForS?.[id];
-  return typeof v === 'number' && Number.isFinite(v) && v > 0 ? Math.floor(v / 1000) : 0;
-}
+/** paused_duration_s is #119's pausedDurationS (sim/pause.ts) — one source (G0 §14b). */
 
 export type ShiftSheetEntry = 'nav' | 'card' | 'stall_chip' | 'fatigue_chip';
 export interface RefillCtx {
@@ -287,8 +279,10 @@ export function refillWorker(
 export function setRest(
   s: GameState, id: WorkerId, on: boolean, b: Balance, ctx: RefillCtx,
 ): { state: GameState; events: SimEvent[] } {
-  // Architect: with pause = 0, setRest is a no-op. Resume (on:false) is never blocked by restEligibility.
-  if (!flagOn(b, 'pause')) return { state: s, events: [] };
+  // Architect: with pause = 0, setRest is a no-op. At rc2Refill=0 it is also a no-op (G0 exclusive
+  // emission: flag-off uses #119's pauseWorker / resumeWorker, which emit worker_resumed).
+  // Resume (on:false) is never blocked by restEligibility.
+  if (!flagOn(b, 'rc2Refill') || !flagOn(b, 'pause')) return { state: s, events: [] };
   const w = s.workers[id];
   if (!w) return { state: s, events: [] };
   if (on) {

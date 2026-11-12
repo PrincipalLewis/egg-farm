@@ -178,3 +178,32 @@ describe('[G2][M2][T-AC9] sessionEndFields spreads refillSessionTotals; resetSes
   // HoE: never merge Draft #138 into #133; do not create src/sim/session.ts locally.
   it.todo('[G2][M2] one-line resetRefillSession(s) inside resetSessionFields — pending #138 merge into rc/v5, then mergefwd; HoE: never merge Draft #138 into #133, do not create src/sim/session.ts locally');
 });
+
+describe('[G2][G0-exclusive] sessionEndFields pause totals exclusive by rc2Refill (both flag states)', () => {
+  const tracked = (s: GameState): GameState => ({
+    ...s,
+    pausedForS: { market_hand: 5000, sumS: 5500, allS: 2500 },
+  });
+
+  it('[G2][G0-exclusive] flag-off (rc2Refill=0, pause=1): spreads pauseSessionEnd (paused_worker_s / all_paused_s); no refill keys', () => {
+    const bb = fl({ rc2Refill: 0, pause: 1 });
+    const f = sessionEndFields(tracked(live()), bb);
+    expect(f.paused_worker_s).toBe(5);
+    expect(f.all_paused_s).toBe(2);
+    expect('shortage_s' in f).toBe(false);
+    expect('refills_manual' in f).toBe(false);
+    expect('charge_starved_s' in f).toBe(false);
+  });
+
+  it('[G2][G0-exclusive] rc2Refill=1 (pause=1): refill totals present; paused_worker_s / all_paused_s absent', () => {
+    const bb = fl({ rc2Refill: 1, autoRefill: 1, pause: 1 });
+    const f = sessionEndFields(tracked(live()), bb);
+    expect(f.shortage_s).toBe(2);
+    expect(f.refills_manual).toBe(3);
+    expect(f.refills_auto).toBe(5);
+    expect(f.charge_starved_s).toBe(12.4);
+    expect('paused_worker_s' in f).toBe(false);
+    expect('all_paused_s' in f).toBe(false);
+    expect('charges_capped_s' in f).toBe(false);
+  });
+});
