@@ -14,7 +14,7 @@ import type { SimEvent, CollectibleSkin } from './sim/events';
 import { goldenOn, goldenUnload, spawnDue } from './sim/golden';
 import { broodyOn, broodyCheckDue, broodyReset, broodyView, type BroodyView } from './sim/broody';
 import { focusFrameMs } from './sim/clock';
-import { streakOn, streakPeak } from './sim/streak';
+import { streakOn, streakPeak, creditedTapsOn } from './sim/streak';
 import { anyM5FlagOn } from './sim/timers';
 import { incomeRefOn, resetIncomeRef } from './sim/income-ref';
 import { playerSaleCtx, type SaleCtx } from './sim/effects';
@@ -66,6 +66,8 @@ export class Game {
   constructor(private b: Balance, private kv: KV, private now = () => Date.now(), seed?: number, public build = 'dev', mirror: Game['mirror'] = null, idbRaw: unknown = null, private opts: GameOpts = {}) {
     this.mirror = mirror;
     this.telemetry = new Telemetry(kv, b.telemetry, now);
+    // ST-AC20 (streak §8.1): session_end reads Farm level, Coop Hand and the credited-tap flag from the live state at emit.
+    this.telemetry.sessionEndContext = () => ({ farm_level: this.state.farmLevel, coop_hand: !!this.state.workers.coop_hand, credit: creditedTapsOn(this.b) });
     this.installId = installId(kv);
     this.telemetry.track('session_start', { install_id: this.installId, build });
     // M41-7 (spec v0.3.3, OQ-7): loadSafe is the single owner of the order. With opts.idbBoot (main.ts) the IndexedDB value is a
@@ -149,7 +151,7 @@ export class Game {
   private emit(evs: SimEvent[]) {
     for (const e0 of evs) { const e = this.withCollectibleId(e0);
       this.notify(e);
-      if (e.type === 'collect') this.telemetry.tap(e.eggs);
+      if (e.type === 'collect') this.telemetry.tap(e.eggs, e.credited === undefined ? undefined : { credited: e.credited, bonus_cents: e.bonus_cents, coopHand: !!this.state.workers.coop_hand }); // ST-AC19
       else if (e.type === 'wage') this.telemetry.sum(`wage_${e.worker}_cents`, e.cents);
       else if (e.type === 'worker_collect') this.telemetry.sum('coop_hand_eggs', e.eggs);
       else if (e.type === 'collectible_collected' && e.skin === 'broody_hen') { this.broodyCents += e.reward_value; this.broodyCollects++; const { type, ...rest } = e; this.telemetry.track(type, rest); }

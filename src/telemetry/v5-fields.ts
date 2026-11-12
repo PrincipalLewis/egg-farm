@@ -1,5 +1,5 @@
 /**
- * v5 telemetry field builders that read M5 flags (HoE/tel-st-ac19-20; errata v5 rev. 15 sha1 5e12a591 V-2b).
+ * v5 telemetry field builders that read M5 flags (HoE/tel-st-ac19-20; errata v5 rev. 16 sha1 f82bf4d6 V-2b).
  * Kept out of game.ts so the F3 no-literal scan of flag readers covers only this small module.
  * Row 32 (HoE/breeds-sim-prB-traits): offline_grant.away_bp — real Away bp (BR-R13), not the #123 AWAY_BP_NONE stub.
  */
