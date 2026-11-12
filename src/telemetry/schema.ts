@@ -71,7 +71,7 @@ export const VIEWPORT_W_BUCKETS = ['<375', '375–767', '≥768'] as const; // s
  *  on fatigue_cue_shown only. */
 const FATIGUE_CUE_TAPPED_FIELDS: Readonly<Record<string, FieldSpec>> = { surface: E('hud_chip', 'banner', 'bubble'), loss_per_s: C, loss_share: F(0, 1, 0.001), n_tired: I(0, 4), n_asleep: I(0, 4), n_paused: I(0, 4) };
 const BBV2 = (balance as { telemetry: { bbv2: { shown_min_gap_s: number; zero_gain_eta_max_s: number; dead_zone_min_s: number; zero_gain_purchase_cap: number } } }).telemetry.bbv2;
-const RARITY = E('C', 'R', 'E', 'L'); // breeds roster tiers (string values follow breeds next rev, errata V-8)
+const RARITY = E('Common', 'Rare', 'Epic', 'Legendary'); // breeds §8 / D6 (rev 3.8.9; was C/R/E/L)
 const BREED = E(...BREED_IDS);
 const LOADOUT = S(/^P[0-3]A[0-3]B[0-3]$/);
 
