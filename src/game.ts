@@ -18,6 +18,7 @@ import { streakOn, streakPeak, creditedTapsOn } from './sim/streak';
 import { anyM5FlagOn } from './sim/timers';
 import { incomeRefOn, resetIncomeRef } from './sim/income-ref';
 import { playerSaleCtx, type SaleCtx } from './sim/effects';
+import { pauseSessionEnd } from './sim/pause'; // pause §12 session_end paused_worker_s / all_paused_s (Saves #119)
 import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY } from './telemetry/telemetry';
@@ -345,9 +346,10 @@ export class Game {
     const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
     this.goldenEnd('reload'); // v5 #1 R10c (Saves-confirmed order): expired{reload} + fresh gap, in the same flush, before session_end/save
     // Row 32 (HoE/breeds-sim-prB-traits): present_* only. Other breeds session_end fields = gen/breeds-telemetry.
-    // T-AC9: no comma-bearing calls inside the session_end literal — helper returns the fields object.
+    // T-AC9: no comma-bearing calls inside the session_end literal — helpers return the fields objects (precomputed, then spread).
+    const pauseEnd = pauseSessionEnd(this.state, this.b); // pause §12 L299: paused_worker_s / all_paused_s; pause = 1 and rc2Refill = 0 only (Saves #119)
     const se = sessionEndPresentFields(this.state, this.b);
-    this.telemetry.track('session_end', { ...se, ...this.broodyEnd() }); this.broodyCents = 0; this.broodyCollects = 0; this.save(); this.telemetry.flush(true); }
+    this.telemetry.track('session_end', { ...pauseEnd, ...se, ...this.broodyEnd() }); this.broodyCents = 0; this.broodyCollects = 0; this.save(); this.telemetry.flush(true); }
   /** v5 #5 §8 / HoE F4: session_end.broody_cents (Σ broody reward_value) and broody_collects; absent while the flag is off.
    *  Counters restart after each session_end (a bfcache restore never re-reports them). */
   private broodyCents = 0; private broodyCollects = 0;
