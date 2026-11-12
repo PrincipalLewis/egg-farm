@@ -253,7 +253,9 @@ describe('Pause / offline / reload (§7.1, §7.2, §7.5)', () => {
     expect((M5_SESSION_KEYS as readonly string[]).includes('stallSession')).toBe(true);
     expect('stallSession' in m5Persist(s)).toBe(false);
     const raw = serialize(s, 0); expect(raw).not.toMatch(/stall|fatigue|cue/i);
-    expect(M5_SAVED_FIELDS).toEqual(['evRngState', 'nextSpawnRemainingS', 'frenzyRemainingS', 'broodyNestCents', 'broodyHenIdx', 'abilities', 'abilitiesUnlocked', 'abilitiesCoachSeen', 'breeds']);
+    // clockWageTipShown + clockWageWindow are Hire 2 saved keys (Saves-approved); stallSession stays session-only.
+    expect(M5_SAVED_FIELDS).toEqual(['evRngState', 'nextSpawnRemainingS', 'frenzyRemainingS', 'broodyNestCents', 'broodyHenIdx', 'abilities', 'abilitiesUnlocked', 'abilitiesCoachSeen', 'breeds', 'clockWageTipShown', 'clockWageWindow']);
+    expect((M5_SAVED_FIELDS as readonly string[]).includes('stallSession')).toBe(false);
     expect(SAVE_VERSION).toBe(6);
   });
   it('[SS-44][SS-45] a reloaded state (session stripped) starts a new episode: stall_id 1, no prev_stall_id, no resolved for an old id; one fatigue_cue_shown', () => {
