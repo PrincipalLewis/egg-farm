@@ -41,6 +41,9 @@ export interface GameState extends M5Fields {
    *  interval/deferral/R15 retry and the live Frenzy's frenzy_ended stats. Stripped by m5Persist SESSION_ONLY_KEYS. */
   goldenPending?: import('./golden').GoldenPending;
   frenzyRun?: import('./golden').FrenzyRun;
+  /** Session-only (v1.3.3 GE-AC45 / §8): session_end counters + QA forceReward. Stripped by m5Persist. */
+  goldenSession?: import('./golden').GoldenSession;
+  goldenForceReward?: import('./events').GoldenReward;
 }
 export const initialState = (b: Balance, seed = 1): GameState => ({
   coinsCents: 0, coop: 0, basket: 0, collectionLevel: 0, farmLevel: 0,
