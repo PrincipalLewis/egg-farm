@@ -6,16 +6,19 @@ import { Track, salePriceCents, trackLock, trackCost, trackLevel, reachedMilesto
 import type { Sink } from './events';
 import { saleValueCents } from './payout';
 import { creditTap, streakSaleFactor, addStreakExtra } from './streak';
+import { breedsNoteCreditedTap } from './breeds-traits';
 import { playerSaleCtx } from './effects';
 import { incomeRefOn, recordSale } from './income-ref';
 import { tapCoinsOn, tapCoinsFor } from './tap-coins';
+import { spawnGolden, tapGolden, frenzySale } from './golden';
 import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
   | { type: 'buyCollection' } | { type: 'buyFarm' } | { type: 'collectOffline' } | { type: 'dismissOffline' } | { type: 'markCelebrated'; tier: number }
   | { type: 'hatch' } | { type: 'placeBreed'; slot: number; id: string | null } // M5.1 breeds (no-op unless m4.flags.breeds)
   | { type: 'hire'; worker: WorkerId } | { type: 'manage'; worker: WorkerId } | { type: 'manageAll' } | { type: 'buyGraderTier' }
-  | { type: 'buyTrack'; track: Track } | { type: 'markMilestones'; ids: string[] };
+  | { type: 'buyTrack'; track: Track } | { type: 'markMilestones'; ids: string[] }
+  | { type: 'spawnGolden'; spots: readonly string[]; layout?: boolean } | { type: 'tapGolden' }; // v5 #1 golden (no-op unless m4.flags.golden)
 /** Sell all preview lives in sim/payout.ts (the one payout fn, #25; M4 sale price via salePriceCents); re-exported for #28 callers. */
 export { sellAllPreview } from './payout';
 export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm' || a.type === 'buyTrack';
@@ -32,7 +35,8 @@ export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'pla
   const customers = done ? s.customers.filter(x => x.id !== id) : s.customers.map(x => x.id === id ? { ...x, filled } : x);
   const o0 = { ...s, basket: s.basket - k, coinsCents: s.coinsCents + value, customers };
   // #3 I_ref (§4.1): the BASE value (price chain x Grader, every timed effect suspended) enters the ring; identity when off.
-  const o = incomeRefOn(b) ? recordSale(o0, saleValueCents(s, k, b, { by, suspended: true }), b) : o0;
+  const o1 = incomeRefOn(b) ? recordSale(o0, saleValueCents(s, k, b, { by, suspended: true }), b) : o0;
+  const o = frenzySale(o1, s, k, value, ctx, b); // #1 frenzy_ended stats (identity unless golden and a live Frenzy)
   return streakSaleFactor(s, b, suspended) === 1 ? o : addStreakExtra(o, value - saleValueCents({ ...s, streakS: 0 }, k, b, ctx)); // #2 extra_coins
 }
 function buy(s: GameState, kind: 'collection' | 'farm', b: Balance, ev?: Sink): GameState {
@@ -73,13 +77,16 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended =
       ev?.push(c.credited === undefined ? { type: 'collect', eggs: n } : bonus === undefined ? { type: 'collect', eggs: n, credited: c.credited }
         : { type: 'collect', eggs: n, credited: c.credited, bonus_cents: bonus });
       if (c.started) ev?.push({ type: 'streak_started', farm_level: s.farmLevel, collection_level: s.collectionLevel });
-      return { ...c.s, coop: s.coop - n, basket: s.basket + n, ...(bonus ? { coinsCents: c.s.coinsCents + bonus } : {}) };
+      const afterTap = breedsNoteCreditedTap(c.s, b, c.credited);
+      return { ...afterTap, coop: s.coop - n, basket: s.basket + n, ...(bonus ? { coinsCents: afterTap.coinsCents + bonus } : {}) };
     }
     case 'sell': return sellTo(s, a.customerId, b, ev, 'player', !attended);
     case 'sellAll': { let r = s; for (const c of s.customers) { if (r.basket < 1) break; r = sellTo(r, c.id, b, ev, 'player', !attended); } return r; }
     case 'buyCollection': return buy(s, 'collection', b, ev);
     case 'buyFarm': return withMilestones(s, buy(s, 'farm', b, ev), b, ev);
     case 'buyTrack': return withMilestones(s, buyTrack(s, a.track, b, ev), b, ev);
+    case 'spawnGolden': return spawnGolden(s, a.spots, b, ev, a.layout === true); // #1 R14/R15: the UI's live valid spot ids
+    case 'tapGolden': return tapGolden(s, b, ev); // #1 R19/R20 (not a credited tap, R25b)
     case 'markMilestones': { const add = a.ids.filter(id => !s.celebratedMilestones.includes(id)); return add.length ? { ...s, celebratedMilestones: [...s.celebratedMilestones, ...add] } : s; }
     case 'hire': {
       const id = a.worker; if (s.workers[id] || s.farmLevel < unlockFarm(id, b)) return s;

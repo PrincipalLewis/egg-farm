@@ -47,6 +47,9 @@ export const UI_KEY = 'eggfarm.ui';
 interface UiFlags { onbStep?: number; sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean; sessions?: number; iosHomeShown?: boolean }
 const h = (html: string) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild as HTMLElement; };
 const setText = (el: Element, v: string) => { if (el.textContent !== v) el.textContent = v; };
+/** OC-A11Y-2 (D-HOP-2026-11-09-01): order-chip accessible name; starts with the visible `.tag .num` text (WCAG 2.5.3).
+ *  Plural from the RAW count, never the formatted string. Copy final per Art; swap wording here only. */
+export const orderChipLabel = (visible: string, raw: number) => `${visible} ${raw === 1 ? 'egg' : 'eggs'} wanted by customer`;
 const setDisabled = (el: HTMLElement, d: boolean) => { const v = d ? 'true' : 'false'; if (el.getAttribute('aria-disabled') !== v) el.setAttribute('aria-disabled', v); };
 const retrigger = (el: Element, cls: string) => { el.classList.remove(cls); void (el as HTMLElement).offsetWidth; el.classList.add(cls); };
 
@@ -369,7 +372,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (t.id === 'sOldSave') { const raw = oldSaveForSession(); if (raw) void exportOldSave(raw, exportName(new Date())).then(ok => { $('#sOldMsg').textContent = ok ? OK_MSG : FAIL_MSG; }); return; }
     if (t.id === 'sExport') { void exportLog(g.telemetry.exportJSON(), `eggfarm-log-${g.installId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.json`).then(m => { const el = $('#sExportMsg'); if (el) el.textContent = m; }); return; }
     if (t.id === 'sReset') { modalKind = 'confirm'; modal.innerHTML = `<div class="card" role="alertdialog" aria-modal="true"><h2>Reset all progress?</h2><button class="btn secondary" id="cCancel">Cancel</button><button class="btn danger" id="cReset">Reset</button></div>`; return; }
-    if (t.id === 'cReset') { g.resetting = true; g.telemetry.track('save_reset'); g.telemetry.flush(true); resetProgress(localStorage); void g.clearMirror().then(() => location.reload()); }
+    if (t.id === 'cReset') { g.beginReset(); resetProgress(localStorage); void g.clearMirror().then(() => location.reload()); }
   });
   modal.addEventListener('change', e => {
     const t = e.target as HTMLInputElement;
@@ -409,8 +412,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const kids: HTMLElement[] = [];
     for (const c of s.customers.slice(0, split.shown)) {
       let el = chips.get(c.id);
-      if (!el) { el = h(`<button class="chip arrive" aria-label="Customer"><img class="cust" src="${A('icon-customer.svg')}" alt=""><span class="tag"><img src="${A('icon-egg.svg')}" alt=""><span class="num"></span></span></button>`); chips.set(c.id, el); }
-      setText(el.querySelector('.tag .num')!, fmtCount(c.demand - c.filled));
+      if (!el) { el = h(`<button class="chip arrive"><img class="cust" src="${A('icon-customer.svg')}" alt=""><span class="tag"><img src="${A('icon-egg.svg')}" alt=""><span class="num"></span></span></button>`); chips.set(c.id, el); }
+      const left = c.demand - c.filled, n = fmtCount(left); // OC-A11Y-1..3: name + visible digit from one value, same render
+      setText(el.querySelector('.tag .num')!, n);
+      const al = orderChipLabel(n, left); if (el.getAttribute('aria-label') !== al) el.setAttribute('aria-label', al);
       setP(el, c.waitedS / patience);
       kids.push(el);
     }
@@ -880,6 +885,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const gateCtx = () => { const st = g.state; return { coop: st.coop, eggsPerTap: S.eggsPerTap(st.collectionLevel, b), customers: st.customers.length, basket: st.basket, coinsCents: st.coinsCents, costCents: S.collectionCost(st.collectionLevel, b) * 100, nextCustomerInS: st.nextCustomerInS }; };
   // AC-R1 §6: banners refit on resize / dock change (wider or narrower card); QA-only hook for the rc0 bannerFit section, compiled out of release.
   { const refit = () => fitBanners(uRow); addEventListener('resize', refit); docked.addEventListener?.('change', refit); }
+  { const lay = () => g.layoutChanged(); addEventListener('resize', lay); docked.addEventListener?.('change', lay); } // v5 #1 R15: re-check a deferred golden spawn on layout change (no-op unless golden is on)
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaFitBanners = () => fitBanners(uRow);
   // QA-only: open the real save-recovery dialog mid-game (R1 resume check); compiled out of release with eggfarmOnb.
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaRecovery = () => showRecoveryDialog({ case: 'F', reason: 'parse', had_backup: false, restored_from_backup: false, copy_failed: false, raw: '{}' } as any, A, [root, modal, toast]);
@@ -890,7 +896,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     renderAll();
     // M41-7 (CSR v0.2.3): M5 = restored + storage blocked; G1 Export takes the CURRENT restored farm via recovery.live().
     const rec = opts.recovery as CsrRecovery, blocked = !!opts.storageBlocked?.(); let noticeId: NoticeId | undefined;
-    if (blocked && rec.case === 'R' && csrCopyActive(rec) && !rec.live) rec.live = () => serialize(g.state, Date.now());
+    if (blocked && rec.case === 'R' && csrCopyActive(rec) && !rec.live) rec.live = () => serialize(g.state, Date.now(), undefined, g.balance);
     void showRecoveryDialog(opts.recovery, A, [root, modal, toast], () => g.telemetry.track('save_recovery_export', { case: opts.recovery!.case }), undefined,
       { storageBlocked: blocked, track: (t, d) => g.telemetry.track(t, d), onNotice: n => { noticeId = n?.id; } }).then(() => {
       if (noticeId === 'M4' && rec.case === 'D') { location.reload(); return; } // CSR-13 defer: "Try again" reloads

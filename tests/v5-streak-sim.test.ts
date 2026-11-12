@@ -111,7 +111,8 @@ describe('#2 streak: the (1 + s) sale factor (R8/R9/R12)', () => {
     expect(saleMultipliers(sell(OFF, { streakS: 0.2 }), OFF)).toEqual([1]);
   });
   it('ST-AC29: flag off: step with or without a clock is identical, and no streak fields appear', () => {
-    let a = sell(OFF), c = sell(OFF); for (let i = 0; i < 50; i++) { a = step(a, DT, OFF); c = step(c, DT, OFF, undefined, F); } expect(c).toEqual(a);
+    const NO = { ...OFF, m4: { ...OFF.m4!, flags: { ...OFF.m4!.flags, golden: 0 } } } as typeof b; // v5 #1 slice 2: golden's focus countdown is not a streak field
+    let a = sell(NO), c = sell(NO); for (let i = 0; i < 50; i++) { a = step(a, DT, NO); c = step(c, DT, NO, undefined, F); } expect(c).toEqual(a);
     expect(Object.keys(strip(tap(sell(OFF), OFF).s)).some(k => k.startsWith('streak') || k === 'tapCreditCdS')).toBe(false);
   });
 });
