@@ -4,7 +4,8 @@ import type { Sink } from './events';
 import { sellTo } from './actions';
 import { prodEggsPerSec, coopCap } from './tracks';
 import { anyM5FlagOn, stepTimers } from './timers';
-import { focusTicks, tickClock, focusAssignedMs, type FrameClock, type StepClock } from './clock';
+import { focusTicks, tickClock, tickFocusS, focusAssignedMs, type FrameClock, type StepClock } from './clock';
+import { stallTick } from '../econ/stall';
 import { isPaused, pausedRecoveredEnergy, tickCallLockout } from './pause';
 import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge, resumeNeedCents } from './workers';
 import { rc2RefillOn, tickRefill } from './refill';
@@ -14,6 +15,7 @@ import { rc2RefillOn, tickRefill } from './refill';
 /** v5 F1b: `clock` (optional) says whether this tick carries focus time and gives the injected wall clock. It only feeds
  *  the M5 stepTimers() sub-calls, which run only while an m4.flags.* flag is on. */
 export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: StepClock): GameState {
+  const ev0 = ev ? ev.length : 0; // risk-helpers: this tick's events start here (econ/stall.ts stallObserve)
   const L = s.farmLevel, E = b.workers.energy;
   // Energy: Working and Tired drain 1% per drain_s_per_pct; Asleep stays at 0; Unpaid doesn't drain (ruling 1).
   // Paused (m4.flags.pause, isPaused): no drain, recover at rest_recovery_mult of that rate, cap 100 (pause spec rule 3).
@@ -59,7 +61,7 @@ export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: St
   }
   let out: GameState = { ...s, coop, coopFullS, customers, nextCustomerInS, nextCustomerId, rng, workers, manageCdS: rc2RefillOn(b) ? s.manageCdS : Math.max(0, s.manageCdS - dt) }; // AC-RF10: manageCdS is not ticked at rc2Refill=1
   if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev, !!fx?.suspended);
-  if (live) out = stepTimers(out, dt, b, clock, ev);
+  if (live) out = stallTick(stepTimers(out, dt, b, clock, ev), tickFocusS(dt, clock), b, ev, ev0); // risk-helpers: identity unless salesStopped
   if (rc2RefillOn(b)) out = tickRefill(out, Math.round(dt * 1000), b, ev); // M4: integer ms; frozen when this tick does not run (offline / hidden ≥ 60 s)
   return out;
 }
