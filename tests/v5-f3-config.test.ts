@@ -97,8 +97,10 @@ const files = (d: string): string[] => readdirSync(d).flatMap(f => { const p = j
 const strip = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '').replace(/(['"`])(?:\\.|(?!\1).)*\1/g, '""');
 /** Named code constants that are not CSV columns, by ruling: FOCUS_DT_MAX_S (HoP, sizing §13 GE-15), the RNG salts (D-C2, D-C4),
  *  the uint32 bound of the xorshift state (D-C5 sanitising), and ENERGY_FULL (worker energy is a percent, 0..100, not a CSV column).
- *  tc_broody_max_on_screen = 1 is "fixed by design" (§12.2). */
-const NAMED_OK = /^export const (FOCUS_DT_MAX_S|EV_RNG_SALT|BR_RNG_SALT|ENERGY_FULL) = [0-9.xa-fA-F]+;$/;
+ *  tc_broody_max_on_screen = 1 is "fixed by design" (§12.2).
+ *  STALL_TENTHS (0.1 s telemetry rounding) and CENTS_PER_DOLLAR (§8 loss_per_s integer cents) in econ/stall.ts are the same
+ *  class: unit-scale factors, not economy tunables (F3-no-literal, #128 ci 42744963797). */
+const NAMED_OK = /^export const (FOCUS_DT_MAX_S|EV_RNG_SALT|BR_RNG_SALT|ENERGY_FULL|STALL_TENTHS|CENTS_PER_DOLLAR) = [0-9.xa-fA-F]+;$/;
 /** Named save-schema constants (D-HOE-20261030-01): BROODY_NEST_MAX_CENTS and BROODY_SLOTS in src/save/m5-fields.ts are the
  *  save-schema bounds from F2 #81 (sanitiser clamp / slot range), not economy tunables, so they are not CSV columns. Allowed only
  *  in that file, only as whole `export const NAME = <number>;` declarations. */
