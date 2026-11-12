@@ -108,7 +108,7 @@ describe('F1b focus (attended) clock', () => {
     const n = focusTicks(fc.focusMs, dtMs); expect(n).toBe(10);
     const rec: number[] = []; const sys: TimerSystem = (st, _d, f) => { rec.push(f); return st; };
     let s = initialState(balance, 1);
-    for (let i = 0; i < 590; i++) { const c = tickClock(i, n, fc); expect(c.nowMs).toBe(123); s = stepTimers(s, dtMs / 1000, B({ golden: 1 }), c, undefined, [sys]); }
+    for (let i = 0; i < 590; i++) { const c = tickClock(i, n, fc, dtMs); expect(c.nowMs).toBe(123); s = stepTimers(s, dtMs / 1000, B({ golden: 1 }), c, undefined, [sys]); }
     expect(rec.reduce((a, x) => a + x, 0)).toBeCloseTo(FOCUS_DT_MAX_S, 9);
     expect(rec.slice(0, 10).every(f => f > 0)).toBe(true); expect(rec.slice(10).every(f => f === 0)).toBe(true);
   });

@@ -1,5 +1,5 @@
 /**
- * M5.1 breeds (product/m5.1-breeds-spec.md rev 3.8.6 sha1 13d5255e; tick semantics engineering/reviews/v5-breeds-tick-semantics.md).
+ * M5.1 breeds (product/m5.1-breeds-spec.md rev 3.8.9 sha1 ea922eb8; tick semantics engineering/reviews/v5-breeds-tick-semantics.md).
  * Roster §4.3 and the bc_* tunables §5. Everything here is read only while m4.flags.breeds is on.
  */
 import type { Balance } from './balance';
@@ -20,6 +20,16 @@ export const BC_SPEC_DEFAULTS = {
   unlock_farm: 10, slot2_farm: 14, slot3_farm: 20, rare_farm: 14, legendary_farm: 24, hatch_cost_s: 45, hatch_farm_share_bp: 10000,
   hatch_min_cents: 50000, hatch_time_s: 60, settle_s: 300, incubators: 1, w_common: 70, w_rare: 22, w_epic: 7, w_legendary: 1,
   pity_rare_after: 8, star_cap: 2, star_bonus_bp: 2500,
+  /** BR-R12b / A8: calm-hands Present window (focus s) and counted-tap threshold. */
+  present_calm_w_s: 10, present_calm_k: 6,
+  /**
+   * Family clamps (spec §4.3 L365–368 / §5; E8/E9). Verified vs m5.1-breeds-spec.ea922eb8:
+   * lay_cap_bp_lt18=700, lay_cap_bp=1500, away_cap_bp=3000, broody_cap_bp=2000.
+   * TODO(Econ/RC-PIN): economy.csv (8dc90e2b) and live product CSV have no bc_* columns yet (manifest row 27);
+   * bc() reads these defaults until the M5.1 CSV lands. lay_cap_farm=18 is the E9 F18 boundary (PR-B stub / E9).
+   */
+  lay_cap_bp_lt18: 700, lay_cap_bp: 1500, lay_cap_farm: 18,
+  away_cap_bp: 3000, broody_cap_bp: 2000,
 } as const;
 export type BcKey = keyof typeof BC_SPEC_DEFAULTS;
 export const bc = (_b: Balance, k: BcKey): number => BC_SPEC_DEFAULTS[k];
@@ -31,8 +41,9 @@ export const unlockedSlots = (F: number, b: Balance) =>
   F >= bc(b, 'slot3_farm') ? 3 : F >= bc(b, 'slot2_farm') ? 2 : F >= bc(b, 'unlock_farm') ? 1 : 0;
 /** §6: `slots` and `settleMs` always have 3 entries (BR-R2 max). */
 export const SLOT_IDX = [0, 1, 2] as const;
-/** BR-AC26 / E12: the existing save_migrated shape (game.ts:252); from/to = SAVE_VERSION 6, never bumped (§6 R5). */
-export const BREEDS_SANITISE_EVENT = { type: 'save_migrated', migration: 'breeds_sanitise', from: 6, to: 6 } as const;
+/** BR-AC26 / E12 / D1: full save_migrated shape (game.ts:260 tracks shape + reason/refund/farm_level/backup_stores:[]). from/to = SAVE_VERSION 6. */
+export const breedsSanitiseEvent = (reason: 'invalid_root' | 'invalid_values', refund_cents: number, farm_level: number) =>
+  ({ type: 'save_migrated' as const, migration: 'breeds_sanitise' as const, from: 6 as const, to: 6 as const, reason, refund_cents, farm_level, backup_stores: [] as [] });
 /** Unit constants for BR-R5 (not tunables): cents per dollar, basis points per 1, and the house half-up rounding term. */
 export const CENTS_PER_DOLLAR = 100; export const BP_ONE = 10000; export const BP_HALF = 5000;
 /** BR-R10 rarity -> its bc_w_* weight key, in roll order (Econ harness h/breeds.ts L39-45, confirmed against spec d43e2ce3). */

@@ -1,10 +1,9 @@
-// v5 telemetry subset (HoE/tel-st-ac19-20): errata v5 rev. 15 5e12a591 (V-2b tap / session_end / offline_grant rows, V-3 pinned set),
+// v5 telemetry subset (HoE/tel-st-ac19-20): errata v5 rev. 16 f82bf4d6 (V-2b tap / session_end / offline_grant rows, V-3 pinned set),
 // streak spec v1.3.3 b315dea1 §8 L288 + §8.1 (ST-AC19 / ST-AC20), m5.0-sizing L382 (empty_credited rule), breeds rev 3.8.9 §8 L699.
 import { describe, it, expect } from 'vitest';
 import { balance as b } from '../src/config/balance';
 import { Game } from '../src/game';
 import { Telemetry, TELEMETRY_KEY, ringPinned, type TEvent as RingEvent } from '../src/telemetry/telemetry';
-import { AWAY_BP_NONE } from '../src/telemetry/v5-fields';
 import { validateEvent, type TEvent } from '../src/telemetry/schema';
 import { mem } from './helpers';
 import { ON } from './v5-f2-helpers';
@@ -32,7 +31,7 @@ const V5_END = ['taps_total', 'taps_moved_eggs', 'empty_credited', 'coop_hand', 
 const schemaErrs = (e: RingEvent, keys: readonly string[]) => { const { ts, sessionMs: _s, ...rest } = e;
   return validateEvent({ ...rest, ts, sid: 'a1b2c3', fgMs: 0 } as TEvent).filter(m => keys.some(k => m.startsWith(`${e.type}.${k}:`))); };
 
-describe('[ST-AC19] tap {count, credited, empty_credited, bonus_cents} (streak §8 L288, errata rev. 15 V-2b)', () => {
+describe('[ST-AC19] tap {count, credited, empty_credited, bonus_cents} (streak §8 L288, errata rev. 16 V-2b)', () => {
   it('[ST-AC19] 50 taps in 1 s at F >= 8, Coop Hand hired, empty coop: one tap event count 50, credited 1, empty_credited 1, bonus_cents = the bonus paid', () => {
     const { g, prime } = game(CREDIT, { workers: { coop_hand: { ...working } } }); prime();
     const ses0 = { ...(g.telemetry as any).ses }; const coins0 = g.state.coinsCents;
@@ -101,7 +100,7 @@ describe('[ST-AC19] tap {count, credited, empty_credited, bonus_cents} (streak �
   });
 });
 
-describe('[ST-AC20] session_end v5 fields (streak §8.1, errata rev. 15 V-2b "+ §8.1")', () => {
+describe('[ST-AC20] session_end v5 fields (streak §8.1, errata rev. 16 V-2b "+ §8.1")', () => {
   it('[ST-AC20] mid-session hire: 600 taps, Coop Hand after 200 -> taps_total 600, taps_moved_eggs 200, empty_credited 200, coop_hand, share 0.667', () => {
     let now = 0; const t = new Telemetry(mem(), b.telemetry, () => now);
     let hired = false; t.sessionEndContext = () => ({ farm_level: 12, coop_hand: hired, credit: true });
@@ -149,7 +148,7 @@ describe('flag-off: credit fields absent, legacy shape kept (errata V-2b "flag-g
   });
 });
 
-describe('offline_grant v5 field away_bp (errata rev. 15 V-2b, breeds §8 L699)', () => {
+describe('offline_grant v5 field away_bp (errata rev. 16 V-2b, breeds §8 L699)', () => {
   const grant = (bb: B) => {
     const kv = mem(); let t = T0; const g0 = new Game(bb, kv, () => t, 7, 'dev', null, null, { newId: () => '0123456789abcdef' });
     g0.state = { ...g0.state, farmLevel: 12, hensLevel: 5 } as typeof g0.state; g0.save();
@@ -157,13 +156,13 @@ describe('offline_grant v5 field away_bp (errata rev. 15 V-2b, breeds §8 L699)'
     return evs(g, 'offline_grant');
   };
   it('breeds on: away_bp present, int >= 0, 0 while BR-R13 applies no Away bp', () => {
-    const [e] = grant(flags({ breeds: 1 })); expect(e).toBeDefined(); expect(e.away_bp).toBe(AWAY_BP_NONE);
+    const [e] = grant(flags({ breeds: 1 })); expect(e).toBeDefined(); expect(e.away_bp).toBe(0);
     expect(schemaErrs(e, ['secondsAway', 'eggs', 'away_bp'])).toEqual([]);
   });
   it('breeds off: away_bp absent', () => { const [e] = grant(OFF); expect(e).toBeDefined(); expect(e).not.toHaveProperty('away_bp'); });
 });
 
-describe('[ST-AC19/20] the ring trims by the pinned set of errata rev. 15 V-3 (event-based isPinned)', () => {
+describe('[ST-AC19/20] the ring trims by the pinned set of errata rev. 16 V-3 (event-based isPinned)', () => {
   it('V-3 types, coop_full end and tip_shown{clock_wage} survive a flood; coop_full start, other tip_shown and tap are trimmed', () => {
     const t = new Telemetry(mem(), { ...b.telemetry, ring_size: 20 }, () => 0);
     t.track('ability_used', { worker: 'hawker' }); t.track('worker_paused', { worker: 'coop_hand' }); t.track('hatch_started', {});
