@@ -107,6 +107,25 @@ describe('[PAU-AC8][D1] worker_resumed{cause} and paused_duration_s (pause §12 
     }
     expect(pausedDurationS(farm({ workers: { hawker: W(50, { paused: true }) } }), 'hawker')).toBe(0); // paused with no tracker entry
   });
+  it('[PAU-AC8][QA-D-1110-PAUDUR][G2-b][§14b] 10 steps of dt=0.1 accumulate exactly 1000 ms; emit is 1 s, not 0; exact-1000 ms edge', () => {
+    // Architect G2 ruling (b), G0-API.md rev 11 §14b: integer ms internally, floor(ms/1000) at emit.
+    let s = pauseWorker(farm({ workers: { hawker: W(50) } }), 'hawker', P);
+    for (let i = 0; i < 10; i++) s = step(s, 0.1, P);
+    expect(s.pausedForS?.hawker).toBe(1000); // integer ms, not a 0.999… s float sum
+    expect(s.pausedForS?.sumS).toBe(1000);
+    expect(s.pausedForS?.allS).toBe(1000);
+    expect(pausedDurationS(s, 'hawker')).toBe(1); // floor(1000/1000) = 1, not 0
+    expect(pauseSessionEnd(s, P)).toEqual({ paused_worker_s: 1, all_paused_s: 1 });
+    const at = (ms: number) => {
+      const st = { ...farm({ workers: { hawker: W(50, { paused: true }) } }), pausedForS: { hawker: ms, sumS: ms, allS: ms } };
+      return { duration: pausedDurationS(st, 'hawker'), session: pauseSessionEnd(st, P) };
+    };
+    expect(at(999)).toEqual({ duration: 0, session: { paused_worker_s: 0, all_paused_s: 0 } });
+    expect(at(1000)).toEqual({ duration: 1, session: { paused_worker_s: 1, all_paused_s: 1 } }); // exact-1000 ms edge
+    expect(at(1001)).toEqual({ duration: 1, session: { paused_worker_s: 1, all_paused_s: 1 } });
+    expect(at(1999)).toEqual({ duration: 1, session: { paused_worker_s: 1, all_paused_s: 1 } });
+    expect(at(2000)).toEqual({ duration: 2, session: { paused_worker_s: 2, all_paused_s: 2 } });
+  });
   it('[PAU-AC8][D1][QA-D-1110-PAUDUR] deterministic: the same inputs give the same events', () => {
     const runOnce = () => { const ev: SimEvent[] = []; let s = pauseWorker(farm({ workers: { market_hand: W(40), coop_hand: W(35) } }), 'market_hand', P);
       s = ticks(s, 12.3); s = pauseWorker(s, 'coop_hand', P); s = ticks(s, 4.4); s = resumeWorker(s, 'market_hand', P, ev); s = apply(s, { type: 'manage', worker: 'coop_hand' }, P, ev); return ev; };
