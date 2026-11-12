@@ -12,6 +12,7 @@ import { m5Offline, m5Persist, m5Load } from '../src/save/m5-fields';
 import { serialize } from '../src/save/save';
 import { refCents } from '../src/sim/income-ref';
 import { BROODY_MATH, BROODY_RECHECK_MS, accrueNest, broodyTick, broodyCheckDue, broodyView, broodyOn, capScaledOf, type NestAcc } from '../src/sim/broody';
+import { TIMER_SYSTEMS } from '../src/sim/timers';
 import { Game } from '../src/game';
 import { mem } from './helpers';
 import { ON } from './v5-f2-helpers';
@@ -244,5 +245,11 @@ describe('Game wiring: yard probe driver, attended tap, collectible_id, session_
   it('R20a reset: collectible_expired{broody_hen, reset} once when the hen was unlocked', () => {
     const { g, frames } = setup(); frames(2); g.beginReset();
     expect(g.telemetry.events().filter((e: any) => e.type === 'collectible_expired' && e.skin === 'broody_hen').map((e: any) => e.reason)).toEqual(['reset']);
+  });
+});
+
+describe('TIMER_SYSTEMS order (Architect #134 Major: broody after incomeRef, abilities last)', () => {
+  it('is [seedEvRng, streak, breeds, incomeRef, broody, frenzy, golden, abilities]', () => {
+    expect(TIMER_SYSTEMS.map(s => s.name)).toEqual(['seedEvRng', 'streak', 'breeds', 'incomeRef', 'broody', 'frenzy', 'golden', 'abilities']);
   });
 });
