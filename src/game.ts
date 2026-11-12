@@ -6,6 +6,7 @@ import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
 import { sessionEndPresentFields, awayBp } from './sim/breeds-traits';
+import * as sessionSim from './sim/session';
 import { offlineGrantV5 } from './telemetry/v5-fields';
 import type { BreedId } from './config/breeds';
 import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
@@ -358,6 +359,8 @@ export class Game {
     if (this.sessionFrozen() || !T.rotateDue(at)) { T.onPageShown(at, false); return; }
     const reopen = this.splitCoopFull(hAt);
     T.endSession('hidden', hAt); // no-op when pagehide already ended this sid (one session_end per sid)
+    // A1: session_end, then session_summary, then every reset() — this sim hook is the last reset, once per rotation.
+    sessionSim.resetSessionFields(this.state);
     const sp = T.onPageShown(at); T.startSession('resume', this.sessionStartFields(), sp?.prevHiddenMs);
     if (reopen && this.state.coop >= coopCap(this.state, this.b)) { this.coopFullSince = at; this.telemetry.track('coop_full', { phase: 'start' }); }
   }
