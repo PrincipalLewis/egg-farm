@@ -25,8 +25,7 @@ import { priceDollars } from '../econ/income';
 import { frenzyFactor, type SaleCtx } from './effects';
 import { ensureEvRng, evDraw, pickIndex } from './rng';
 import { saleValueCents } from './payout';
-import { flagOn } from '../config/flags';
-import { goldenFrozen } from './golden-frozen';
+import { goldenFrozen, pauseOn } from './golden-frozen';
 export { frenzyFactor, goldenFrozen };
 export const goldenOn = (b: Balance) => m4On(b) && b.m4?.flags?.golden === 1;
 /** Units of §4 #2 (bp = seconds x 10^4; baseScaled in 10^-4 $ -> cents / 10^6), not tunables. */
@@ -102,7 +101,7 @@ export function sessionEndGoldenFields(s: GameState, b: Balance): {
   if (!goldenOn(b)) return {};
   const g = sess(s), extra = g.frenzyExtraCents + (s.frenzyRun?.extraCents ?? 0);
   const out = { golden_spawned: g.spawned, golden_collected: g.collected, golden_cents: g.cents, frenzy_extra_cents: extra };
-  if (!flagOn(b, 'pause')) return out;
+  if (!pauseOn(b)) return out;
   return { ...out, golden_frozen_s: Math.round(g.frozenS * 10) / 10 };
 }
 /** Fields for worker_paused (GE-AC45). The emitter is Saves-owned; this is the shared snapshot. */

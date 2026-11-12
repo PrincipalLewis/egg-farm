@@ -1,4 +1,4 @@
-import { m4On } from './config/formulas';
+import { m4On, tcNum } from './config/formulas';
 import type { Balance } from './config/balance';
 import { GameState, initialState } from './sim/state';
 import { coopCap } from './sim/tracks';
@@ -396,9 +396,9 @@ export class Game {
   qaGoldenState() {
     const off = { phase: 'off' as const, ageS: undefined as number | undefined, nextSpawnRemainingS: undefined as number | undefined, frenzyRemainingS: undefined as number | undefined, evRngState: this.state.evRngState, slotId: undefined as string | undefined, frozen: false };
     if (!goldenOn(this.b)) return off;
-    const g = this.state.goldenEgg, frozen = goldenFrozen(this.state, this.b), tc = this.b.m4?.tc;
-    const phase = !g ? (this.state.nextSpawnRemainingS === undefined ? (this.state.farmLevel < (tc?.egg_unlock_farm ?? 8) ? 'locked' : 'waiting') : 'waiting')
-      : (tc && g.ageS >= (tc.egg_despawn_s ?? 30) ? 'fade' : tc && g.ageS >= (tc.urgent_at_s ?? 27) ? 'urgent' : tc && g.ageS >= (tc.warn_at_s ?? 20) ? 'warning' : 'idle');
+    const g = this.state.goldenEgg, frozen = goldenFrozen(this.state, this.b);
+    const phase = !g ? (this.state.nextSpawnRemainingS === undefined && this.state.farmLevel < tcNum(this.b, 'egg_unlock_farm') ? 'locked' : 'waiting')
+      : (g.ageS >= tcNum(this.b, 'egg_despawn_s') ? 'fade' : g.ageS >= tcNum(this.b, 'urgent_at_s') ? 'urgent' : g.ageS >= tcNum(this.b, 'warn_at_s') ? 'warning' : 'idle');
     return { phase, ageS: g?.ageS, nextSpawnRemainingS: this.state.nextSpawnRemainingS, frenzyRemainingS: this.state.frenzyRemainingS, evRngState: this.state.evRngState, slotId: g?.slotId, frozen };
   }
   /** Spawn driver: when the sim says due (countdown 0, no egg, R15 500 ms retry over) on an attended frame, measure and dispatch. */

@@ -13,7 +13,10 @@ import type { GameState } from './state';
 import { WORKERS } from './workers';
 import { isPaused } from './pause';
 
+/** m4.flags.pause (and m4.enabled). Used by session_end TEL-14 for golden_frozen_s. */
+export const pauseOn = (b: Balance): boolean => flagOn(b, 'pause');
+
 export function goldenFrozen(s: GameState, b: Balance): boolean {
-  if (!flagOn(b, 'pause') || s.farmLevel < tcNum(b, 'pause_unlock_farm')) return false;
+  if (!pauseOn(b) || s.farmLevel < tcNum(b, 'pause_unlock_farm')) return false;
   return WORKERS.some(id => isPaused(s.workers[id], b));
 }
