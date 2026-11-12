@@ -21,7 +21,8 @@ export type SimEvent =
   | { type: 'milestone_reached'; id: string; track: 'hens' | 'egg_value'; level: number; mult: number }
   | { type: 'balanced_tier'; id: string; tier: number; min_level: number }
   | M5SimEvent
-  | BreedsSimEvent;
+  | BreedsSimEvent
+  | SalesStallEvent;
 /** M5.1 breeds §8 telemetry (rev 3.8.9 ea922eb8 L692-695; errata rev 15 5e12a591 #15-18). Emitted only with m4.flags.breeds on. */
 export type BreedRarityName = 'Common' | 'Rare' | 'Epic' | 'Legendary';
 export type BreedsSimEvent =
@@ -48,4 +49,10 @@ export type M5SimEvent =
   | { type: 'ability_used'; worker: WorkerId; farm: number; energy_pct: number; mood: WorkerMood; via_all: boolean; t_since_ready_s: number; in_sheet: boolean; combo: boolean }
   | { type: 'ability_blocked'; worker: WorkerId; reason: AbilityBlockReason; count: number }
   | { type: 'ability_ended'; worker: WorkerId; cause: AbilityEndCause; effect_s: number };
+/** Saves risk-helpers (sales-stopped-spec §8; econ/stall.ts): emitted only with m4.flags.salesStopped on. Fields = schema.ts rows. */
+type StallTag = import('../econ/stall').WorkerStateTag;
+export type SalesStallEvent =
+  | { type: 'sales_stall'; phase: 'shown' | 'resolved'; stall_id: number; prev_stall_id?: number; cause: import('../econ/stall').StallCause; farm_level: number; queue_len: number; sellable_eggs: number; coop_eggs: number; mh_state: StallTag; ch_state: StallTag; focus_s_since_last_sale: number; session_s: number; resolved_by?: import('../econ/stall').StallResolvedBy; time_to_resolve_s?: number; chip_tapped?: boolean }
+  | { type: 'fatigue_cue_shown'; surface: import('../econ/stall').FatigueSurface; loss_per_s: number; loss_share: number; n_tired: number; n_asleep: number; n_paused: number; suppressed_by_stall: boolean }
+  | { type: 'fatigue_cue_tapped'; surface: import('../econ/stall').FatigueSurface; loss_per_s: number; loss_share: number; n_tired: number; n_asleep: number; n_paused: number };
 export type Sink = SimEvent[] | undefined;
