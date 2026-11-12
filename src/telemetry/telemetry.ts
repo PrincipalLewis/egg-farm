@@ -18,7 +18,7 @@ export const isPinned = (type: string) => type === 'session_start' || type === '
 /** TEL-AC1 envelope (telemetry-spec v0.6.2 L17-20): every emitted event carries type, ts (wall ms), sid (6-char base36) and fgMs
  *  (foreground ms of that sid, hidden time excluded, non-decreasing per sid). No sessionMs (T-AC1). Stored legacy events may lack sid/fgMs. */
 export interface TEvent { type: string; ts: number; sid?: string; fgMs?: number; [k: string]: unknown; }
-/** ST-AC19/20 (errata rev. 15 5e12a591 V-3): the ring keeps every event the schema pins (event-based isPinned: §3.2 + the V-3 set,
+/** ST-AC19/20 (errata rev. 16 f82bf4d6 V-3): the ring keeps every event the schema pins (event-based isPinned: §3.2 + the V-3 set,
  *  coop_full end/capped, tip_shown{clock_wage}). A stored legacy:true event also keeps its old type-based pin, so no pin is lost. */
 export const ringPinned = (e: TEvent): boolean => pinnedEvent(e) || (e.legacy === true && isPinned(e.type));
 /** One player coop tap with the credited-tap system on (streak §8 L288; the sim's `collect{credited, bonus_cents}`), plus whether a
@@ -139,7 +139,7 @@ export class Telemetry {
     if (c.credited) { w.credited++; S.credited_taps++; if (eggs === 0 && c.coopHand) { w.empty_credited++; S.empty_credited++; } }
     w.bonus_cents += bonus; S.tap_bonus_cents += bonus;
   }
-  /** session_end v5 fields (streak §8.1 / ST-AC20, errata rev. 15 V-2b): taps_total, taps_moved_eggs, farm_level always (v0.6.2
+  /** session_end v5 fields (streak §8.1 / ST-AC20, errata rev. 16 V-2b): taps_total, taps_moved_eggs, farm_level always (v0.6.2
    *  base fields); credited_taps, tap_bonus_cents (ST-AC19 [T-sub]), empty_credited and coop_hand only with credited taps on
    *  (flag-gated fields are absent with their flag off). coop_hand = a Coop Hand was hired at any tap of the session or at emit. */
   private sessionEndFields(): Record<string, unknown> {
