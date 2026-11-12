@@ -37,8 +37,13 @@ describe('[F3][D-C1] F3 flags block (m4.flags.*, HoE D-C1)', () => {
 });
 
 describe('[F3][§9.5-1] F3 CSV wiring', () => {
-  it('[§9.5-1] M5_MAPPED_COLS is exactly the two ruled non-tc_ mappings (no vacuous loop below)', () => {
-    expect([...M5_MAPPED_COLS]).toEqual(['leave_attended_window_s', 'rest_recovery_mult']);
+  it('[§9.5-1] M5_MAPPED_COLS is the ruled non-tc_ mappings (leave/rest + rc2 Refill; no vacuous loop below)', () => {
+    expect([...M5_MAPPED_COLS]).toEqual(['leave_attended_window_s', 'rest_recovery_mult', 'charge_regen_s', 'charge_cap', 'refill_threshold_pct', 'start_charges']);
+  });
+  it('[R1][M1] rc2 Refill columns land in m4.tc under their own names, values verbatim from the CSV (no combo alias)', () => {
+    const tc = balance.m4!.tc as Record<string, number>;
+    expect([tc.charge_regen_s, tc.charge_cap, tc.refill_threshold_pct, tc.start_charges]).toEqual([150, 2, 50, 2]);
+    expect('combo_window_s' in tc || 'combo_boost_s' in tc).toBe(false);
   });
   it('every tc_* column lands in m4.tc (auto), plus the explicit non-tc_ mappings, values verbatim from the CSV', () => {
     const tc = balance.m4!.tc as Record<string, number>;

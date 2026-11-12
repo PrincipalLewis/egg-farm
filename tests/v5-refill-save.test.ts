@@ -1,4 +1,4 @@
-// HoE/v5-refill-sim G1 (engineering/tasks/v5-refill-sim/G0-API.md §1, §5, §6; Architect review M1, m2, m3, m5):
+// HoE/v5-refill-sim G1 (engineering/tasks/v5-refill-sim/G0-API.md rev 9 sha256 bcc52937, §1, §5, §6; Architect review M1, m2, m3, m5):
 // additive OPTIONAL keys, SAVE_VERSION stays 6, no migration. Red-first: round-trip, flags-0 write-back, sanitiser matrix.
 import { describe, it, expect } from 'vitest';
 import { balance as b, type Balance } from '../src/config/balance';
@@ -16,7 +16,7 @@ const fl = (f: Record<string, number>, tc: Record<string, number> = {}) =>
 const R = fl({ rc2Refill: 1, pause: 1 }), RA = fl({ rc2Refill: 1, autoRefill: 1, pause: 1 });
 const R_ONLY = fl({ rc2Refill: 1 }), A_ONLY = fl({ autoRefill: 1 });
 const TC = b.m4!.tc!, REGEN = TC.charge_regen_s * 1000, CAP = TC.charge_cap;
-const base = (): GameState => ({ ...initialState(b, 7), farmLevel: 12, workers: { market_hand: { energy: 40, cdS: 0 }, coop_hand: { energy: 80, cdS: 0 } } });
+const base = (): GameState => ({ ...initialState(b, 7), farmLevel: 12, tracksV7: 1, workers: { market_hand: { energy: 40, cdS: 0 }, coop_hand: { energy: 80, cdS: 0 } } }); // tracksV7: already-migrated v6 farm, so loadSafe is a no-op (G-4 byte identity)
 const mem = (): KV & { m: Map<string, string> } => { const m = new Map<string, string>(); return { m, getItem: k => m.get(k) ?? null, setItem: (k, v) => void m.set(k, v), removeItem: k => void m.delete(k) }; };
 const load = (s: any, bb: Balance) => { const ev: SimEvent[] = []; return { s: m5Load(s, bb, NOW, ev) as any, ev }; };
 /** The Game boot path (game.ts:104): loadSafe, then m5Load. */
