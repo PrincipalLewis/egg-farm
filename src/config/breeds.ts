@@ -20,11 +20,13 @@ export const BC_SPEC_DEFAULTS = {
   unlock_farm: 10, slot2_farm: 14, slot3_farm: 20, rare_farm: 14, legendary_farm: 24, hatch_cost_s: 45, hatch_farm_share_bp: 10000,
   hatch_min_cents: 50000, hatch_time_s: 60, settle_s: 300, incubators: 1, w_common: 70, w_rare: 22, w_epic: 7, w_legendary: 1,
   pity_rare_after: 8, star_cap: 2, star_bonus_bp: 2500,
+  /** BR-R12b / A8: calm-hands Present window (focus s) and counted-tap threshold. */
+  present_calm_w_s: 10, present_calm_k: 6,
   /**
    * Family clamps (spec §4.3 L365–368 / §5; E8/E9). Verified vs m5.1-breeds-spec.ea922eb8:
    * lay_cap_bp_lt18=700, lay_cap_bp=1500, away_cap_bp=3000, broody_cap_bp=2000.
    * TODO(Econ/RC-PIN): economy.csv (8dc90e2b) and live product CSV have no bc_* columns yet (manifest row 27);
-   * bc() reads these defaults until the M5.1 CSV lands. lay_cap_farm=18 is the E9 F18 boundary implied by lt18 (not a CSV column).
+   * bc() reads these defaults until the M5.1 CSV lands. lay_cap_farm=18 is the E9 F18 boundary (PR-B stub / E9).
    */
   lay_cap_bp_lt18: 700, lay_cap_bp: 1500, lay_cap_farm: 18,
   away_cap_bp: 3000, broody_cap_bp: 2000,
