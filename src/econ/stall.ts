@@ -93,7 +93,11 @@ export interface StallSession {
 export interface FatigueSnap { loss_per_s: number; loss_share: number; n_tired: number; n_asleep: number; n_paused: number; }
 
 const EPS = 1e-9;
-const r1 = (x: number) => Math.round(x * 10) / 10;
+/** 0.1 s rounding for sales_stall time fields (spec §8: focus_s_since_last_sale, session_s, time_to_resolve_s). Unit scale, not a CSV column. */
+export const STALL_TENTHS = 10;
+/** §8 loss_per_s is an integer count in cents (fatigueLossPerSec is $/s). Unit scale, not a CSV column. */
+export const CENTS_PER_DOLLAR = 100;
+const r1 = (x: number) => Math.round(x * STALL_TENTHS) / STALL_TENTHS;
 const on = (b: Balance) => flagOn(b, 'salesStopped');
 
 /** §4.8 share guard (FC-AC6): loss / (income + loss); denominator <= 0 gives 1 when loss > 0, else 0. Always in [0, 1]. */
@@ -248,7 +252,7 @@ export function stallTick(s: GameState, focusS: number, b: Balance, ev: Sink, ev
   // ---- Rule 2 (§4.8) ----
   const loss = fatigueLossPerSec(s, b), share = fatigueShareOf(loss, incomePerSec(s, b));
   let nT = 0, nA = 0, nP = 0; for (const id of WORKERS) { const t = workerTag(s, id, b); if (t === 'tired') nT++; else if (t === 'asleep') nA++; else if (t === 'paused') nP++; }
-  ss.snap = { loss_per_s: Math.max(0, Math.round(loss * 100)), loss_share: Math.round(share * 1000) / 1000, n_tired: nT, n_asleep: nA, n_paused: nP };
+  ss.snap = { loss_per_s: Math.max(0, Math.round(loss * CENTS_PER_DOLLAR)), loss_share: Math.round(share * 1000) / 1000, n_tired: nT, n_asleep: nA, n_paused: nP };
   const st = cueStep(ss.cue, share, f, { min: tcNum(b, 'fatigue_cue_min_share'), hold: tcNum(b, 'fatigue_cue_hold_s'), clear: tcNum(b, 'fatigue_cue_clear_share'), clearHold: tcNum(b, 'fatigue_cue_clear_hold_s') });
   ss.cue = st.next;
   if (st.ended) { ss.episode = null; ss.cueLogged = []; ss.cueForceCleared = false; }
