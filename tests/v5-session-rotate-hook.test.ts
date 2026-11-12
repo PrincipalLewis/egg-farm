@@ -1,6 +1,7 @@
-// v5 session-rotation hook: Game calls sim/session.ts resetSessionFields exactly once per TEL-AC1
-// rotation, after A1 (session_end, then session_summary), never in a frozen tab (R7), never on a
-// hide < 60 s; the R6 bfcache pageshow path calls it once. Extension point for clockWage / Refill.
+// v5 session-rotation hook: Game calls sim/session.ts resetSessionFields per TEL-AC1 rotation,
+// after A1 (session_end, then session_summary), never in a frozen tab (R7), never on a hide < 60 s.
+// The visibilitychange path also resets a distinct hide snapshot (the state settleHiddenPeriod
+// restores). The R6 bfcache pageshow path calls it once. Extension point for clockWage / Refill.
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { balance as b } from '../src/config/balance';
 import { Game } from '../src/game';
@@ -35,7 +36,7 @@ describe('resetSessionFields (session rotation hook)', () => {
       expect(M5_SESSION_FIELDS).toContain(k);
   });
 
-  it('rotation (hide >= 60 s then shown): called once, after session_end and session_summary, before session_start{resume}', () => {
+  it('rotation (hide >= 60 s then shown): called twice on distinct objects, after session_end and session_summary, before session_start{resume}', () => {
     const { g, clock } = setup();
     const orig = session.resetSessionFields;
     const spy = vi.spyOn(session, 'resetSessionFields').mockImplementation((s) => {
@@ -48,14 +49,26 @@ describe('resetSessionFields (session rotation hook)', () => {
       orig(s);
     });
     hide(g, clock, 60_000); g.onShown(clock.t);
-    expect(spy).toHaveBeenCalledTimes(1);
-    // onShown then runs the offline grant, which replaces g.state — the hook saw the pre-grant object.
+    expect(spy).toHaveBeenCalledTimes(2);
+    const a = spy.mock.calls[0][0];
+    const b = spy.mock.calls[1][0];
+    expect(a).not.toBe(b);
+    // first: provisional pre-grant this.state; second: the hide snapshot settleHiddenPeriod restores.
     const types = evs(g).map(e => e.type);
     const iEnd = types.lastIndexOf('session_end');
     expect(types[iEnd]).toBe('session_end');
     expect(types[iEnd + 1]).toBe('session_summary');
     expect(types[iEnd + 2]).toBe('session_start');
     expect(evs(g)[iEnd + 2]).toMatchObject({ reason: 'resume' });
+  });
+
+  it('rotation: the reset reaches the state that survives the offline grant (hide snapshot restored by settleHiddenPeriod)', () => {
+    const { g, clock } = setup();
+    type Tagged = { __sess?: number };
+    vi.spyOn(session, 'resetSessionFields').mockImplementation((s) => { delete (s as Tagged).__sess; });
+    g.state = { ...g.state, __sess: 1 } as typeof g.state; // a session-only counter, present at the hide
+    hide(g, clock, 120_000); g.onShown(clock.t);
+    expect((g.state as Tagged).__sess).toBeUndefined();
   });
 
   it('hide < 60 s does not call the hook and does not rotate', () => {

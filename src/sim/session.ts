@@ -1,10 +1,16 @@
 /**
  * Telemetry-session rotation hook (v5-tel-envelope / TEL-AC1 hidden >= session_hidden_end_s).
  *
- * Game calls `resetSessionFields` exactly once per rotation, in both paths (visibilitychange
- * show after a hide >= 60 s, and R6 bfcache pageshow{persisted}), after Telemetry.endSession
- * has finished A1 (session_end, then session_summary, then every contributor reset()), and
- * never in a read-only / frozen tab (R7) or on a hide < 60 s.
+ * Game calls `resetSessionFields` once per rotation on the live `this.state`, in both paths
+ * (visibilitychange show after a hide >= 60 s, and R6 bfcache pageshow{persisted}), after
+ * Telemetry.endSession has finished A1 (session_end, then session_summary, then every
+ * contributor reset()), and never in a read-only / frozen tab (R7) or on a hide < 60 s.
+ *
+ * On the visibilitychange path a hide >= offlineMinSeconds later restores the hide snapshot
+ * (`settleHiddenPeriod`: `this.state = h.state`) and drops the provisional sim, so Game also
+ * calls the hook on `this.hidden.state` when that object differs from `this.state` — it is the
+ * state that survives the rotation. Idempotent; same object → one call. The R6 path has no
+ * such restore and stays a single call.
  *
  * This is the single sim-level plug-in point. ClockWage and Refill each add a one-line call
  * here (Hire 2: resetAsleepSession; Saves G0 M2: resetRefillSession). They also add their
