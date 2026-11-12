@@ -2,7 +2,9 @@
 // M3 / ruling 4: sim-state asleep clock (one writer tickAsleepClock, one predicate asleepClockOn, integer ms, session field never saved,
 // reset on session end); M4: mood 'asleep' only (Unpaid excluded); M2 / ruling 2: AC-FC12 window in the saved key clockWageWindow,
 // reset at welcome-back close (also when Y = 0). failure-cost v0.3.24 AC-FC12 / AC-FC15.
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { balance as b } from '../src/config/balance';
 import { initialState, type GameState } from '../src/sim/state';
 import { step } from '../src/sim/tick';
@@ -11,6 +13,7 @@ import { serialize, validate, checksum, SAVE_KEY } from '../src/save/save';
 import { m5Load, m5Persist } from '../src/save/m5-fields';
 import { M5_SAVED_FIELDS, M5_SESSION_FIELDS } from '../src/sim/m5-state';
 import { asleepClockOn, tickAsleepClock, asleepSessionEnd, resetAsleepSession, clockWageWindowView } from '../src/sim/clock-wage';
+import { stubAutoRefillOn } from '../src/sim/auto-refill-on';
 import { Game } from '../src/game';
 import { mem } from './helpers';
 const flags = (o: Record<string, number>) => ({ ...b, m4: { ...b.m4!, enabled: 1, flags: { ...b.m4!.flags, ...o } } }) as typeof b;
@@ -29,7 +32,7 @@ describe('[S4 / ruling 4] asleep clock in sim state', () => {
   });
   it('flag off: identity (same object), no field, session_end payload {}', () => {
     const s = st({ workers: { market_hand: { energy: 0, cdS: 0.5 } } });
-    expect(tickAsleepClock(s, 100, b)).toBe(s); expect(asleepClockOn(b)).toBe(false);
+    expect(tickAsleepClock(s, 100, b)).toBe(s); expect(asleepClockOn(s, 'market_hand', b)).toBe(false);
     const r = runN(s, 100, b); expect('asleepSessionMs' in r).toBe(false); expect('clockWageWindow' in r).toBe(false); expect(asleepSessionEnd(r, b)).toEqual({});
   });
   it('paused Asleep MH adds nothing', () => {
@@ -116,5 +119,96 @@ describe('[M2 / ruling 2] clockWageWindow: saved, survives reload, resets at wel
     const kv = kvOf(); kv.setItem(SAVE_KEY, serialize({ ...initialState(b, 3), clockWageWindow: { coop_hand: { asleepMs: 9, cents: 1 } } }, 1_760_000_000_000));
     const g = new Game(b, kv, () => 1_760_000_001_000, 1, 'dev', null, null, { idbBoot: 'absent' }); g.save();
     expect(kv.getItem(SAVE_KEY)).toContain('"clockWageWindow":{"coop_hand":{"asleepMs":9,"cents":1}}');
+  });
+});
+
+describe('[D-HOE-61 / G0 rev 9] per-worker asleepClockOn OR autoRefillOn', () => {
+  afterEach(() => stubAutoRefillOn(null));
+
+  it('stub autoRefillOn=true, clockWage off: tickAsleepClock accumulates asleep_s, charges no wages, no window', () => {
+    stubAutoRefillOn(() => true);
+    const bb = flags({ clockWage: 0 });
+    const s0 = st({ workers: { market_hand: { energy: 0, cdS: 0.5 } } });
+    expect(asleepClockOn(s0, 'market_hand', bb)).toBe(true);
+    const s = runN(s0, 1200, bb);
+    expect(s.asleepSessionMs).toBe(120_000);
+    expect(asleepSessionEnd(s, bb)).toEqual({ asleep_s: 120 });
+    expect(s.coinsCents).toBe(s0.coinsCents);
+    expect('clockWageWindow' in s).toBe(false);
+    expect('asleepPaidCents' in s).toBe(false);
+  });
+
+  it('stub autoRefillOn=false, clockWage off: unchanged (identity, no field)', () => {
+    stubAutoRefillOn(() => false);
+    const s = st({ workers: { market_hand: { energy: 0, cdS: 0.5 } } });
+    expect(tickAsleepClock(s, 100, b)).toBe(s);
+    expect(asleepClockOn(s, 'market_hand', b)).toBe(false);
+    const r = runN(s, 100, b);
+    expect('asleepSessionMs' in r).toBe(false);
+    expect(asleepSessionEnd(r, b)).toEqual({});
+  });
+
+  it('per-worker: only the worker whose autoRefillOn is true is counted (clockWage off)', () => {
+    stubAutoRefillOn((_s, id) => id === 'market_hand');
+    const s = st({ workers: { market_hand: { energy: 0, cdS: 0.5 }, coop_hand: { energy: 0, cdS: 0.5 } } });
+    const r = tickAsleepClock(s, 1000, b);
+    expect(r.asleepSessionMs).toBe(1000); // MH only, not 2000
+    expect(asleepSessionEnd(r, b)).toEqual({ asleep_s: 1 });
+  });
+
+  it('paused and Unpaid still add nothing when autoRefillOn is true', () => {
+    stubAutoRefillOn(() => true);
+    const P = flags({ clockWage: 0, pause: 1 });
+    expect(tickAsleepClock(st({ workers: { market_hand: { energy: 0, cdS: 0.5, paused: true } } }), 1000, P).asleepSessionMs).toBeUndefined();
+    expect(tickAsleepClock(st({ workers: { coop_hand: { energy: 0, cdS: 0, unpaid: true } } }), 1000, b).asleepSessionMs).toBeUndefined();
+  });
+
+  it('tickAsleepClock is the single writer of asleepSessionMs in src/', () => {
+    const root = join(__dirname, '../src');
+    const files: string[] = [];
+    const walk = (d: string) => {
+      for (const e of readdirSync(d, { withFileTypes: true })) {
+        const p = join(d, e.name);
+        if (e.isDirectory()) walk(p);
+        else if (e.name.endsWith('.ts')) files.push(p);
+      }
+    };
+    walk(root);
+    const writes: string[] = [];
+    for (const f of files) {
+      readFileSync(f, 'utf8').split('\n').forEach((row, i) => {
+        if (!/asleepSessionMs\s*:/.test(row) && !/asleepSessionMs\s*=[^=]/.test(row)) return;
+        if (/^\s*(\/\/|\*|\/\*)/.test(row)) return;
+        if (/asleepSessionMs\?:/.test(row)) return; // type
+        if (/asleepSessionMs:\s*_/.test(row)) return; // destructure drop
+        if (/\((?:s|out)\.asleepSessionMs\s*\?\?/.test(row) && !/\+\s*dtMs/.test(row)) return; // read
+        if (/'asleepSessionMs'/.test(row)) return;
+        const rel = f.slice(root.length + 1);
+        if (rel === 'sim/clock-wage.ts' && /\(out\.asleepSessionMs\s*\?\?\s*0\)\s*\+\s*dtMs/.test(row)) return; // the one writer
+        writes.push(`${rel}:${i + 1}:${row.trim()}`);
+      });
+    }
+    const cw = readFileSync(join(root, 'sim/clock-wage.ts'), 'utf8');
+    expect(cw).toMatch(/export function tickAsleepClock\(s: GameState, dtMs: number, b: Balance\)/);
+    expect(cw).toMatch(/asleepSessionMs:\s*\(out\.asleepSessionMs\s*\?\?\s*0\)\s*\+\s*dtMs/);
+    expect(writes).toEqual([]);
+  });
+});
+
+describe('[session rotation] local stub of Architect resetSessionFields(s)', () => {
+  // Architect's hook: pure resetSessionFields(s) in src/sim/session.ts, run once per rotation after
+  // session_end and session_summary (not on rc/v5 yet; ETA ~01:15 CET). We must not create that file.
+  // Our part is one line inside it:  s = resetAsleepSession(s);
+  // This stub is the test stand-in; drop it when session.ts lands.
+  const resetSessionFields = (s: GameState): GameState => resetAsleepSession(s);
+
+  it('resetSessionFields (stub) with our one line clears asleep session counters; identity when absent', () => {
+    const s = runN(st({ workers: { market_hand: { energy: 0, cdS: 0.5 } } }), 20, C);
+    expect(s.asleepSessionMs).toBeGreaterThan(0);
+    const r = resetSessionFields(s);
+    expect('asleepSessionMs' in r).toBe(false);
+    expect('asleepPaidCents' in r).toBe(false);
+    const empty = st({});
+    expect(resetSessionFields(empty)).toBe(empty);
   });
 });
