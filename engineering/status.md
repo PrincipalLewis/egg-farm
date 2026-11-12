@@ -166,3 +166,6 @@
 - RED FIRST: `[F7]` Game.frame at 30/60/144 fps + uneven gaps, 60 s focused — verified red (focusMs 20004 / 10008 / 4171 / 14960) then fixed.
 - Gates (flock `.vitest-eng.lock` nice -n 10, maxWorkers=2): tsc 0; sync-economy --check 0; focused present+f3-config+f1b+away-* 89/89 (incl. F3-no-literal).
 - One ordinary push; bundle `scratch/bundles/saves-breeds-sim-prB-traits-<sha8>.bundle`.
+
+## 2026-11-12 22:20 CET · Generalist · HoE/v5-restart-generalist #134 mergefwd
+- Tip (post-status) mergefwd `a5aa7414` = merge rc/v5 `006bdd72` into `03888f96` (clean, no content edits). Stays Draft. Gates @ a5aa7414: k10 known-red g1max 63.12 vs 63.10; npm test 162 files / 2389 pass / 1 skip; build + check-release-build ok; flag-0 traces sha1-identical tip vs `/workspace/wt-gen-broody-base` (2b760d1c) and vs prior 03888f96 (shipping 8daf487a / ON_broody0 b9f3cf75 / m4off_broody1 b0487313).
