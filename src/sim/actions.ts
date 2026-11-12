@@ -6,6 +6,7 @@ import { Track, salePriceCents, trackLock, trackCost, trackLevel, reachedMilesto
 import type { Sink } from './events';
 import { saleValueCents } from './payout';
 import { creditTap, streakSaleFactor, addStreakExtra } from './streak';
+import { breedsNoteCreditedTap } from './breeds-traits';
 import { playerSaleCtx } from './effects';
 import { incomeRefOn, recordSale } from './income-ref';
 import { tapCoinsOn, tapCoinsFor } from './tap-coins';
@@ -83,7 +84,8 @@ function apply0(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true)
       ev?.push(c.credited === undefined ? { type: 'collect', eggs: n } : bonus === undefined ? { type: 'collect', eggs: n, credited: c.credited }
         : { type: 'collect', eggs: n, credited: c.credited, bonus_cents: bonus });
       if (c.started) ev?.push({ type: 'streak_started', farm_level: s.farmLevel, collection_level: s.collectionLevel });
-      return { ...c.s, coop: s.coop - n, basket: s.basket + n, ...(bonus ? { coinsCents: c.s.coinsCents + bonus } : {}) };
+      const afterTap = breedsNoteCreditedTap(c.s, b, c.credited);
+      return { ...afterTap, coop: s.coop - n, basket: s.basket + n, ...(bonus ? { coinsCents: afterTap.coinsCents + bonus } : {}) };
     }
     case 'sell': return sellTo(s, a.customerId, b, ev, 'player', !attended);
     case 'sellAll': { let r = s; for (const c of s.customers) { if (r.basket < 1) break; r = sellTo(r, c.id, b, ev, 'player', !attended); } return r; }

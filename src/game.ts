@@ -5,6 +5,8 @@ import { coopCap } from './sim/tracks';
 import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
+import { sessionEndPresentFields, awayBp } from './sim/breeds-traits';
+import { offlineGrantV5 } from './telemetry/v5-fields';
 import type { BreedId } from './config/breeds';
 import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
@@ -34,7 +36,7 @@ export interface GameOpts {
   newId?: () => string;
 }
 export class Game {
-  state: GameState; accMs = 0; lastFrameAt: number; offline = { eggs: 0, awayS: 0 };
+  state: GameState; accMs = 0; /** F7: unused attended focus still inside the acc window. */ focusAccMs = 0; lastFrameAt: number; offline = { eggs: 0, awayS: 0 };
   /** M5.1 BR-R18: a hatch revealed by the offline settle; the UI shows it after welcome-back closes, then clears it. Not saved. */
   pendingReveal: BreedId | null = null;
   /** M5.1 Q4: Farm level at the end of the last visible frame (the next frame's start). */
@@ -115,8 +117,17 @@ export class Game {
     if (!this.readOnly) this.save(); // never on a refused newer save (M4A-31(f)6); persist pending offline eggs + new timestamp so the grant never repeats for one absence
   }
   private grantOffline(gapMs: number) {
+    // F3: capture Away bp applied to the grant BEFORE applyOffline (hatch reveal can star-up a slotted Away).
+    const appliedAwayBp = awayBp(this.state, this.b);
     const r = applyOffline(this.state, gapMs, this.b); this.state = r.state; if (r.reveal) this.pendingReveal = r.reveal;
-    if (r.eggs > 0) { this.offline = { eggs: r.eggs, awayS: r.awayS }; this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs }); }
+    // F5 / BR-R18 / PMC: emit offline_grant ONLY when the offline rules apply (gap >= offlineMinSeconds).
+    // Same trigger as flag-off. Sub-60 s loads emit NOTHING. Eggs=0 still emits when breeds on (errata V-2b).
+    if (gapMs < this.b.offline.offlineMinSeconds * 1000) return r.eggs;
+    const v5 = offlineGrantV5(this.b, appliedAwayBp);
+    if (r.eggs > 0 || v5.away_bp !== undefined) {
+      if (r.eggs > 0) this.offline = { eggs: r.eggs, awayS: r.awayS };
+      this.telemetry.track('offline_grant', { secondsAway: r.awayS, eggs: r.eggs, ...v5 });
+    }
     return r.eggs;
   }
   /** v5 #1 §8 / Architect ruling 5: per-session collectible_id shared by golden egg and Broody; the Frenzy keeps its egg's id. */
@@ -327,7 +338,9 @@ export class Game {
     if (this.resetting || this.inactive || this.held()) return;
     const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
     this.goldenEnd('reload'); // v5 #1 R10c (Saves-confirmed order): expired{reload} + fresh gap, in the same flush, before session_end/save
-    this.telemetry.track('session_end'); this.save(); this.telemetry.flush(true); }
+    // Row 32 (HoE/breeds-sim-prB-traits): present_* only. Other breeds session_end fields = gen/breeds-telemetry.
+    // T-AC9: no comma-bearing calls inside the session_end literal — helper returns the fields object.
+    this.telemetry.track('session_end', sessionEndPresentFields(this.state, this.b)); this.save(); this.telemetry.flush(true); }
   /** "Reset save" (Settings confirm, debug panel): stop saving, close the golden egg / Frenzy (A24-1: silent), log save_reset, flush. */
   beginReset() {
     this.resetting = true; this.goldenEnd('reset');
@@ -354,6 +367,7 @@ export class Game {
     if (!goldenOn(this.b) || this.inactive || this.held() || this.hidden || !this.attendedNow() || !spawnDue(this.state, this.b, layout)) return;
     this.dispatch(layout ? { type: 'spawnGolden', spots: this.spotProbe(), layout: true } : { type: 'spawnGolden', spots: this.spotProbe() });
   }
+
   dispatch(a: Action) {
     if (this.inactive || this.held()) return;
     const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev, this.attendedNow()); this.emit(ev); this.checkCoopFull(); // Q-F1c-1 (D-HOP-2026-10-29-06)
@@ -394,6 +408,7 @@ export class Game {
   onHidden(at = this.now()) {
     if (this.hidden) return;
     this.frame(); // bring the sim up to the hide
+    this.focusAccMs = 0; // hidden frames never pass focus (leftover acc is simulated unfocused)
     this.hidden = { at, periodId: this.nextHiddenPeriodId++, state: this.state, accMs: this.accMs, simMs: 0, ev: [] };
   }
   /** Page shown again after `span`. Hidden >= offlineMinSeconds: drop the provisional hidden sim and pay the whole
@@ -433,7 +448,7 @@ export class Game {
       // n2: capped when the 60 s budget limited credit (gap > budget); false while budget == offlineMin and gap < offlineMin.
       return { mode: 'online', simulatedMs: h.simMs, grantedMs: h.simMs, eggs: 0, coins: this.state.coinsCents - h.state.coinsCents, capped: gap > budgetMs };
     }
-    this.state = h.state; this.accMs = 0;
+    this.state = h.state; this.accMs = 0; this.focusAccMs = 0;
     if (this.state.pendingOfflineEggs > 0) this.state = { ...this.state, basket: this.state.basket + this.state.pendingOfflineEggs, pendingOfflineEggs: 0 };
     { const ev: SimEvent[] = []; this.state = m5Offline(this.state, this.b, ev); this.emit(ev); } // v5 F2, before grantOffline (§9.5 #3)
     const eggs = this.grantOffline(gap);
@@ -473,11 +488,15 @@ export class Game {
       // v5 F1b: focus (attended) ms for this frame, min(gap, 1.0 s); 0 for a gap >= 60 s (§9.1a) or when not attended.
       const focusMs = focusFrameMs(gap, this.attendedNow(), this.b.offline.offlineMinSeconds);
       const ev: SimEvent[] = []; if (gap >= maxMs) this.state = m5Offline(this.state, this.b, ev); // v5 F2 §9.1a: M5 timed systems take the offline path
-      const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev, { focusMs, nowMs: t, slotsFarm: this.frameFarm });
+      if (gap >= maxMs) this.focusAccMs = 0;
+      const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev, { focusMs, focusAccMs: this.focusAccMs, nowMs: t, slotsFarm: this.frameFarm });
       // The legacy capped catch-up above still settles sales/wages and all other systems. Its absent-time sales
       // must not consume the NEW I_ref warm-up: start that window at the return boundary (§4.1a), like a hidden offline return.
       this.state = gap >= maxMs && incomeRefOn(this.b) ? resetIncomeRef(r.state) : r.state;
-      this.frameFarm = r.state.farmLevel; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
+      this.frameFarm = r.state.farmLevel;
+      this.accMs = gap >= maxMs ? 0 : r.accMs;
+      this.focusAccMs = gap >= maxMs ? 0 : r.focusAccMs;
+      this.emit(ev);
       this.driveGolden(false); // v5 #1: identity unless golden is on and a spawn is due on an attended frame
     }
     this.checkCoopFull(); this.telemetry.poll();

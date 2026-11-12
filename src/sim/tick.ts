@@ -4,7 +4,7 @@ import type { Sink } from './events';
 import { sellTo } from './actions';
 import { prodEggsPerSec, coopCap } from './tracks';
 import { anyM5FlagOn, stepTimers } from './timers';
-import { focusTicks, tickClock, tickFocusS, type FrameClock, type StepClock } from './clock';
+import { focusTicks, tickClock, tickFocusS, focusAssignedMs, type FrameClock, type StepClock } from './clock';
 import { stallTick } from '../econ/stall';
 import { isPaused, pausedRecoveredEnergy, tickCallLockout } from './pause';
 import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge, resumeNeedCents } from './workers';
@@ -107,7 +107,11 @@ function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, fxSuspen
 export function advance(s: GameState, elapsedMs: number, accMs: number, b: Balance, ev?: Sink, clock?: FrameClock) {
   const dtMs = 1000 / b.tickHz;
   let acc = accMs + elapsedMs, ticks = 0;
-  const nFocus = clock ? focusTicks(clock.focusMs, dtMs) : 0;
-  while (acc >= dtMs - 1e-9) { s = step(s, dtMs / 1000, b, ev, clock ? tickClock(ticks, nFocus, clock) : undefined); acc -= dtMs; ticks++; }
-  return { state: s, accMs: Math.max(0, acc), ticks };
+  // F7: total focus for this call = leftover in the acc window + this chunk, so Σ fT = Σ F across rAF-sized frames.
+  const F = clock ? (clock.focusAccMs ?? 0) + clock.focusMs : 0;
+  const nFocus = clock ? focusTicks(F, dtMs) : 0;
+  const fc = clock ? { ...clock, focusMs: F } : undefined;
+  while (acc >= dtMs - 1e-9) { s = step(s, dtMs / 1000, b, ev, fc ? tickClock(ticks, nFocus, fc, dtMs) : undefined); acc -= dtMs; ticks++; }
+  const assigned = clock ? focusAssignedMs(ticks, F, dtMs) : 0;
+  return { state: s, accMs: Math.max(0, acc), ticks, focusAccMs: Math.max(0, F - assigned) };
 }
