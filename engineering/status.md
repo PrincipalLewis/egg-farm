@@ -169,3 +169,6 @@
 
 ## 2026-11-12 23:06 CET · Generalist · HoE/golden-ui (sim only)
 - `gen/golden` off `origin/rc/v5` `006bdd72` (will mergefwd; F6 not ancestor). v1.3.3 freeze + session_end + QA hooks restored after 22:47 CET box reboot; red-first commit was lost. Flag 0. UI parked.
+
+## 2026-11-12 23:22 CET · Generalist · HoE/golden-ui (sim only)
+- `gen/golden` mergefwd onto `origin/rc/v5` `be77b1c0` (F6 not used). Gates (post-reboot, lane-run): tsc 0; npm test 2443 passed / 1 skipped; build + check-release-build `m4.1+d947a198` ok; flag-off goldens f90d1678 / a54c9cf9 unchanged; k10 known-red g1max 63.12 vs 63.10 (not a GO gate). Flag 0. UI parked. Draft PR next.
