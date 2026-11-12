@@ -78,8 +78,9 @@ function endCalls(o: any, b: Balance, ev: SimEvent[]) {
 }
 /** rc2 Refill load sanitiser (G0 §1, Architect m2). Only when rc2Refill=1. Does not mutate `s`; same object when clean.
  *  restAuto runs only with pause on (after pauseLoad). autoRefill runs only when both flags are on (AC-LR16).
- *  chargeNextMs is written (full regen) only when refillCharges is present and below the cap; at the cap it is dropped (F-4),
- *  including when the cap comes from a clamp or the lazy start_charges default. */
+ *  chargeNextMs: at the cap it is dropped (F-4), including when the cap comes from a clamp or the lazy
+ *  start_charges default. Below the cap — including when refillCharges is absent and start < cap — a
+ *  missing or bad next is written as full regen (F-5a). The charges key itself stays absent when missing. */
 function sanitizeRefillOnLoad(s: GameState, b: Balance): GameState {
   if (!m5Flag(b, 'rc2Refill')) return s;
   const cap = tc(b, 'charge_cap'), regen = Math.round(tc(b, 'charge_regen_s') * 1000), start = tc(b, 'start_charges');

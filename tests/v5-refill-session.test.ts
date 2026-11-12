@@ -1,6 +1,8 @@
-// HoE/v5-refill-sim G2 M2 (G0-API.md rev 9 sha256 bcc52937; Architect M2 + M2 note 22:18 CET).
-// resetRefillSession is a pure function, tested on its own. Hook-up into resetSessionFields waits for
-// v5/session-rotate-hook (same pattern as clockWage's resetAsleepSession). No registerSessionEnd, no custom rotate wiring.
+// HoE/v5-refill-sim G2 M2 (G0-API.md rev 10 sha256 bcf95315; Architect M2 + M2 note 22:18 CET).
+// resetRefillSession is a pure function, tested on its own. One-line hook-up into
+// resetSessionFields (src/sim/session.ts:24) is pending Architect Draft PR #138
+// (head 7da29009, branch v5/session-rotate-hook, waits on #123; not on rc/v5;
+// mergefwd only with HoE's OK). No registerSessionEnd, no custom rotate wiring.
 // refillSessionTotals feeds session_end (m7 gating). autoRefillOn is a pure per-worker read (D-HOE-61).
 import { describe, it, expect } from 'vitest';
 import { balance as b, type Balance } from '../src/config/balance';
@@ -118,4 +120,33 @@ describe('[G2][D-HOE-61] autoRefillOn(s, id, b): pure per-worker read; writes no
       grader: { energy: 50, cdS: 0, autoRefill: false },
     }));
   });
+});
+
+describe('[G0 §11][lighter L64] asleep_s counts MH+CH only; autoRefill/clockWage decide WHEN it is emitted (HoE 22:19)', () => {
+  const RA0 = fl({ rc2Refill: 1, autoRefill: 1, clockWage: 0 }); // clockWage already 0 in shipping flags; stated for the AC
+  const asleepHG = (): GameState => ({
+    ...live(),
+    workers: {
+      market_hand: { energy: 80, cdS: 0, autoRefill: true }, // working
+      coop_hand: { energy: 80, cdS: 0, autoRefill: true },   // working
+      hawker: { energy: 0, cdS: 0, autoRefill: true },       // asleep
+      grader: { energy: 0, cdS: 0, autoRefill: true },       // asleep
+    },
+  });
+
+  it('seam: autoRefillOn is true for an asleep Hawker and Grader (Hire 2 ORs this into asleepClockOn); Refill writes no asleep_s', () => {
+    const s = asleepHG(), before = JSON.stringify(s);
+    expect(autoRefillOn(s, 'hawker', RA0)).toBe(true);
+    expect(autoRefillOn(s, 'grader', RA0)).toBe(true);
+    expect(autoRefillOn(s, 'market_hand', RA0)).toBe(true);
+    // Refill's session_end view does not own or emit asleep_s (Hire 2 is the writer).
+    expect('asleep_s' in refillSessionTotals(s, RA0)).toBe(false);
+    expect(JSON.stringify(s)).toBe(before);
+    expect('asleepSessionMs' in s).toBe(false);
+    expect('asleep_s' in (s as any)).toBe(false);
+  });
+
+  // tickAsleepClock / asleepSessionEnd live on Hire 2 (wip/hire2/v5-clockwage, stub autoRefillOn at f8f142aa), not this tree.
+  // The full AC: with autoRefill=1 and clockWage=0, an asleep Hawker or Grader adds 0 to asleep_s and session_end still emits asleep_s.
+  it.todo('[G0 §11][lighter L64] autoRefill=1 clockWage=0: an asleep Hawker or Grader adds 0 to asleep_s and session_end still emits asleep_s — needs Hire 2 tickAsleepClock/asleepSessionEnd (f8f142aa), not in this tree');
 });

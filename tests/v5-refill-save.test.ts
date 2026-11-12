@@ -1,4 +1,4 @@
-// HoE/v5-refill-sim G1 (engineering/tasks/v5-refill-sim/G0-API.md rev 9 sha256 bcc52937, §1, §5, §6; Architect review M1, m2, m3, m5):
+// HoE/v5-refill-sim G1 (engineering/tasks/v5-refill-sim/G0-API.md rev 10 sha256 bcf95315, §1, §5, §6; Architect review M1, m2, m3, m5):
 // additive OPTIONAL keys, SAVE_VERSION stays 6, no migration. Red-first: round-trip, flags-0 write-back, sanitiser matrix.
 import { describe, it, expect } from 'vitest';
 import { balance as b, type Balance } from '../src/config/balance';
@@ -73,6 +73,26 @@ describe('[G0 §6.1] red-first round-trip and flags-0 write-back', () => {
       workers: { market_hand: { energy: 30, cdS: 0, paused: true, restAuto: true, autoRefill: true }, coop_hand: { energy: 80, cdS: 0 } } };
     const kv = mem(); kv.setItem(SAVE_KEY, serialize(s, NOW)); const a = boot(kv, RA);
     expect(serialize(a.s, NOW)).toBe(serialize(s, NOW));
+  });
+});
+
+describe('[G0 §1 vs §12.9][Architect FYI 68a24fd8] chargesOf vs chargesView lazy default', () => {
+  it('shipping start_charges == charge_cap, so both reads agree on a missing key', () => {
+    expect(TC.start_charges).toBe(TC.charge_cap);
+    const s = base();
+    expect('refillCharges' in s).toBe(false);
+    expect(chargesOf(s, R_ONLY)).toBe(TC.start_charges);
+    expect(chargesView(s, R_ONLY)).toEqual({ charges: CAP, cap: CAP, nextChargeMs: null });
+    expect(chargesOf(s, R_ONLY)).toBe(chargesView(s, R_ONLY).charges);
+  });
+  // G0 §1 / Architect m3: chargesOf uses start_charges. G0 §12.9: chargesView uses cap.
+  // Agreeing the two would violate one of those pins. Left as specified; pending a G0 ruling if Econ lowers start.
+  it('when start_charges != charge_cap, chargesOf uses start (§1) and chargesView uses cap (§12.9); nextChargeMs is null at the view cap', () => {
+    const bb = fl({ rc2Refill: 1 }, { start_charges: 0, charge_cap: 2 });
+    const s = base();
+    expect('refillCharges' in s).toBe(false);
+    expect(chargesOf(s, bb)).toBe(0);
+    expect(chargesView(s, bb)).toEqual({ charges: 2, cap: 2, nextChargeMs: null });
   });
 });
 
