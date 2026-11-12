@@ -39,7 +39,7 @@ const golden: TimerSystem = (s, _dt, f, b, _c, ev) => goldenTick(s, f, b, ev);
 const abilities: TimerSystem = (s, _dt, f, b, _c, ev) => abilitiesTick(s, f, b, ev);
 /** #5 Broody R7: nest accrual on this tick's integer focus ms (fT, Σ fT = frame focus), after I_ref. Identity unless m4.flags.broody. */
 const broody: TimerSystem = (s, _dt, f, b, c, ev) => broodyTick(s, f, f > 0 ? c?.focusFtMs ?? Math.round(f * 1000) : 0, b, ev);
-export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak, breeds, incomeRef, frenzy, golden, abilities, broody];
+export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak, breeds, incomeRef, broody, frenzy, golden, abilities];
 export const anyM5FlagOn = (b: Balance) => M5_FLAGS.some(f => flagOn(b, f));
 export function stepTimers(s: GameState, dt: number, b: Balance, clock?: StepClock, ev?: Sink, systems: readonly TimerSystem[] = TIMER_SYSTEMS): GameState {
   const f = tickFocusS(dt, clock);
