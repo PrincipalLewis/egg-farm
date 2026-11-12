@@ -22,7 +22,8 @@ export type SimEvent =
   | { type: 'grader_tier'; tier: number; mult: number; cost: number }
   | { type: 'milestone_reached'; id: string; track: 'hens' | 'egg_value'; level: number; mult: number }
   | { type: 'balanced_tier'; id: string; tier: number; min_level: number }
-  | M5SimEvent;
+  | M5SimEvent
+  | SalesStallEvent;
 /** M5.0 sim events (F1(d)); emitted only with their m4.flags.* on. Field names follow telemetry-spec v0.6.2 as quoted in the
  *  feature specs. Game adds the UI-only fields when forwarding to telemetry: `collectible_id` (per-session counter shared by
  *  golden egg and Broody), `layout`, and for Broody `slot_id` Y0..Y11 / `restored`. */
@@ -45,4 +46,10 @@ export type M5SimEvent =
   /** Pause §12 (v1.3.16 471fb534): emitted only by sim/pause.ts resumeWorker, only with pause = 1 and rc2Refill = 0 (exclusive emission).
    *  paused_duration_s: integer floor >= 0 of sim seconds paused (D-PMW-2026-11-10-02, QA-D-1110-PAUDUR). */
   | { type: 'worker_resumed'; worker: WorkerId; farm: number; energy_pct: number; paused_duration_s: number; cause: 'manual' | 'manage' };
+/** Saves risk-helpers (sales-stopped-spec §8; econ/stall.ts): emitted only with m4.flags.salesStopped on. Fields = schema.ts rows. */
+type StallTag = import('../econ/stall').WorkerStateTag;
+export type SalesStallEvent =
+  | { type: 'sales_stall'; phase: 'shown' | 'resolved'; stall_id: number; prev_stall_id?: number; cause: import('../econ/stall').StallCause; farm_level: number; queue_len: number; sellable_eggs: number; coop_eggs: number; mh_state: StallTag; ch_state: StallTag; focus_s_since_last_sale: number; session_s: number; resolved_by?: import('../econ/stall').StallResolvedBy; time_to_resolve_s?: number; chip_tapped?: boolean }
+  | { type: 'fatigue_cue_shown'; surface: import('../econ/stall').FatigueSurface; loss_per_s: number; loss_share: number; n_tired: number; n_asleep: number; n_paused: number; suppressed_by_stall: boolean }
+  | { type: 'fatigue_cue_tapped'; surface: import('../econ/stall').FatigueSurface; loss_per_s: number; loss_share: number; n_tired: number; n_asleep: number; n_paused: number };
 export type Sink = SimEvent[] | undefined;
