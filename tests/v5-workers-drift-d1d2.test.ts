@@ -16,6 +16,7 @@ import { step } from '../src/sim/tick';
 import { apply } from '../src/sim/actions';
 import { graderMult, needManage, resumeNeedCents, unpaidResumeAtCents, type Worker } from '../src/sim/workers';
 import { isPaused, pauseWorker, resumeWorker, pausedDurationS, pauseSessionEnd } from '../src/sim/pause';
+import { sessionEndPresentFields } from '../src/sim/breeds-traits';
 import { validateEvent } from '../src/telemetry/schema';
 import { serialize, SAVE_KEY } from '../src/save/save';
 import { Game } from '../src/game';
@@ -387,6 +388,34 @@ describe('[PAU-AC8][QA-D-1110-PAUDUR][TEL-AC8][TEL-AC14] session_end.paused_work
     const g2 = boot(P, kv); expect(pauseSessionEnd(g2.state, P)).toEqual({ paused_worker_s: 0, all_paused_s: 0 });
     g2.debugAdvance(6_000); g2.endSession();
     expect(lastEnd(g2)).toMatchObject({ paused_worker_s: 6, all_paused_s: 6 });
+  });
+  it('[TEL-AC8][TEL-AC14][BR-AC53] session_end carries pause fields and present_* together; helper keys do not collide', () => {
+    const BOTH = withFlags({ pause: 1, breeds: 1 });
+    const pauseSample = pauseSessionEnd({ ...farm({ workers: { hawker: W(60) } }, BOTH), pausedForS: { sumS: 1, allS: 1 } }, BOTH);
+    const presentSample = sessionEndPresentFields({ ...farm({}, BOTH), breedsCalm: { focusMs: 0, stamps: [], pendingCount: 0, activeMs: 0, lostCount: 0, open: false } }, BOTH);
+    const pauseKeys = Object.keys(pauseSample).sort();
+    const presentKeys = Object.keys(presentSample).sort();
+    expect(pauseKeys).toEqual(['all_paused_s', 'paused_worker_s']);
+    expect(presentKeys).toEqual(['present_active_s', 'present_lost_count']);
+    expect(pauseKeys.filter(k => presentKeys.includes(k))).toEqual([]); // no key collision between the two helpers
+
+    const g = boot(BOTH);
+    g.state = pauseWorker(farm({ workers: { hawker: W(60), grader: W(60) }, tracksV7: 1 } as Partial<GameState>, BOTH), 'hawker', BOTH);
+    g.state = { ...g.state, breedsCalm: { focusMs: 5_000, stamps: [], pendingCount: 0, activeMs: 5_000, lostCount: 2, open: true } };
+    g.debugAdvance(7_000);
+    const pause = pauseSessionEnd(g.state, BOTH);
+    const present = sessionEndPresentFields(g.state, BOTH);
+    expect(Object.keys(pause).some(k => k in present)).toBe(false);
+    expect(pause).toEqual({ paused_worker_s: 7, all_paused_s: 0 }); // one of two hired is paused
+    g.endSession();
+    const e = lastEnd(g);
+    expect(e).toMatchObject({ ...pause, ...present });
+    for (const k of [...pauseKeys, ...presentKeys]) expect(k in e, k).toBe(true);
+    expect(e.paused_worker_s).toBe(pause.paused_worker_s);
+    expect(e.all_paused_s).toBe(pause.all_paused_s);
+    expect(e.present_active_s).toBe(present.present_active_s);
+    expect(e.present_lost_count).toBe(present.present_lost_count);
+    expect(validateEvent(e as never).filter(m => /paused_worker_s|all_paused_s|present_active_s|present_lost_count/.test(m))).toEqual([]);
   });
 });
 
