@@ -1,4 +1,4 @@
-// HoE/v5-refill-sim G1 (engineering/tasks/v5-refill-sim/G0-API.md rev 11 sha256 a29b999d, §1, §5, §6; Architect review M1, m2, m3, m5):
+// HoE/v5-refill-sim G1 (engineering/tasks/v5-refill-sim/G0-API.md rev 12 sha256 82eeac34, §1, §5, §6; Architect review M1, m2, m3, m5):
 // additive OPTIONAL keys, SAVE_VERSION stays 6, no migration. Red-first: round-trip, flags-0 write-back, sanitiser matrix.
 import { describe, it, expect } from 'vitest';
 import { balance as b, type Balance } from '../src/config/balance';

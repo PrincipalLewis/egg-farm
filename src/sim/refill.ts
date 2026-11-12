@@ -1,5 +1,5 @@
 /**
- * rc2 Refill + autoRefill (G0-API.md rev 11, sha256 a29b999d). G1: chargesOf (m3, lazy) and chargesView.
+ * rc2 Refill + autoRefill (G0-API.md rev 12, sha256 82eeac34). G1: chargesOf (m3, lazy) and chargesView.
  * G2: session views, autoRefillOn, restEligibility, refillEligibility, mutators, tick (M4).
  * UI-safe views: no side effects. Refill never writes asleep_s or clockWage state (D-HOE-61).
  * M4: sim-clock only; no wall-clock or RNG calls.
@@ -19,6 +19,7 @@ import { ENERGY_FULL, isPaused, pauseWorker, resumeWorker } from './pause';
 import { sessionEndPresentFields } from './breeds-traits';
 import type { RefillSession } from './m5-state';
 import type { SimEvent, Sink } from './events';
+import { workerAtRisk } from '../econ/income';
 
 export interface ChargesView { charges: number; cap: number; nextChargeMs: number | null } // null at the cap (F-4)
 
@@ -122,10 +123,21 @@ export function restEligibility(s: GameState, id: WorkerId, b: Balance): { ok: t
   return { ok: true };
 }
 
-/** rest_toggled.state (D-HOE-33). §12.7 etas are it.todo (formula not specified). */
+/** rest_toggled.state (D-HOE-33). Etas live beside this, in restEtas (G0 §15). */
 export function restState(w: Worker | undefined, b: Balance): 'active' | 'paused' | 'resting' {
   if (!isPaused(w, b)) return 'active';
   return w?.restAuto === true ? 'resting' : 'paused';
+}
+
+/** G0 §15. restState stays the enum. etasNull → both null. Float seconds, then ceil. rest_recovery_mult is never a drain. */
+export function restEtas(w: Worker | undefined, b: Balance): { etaTiredS: number | null; etaAsleepS: number | null } {
+  const drain = b.workers.energy.drain_s_per_pct;
+  const tired = b.workers.energy.tired_below_pct;
+  if (!w || w.unpaid === true || isPaused(w, b) || !(drain > 0)) return { etaTiredS: null, etaAsleepS: null };
+  return {
+    etaTiredS: w.energy < tired ? 0 : Math.ceil((w.energy - tired) * drain + Number.EPSILON),
+    etaAsleepS: w.energy <= 0 ? 0 : Math.ceil(w.energy * drain),
+  };
 }
 
 export function refillAgoSimMs(s: GameState, id: WorkerId): number | undefined {
@@ -140,8 +152,9 @@ export function refillAgoSimMs(s: GameState, id: WorkerId): number | undefined {
  */
 type PausedForHolder = { pausedForS?: Partial<Record<WorkerId, number>> };
 export function pausedDurationS(s: GameState, id: WorkerId): number {
+  // Match #119 floorMsToS (9260abd1): pausedForS is integer ms; floor ms/1000 at emit (G0 §14b / §15).
   const v = (s as GameState & PausedForHolder).pausedForS?.[id];
-  return Math.floor(typeof v === 'number' && Number.isFinite(v) && v > 0 ? v : 0);
+  return typeof v === 'number' && Number.isFinite(v) && v > 0 ? Math.floor(v / 1000) : 0;
 }
 
 export type ShiftSheetEntry = 'nav' | 'card' | 'stall_chip' | 'fatigue_chip';
@@ -162,25 +175,32 @@ function hiredIds(s: GameState): WorkerId[] {
   return WORKERS.filter(id => !!s.workers[id]);
 }
 
-/** Temporary stand-in for shiftOrder (energy asc, then WORKERS index). Full AC-RF3 needs #128 workerAtRisk — not in this tree. */
-function energyThenIndex(s: GameState, ids: WorkerId[]): WorkerId[] {
-  return ids.slice().sort((a, c) => {
-    const d = (s.workers[a]!.energy) - (s.workers[c]!.energy);
-    return d !== 0 ? d : WORKERS.indexOf(a) - WORKERS.indexOf(c);
+/** G0: hired, workerAtRisk desc → lower energy → market_hand…grader (AC-RF3 / AC-LR5). */
+export function shiftOrder(s: GameState, b: Balance): WorkerId[] {
+  return hiredIds(s).slice().sort((a, c) => {
+    const risk = workerAtRisk(c, s, b) - workerAtRisk(a, s, b); // desc
+    if (risk !== 0) return risk;
+    const energy = s.workers[a]!.energy - s.workers[c]!.energy; // asc
+    if (energy !== 0) return energy;
+    return WORKERS.indexOf(a) - WORKERS.indexOf(c);
   });
 }
 
-function rankByRisk(s: GameState, id: WorkerId): number {
-  const hired = hiredIds(s);
-  const i = hired.indexOf(id);
-  return i < 0 ? 1 : i + 1; // HoE 7.3: 1-based among hired; order is WORKERS until shiftOrder lands
+/** G0 7.3: 1-based position in shiftOrder among hired workers. */
+function rankByRisk(s: GameState, id: WorkerId, b: Balance): number {
+  const i = shiftOrder(s, b).indexOf(id);
+  return i < 0 ? 1 : i + 1;
 }
 
+/** best_worker: top hired row by shiftOrder (AC-RF3). lowest_worker: lowest-energy Refillable, WORKERS ties (rc2 v1.3.7). */
 function bestAndLowest(s: GameState, b: Balance): { best: WorkerId; lowest: WorkerId } {
-  const refs = energyThenIndex(s, hiredIds(s).filter(id => isRefillable(s, id, b)));
-  const fallback = hiredIds(s)[0] ?? WORKERS[0]!;
-  const lowest = refs[0] ?? fallback;
-  return { best: lowest, lowest };
+  const order = shiftOrder(s, b);
+  const fallback = order[0] ?? WORKERS[0]!;
+  const refs = hiredIds(s).filter(id => isRefillable(s, id, b)).sort((a, c) => {
+    const d = s.workers[a]!.energy - s.workers[c]!.energy;
+    return d !== 0 ? d : WORKERS.indexOf(a) - WORKERS.indexOf(c);
+  });
+  return { best: order[0] ?? fallback, lowest: refs[0] ?? fallback };
 }
 
 function onTrueFields(s: GameState, id: WorkerId, b: Balance): {
@@ -222,7 +242,7 @@ export function refillWorker(
   const prePct = pct(w0.energy);
   const { best, lowest } = bestAndLowest(s, b);
   const n = refillableCount(s, b);
-  const rank = rankByRisk(s, id);
+  const rank = rankByRisk(s, id, b);
   let state = s;
   const evs: SimEvent[] = [];
   // Resume a paused worker through resumeWorker (rule 8, cause 'manage'). Never write cdS (U1, AC-LR20).
@@ -332,6 +352,13 @@ export function noteStallChipTap(s: GameState, _action: 'refill' | 'sell_all' | 
   return s;
 }
 
+function comboWindowMs(b: Balance): number | null {
+  const tc = b.m4?.tc;
+  const v = (typeof tc?.['tc_combo_window_s'] === 'number' ? tc['tc_combo_window_s'] : tc?.['combo_window_s']);
+  if (typeof v !== 'number' || !Number.isFinite(v) || v < 0) return null;
+  return v * 1000;
+}
+
 function autoTc(b: Balance): { at: number; reserve: number } | null {
   const tc = b.m4?.tc;
   const at = tc?.['autorefill_at_pct'], reserve = tc?.['autorefill_reserve'];
@@ -347,7 +374,7 @@ function applyAutoRefill(s: GameState, id: WorkerId, b: Balance, ev?: Sink): Gam
   const prePct = pct(w0.energy);
   const { best, lowest } = bestAndLowest(s, b);
   const n = refillableCount(s, b);
-  const rank = rankByRisk(s, id);
+  const rank = rankByRisk(s, id, b);
   const w = { ...w0, energy: ENERGY_FULL };
   const charges = chargesOf(s, b) - 1;
   const cap = tcNum(b, 'charge_cap');
@@ -408,14 +435,23 @@ export function tickRefill(s: GameState, dtMs: number, b: Balance, ev?: Sink): G
     if (charges !== startCharges) state = { ...state, refillCharges: charges };
   }
 
-  // Advance manual-refill ages (existing keys only).
+  // Advance manual-refill ages (existing keys only). Expire once age > combo-window ms (G0 §1 / §15).
+  // Use whichever window key is present (combo_window_s or tc_combo_window_s, D-HOE-57); if neither, just increment.
   if (state.refillAgoMs) {
     const ago: NonNullable<GameState['refillAgoMs']> = {};
+    const windowMs = comboWindowMs(b);
     for (const id of WORKERS) {
       const v = state.refillAgoMs[id];
-      if (typeof v === 'number') ago[id] = v + dtMs;
+      if (typeof v !== 'number') continue;
+      const next = v + dtMs;
+      if (windowMs !== null && next > windowMs) continue; // drop the entry
+      ago[id] = next;
     }
-    state = { ...state, refillAgoMs: ago };
+    if (Object.keys(ago).length) state = { ...state, refillAgoMs: ago };
+    else {
+      const { refillAgoMs: _drop, ...rest } = state;
+      state = rest as GameState;
+    }
   }
 
   // Rest auto-end at a full tank (energy already recovered in step via pausedRecoveredEnergy).
@@ -449,14 +485,14 @@ export function tickRefill(s: GameState, dtMs: number, b: Balance, ev?: Sink): G
   }
 
   // Auto-refill (AC-LR19), after Rest auto-end. Skipped when Econ CSV keys are not on the fixture.
-  // Temporary order: energy asc, WORKERS index (shiftOrder / #128 workerAtRisk is it.todo).
+  // Costliest first, by shiftOrder (AC-LR5 / G0 §3).
   if (flagOn(b, 'autoRefill')) {
     const keys = autoTc(b);
     if (keys) {
-      const cands = energyThenIndex(state, hiredIds(state).filter(id => {
+      const cands = shiftOrder(state, b).filter(id => {
         const w = state.workers[id]!;
         return autoRefillOn(state, id, b) && w.energy <= keys.at && !isPaused(w, b) && !w.unpaid;
-      }));
+      });
       for (const id of cands) {
         if (chargesOf(state, b) <= keys.reserve) break;
         state = applyAutoRefill(state, id, b, ev);

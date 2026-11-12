@@ -1,4 +1,4 @@
-// HoE/v5-refill-sim G2 (G0-API.md rev 11 sha256 a29b999d): restEligibility §14a, mutators, tick M4, m1/m4/m6/m7, manage no-op.
+// HoE/v5-refill-sim G2 (G0-API.md rev 12 sha256 82eeac34): restEligibility §14a, mutators, tick M4, m1/m4/m6/m7, manage no-op, shiftOrder, restEtas §15.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -7,10 +7,12 @@ import { initialState, type GameState } from '../src/sim/state';
 import { apply } from '../src/sim/actions';
 import { step } from '../src/sim/tick';
 import { WORKERS, type WorkerId } from '../src/sim/workers';
+import { workerAtRisk } from '../src/econ/income';
 import {
   restEligibility, refillEligibility, refillableCount, restState, refillAgoSimMs, pct,
   refillWorker, setRest, setAutoRefill, takeAutoRefillToast, noteShiftSheetOpened, noteStallChipTap,
   tickRefill, chargesOf, chargesView, autoRefillOn, pausedDurationS, rc2RefillOn, refillSessionTotals,
+  shiftOrder, restEtas,
   type RefillCtx,
 } from '../src/sim/refill';
 
@@ -149,7 +151,7 @@ describe('[G2] mutators', () => {
     const s: GameState = {
       ...base(), refillCharges: 2,
       workers: { market_hand: { energy: 20, cdS: 0, paused: true, restAuto: true } },
-      pausedForS: { market_hand: 3.9 },
+      pausedForS: { market_hand: 3900 },
     } as any;
     const r = refillWorker(s, 'market_hand', R, CTX);
     expect(r.ok).toBe(true);
@@ -185,7 +187,7 @@ describe('[G2] mutators', () => {
     const s: GameState = {
       ...base(),
       workers: { market_hand: { energy: 40, cdS: 0, paused: true, restAuto: true } },
-      pausedForS: { market_hand: 1 },
+      pausedForS: { market_hand: 1000 },
     } as any;
     const r = setRest(s, 'market_hand', false, R, CTX);
     expect(r.state.workers.market_hand!.paused).toBe(false);
@@ -248,7 +250,7 @@ describe('[G2][M4] tickRefill: integer ms, regen, rest auto-end, auto-refill, ac
     const s: GameState = {
       ...base(),
       workers: { market_hand: { energy: 100, cdS: 0, paused: true, restAuto: true } },
-      pausedForS: { market_hand: 8 },
+      pausedForS: { market_hand: 8000 },
     } as any;
     const out = tickRefill(s, 100, R, ev);
     expect(out.workers.market_hand!.paused).toBe(false);
@@ -324,7 +326,190 @@ describe('[G2][OPEN-6] manage / manageAll are no-ops at rc2Refill=1; flag-off is
   });
 });
 
-describe('[G2] gaps left as it.todo with notes', () => {
-  it.todo('shiftOrder(s,b): hired, workerAtRisk desc → energy asc → WORKERS index (AC-RF3 / AC-LR5) — needs #128 workerAtRisk, OPEN, not in this tree. Auto-refill currently uses a temporary energy-asc + WORKERS-index stand-in; rank_by_risk is 1-based among hired in WORKERS order until shiftOrder lands.');
-  it.todo('restState etaTiredS / etaAsleepS (§12.7): apply the Rest multiplier at rc2Refill=1 — G0 does not specify the eta formula; will not invent. restState(w,b) currently returns the D-HOE-33 enum only.');
+describe('[G2][AC-RF3][AC-LR5] shiftOrder: hired, workerAtRisk desc → energy asc → WORKERS index', () => {
+  const expectedOrder = (s: GameState, bb: Balance): WorkerId[] =>
+    WORKERS.filter(id => !!s.workers[id]).sort((a, c) => {
+      const risk = workerAtRisk(c, s, bb) - workerAtRisk(a, s, bb);
+      if (risk !== 0) return risk;
+      const energy = s.workers[a]!.energy - s.workers[c]!.energy;
+      if (energy !== 0) return energy;
+      return WORKERS.indexOf(a) - WORKERS.indexOf(c);
+    });
+
+  it('returns only hired workers, in AC-RF3 order', () => {
+    const s: GameState = { ...base(), workers: { hawker: { energy: 10, cdS: 0 }, grader: { energy: 10, cdS: 0 } } };
+    const got = shiftOrder(s, R);
+    expect(got.includes('market_hand')).toBe(false);
+    expect(got.includes('coop_hand')).toBe(false);
+    expect([...got].sort()).toEqual(['grader', 'hawker']);
+    expect(got).toEqual(expectedOrder(s, R));
+    expect(shiftOrder({ ...base(), workers: {} }, R)).toEqual([]);
+  });
+
+  it('sorts hired by workerAtRisk descending (AC-RF3 / AC-LR5)', () => {
+    const s: GameState = {
+      ...base(),
+      workers: {
+        market_hand: { energy: 0, cdS: 0 },
+        coop_hand: { energy: 10, cdS: 0 },
+        hawker: { energy: 10, cdS: 0 },
+        grader: { energy: 10, cdS: 0 },
+      },
+    };
+    const got = shiftOrder(s, R);
+    expect(got).toEqual(expectedOrder(s, R));
+    const risks = got.map(id => workerAtRisk(id, s, R));
+    for (let i = 1; i < risks.length; i++) expect(risks[i - 1]).toBeGreaterThanOrEqual(risks[i]!);
+    // at least one pair actually differs so this is not a vacuous all-zero sort
+    expect(Math.max(...risks)).toBeGreaterThan(0);
+    expect(new Set(risks).size).toBeGreaterThan(1);
+  });
+
+  it('equal workerAtRisk: lower energy first (AC-RF3 / AC-LR5 tie)', () => {
+    const s: GameState = {
+      ...base(),
+      workers: { market_hand: { energy: 80, cdS: 0 }, coop_hand: { energy: 40, cdS: 0 } },
+    };
+    expect(workerAtRisk('market_hand', s, R)).toBe(0);
+    expect(workerAtRisk('coop_hand', s, R)).toBe(0);
+    expect(shiftOrder(s, R)).toEqual(['coop_hand', 'market_hand']);
+  });
+
+  it('equal risk and energy: WORKERS order market_hand…grader (AC-RF3 / AC-LR5 tie)', () => {
+    const s: GameState = {
+      ...base(),
+      workers: {
+        grader: { energy: 80, cdS: 0 },
+        hawker: { energy: 80, cdS: 0 },
+        coop_hand: { energy: 80, cdS: 0 },
+        market_hand: { energy: 80, cdS: 0 },
+      },
+    };
+    for (const id of WORKERS) expect(workerAtRisk(id, s, R)).toBe(0);
+    expect(shiftOrder(s, R)).toEqual([...WORKERS]);
+  });
+
+  it('rank_by_risk on refill_used is the 1-based position in shiftOrder among hired (G0 7.3)', () => {
+    const s: GameState = {
+      ...base(), refillCharges: 2,
+      workers: { market_hand: { energy: 40, cdS: 0 }, coop_hand: { energy: 20, cdS: 0 } },
+    };
+    expect(workerAtRisk('market_hand', s, R)).toBe(0);
+    expect(workerAtRisk('coop_hand', s, R)).toBe(0);
+    expect(shiftOrder(s, R)).toEqual(['coop_hand', 'market_hand']);
+    const coop = refillWorker(s, 'coop_hand', R, CTX);
+    expect(coop.ok).toBe(true);
+    if (!coop.ok) return;
+    expect((coop.events.find(e => e.type === 'refill_used') as any).rank_by_risk).toBe(1);
+    const mh = refillWorker(s, 'market_hand', R, CTX);
+    expect(mh.ok).toBe(true);
+    if (!mh.ok) return;
+    expect((mh.events.find(e => e.type === 'refill_used') as any).rank_by_risk).toBe(2);
+  });
+
+  it('best_worker is shiftOrder[0] among hired; lowest_worker is the lowest-energy Refillable (WORKERS ties)', () => {
+    // hens/egg tracks at 12 so a Tired Coop Hand has non-zero workerAtRisk (income model).
+    // Coop Hand at 20 is costliest; Hawker at 0 is the lowest-energy refillable — they diverge.
+    const s: GameState = {
+      ...base(), farmLevel: 12, hensLevel: 12, eggValueLevel: 12, refillCharges: 2,
+      workers: {
+        coop_hand: { energy: 20, cdS: 0 },
+        market_hand: { energy: 10, cdS: 0 },
+        hawker: { energy: 0, cdS: 0 },
+        grader: { energy: 10, cdS: 0 },
+      },
+    };
+    expect(workerAtRisk('coop_hand', s, R)).toBeGreaterThan(0);
+    expect(workerAtRisk('coop_hand', s, R)).toBeGreaterThan(workerAtRisk('hawker', s, R));
+    const order = shiftOrder(s, R);
+    expect(order[0]).toBe('coop_hand');
+    const r = refillWorker(s, 'coop_hand', R, CTX);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const used = r.events.find(e => e.type === 'refill_used') as any;
+    expect(used.best_worker).toBe('coop_hand');
+    expect(used.lowest_worker).toBe('hawker');
+    expect(used.best_worker).not.toBe(used.lowest_worker);
+    expect(used.best_worker).toBe(order[0]);
+  });
+
+  it('[AC-LR5] one spendable charge, two auto candidates: the higher workerAtRisk is refilled', () => {
+    const ev: any[] = [];
+    const s: GameState = {
+      ...base(), refillCharges: 1,
+      workers: {
+        market_hand: { energy: 0, cdS: 0, autoRefill: true },
+        coop_hand: { energy: 10, cdS: 0, autoRefill: true },
+      },
+    };
+    const mh = workerAtRisk('market_hand', s, RA);
+    const ch = workerAtRisk('coop_hand', s, RA);
+    expect(mh).not.toBe(ch);
+    const winner = mh > ch ? 'market_hand' : 'coop_hand';
+    const loser = winner === 'market_hand' ? 'coop_hand' : 'market_hand';
+    const out = tickRefill(s, 100, RA, ev);
+    expect(out.workers[winner]!.energy).toBe(100);
+    expect(out.workers[loser]!.energy).toBe(s.workers[loser]!.energy);
+    expect(out.refillCharges).toBe(0);
+    const used = ev.filter(e => e.type === 'refill_used');
+    expect(used).toHaveLength(1);
+    expect(used[0].worker).toBe(winner);
+    expect(used[0].rank_by_risk).toBe(1);
+  });
+});
+
+describe('[G0 §15] restEtas(w, b): etaTiredS / etaAsleepS beside restState; restState stays the D-HOE-33 enum', () => {
+  const w = (energy: number, extra: Record<string, unknown> = {}) => ({ energy, cdS: 0, ...extra });
+  it('energy 100, active: 630 / 900; restState is active', () => {
+    expect(restEtas(w(100), R)).toEqual({ etaTiredS: 630, etaAsleepS: 900 });
+    expect(restState(w(100), R)).toBe('active');
+  });
+  it('energy 30, still working: 1 / 270', () => {
+    expect(restEtas(w(30), R)).toEqual({ etaTiredS: 1, etaAsleepS: 270 });
+  });
+  it('energy 29, already tired: 0 / 261', () => {
+    expect(restEtas(w(29), R)).toEqual({ etaTiredS: 0, etaAsleepS: 261 });
+  });
+  it('energy 0, asleep, not paused, not Unpaid: 0 / 0', () => {
+    expect(restEtas(w(0), R)).toEqual({ etaTiredS: 0, etaAsleepS: 0 });
+  });
+  it('resting, paused, Unpaid, or unhired: both null, even mid-tank; restState enum is unchanged', () => {
+    expect(restEtas(w(50, { paused: true, restAuto: true }), R)).toEqual({ etaTiredS: null, etaAsleepS: null });
+    expect(restState(w(50, { paused: true, restAuto: true }), R)).toBe('resting');
+    expect(restEtas(w(50, { paused: true }), R)).toEqual({ etaTiredS: null, etaAsleepS: null });
+    expect(restState(w(50, { paused: true }), R)).toBe('paused');
+    expect(restEtas(w(50, { unpaid: true }), R)).toEqual({ etaTiredS: null, etaAsleepS: null });
+    expect(restEtas(undefined, R)).toEqual({ etaTiredS: null, etaAsleepS: null });
+  });
+  it('m4.flags.pause=0 with a stale paused:true still drains (isPaused is false) and returns a numeric eta', () => {
+    const off = fl({ rc2Refill: 1, pause: 0 });
+    const stale = w(100, { paused: true, restAuto: true });
+    expect(restEtas(stale, off)).toEqual({ etaTiredS: 630, etaAsleepS: 900 });
+    expect(restState(stale, off)).toBe('active');
+  });
+  it('drain_s_per_pct <= 0 is null', () => {
+    const z = { ...R, workers: { ...R.workers, energy: { ...R.workers.energy, drain_s_per_pct: 0 } } } as Balance;
+    expect(restEtas(w(100), z)).toEqual({ etaTiredS: null, etaAsleepS: null });
+    const neg = { ...R, workers: { ...R.workers, energy: { ...R.workers.energy, drain_s_per_pct: -1 } } } as Balance;
+    expect(restEtas(w(100), neg)).toEqual({ etaTiredS: null, etaAsleepS: null });
+  });
+});
+
+describe('[G0 §15] refillAgoMs entries expire once age > combo_window_s × 1000', () => {
+  it('with combo_window_s on the fixture, a tick that crosses the window drops that entry and keeps one still at the bound', () => {
+    const bb = fl({ rc2Refill: 1, pause: 1 }, { combo_window_s: 10 }); // 10 s → 10000 ms; exclusive >
+    const s: GameState = {
+      ...base(), refillAgoMs: { market_hand: 9900, coop_hand: 10000 },
+    };
+    const out = tickRefill(s, 100, bb); // 9900+100=10000 kept; 10000+100=10100 dropped
+    expect(out.refillAgoMs?.market_hand).toBe(10000);
+    expect(out.refillAgoMs && 'coop_hand' in out.refillAgoMs).toBe(false);
+  });
+  it('when the last entry expires, refillAgoMs is removed; when the window key is absent, ages only increment', () => {
+    const bb = fl({ rc2Refill: 1, pause: 1 }, { combo_window_s: 10 });
+    const gone = tickRefill({ ...base(), refillAgoMs: { market_hand: 10000 } }, 100, bb);
+    expect('refillAgoMs' in gone).toBe(false);
+    const keep = tickRefill({ ...base(), refillAgoMs: { market_hand: 10000 } }, 100, R); // no window key on R
+    expect(keep.refillAgoMs?.market_hand).toBe(10100);
+  });
 });

@@ -1,4 +1,4 @@
-// HoE/v5-refill-sim G2 M2 (G0-API.md rev 11 sha256 a29b999d; Architect M2 + M2 note 22:18 CET).
+// HoE/v5-refill-sim G2 M2 (G0-API.md rev 12 sha256 82eeac34; Architect M2 + M2 note 22:18 CET).
 // resetRefillSession is a pure function, tested on its own. One-line hook-up into
 // resetSessionFields is it.todo: HoE ruled NEVER merge Draft #138 into #133, and
 // do not create src/sim/session.ts locally. After #138 lands on rc/v5 we mergefwd
