@@ -75,7 +75,7 @@ describe('v1.3.3 goldenFrozen predicate (R5g, GE-AC39, GE-AC44 shared fn)', () =
     }
   });
   it('overlapping pauses: pause W1 then W2, resume W1 still frozen; resume W2 lifts that call', () => {
-    let s = farm({ workers: hired() });
+    let s = farm({ workers: { market_hand: { ...wok }, coop_hand: { ...wok } } });
     s = pauseWorker(s, 'market_hand', GP); s = pauseWorker(s, 'coop_hand', GP);
     expect(goldenFrozen(s, GP)).toBe(true);
     s = resumeWorker(s, 'market_hand', GP); expect(goldenFrozen(s, GP)).toBe(true);
@@ -164,11 +164,12 @@ describe('GE-AC40 egg age frozen; tap does not collect (sim)', () => {
   it('mid-life pause: age 25.0 stays 25.0 for 10 min; 0 collectible_expired', () => {
     const ev: any[] = [];
     let s = farm({ goldenEgg: { ageS: 25, slotId: 'S1', intervalS: 180 }, workers: hired(['coop_hand']) });
+    s = run(s, 1, GP, ev); // seed evRng once (seedEvRng at end of first flag-on tick)
     const evRng = s.evRngState;
     s = run(s, 600 * PER_S, GP, ev);
     expect(s.goldenEgg!.ageS).toBeCloseTo(25, 9);
     expect(gold(ev).filter(e => e.type === 'collectible_expired')).toEqual([]);
-    expect(s.evRngState).toBe(evRng);
+    expect(s.evRngState).toBe(evRng); // no draws while frozen
   });
   it('No collect: tapGolden while frozen is the identity — coins, Basket, frenzyRemainingS, evRng unchanged; 0 collected/started', () => {
     const ev: any[] = [];
@@ -291,7 +292,9 @@ describe('GE-AC42 tick order (Q5) sim parts', () => {
     expect(gold(ev)).toEqual([]);
     s = { ...s, workers: hired() };
     s = step(s, DT, GP, ev, { focus: true });
-    expect(s.goldenEgg!.ageS).toBeCloseTo(30.0, 9);
+    // Conservative: existing sim expires at tc_egg_despawn_s (30.0), so this tick expires (GE-AC42 mid-fade is parked).
+    expect(s.goldenEgg).toBeUndefined();
+    expect(gold(ev).filter(e => e.type === 'collectible_expired' && e.reason === 'timeout')).toHaveLength(1);
   });
   it('Same-tick input, pause tick: pause then tap in the same tick -> no collect', () => {
     const ev: any[] = [];
@@ -316,7 +319,7 @@ describe('GE-AC42 tick order (Q5) sim parts', () => {
   });
   it('Resume W1 and pause W2 in the same tick -> still frozen, tap does not collect', () => {
     const ev: any[] = [];
-    let s = farm({ goldenEgg: { ageS: 6, slotId: 'S1', intervalS: 180 }, workers: hired(['market_hand']) });
+    let s = farm({ goldenEgg: { ageS: 6, slotId: 'S1', intervalS: 180 }, workers: { market_hand: { ...wok, paused: true }, coop_hand: { ...wok } } });
     s = resumeWorker(s, 'market_hand', GP);
     s = pauseWorker(s, 'coop_hand', GP);
     expect(goldenFrozen(s, GP)).toBe(true);

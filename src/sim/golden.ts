@@ -122,9 +122,16 @@ export const spawnDue = (s: GameState, b: Balance, layout = false) => goldenOn(b
 export function goldenTick(s: GameState, f: number, b: Balance, ev?: Sink): GameState {
   if (!goldenOn(b)) return s;
   // R2: first-spawn countdown starts on unlock even while frozen; it then holds (R5g a).
+  // The starting tick sets the countdown and does not decrement (GE-AC2: remaining is tc_first_spawn_s after 1 tick).
   if (!s.goldenEgg && s.nextSpawnRemainingS === undefined) {
     if (s.farmLevel < tcNum(b, 'egg_unlock_farm')) return s;
-    const first = tcNum(b, 'first_spawn_s'); s = { ...s, nextSpawnRemainingS: first, goldenPending: pending(first) };
+    const first = tcNum(b, 'first_spawn_s');
+    s = { ...s, nextSpawnRemainingS: first, goldenPending: pending(first) };
+    if (goldenFrozen(s, b) && f > 0) {
+      const se = sess(s);
+      s = { ...s, goldenSession: { ...se, frozenS: r12(se.frozenS + f) } };
+    }
+    return s;
   }
   if (goldenFrozen(s, b)) {
     if (!(f > 0)) return s;
