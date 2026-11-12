@@ -1,3 +1,44 @@
+# HoE/v5-139-mergefwd2 — #139 gen/golden — HANDOFF (00:54 CET, 2026-11-13)
+
+**State:** merged forward onto rc/v5 `5552556b` (#140 / #132 landed, on top of mergefwd `08e5937e` onto `0755a284` / #119). mergefwd2 onto `5552556b` was a **clean auto-merge**. The only conflict was mergefwd1 in `src/game.ts` `endSession`, resolved by keeping both sides: precompute `pauseEnd` and `sessionEndPayload` (present_* + golden fields) and track `{ ...pauseEnd, ...payload }` (T-AC9). No product logic change. Test-only follow-up: the #123 ST-AC20 subset-isolation guard now expects Saves-owned `paused_*` present when pause=1 (from `pauseSessionEnd`) and still absent when pause is off. Local gates green. PR stays Ready.
+
+**PR:** https://github.com/PrincipalLewis/egg-farm/pull/139. Branch `gen/golden`, worktree `/workspace/wt-gen-golden`.
+**Gates tip `1e9ed224`** (tree `0ccddc44`) = test fix on mergefwd **`b9be3663`** (tree `a49d44d9`, parents `08e5937e` + `5552556b`). This HANDOFF commit sits on top.
+
+**Merges:**
+- `b9be3663` = `08e5937e` + `5552556b`. Clean auto-merge. Incoming: `src/sim/events.ts` (`worker_paused`), `src/sim/pause.ts`, new `src/sim/pause-events.ts`, `tests/v5-worker-paused.test.ts`.
+- `08e5937e` = `0aca2cc2` + `0755a284`. Only conflict: `src/game.ts` `endSession`. `sessionEndPayload` at line 33 unchanged. ST-AC19/20 constructor/tap auto-merged.
+
+**Resolved hunks:**
+- mergefwd2 (`5552556b`): **no conflict hunks**.
+- mergefwd1 (`0755a284`) @ `08e5937e` `src/game.ts` `endSession`:
+  - Before (ours `0aca2cc2` lines 344–346): `this.telemetry.track('session_end', sessionEndPayload(this.state, this.b));` No `pauseSessionEnd`.
+  - Before (theirs `0755a284` lines 346–352): `pauseEnd` + `presentEnd`; `track('session_end', { ...pauseEnd, ...presentEnd })`. No sessionEndPayload / golden fields.
+  - After **lines 347–351**:
+```
+    // Row 32 ... T-AC9 ...
+    const pauseEnd = pauseSessionEnd(this.state, this.b); // pause §12 L299 ...
+    const payload = sessionEndPayload(this.state, this.b); // present_* + golden session_end fields
+    this.telemetry.track('session_end', { ...pauseEnd, ...payload }); this.save(); this.telemetry.flush(true); }
+```
+    `sessionEndPayload` stays at **line 33**: `({ ...sessionEndPresentFields(s, b), ...sessionEndGoldenFields(s, b) })`.
+    Import auto-merged at **line 21**: `import { pauseSessionEnd } from './sim/pause';`.
+
+## Gates @ 1e9ed224 (`/workspace/artifacts/v5-golden-1e9ed224/`)
+- tsc 0.
+- Focused golden + F3: 7 files / 155 pass. F3-no-literal (`tests/v5-f3-config.test.ts`) 28; freeze 44; spawn 25; rewards 21; game 21; m5persist 7; is-paused 9.
+- Flag-off goldens unchanged: GOLDEN1 `f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544` (flagoff), `a54c9cf9d6a4c967ef8fc9d2cb741ba2deab042b8cad5097b38d5c192339fda5` (m4on). 2 files / 4 pass.
+- Full npm test: 166 files, 2521 pass / 1 skip, EXIT 0.
+- Build + check-release-build: ok (`m4.1+1e9ed224`). Re-run on the tip that includes this file.
+
+## Hosted runs
+Collected after the plain push of this HANDOFF tip; not waited. See the PR checks / the mergefwd report.
+
+## Parked (UI stage) / open questions
+Unchanged from the previous section below.
+
+---
+
 # HANDOFF · gen/golden (sim/logic only)
 
 **Date:** 2026-11-12 23:22 CET (Europe/Belgrade, UTC+1)
