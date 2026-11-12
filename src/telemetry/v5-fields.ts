@@ -6,6 +6,9 @@
 import type { Balance } from '../config/balance';
 import { flagOn } from '../config/flags';
 
+/** 0 = no Away bp applied. Kept as a named export so existing ST-AC19/20 tests compile after the Row 32 merge. */
+export const AWAY_BP_NONE = 0;
+
 /** offline_grant.away_bp (breeds §8 / errata V-2b): required breeds-on (0 if none); absent flag-off; emit even when eggs=0 (PMC). */
 export const offlineGrantV5 = (b: Balance, away_bp = 0): { away_bp?: number } =>
   (flagOn(b, 'breeds') ? { away_bp } : {});
