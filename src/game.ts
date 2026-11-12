@@ -18,6 +18,7 @@ import { streakOn, streakPeak, creditedTapsOn } from './sim/streak';
 import { anyM5FlagOn } from './sim/timers';
 import { incomeRefOn, resetIncomeRef } from './sim/income-ref';
 import { playerSaleCtx, type SaleCtx } from './sim/effects';
+import { pauseSessionEnd } from './sim/pause'; // pause §12 session_end paused_worker_s / all_paused_s (Saves #119)
 import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY, Telemetry, installId } from './telemetry/telemetry';
@@ -69,6 +70,9 @@ export class Game {
     // ST-AC20 (streak §8.1): session_end reads Farm level, Coop Hand and the credited-tap flag from the live state at emit.
     this.telemetry.sessionEndContext = () => ({ farm_level: this.state.farmLevel, coop_hand: !!this.state.workers.coop_hand, credit: creditedTapsOn(this.b) });
     // Row 32 (HoE/breeds-sim-prB-traits): present_* only. Other breeds session_end fields = gen/breeds-telemetry.
+    // #119 pause §12: paused_worker_s / all_paused_s on session_end (pause = 1 and rc2Refill = 0 only). Same emit path as present_*.
+    // Registration order matches { ...pauseSessionEnd(), ...sessionEndPresentFields() }; contributor reset is a no-op (Saves does not reset pausedForS here).
+    this.telemetry.registerSessionEnd('pause', { fields: () => pauseSessionEnd(this.state, this.b), reset() {} });
     this.telemetry.registerSessionEnd('present', { fields: () => sessionEndPresentFields(this.state, this.b), reset() {} });
     this.installId = installId(kv);
     this.telemetry.startSession('load', this.sessionStartFields());
@@ -375,6 +379,7 @@ export class Game {
     const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
     this.goldenEnd('reload'); // v5 #1 R10c (Saves-confirmed order): expired{reload} + fresh gap, in the same flush, before session_end/save
     // R3: a hide >= session_hidden_end_s that never came back ends as the back-dated session_end{hidden}; otherwise {unload}.
+    // session_end fields come from registered contributors (pause #119, then present_*); do not track('session_end') here.
     const hAt = this.telemetry.clock.hiddenAt;
     if (hAt !== null && hAt < at && !this.readOnly && this.telemetry.rotateDue(at)) { this.splitCoopFull(hAt); this.telemetry.endSession('hidden', hAt); }
     else this.telemetry.endSession('unload', at);
