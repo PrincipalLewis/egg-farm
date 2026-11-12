@@ -131,9 +131,13 @@ describe('[ST-AC20] session_end v5 fields (streak §8.1, errata rev. 16 V-2b "+ 
     const { g } = game(CREDIT, { workers: { coop_hand: { ...working } } }); g.dispatch({ type: 'collect' });
     expect(schemaErrs(end(g), V5_END)).toEqual([]);
   });
-  it('Saves-owned session_end paused_* fields are not emitted by this subset', () => {
-    const { g } = game(flags({ streak: 1, pause: 1 })); const e = end(g);
-    expect(e).not.toHaveProperty('paused_worker_s'); expect(e).not.toHaveProperty('all_paused_s');
+  it('Saves #119 session_end paused_* fields: 0 when pause=1 and rc2Refill=0 with no pause time; absent if pause is off or rc2Refill=1', () => {
+    const on = end(game(flags({ streak: 1, pause: 1 })).g);
+    expect(on).toMatchObject({ paused_worker_s: 0, all_paused_s: 0 });
+    const off = end(game(flags({ streak: 1, pause: 0 })).g);
+    expect(off).not.toHaveProperty('paused_worker_s'); expect(off).not.toHaveProperty('all_paused_s');
+    const refill = end(game(flags({ streak: 1, pause: 1, rc2Refill: 1 })).g);
+    expect(refill).not.toHaveProperty('paused_worker_s'); expect(refill).not.toHaveProperty('all_paused_s');
   });
 });
 
