@@ -43,7 +43,10 @@ export type M5SimEvent =
   | { type: 'abilities_unlocked'; farm: number; hired: WorkerId[] }
   | { type: 'ability_used'; worker: WorkerId; farm: number; energy_pct: number; mood: WorkerMood; via_all: boolean; t_since_ready_s: number; in_sheet: boolean; combo: boolean }
   | { type: 'ability_blocked'; worker: WorkerId; reason: AbilityBlockReason; count: number }
-  | { type: 'ability_ended'; worker: WorkerId; cause: AbilityEndCause; effect_s: number };
+  | { type: 'ability_ended'; worker: WorkerId; cause: AbilityEndCause; effect_s: number }
+  /** Pause §12 (v1.3.16 471fb534): emitted only by sim/pause.ts resumeWorker, only with pause = 1 and rc2Refill = 0 (exclusive emission).
+   *  paused_duration_s: integer floor >= 0 of sim seconds paused (D-PMW-2026-11-10-02, QA-D-1110-PAUDUR). */
+  | { type: 'worker_resumed'; worker: WorkerId; farm: number; energy_pct: number; paused_duration_s: number; cause: 'manual' | 'manage' };
 /** Saves risk-helpers (sales-stopped-spec §8; econ/stall.ts): emitted only with m4.flags.salesStopped on. Fields = schema.ts rows. */
 type StallTag = import('../econ/stall').WorkerStateTag;
 export type SalesStallEvent =
