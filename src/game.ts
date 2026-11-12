@@ -379,7 +379,7 @@ export class Game {
     if (hAt !== null && hAt < at && !this.readOnly && this.telemetry.rotateDue(at)) { this.splitCoopFull(hAt); this.telemetry.endSession('hidden', hAt); }
     else this.telemetry.endSession('unload', at);
     // resetSessionFields does not run on pagehide (not a rotation). Keep the unload reset so a same-instance
-    // continuation starts at 0; mid-play rotate is handled by the hook (added in a follow-up commit).
+    // continuation starts at 0. Mid-play rotate: the hook, plus a re-apply after settle restores the hide snapshot.
     this.state = resetAsleepSession(this.state);
     this.save(); this.telemetry.flush(true); }
   // ---- v5 clockWage (failure-cost v0.3.24). S4 totals live in sim state (sim/clock-wage.ts asleep clock, Architect ruling 4).
@@ -498,6 +498,8 @@ export class Game {
       return { mode: 'online', simulatedMs: h.simMs, grantedMs: h.simMs, eggs: 0, coins: this.state.coinsCents - h.state.coinsCents, capped: gap > budgetMs };
     }
     this.state = h.state; this.accMs = 0; this.focusAccMs = 0;
+    // The hook ran on the pre-grant object, which this restore replaces. Re-apply so the new sid starts at 0.
+    this.state = resetAsleepSession(this.state);
     if (this.state.pendingOfflineEggs > 0) this.state = { ...this.state, basket: this.state.basket + this.state.pendingOfflineEggs, pendingOfflineEggs: 0 };
     { const ev: SimEvent[] = []; this.state = m5Offline(this.state, this.b, ev); this.emit(ev); } // v5 F2, before grantOffline (§9.5 #3)
     const eggs = this.grantOffline(gap);

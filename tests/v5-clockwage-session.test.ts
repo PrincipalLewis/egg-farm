@@ -13,6 +13,7 @@ import { serialize, validate, checksum, SAVE_KEY } from '../src/save/save';
 import { m5Load, m5Persist } from '../src/save/m5-fields';
 import { M5_SAVED_FIELDS, M5_SESSION_FIELDS } from '../src/sim/m5-state';
 import { asleepClockOn, tickAsleepClock, asleepSessionEnd, resetAsleepSession, clockWageWindowView } from '../src/sim/clock-wage';
+import * as sessionSim from '../src/sim/session';
 import { stubAutoRefillOn } from '../src/sim/auto-refill-on';
 import { Game } from '../src/game';
 import { mem } from './helpers';
@@ -77,9 +78,10 @@ describe('[S4] Game: session_end, dropped hidden sim, reset at session end', () 
     expect(eb).toEqual(expect.objectContaining({ present_active_s: 12.3, present_lost_count: 3 }));
     expect('asleep_s' in eb).toBe(false); expect('wage_paid_asleep_cents' in eb).toBe(false);
   });
-  it('dropped hidden sim (>= offlineMinSeconds) adds nothing; a short kept hidden period counts', () => {
+  it('dropped hidden sim (>= offlineMinSeconds) is a rotation (counters reset); a short kept hidden period counts and does not reset', () => {
     const d = boot(C, { energy: 0, cdS: 0.5 }); d.tick(10_000);
-    d.g.onHidden(); d.at(b.offline.offlineMinSeconds * 1000 + 5_000); d.g.frame(); d.g.onShown(); expect(d.g.state.asleepSessionMs).toBe(10_000);
+    d.g.onHidden(); d.at(b.offline.offlineMinSeconds * 1000 + 5_000); d.g.frame(); d.g.onShown();
+    expect('asleepSessionMs' in d.g.state).toBe(false);
     const k = boot(C, { energy: 0, cdS: 0.5 }); k.tick(10_000); k.g.onHidden(); k.at(5_000); k.g.onShown(); expect(k.g.state.asleepSessionMs).toBe(15_000);
   });
 });
@@ -195,20 +197,54 @@ describe('[D-HOE-61 / G0 rev 9] per-worker asleepClockOn OR autoRefillOn', () =>
   });
 });
 
-describe('[session rotation] local stub of Architect resetSessionFields(s)', () => {
-  // Architect's hook: pure resetSessionFields(s) in src/sim/session.ts, run once per rotation after
-  // session_end and session_summary (not on rc/v5 yet; ETA ~01:15 CET). We must not create that file.
-  // Our part is one line inside it:  s = resetAsleepSession(s);
-  // This stub is the test stand-in; drop it when session.ts lands.
-  const resetSessionFields = (s: GameState): GameState => resetAsleepSession(s);
+describe('[session rotation] resetSessionFields hook', () => {
+  const boot = (bb: typeof b, mh: object) => {
+    let t = 1_760_000_000_000; const g = new Game(bb, kvOf(), () => t, 1, 'dev', null, null, { idbBoot: 'absent' });
+    g.state = { ...g.state, farmLevel: 12, coinsCents: 100_000, customers: [], nextCustomerInS: 1e9, workers: { market_hand: mh } } as GameState;
+    return { g, tick: (ms: number) => { for (let i = 0; i < ms / 500; i++) { t += 500; g.frame(); } }, at: (ms: number) => { t += ms; } };
+  };
 
-  it('resetSessionFields (stub) with our one line clears asleep session counters; identity when absent', () => {
+  it('resetSessionFields in place clears asleep counters; no-op (same keys) when absent', () => {
     const s = runN(st({ workers: { market_hand: { energy: 0, cdS: 0.5 } } }), 20, C);
     expect(s.asleepSessionMs).toBeGreaterThan(0);
-    const r = resetSessionFields(s);
-    expect('asleepSessionMs' in r).toBe(false);
-    expect('asleepPaidCents' in r).toBe(false);
+    const orig = s;
+    sessionSim.resetSessionFields(s);
+    expect(s).toBe(orig);
+    expect('asleepSessionMs' in s).toBe(false);
+    expect('asleepPaidCents' in s).toBe(false);
     const empty = st({});
-    expect(resetSessionFields(empty)).toBe(empty);
+    sessionSim.resetSessionFields(empty);
+    expect('asleepSessionMs' in empty).toBe(false);
+  });
+
+  it('asleep totals reset once per rotation (hide >= session_hidden_end_s then shown)', () => {
+    const { g, tick, at } = boot(C, { energy: 0, cdS: 0.5 });
+    tick(10_000);
+    expect(g.state.asleepSessionMs).toBe(10_000);
+    const sid = g.telemetry.clock.sid;
+    g.onHidden(); at(60_000); g.frame(); g.onShown();
+    expect(g.telemetry.clock.sid).not.toBe(sid);
+    expect('asleepSessionMs' in g.state).toBe(false);
+    expect('asleepPaidCents' in g.state).toBe(false);
+    const ends = g.telemetry.events().filter(e => e.type === 'session_end');
+    expect(ends).toHaveLength(1);
+    expect(ends[0]).toEqual(expect.objectContaining({ asleep_s: expect.any(Number), wage_paid_asleep_cents: expect.any(Number) }));
+    expect(ends[0].asleep_s).toBeGreaterThanOrEqual(10);
+    // A second rotation resets once more (still empty, and only one additional session_end).
+    const sid2 = g.telemetry.clock.sid;
+    g.onHidden(); at(60_000); g.frame(); g.onShown();
+    expect(g.telemetry.clock.sid).not.toBe(sid2);
+    expect('asleepSessionMs' in g.state).toBe(false);
+    expect(g.telemetry.events().filter(e => e.type === 'session_end')).toHaveLength(2);
+  });
+
+  it('hide under 60 s does not reset asleep totals and does not rotate', () => {
+    const { g, tick, at } = boot(C, { energy: 0, cdS: 0.5 });
+    tick(10_000);
+    const sid = g.telemetry.clock.sid;
+    g.onHidden(); at(5_000); g.onShown();
+    expect(g.telemetry.clock.sid).toBe(sid);
+    expect(g.state.asleepSessionMs).toBe(15_000);
+    expect(g.telemetry.events().filter(e => e.type === 'session_end')).toHaveLength(0);
   });
 });

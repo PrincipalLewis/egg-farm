@@ -20,8 +20,9 @@
  *   const next = resetAsleepSession(s); if (next !== s) { for (const k of Object.keys(s)) if (!(k in next)) delete (s as Record<string, unknown>)[k]; Object.assign(s, next); }
  */
 import type { GameState } from './state';
+import { resetAsleepSession } from './clock-wage';
 
 export function resetSessionFields(s: GameState): void {
+  const next = resetAsleepSession(s); if (next !== s) { for (const k of Object.keys(s)) if (!(k in next)) delete (s as unknown as Record<string, unknown>)[k]; Object.assign(s, next); }
   // Extension point — clockWage / Refill add their one-line resets above this comment.
-  void s;
 }
