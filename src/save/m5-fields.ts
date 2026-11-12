@@ -14,7 +14,7 @@ import type { SimEvent } from '../sim/events';
 import { WORKERS } from '../sim/workers';
 import { type M5Flag, flagOn } from '../config/flags';
 import { M5_SESSION_FIELDS } from '../sim/m5-state';
-import { sanitizePausedOnLoad } from '../sim/pause';
+import { sanitizePausedOnLoad, isPaused } from '../sim/pause';
 import { streakAfter, endStreak } from '../sim/streak';
 import { sanitizeBreedsOnLoad, breedsSaveView } from '../sim/breeds';
 import { incomeRefOn, resetIncomeRef } from '../sim/income-ref';
@@ -105,7 +105,7 @@ function sanitizeRefillOnLoad(s: GameState, b: Balance): GameState {
     for (const id of WORKERS) {
       const w = ws[id]; if (!w || typeof w !== 'object') continue;
       let n: any = w;
-      if (pauseOn && 'restAuto' in n && !(n.restAuto === true && n.paused === true)) { const { restAuto: _r, ...rest } = n; n = rest; }
+      if (pauseOn && 'restAuto' in n && !(n.restAuto === true && isPaused(n, b))) { const { restAuto: _r, ...rest } = n; n = rest; }
       if (autoOn && 'autoRefill' in n && n.autoRefill !== true) { const { autoRefill: _a, ...rest } = n; n = rest; }
       if (n === w) continue;
       if (!copied) { if (o === s) o = { ...s }; ws = { ...o.workers }; o.workers = ws; copied = true; }
