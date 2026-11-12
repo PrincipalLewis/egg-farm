@@ -59,6 +59,21 @@ describe('[S4] Game: session_end, dropped hidden sim, reset at session end', () 
     const off = boot(b, { energy: 0, cdS: 0.5 }); off.tick(10_000); const e0 = end(off.g);
     expect('asleep_s' in e0).toBe(false); expect('wage_paid_asleep_cents' in e0).toBe(false);
   });
+  it('session_end merges present_* (breeds #125) and asleep_* (clockWage); each family stays behind its own flag', () => {
+    const both = flags({ clockWage: 1, breeds: 1 });
+    const { g, tick } = boot(both, { energy: 0, cdS: 0.5 }); tick(120_000);
+    g.state = { ...g.state, breedsCalm: { focusMs: 0, stamps: [], pendingCount: 0, activeMs: 12_300, lostCount: 3, open: true } };
+    const e = end(g);
+    expect(e).toEqual(expect.objectContaining({ asleep_s: 120, wage_paid_asleep_cents: 600, present_active_s: 12.3, present_lost_count: 3 }));
+    const cwOnly = end(boot(C, { energy: 0, cdS: 0.5 }).g);
+    expect('present_active_s' in cwOnly).toBe(false); expect('present_lost_count' in cwOnly).toBe(false);
+    const brOnly = flags({ breeds: 1 });
+    const { g: gb } = boot(brOnly, { energy: 0, cdS: 0.5 });
+    gb.state = { ...gb.state, breedsCalm: { focusMs: 0, stamps: [], pendingCount: 0, activeMs: 12_300, lostCount: 3, open: true } };
+    const eb = end(gb);
+    expect(eb).toEqual(expect.objectContaining({ present_active_s: 12.3, present_lost_count: 3 }));
+    expect('asleep_s' in eb).toBe(false); expect('wage_paid_asleep_cents' in eb).toBe(false);
+  });
   it('dropped hidden sim (>= offlineMinSeconds) adds nothing; a short kept hidden period counts', () => {
     const d = boot(C, { energy: 0, cdS: 0.5 }); d.tick(10_000);
     d.g.onHidden(); d.at(b.offline.offlineMinSeconds * 1000 + 5_000); d.g.frame(); d.g.onShown(); expect(d.g.state.asleepSessionMs).toBe(10_000);
