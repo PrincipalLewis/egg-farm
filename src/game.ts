@@ -364,6 +364,9 @@ export class Game {
     T.endSession('hidden', hAt); // no-op when pagehide already ended this sid (one session_end per sid)
     // A1: session_end, then session_summary, then every reset() — this sim hook is the last reset, once per rotation.
     sessionSim.resetSessionFields(this.state);
+    // A hide >= offlineMinSeconds later restores the hide snapshot (settleHiddenPeriod: this.state = h.state) and drops the
+    // provisional sim, so reset the snapshot too; it is the state that survives the rotation. Idempotent; same object → once.
+    const hs = this.hidden?.state; if (hs && hs !== this.state) sessionSim.resetSessionFields(hs);
     const sp = T.onPageShown(at); T.startSession('resume', this.sessionStartFields(), sp?.prevHiddenMs);
     if (reopen && this.state.coop >= coopCap(this.state, this.b)) { this.coopFullSince = at; this.telemetry.track('coop_full', { phase: 'start' }); }
   }

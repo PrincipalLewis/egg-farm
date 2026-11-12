@@ -27,6 +27,7 @@ export const m5Flag = (b: Balance, k: M5Flag): boolean => flagOn(b, k);
 const anyFlag = (b: Balance) => (['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'] as const).some(k => m5Flag(b, k)); // CCR-F4: + pause
 const tc = tcNum; // throws on a missing tc_* key (validateBalance rejects it at load while the flag is on)
 /** D-C2 salt + seeding: ONE code path, re-exported from F1b sim/rng.ts (identical formula and validity rule). */
+import { withStallTimersReset } from '../econ/stall';
 import { EV_RNG_SALT, ensureEvRng } from '../sim/rng';
 export { EV_RNG_SALT, ensureEvRng };
 /** D-C5: the Broody nest clamp (fmtMoneyExact limit) and the yard slot range 0..11. */
@@ -120,6 +121,7 @@ function pauseLoad(ws: any, farmLevel: number, b: Balance): any {
  *  Cooldowns need nothing: readyAt is wall clock. The streak run ends with streak_peak{reason:"offline"} if s > 0 (#2, R11).
  *  The I_ref ring and refWarmS are dropped, so the next read is the I_ss warm-up (#3, streak spec §4.1a). */
 export function m5Offline(s: GameState, b: Balance, ev: SimEvent[]): GameState {
+  s = withStallTimersReset(s); // risk-helpers §7.2 L246: a >= 60 s gap resets every stall timer (resetStallTimers' one path); same object when none
   if (!anyFlag(b)) return s;
   let o: any = { ...s };
   if (m5Flag(b, 'abilities') && o.abilities && typeof o.abilities === 'object') { o.abilities = { ...o.abilities }; endCalls(o, b, ev); }
