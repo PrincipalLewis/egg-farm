@@ -19,6 +19,10 @@ export type SimEvent =
   | { type: 'grader_tier'; tier: number; mult: number; cost: number }
   | { type: 'milestone_reached'; id: string; track: 'hens' | 'egg_value'; level: number; mult: number }
   | { type: 'balanced_tier'; id: string; tier: number; min_level: number }
+  | { type: 'shift_sheet_opened'; entry: 'nav' | 'card' | 'stall_chip' | 'fatigue_chip'; sheet_id: number; stall_id?: number }
+  | { type: 'refill_used'; worker: WorkerId; energy_pct: number; charges_left: number; rank_by_risk: number; by: 'manual' | 'auto'; sheet_id: number | null; entry_point: 'nav' | 'card' | 'stall_chip' | 'fatigue_chip' | 'auto'; stall_id?: number; refillable_n: number; best_worker: WorkerId; lowest_worker: WorkerId }
+  | { type: 'rest_toggled'; worker: WorkerId; on: boolean; energy_pct: number; state: 'active' | 'paused' | 'resting'; cause: 'manual' | 'auto_full' | 'manage'; sheet_id: number | null; entry_point: 'nav' | 'card' | 'stall_chip' | 'fatigue_chip' | 'auto'; stall_id?: number; farm?: number; mood?: WorkerMood; unpaid?: boolean; ability_active?: boolean; golden_on_screen?: boolean; frenzy_active?: boolean; paused_duration_s?: number }
+  | { type: 'autorefill_toggled'; worker: WorkerId; on: boolean; farm_level: number }
   | M5SimEvent;
 /** M5.0 sim events (F1(d)); emitted only with their m4.flags.* on. Field names follow telemetry-spec v0.6.2 as quoted in the
  *  feature specs. Game adds the UI-only fields when forwarding to telemetry: `collectible_id` (per-session counter shared by

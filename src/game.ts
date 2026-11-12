@@ -5,7 +5,9 @@ import { coopCap } from './sim/tracks';
 import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
-import { sessionEndPresentFields, awayBp } from './sim/breeds-traits';
+import { awayBp } from './sim/breeds-traits';
+import { sessionEndFields, noteShiftSheetOpened, refillWorker, setRest as setRestSim, setAutoRefill as setAutoRefillSim, takeAutoRefillToast as takeAutoRefillToastSim, restEligibility, type ShiftSheetEntry, type RefillCtx } from './sim/refill';
+import type { WorkerId } from './sim/workers';
 import { offlineGrantV5 } from './telemetry/v5-fields';
 import type { BreedId } from './config/breeds';
 import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
@@ -340,7 +342,7 @@ export class Game {
     this.goldenEnd('reload'); // v5 #1 R10c (Saves-confirmed order): expired{reload} + fresh gap, in the same flush, before session_end/save
     // Row 32 (HoE/breeds-sim-prB-traits): present_* only. Other breeds session_end fields = gen/breeds-telemetry.
     // T-AC9: no comma-bearing calls inside the session_end literal — helper returns the fields object.
-    this.telemetry.track('session_end', sessionEndPresentFields(this.state, this.b)); this.save(); this.telemetry.flush(true); }
+    this.telemetry.track('session_end', sessionEndFields(this.state, this.b)); this.save(); this.telemetry.flush(true); }
   /** "Reset save" (Settings confirm, debug panel): stop saving, close the golden egg / Frenzy (A24-1: silent), log save_reset, flush. */
   beginReset() {
     this.resetting = true; this.goldenEnd('reset');
@@ -366,6 +368,34 @@ export class Game {
   private driveGolden(layout: boolean) {
     if (!goldenOn(this.b) || this.inactive || this.held() || this.hidden || !this.attendedNow() || !spawnDue(this.state, this.b, layout)) return;
     this.dispatch(layout ? { type: 'spawnGolden', spots: this.spotProbe(), layout: true } : { type: 'spawnGolden', spots: this.spotProbe() });
+  }
+
+  /** G0 §12.1: open a shift sheet. stallId is used only when entry is stall_chip (schema). */
+  openShiftSheet(entry: ShiftSheetEntry, stallId?: number): number {
+    const r = noteShiftSheetOpened(this.state, this.b, entry, stallId);
+    this.state = r.state; this.emit(r.events); return r.sheetId;
+  }
+  refill(id: WorkerId, ctx: RefillCtx): { ok: true } | { ok: false; reason: import('./sim/refill').RefillBlock } {
+    const r = refillWorker(this.state, id, this.b, ctx);
+    this.state = r.state; this.emit(r.events);
+    return r.ok ? { ok: true } : { ok: false, reason: r.reason };
+  }
+  setRest(id: WorkerId, on: boolean, ctx: RefillCtx): { ok: true } | { ok: false; reason: import('./sim/refill').RestBlock } {
+    if (on) {
+      const el = restEligibility(this.state, id, this.b);
+      if (!el.ok) return el;
+    }
+    const r = setRestSim(this.state, id, on, this.b, ctx);
+    this.state = r.state; this.emit(r.events);
+    return { ok: true }; // resume is never blocked (§14a)
+  }
+  setAutoRefill(id: WorkerId, on: boolean): void {
+    const r = setAutoRefillSim(this.state, id, on, this.b);
+    this.state = r.state; this.emit(r.events);
+  }
+  takeAutoRefillToast(): { n: number; worker: WorkerId | null } | null {
+    const r = takeAutoRefillToastSim(this.state);
+    this.state = r.state; return r.toast;
   }
 
   dispatch(a: Action) {

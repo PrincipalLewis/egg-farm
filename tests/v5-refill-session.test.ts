@@ -1,8 +1,8 @@
-// HoE/v5-refill-sim G2 M2 (G0-API.md rev 10 sha256 bcf95315; Architect M2 + M2 note 22:18 CET).
+// HoE/v5-refill-sim G2 M2 (G0-API.md rev 11 sha256 a29b999d; Architect M2 + M2 note 22:18 CET).
 // resetRefillSession is a pure function, tested on its own. One-line hook-up into
-// resetSessionFields (src/sim/session.ts:24) is pending Architect Draft PR #138
-// (head 7da29009, branch v5/session-rotate-hook, waits on #123; not on rc/v5;
-// mergefwd only with HoE's OK). No registerSessionEnd, no custom rotate wiring.
+// resetSessionFields is it.todo: HoE ruled NEVER merge Draft #138 into #133, and
+// do not create src/sim/session.ts locally. After #138 lands on rc/v5 we mergefwd
+// and wire the real one-line call. No registerSessionEnd, no custom rotate wiring.
 // refillSessionTotals feeds session_end (m7 gating). autoRefillOn is a pure per-worker read (D-HOE-61).
 import { describe, it, expect } from 'vitest';
 import { balance as b, type Balance } from '../src/config/balance';
@@ -10,7 +10,7 @@ import { initialState, type GameState } from '../src/sim/state';
 import { m5Persist } from '../src/save/m5-fields';
 import { M5_SESSION_FIELDS } from '../src/sim/m5-state';
 import { WORKERS, type WorkerId } from '../src/sim/workers';
-import { resetRefillSession, refillSessionTotals, autoRefillOn } from '../src/sim/refill';
+import { resetRefillSession, refillSessionTotals, autoRefillOn, sessionEndFields } from '../src/sim/refill';
 import type { RefillSession } from '../src/sim/m5-state';
 
 const fl = (f: Record<string, number>): Balance =>
@@ -146,7 +146,35 @@ describe('[G0 §11][lighter L64] asleep_s counts MH+CH only; autoRefill/clockWag
     expect('asleep_s' in (s as any)).toBe(false);
   });
 
-  // tickAsleepClock / asleepSessionEnd live on Hire 2 (wip/hire2/v5-clockwage, stub autoRefillOn at f8f142aa), not this tree.
-  // The full AC: with autoRefill=1 and clockWage=0, an asleep Hawker or Grader adds 0 to asleep_s and session_end still emits asleep_s.
-  it.todo('[G0 §11][lighter L64] autoRefill=1 clockWage=0: an asleep Hawker or Grader adds 0 to asleep_s and session_end still emits asleep_s — needs Hire 2 tickAsleepClock/asleepSessionEnd (f8f142aa), not in this tree');
+  // Full AC (asleep Hawker/Grader adds 0 to asleep_s, field still emitted) is on Hire 2's wip/hire2/v5-clockwage branch.
+});
+
+describe('[G2][M2][T-AC9] sessionEndFields spreads refillSessionTotals; resetSessionFields hook pending #138', () => {
+  it('flag off: sessionEndFields has no refill keys (present_* may still appear)', () => {
+    const s = live();
+    const f = sessionEndFields(s, b);
+    expect('shortage_s' in f).toBe(false);
+    expect('refills_manual' in f).toBe(false);
+    expect('charge_starved_s' in f).toBe(false);
+    expect('charges_capped_s' in f).toBe(false);
+    expect('asleep_s' in f).toBe(false);
+  });
+  it('rc2Refill + autoRefill: spreads shortage_s, refills_*, charge_starved_s; never charges_capped_s or asleep_s', () => {
+    const f = sessionEndFields(live(), RA);
+    expect(f.shortage_s).toBe(2);
+    expect(f.refills_manual).toBe(3);
+    expect(f.refills_auto).toBe(5);
+    expect(f.charge_starved_s).toBe(12.4);
+    expect('charges_capped_s' in f).toBe(false);
+    expect('asleep_s' in f).toBe(false);
+  });
+  it('[T-AC9] Game.session_end calls a single helper (no comma-bearing literal)', () => {
+    const { readFileSync } = require('fs');
+    const { join } = require('path');
+    const src = readFileSync(join(__dirname, '../src/game.ts'), 'utf8');
+    expect(src).toMatch(/track\('session_end', sessionEndFields\(/);
+    expect(src).not.toMatch(/track\('session_end', \{/);
+  });
+  // HoE: never merge Draft #138 into #133; do not create src/sim/session.ts locally.
+  it.todo('[G2][M2] one-line resetRefillSession(s) inside resetSessionFields — pending #138 merge into rc/v5, then mergefwd; HoE: never merge Draft #138 into #133, do not create src/sim/session.ts locally');
 });

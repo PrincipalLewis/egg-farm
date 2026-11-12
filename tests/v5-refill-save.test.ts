@@ -1,4 +1,4 @@
-// HoE/v5-refill-sim G1 (engineering/tasks/v5-refill-sim/G0-API.md rev 10 sha256 bcf95315, §1, §5, §6; Architect review M1, m2, m3, m5):
+// HoE/v5-refill-sim G1 (engineering/tasks/v5-refill-sim/G0-API.md rev 11 sha256 a29b999d, §1, §5, §6; Architect review M1, m2, m3, m5):
 // additive OPTIONAL keys, SAVE_VERSION stays 6, no migration. Red-first: round-trip, flags-0 write-back, sanitiser matrix.
 import { describe, it, expect } from 'vitest';
 import { balance as b, type Balance } from '../src/config/balance';
@@ -76,8 +76,8 @@ describe('[G0 §6.1] red-first round-trip and flags-0 write-back', () => {
   });
 });
 
-describe('[G0 §1 vs §12.9][Architect FYI 68a24fd8] chargesOf vs chargesView lazy default', () => {
-  it('shipping start_charges == charge_cap, so both reads agree on a missing key', () => {
+describe('[G0 §14c] chargesView delegates to chargesOf (one fallback: start_charges)', () => {
+  it('shipping start_charges == charge_cap, so both reads agree on a missing key and nextChargeMs is null at the cap', () => {
     expect(TC.start_charges).toBe(TC.charge_cap);
     const s = base();
     expect('refillCharges' in s).toBe(false);
@@ -85,14 +85,13 @@ describe('[G0 §1 vs §12.9][Architect FYI 68a24fd8] chargesOf vs chargesView la
     expect(chargesView(s, R_ONLY)).toEqual({ charges: CAP, cap: CAP, nextChargeMs: null });
     expect(chargesOf(s, R_ONLY)).toBe(chargesView(s, R_ONLY).charges);
   });
-  // G0 §1 / Architect m3: chargesOf uses start_charges. G0 §12.9: chargesView uses cap.
-  // Agreeing the two would violate one of those pins. Left as specified; pending a G0 ruling if Econ lowers start.
-  it('when start_charges != charge_cap, chargesOf uses start (§1) and chargesView uses cap (§12.9); nextChargeMs is null at the view cap', () => {
+  it('when start_charges=0 and charge_cap=2, a missing key shows charges 0 and a non-null nextChargeMs (regen*1000)', () => {
     const bb = fl({ rc2Refill: 1 }, { start_charges: 0, charge_cap: 2 });
     const s = base();
     expect('refillCharges' in s).toBe(false);
     expect(chargesOf(s, bb)).toBe(0);
-    expect(chargesView(s, bb)).toEqual({ charges: 2, cap: 2, nextChargeMs: null });
+    expect(chargesView(s, bb)).toEqual({ charges: 0, cap: 2, nextChargeMs: TC.charge_regen_s * 1000 });
+    expect(chargesOf(s, bb)).toBe(chargesView(s, bb).charges);
   });
 });
 
