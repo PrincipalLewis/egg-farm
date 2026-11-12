@@ -1,7 +1,7 @@
 import type { WorkerId, WorkerMood } from './workers';
 /** Events the pure sim reports to an optional sink (telemetry lives outside the sim). */
 export type SimEvent =
-  | { type: 'save_migrated'; migration: 'breeds_sanitise'; from: 6; to: 6 } // M5.1 breeds E12 (BR-AC26)
+  | { type: 'save_migrated'; migration: 'breeds_sanitise'; from: 6; to: 6; reason: 'invalid_root' | 'invalid_values'; refund_cents: number; farm_level: number; backup_stores: [] } // M5.1 breeds E12 / D1 (BR-AC26)
   | { type: 'customer_arrive'; id: number; N: number }
   | { type: 'customer_served'; id: number; N: number; partial: boolean }
   | { type: 'customer_partial'; id: number; N: number; filled: number }

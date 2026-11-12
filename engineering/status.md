@@ -131,3 +131,38 @@
 - done: merged origin/rc/v5 518de304 into feat/saves-v5-telemetry-schema (merge 2f4794c, no conflicts). Schema contract verified against errata rev 13 a0e8f6d7: six FATIGUE_CUE_TAPPED_FIELDS; n_* sum <=4 with FAIL fixture at 5; zero_gain_purchase has no capped marker (overflow only session_end.zero_gain_purchase_dropped); dead_zone.reason only none_affordable; tapped rejects suppressed_by_stall. Follow-up a1f81a9 adds generalist slice, rev13 headers, explicit sum=5 fixture, warn-once assertion (kills prior M30 survivor). Gates: telemetry-schema 47/47; telemetry+m3 16/16; tsc --noEmit 0; G-8 base 155374 / buy-spam 175905 bytes (<=200KB). Bundles under egg-farm-studio/scratch/bundles/. Artifacts under egg-farm-studio/artifacts/saves-v5-telemetry-schema-a1f81a9/. No push / no PR opened.
 - next: Saves QA (33ec1b55) verifies against rev13 before HoE merges. Then breeds RC blockers queue (PR C telemetry, BR-AC2b, #95 M1/M2) then F-9.
 - blocked: none on JOB 2. Note: merge commit 2f4794c inherited Architect author from box git config at merge time (cannot amend); follow-up commit is Saves.
+
+## 2026-11-10 01:06 CET · Saves · HoE/breeds-sim-prB-traits COMMIT 0
+- familyClamp(s,b,family)→{rawBp,clampedBp,atCap}; familyActiveBp(s,b,family); bc keys lay_cap_bp_lt18/lay_cap_bp/lay_cap_farm/away_cap_bp/broody_cap_bp (match PR-B stubs + ea922eb8).
+- Branch saves/breeds-sim-prB-traits-c0 (ordinary push; no force). Commits 1–3 parked park/prB-traits-b381998.
+- tsc + sync-economy --check + focused 72 pass.
+## 2026-11-10 01:00 CET · Senior Engineer, Saves & Persistence · HoE/breeds-sim-prB-traits (row 32)
+- WIP commit 1/3: Present calm-gate (BR-R12/R12b) + session_end present_active_s/present_lost_count; bc present_calm_* + lay_cap_*; breedsCalm session ring; E22b clear on offline ≥ 60 s. Scope: NOT hatch_started/breed_* session_end (gen/breeds-telemetry). Focused tests 128 pass + tsc. Next: Away+Broody (c2), away_bp (c3).
+
+## 2026-11-10 01:02 CET · Saves · HoE/breeds-sim-prB-traits commits 2–3
+- Commit 2: Away (BR-R13) in m4OfflineEggs + Broody bp_eff / broody_cap_bp=2000.
+- Commit 3: telemetry/v5-fields offlineGrantV5 real away_bp; grantOffline emits when breeds on incl. eggs=0.
+- Draft PR #125. Focused 138 pass + tsc. Row 32 only (not row 34 / not #119 paused_*).
+
+## 2026-11-10 01:11 CET · Saves · HoE/breeds-sim-prB-traits #125 Ready
+- Merged #126 c0 (`d4b5fdc`) into tip via ordinary merge `f97be20` (no rebase/force). Harden non-WIP: Present `683b5ef`, Away `c908227`, away_bp `e6bd1da`. Head `e6bd1da`.
+- Row 32 only; sessionEndPresentFields separate from gen/breeds-telemetry. Gates (flock+lane-run saves): tsc 0, sync-economy --check 0, focused 146 pass.
+- #126 body patched (trace/API/stack); #125 marked Ready once.
+
+## 2026-11-10 01:52 CET · Saves · HoE/breeds-sim-prB-traits #125 HoQA F1–F5 fix
+- Merged-forward `origin/rc/v5` `d65391b0` (#111) @ `8f47fd1` (ordinary merge; game.ts goldenEnd then sessionEndPresentFields / T-AC9).
+- F1: FrameClock→StepClock `focusFtMs` = min(100, F−given); Present uses fT/1000; Σ fT = F (BR-R12b(b)).
+- F2: pending counted-tap stamps flush after fT (order (0)→(3)→(4)→(5)); BR-AC53 → present_active_s 660.0.
+- F3: `grantOffline` captures `awayBp` before `applyOffline`.
+- F4: BR-R13 float order `min(away,cap)×rate×(1e4+bp)/1e4` then min/max/floor.
+- F5 / BR-R18 / PMC: emit `offline_grant` only when gap ≥ offlineMinSeconds (60 s); sub-60 emits nothing; eggs=0 + away_bp still at ≥60.
+- F6 Broody nest accrual still out of scope.
+- Gates (flock+lane-run): tsc 0; focused present/away-bp/away-broody/family-caps 34/34; f1b+breeds-state+offline 88/88; sync-economy --check pending in same push.
+- One push; re-bar grades F1–F5 + merge-forward onto d65391b0.
+
+## 2026-11-10 03:24 CET · Saves · HoE/v5-125-fix F7 + F3-no-literal
+- F7: Game.frame was passing only this rAF's focusMs into advance(); leftover accMs carried, leftover focus did not. Σ fT << Σ F at 20–144 fps (60 s @ 60 fps → 9,600 ms). Carry unused focus across the acc window (`FrameClock.focusAccMs` / `advance().focusAccMs`); Σ fT = Σ F at any frame rate, consistent with F1 fT shares.
+- F3-no-literal: dropped bare `tickClock(..., tickMs = 100)` default; callers pass `dtMs`.
+- RED FIRST: `[F7]` Game.frame at 30/60/144 fps + uneven gaps, 60 s focused — verified red (focusMs 20004 / 10008 / 4171 / 14960) then fixed.
+- Gates (flock `.vitest-eng.lock` nice -n 10, maxWorkers=2): tsc 0; sync-economy --check 0; focused present+f3-config+f1b+away-* 89/89 (incl. F3-no-literal).
+- One ordinary push; bundle `scratch/bundles/saves-breeds-sim-prB-traits-<sha8>.bundle`.
