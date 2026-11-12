@@ -33,7 +33,7 @@ describe('[S4 / ruling 4] asleep clock in sim state', () => {
   });
   it('flag off: identity (same object), no field, session_end payload {}', () => {
     const s = st({ workers: { market_hand: { energy: 0, cdS: 0.5 } } });
-    expect(tickAsleepClock(s, 100, b)).toBe(s); expect(asleepClockOn(s, 'market_hand', b)).toBe(false);
+    expect(tickAsleepClock(s, 100, b)).toBe(s); expect(asleepClockOn(s, b)).toBe(false);
     const r = runN(s, 100, b); expect('asleepSessionMs' in r).toBe(false); expect('clockWageWindow' in r).toBe(false); expect(asleepSessionEnd(r, b)).toEqual({});
   });
   it('paused Asleep MH adds nothing', () => {
@@ -124,14 +124,14 @@ describe('[M2 / ruling 2] clockWageWindow: saved, survives reload, resets at wel
   });
 });
 
-describe('[D-HOE-61 / G0 rev 9] per-worker asleepClockOn OR autoRefillOn', () => {
+describe('[D-HOE-61 / G0 rev 10 §11] emission OR; counted set is always MH+CH', () => {
   afterEach(() => stubAutoRefillOn(null));
 
   it('stub autoRefillOn=true, clockWage off: tickAsleepClock accumulates asleep_s, charges no wages, no window', () => {
     stubAutoRefillOn(() => true);
-    const bb = flags({ clockWage: 0 });
+    const bb = flags({ autoRefill: 1, clockWage: 0 });
     const s0 = st({ workers: { market_hand: { energy: 0, cdS: 0.5 } } });
-    expect(asleepClockOn(s0, 'market_hand', bb)).toBe(true);
+    expect(asleepClockOn(s0, bb)).toBe(true);
     const s = runN(s0, 1200, bb);
     expect(s.asleepSessionMs).toBe(120_000);
     expect(asleepSessionEnd(s, bb)).toEqual({ asleep_s: 120 });
@@ -140,29 +140,43 @@ describe('[D-HOE-61 / G0 rev 9] per-worker asleepClockOn OR autoRefillOn', () =>
     expect('asleepPaidCents' in s).toBe(false);
   });
 
-  it('stub autoRefillOn=false, clockWage off: unchanged (identity, no field)', () => {
+  it('stub autoRefillOn=false, clockWage off, M5 off: unchanged (identity, no field)', () => {
     stubAutoRefillOn(() => false);
     const s = st({ workers: { market_hand: { energy: 0, cdS: 0.5 } } });
     expect(tickAsleepClock(s, 100, b)).toBe(s);
-    expect(asleepClockOn(s, 'market_hand', b)).toBe(false);
+    expect(asleepClockOn(s, b)).toBe(false);
     const r = runN(s, 100, b);
     expect('asleepSessionMs' in r).toBe(false);
     expect(asleepSessionEnd(r, b)).toEqual({});
   });
 
-  it('per-worker: only the worker whose autoRefillOn is true is counted (clockWage off)', () => {
+  it('counted set is always unpaused asleep MH+CH (clockWage off; only MH autoRefillOn): both count', () => {
     stubAutoRefillOn((_s, id) => id === 'market_hand');
+    const bb = flags({ autoRefill: 1, clockWage: 0 });
     const s = st({ workers: { market_hand: { energy: 0, cdS: 0.5 }, coop_hand: { energy: 0, cdS: 0.5 } } });
-    const r = tickAsleepClock(s, 1000, b);
-    expect(r.asleepSessionMs).toBe(1000); // MH only, not 2000
-    expect(asleepSessionEnd(r, b)).toEqual({ asleep_s: 1 });
+    const r = tickAsleepClock(s, 1000, bb);
+    expect(r.asleepSessionMs).toBe(2000); // both, not just MH
+    expect(asleepSessionEnd(r, bb)).toEqual({ asleep_s: 2 });
+  });
+
+  it('G0 §11: autoRefill=1 (stub) and clockWage=0, an asleep Hawker or Grader adds 0 and asleep_s is still emitted', () => {
+    stubAutoRefillOn(() => true);
+    const bb = flags({ autoRefill: 1, clockWage: 0 });
+    for (const id of ['hawker', 'grader'] as const) {
+      const s0 = st({ workers: { [id]: { energy: 0, cdS: 0.5 } }, graderTier: 1 });
+      const r = tickAsleepClock(s0, 10_000, bb);
+      expect(r).toBe(s0);
+      expect('asleepSessionMs' in r).toBe(false);
+      expect(asleepSessionEnd(r, bb)).toEqual({ asleep_s: 0 });
+      expect('wage_paid_asleep_cents' in asleepSessionEnd(r, bb)).toBe(false);
+    }
   });
 
   it('paused and Unpaid still add nothing when autoRefillOn is true', () => {
     stubAutoRefillOn(() => true);
-    const P = flags({ clockWage: 0, pause: 1 });
+    const P = flags({ clockWage: 0, pause: 1, autoRefill: 1 });
     expect(tickAsleepClock(st({ workers: { market_hand: { energy: 0, cdS: 0.5, paused: true } } }), 1000, P).asleepSessionMs).toBeUndefined();
-    expect(tickAsleepClock(st({ workers: { coop_hand: { energy: 0, cdS: 0, unpaid: true } } }), 1000, b).asleepSessionMs).toBeUndefined();
+    expect(tickAsleepClock(st({ workers: { coop_hand: { energy: 0, cdS: 0, unpaid: true } } }), 1000, P).asleepSessionMs).toBeUndefined();
   });
 
   it('tickAsleepClock is the single writer of asleepSessionMs in src/', () => {
