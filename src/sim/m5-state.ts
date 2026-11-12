@@ -63,10 +63,13 @@ export interface M5Fields {
   abilitiesCoachSeen?: boolean;
   // ---- M5.1 breeds (saved, breeds spec §6; sim/breeds.ts) ----
   breeds?: import('./breeds').BreedsSave;
+  // ---- #5b/#11 sales-stopped + Rule 2 (session only, never saved; sales-stopped-spec §7.5, SS-43; Saves risk-helpers) ----
+  /** Stall timers, chip pair, Rule 2 hysteresis and queued note* telemetry (econ/stall.ts). Absent while salesStopped is off. */
+  stallSession?: import('../econ/stall').StallSession;
 }
 
 /** Fields F2 persists (optional, absent = default). */
 export const M5_SAVED_FIELDS = ['evRngState', 'nextSpawnRemainingS', 'frenzyRemainingS', 'broodyNestCents', 'broodyHenIdx', 'abilities', 'abilitiesUnlocked', 'abilitiesCoachSeen', 'breeds'] as const satisfies readonly (keyof M5Fields)[];
 /** Fields that live only for a page session: F2 strips them before serialize (specs: never saved). */
-export const M5_SESSION_FIELDS = ['goldenEgg', 'streakS', 'streakHoldS', 'tapCreditCdS', 'irefRingCents', 'refWarmS', 'broodyNestScaled', 'brRngState'] as const satisfies readonly (keyof M5Fields)[];
+export const M5_SESSION_FIELDS = ['goldenEgg', 'streakS', 'streakHoldS', 'tapCreditCdS', 'irefRingCents', 'refWarmS', 'broodyNestScaled', 'brRngState', 'stallSession'] as const satisfies readonly (keyof M5Fields)[];
 export const M5_FIELDS: readonly (keyof M5Fields)[] = [...M5_SAVED_FIELDS, ...M5_SESSION_FIELDS];
