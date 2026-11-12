@@ -131,9 +131,11 @@ describe('[ST-AC20] session_end v5 fields (streak §8.1, errata rev. 16 V-2b "+ 
     const { g } = game(CREDIT, { workers: { coop_hand: { ...working } } }); g.dispatch({ type: 'collect' });
     expect(schemaErrs(end(g), V5_END)).toEqual([]);
   });
-  it('Saves-owned session_end paused_* fields are not emitted by this subset', () => {
-    const { g } = game(flags({ streak: 1, pause: 1 })); const e = end(g);
-    expect(e).not.toHaveProperty('paused_worker_s'); expect(e).not.toHaveProperty('all_paused_s');
+  it('after #119 mergefwd, pause=1 session_end carries Saves-owned paused_* (pauseSessionEnd); they stay absent with pause off', () => {
+    const on = end(game(flags({ streak: 1, pause: 1 })).g);
+    expect(on).toHaveProperty('paused_worker_s'); expect(on).toHaveProperty('all_paused_s');
+    const off = end(game(flags({ streak: 1 })).g);
+    expect(off).not.toHaveProperty('paused_worker_s'); expect(off).not.toHaveProperty('all_paused_s');
   });
 });
 
