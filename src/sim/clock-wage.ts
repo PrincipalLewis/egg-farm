@@ -5,12 +5,12 @@
  *    before the existing `if (isOff(m) || isPaused(w, b)) continue;`, and `wageState(m, b)` spread into the existing wage event.
  *  Everything here returns the same state object when the flag is off. */
 import type { Balance } from '../config/balance';
-import { flagOn } from '../config/flags';
+import { flagOn, M5_FLAGS } from '../config/flags';
 import { CENTS_PER_DOLLAR } from '../config/breeds';
 import type { Sink } from './events';
 import { isPaused } from './pause';
 import type { GameState } from './state';
-import { mood, wageCharge, type WorkerMood, type WorkerId } from './workers';
+import { mood, wageCharge, type WorkerMood, WORKERS } from './workers';
 import { autoRefillOn } from './auto-refill-on'; // STUB: change to './refill' when #133 G2 lands
 export type WageWorker = 'market_hand' | 'coop_hand';
 export const clockWageOn = (b: Balance): boolean => flagOn(b, 'clockWage');
@@ -38,11 +38,13 @@ export function clockWageAsleepStep(s: GameState, id: WageWorker, dt: number, b:
   const out: GameState = { ...s, coinsCents: s.coinsCents - cents, wageFracCents: { ...s.wageFracCents, [id]: frac }, workers: { ...s.workers, [id]: { ...w, cdS } } };
   return cents > 0 ? addAsleepCents(out, id, cents) : out;
 }
-// ---- Asleep clock (Architect ruling 4 / M3 + M4; D-HOE-61 / G0 rev 9). ONE predicate, ONE writer (tickAsleepClock).
+// ---- Asleep clock (Architect ruling 4 / M3 + M4; G0 rev 10 §11). ONE writer (tickAsleepClock).
 // Live sim only: offline never steps (FC-R5); a dropped hidden sim is reverted with the hide snapshot. Counts mood 'asleep' (Unpaid excluded,
-// FC-R4 precedence) and not paused. Integer ms. Per-worker OR: clockWageOn(b) || autoRefillOn(s, id, b). Wages stay clockWage-only.
-/** Per-worker gate: this worker's asleep time counts when clockWage is on or its autoRefill switch is on. */
-export const asleepClockOn = (s: GameState, id: WorkerId, b: Balance): boolean => clockWageOn(b) || autoRefillOn(s, id, b);
+// FC-R4 precedence) and not paused. Integer ms. Counted set is always unpaused asleep MH+CH, accumulated whenever M5 is on — flags do
+// not filter which workers count. Emission of session_end.asleep_s is a separate predicate (clockWageOn || any worker's autoRefillOn).
+// Wages and clockWageWindow stay clockWage-only.
+/** Emission predicate (G0 rev 10 §11): 'autoRefill or clockWage' decides WHEN asleep_s is emitted, not which workers count. */
+export const asleepClockOn = (s: GameState, b: Balance): boolean => clockWageOn(b) || WORKERS.some(id => autoRefillOn(s, id, b));
 const WAGE_WORKERS: readonly WageWorker[] = ['market_hand', 'coop_hand'];
 type Win = NonNullable<GameState['clockWageWindow']>;
 /** clockWageWindow seam: the ONLY read and the ONLY write of that saved key (everything else goes through these two). */
@@ -59,20 +61,20 @@ const bump = (win: Win | undefined, id: WageWorker, ms: number, cents: number): 
 function addAsleepCents(s: GameState, id: WageWorker, cents: number): GameState {
   return writeWindow({ ...s, asleepPaidCents: (s.asleepPaidCents ?? 0) + cents }, bump(win(s), id, 0, cents));
 }
-/** Called once per step() after the energy loop (signature kept: s, dtMs, b). Same object when no wage worker's clock is on or none is Asleep. */
+/** Called once per step() after the energy loop (signature kept: s, dtMs, b). Same object when M5 is off or no unpaused asleep MH/CH. */
 export function tickAsleepClock(s: GameState, dtMs: number, b: Balance): GameState {
+  if (!M5_FLAGS.some(f => flagOn(b, f))) return s; // flag-off identity (no asleepSessionMs write)
   let out = s;
   for (const id of WAGE_WORKERS) {
-    if (!asleepClockOn(s, id, b)) continue;
     const w = s.workers[id]; if (!w || isPaused(w, b) || mood(w, b) !== 'asleep') continue;
     out = { ...out, asleepSessionMs: (out.asleepSessionMs ?? 0) + dtMs }; if (clockWageOn(b)) out = writeWindow(out, bump(win(out), id, dtMs, 0));
   }
   return out;
 }
-/** session_end fields, each under its own gate (FC §6 L168): asleep_s when any wage worker's asleepClockOn, wage_paid_asleep_cents with clockWageOn only. */
+/** session_end fields, each under its own gate (G0 rev 10 §11): asleep_s when clockWageOn or any worker's autoRefillOn (emit even at 0);
+ *  wage_paid_asleep_cents with clockWageOn only. */
 export function asleepSessionEnd(s: GameState, b: Balance): { asleep_s?: number; wage_paid_asleep_cents?: number } {
-  const asleepOn = WAGE_WORKERS.some(id => asleepClockOn(s, id, b));
-  return { ...(asleepOn ? { asleep_s: Number(((s.asleepSessionMs ?? 0) / 1000).toFixed(1)) } : {}), ...(clockWageOn(b) ? { wage_paid_asleep_cents: s.asleepPaidCents ?? 0 } : {}) };
+  return { ...(asleepClockOn(s, b) ? { asleep_s: Number(((s.asleepSessionMs ?? 0) / 1000).toFixed(1)) } : {}), ...(clockWageOn(b) ? { wage_paid_asleep_cents: s.asleepPaidCents ?? 0 } : {}) };
 }
 /** Session rotation (and session_end): a new session starts at 0. Shared with Refill's G0 M2 reset. */
 export function resetAsleepSession(s: GameState): GameState {
