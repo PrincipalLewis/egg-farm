@@ -130,8 +130,8 @@ function apply0(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true)
       ev?.push({ type: 'worker_manage_all', workers: need, energyBefore: need.map(id => Math.round(s.workers[id]!.energy)) });
       return { ...s, workers, manageCdS: b.workers.energy.manage_cooldown_s };
     }
-    case 'hatch': return startHatch(s, b);
-    case 'placeBreed': return placeBreed(s, b, a.slot, a.id);
+    case 'hatch': return startHatch(s, b, ev); // §8 hatch_started (drift row 34)
+    case 'placeBreed': return placeBreed(s, b, a.slot, a.id); // §8 breed_slotted: opens a 1,000 ms window; the tick sink emits it on close
     case 'markCelebrated': return { ...s, celebratedTier: Math.max(s.celebratedTier, a.tier) };
     // Closing the welcome-back modal without tapping Collect still grants the eggs.
     // S2-3a / MK-22: closing the welcome-back modal brings the first customer on the next tick (deterministic: timer -> 0).

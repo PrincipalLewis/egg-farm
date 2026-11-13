@@ -3,6 +3,7 @@ import { GameState, eggsPerSec } from './state';
 import { prodEggsPerSec, offlineMult } from './tracks';
 import { m4On, clampL } from '../config/formulas';
 import { breedsOffline } from './breeds';
+import type { Sink } from './events';
 import { breedsCalmClearRing, awayBp } from './breeds-traits';
 import { BP_ONE } from '../config/breeds';
 import { broodyKeepOffline } from './broody';
@@ -26,11 +27,11 @@ export function offlineEggs(awayS: number, farmLevel: number, b: Balance, eps = 
 /** Coop untouched; eggs parked in pendingOfflineEggs until the modal's Collect (bypasses coop cap). */
 /** D-HOP-2026-11-06-01 (a) / Pause v1.3.15: the egg grant depends on hen state, the eligible gap, and the cap.
  *  Pause, hire, and m4.flags.pause do not change it. */
-export function applyOffline(s: GameState, awayMs: number, b: Balance) {
+export function applyOffline(s: GameState, awayMs: number, b: Balance, ev?: Sink) { // ev: §8 breed_revealed{offline:true} etc.
   const eggs = m4On(b) && b.m4?.offline ? m4OfflineEggs(awayMs / 1000, s.hensLevel, b, offlineMult(s, b), awayBp(s, b))
     : offlineEggs(awayMs / 1000, s.farmLevel, b, prodEggsPerSec(s, b), offlineMult(s, b));
   const awayS = Math.max(0, Math.min(awayMs / 1000, b.offline.offlineCapSeconds));
-  const br = breedsOffline(s, awayMs, b); // M5.1 BR-R18: same capped gap, even when the grant is 0 eggs; identity when flag off
+  const br = breedsOffline(s, awayMs, b, ev); // M5.1 BR-R18: same capped gap, even when the grant is 0 eggs; identity when flag off
   // E22b / BR-AC49: hide ≥ offlineMinSeconds empties the Present calm ring (gate open on return).
   let state = br.state;
   if (m4On(b) && b.m4?.flags?.breeds === 1 && awayMs >= b.offline.offlineMinSeconds * 1000) state = breedsCalmClearRing(state);
