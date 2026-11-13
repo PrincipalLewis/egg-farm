@@ -77,7 +77,7 @@ export class Game {
     this.telemetry.registerSessionEnd('pause', { fields: () => pauseSessionEnd(this.state, this.b), reset: () => resetPausedSession(this.state) });
     this.telemetry.registerSessionEnd('present', { fields: () => sessionEndPresentFields(this.state, this.b), reset: () => resetPresentSession(this.state) });
     // GE-AC45: golden_* / frenzy_extra_cents only (present_* is already registered). Hook order: taps, pause, present, ours.
-    this.telemetry.registerSessionEnd('golden', { fields: () => sessionEndGoldenFields(this.state, this.b), reset: () => resetGoldenSession(this.state) });
+    this.telemetry.registerSessionEnd('golden', { fields: () => ({ ...sessionEndGoldenFields(this.state, this.b) }), reset: () => resetGoldenSession(this.state) });
     this.installId = installId(kv);
     this.telemetry.startSession('load', this.sessionStartFields());
     // M41-7 (spec v0.3.3, OQ-7): loadSafe is the single owner of the order. With opts.idbBoot (main.ts) the IndexedDB value is a
