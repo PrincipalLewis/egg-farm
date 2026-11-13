@@ -281,11 +281,11 @@ describe('resetSessionFields (session rotation hook)', () => {
 
   it('rotation: a pause that spans the rotate reports the full paused_duration_s; session 2 pause fields count only session 2', () => {
     // Rule (cited): paused_duration_s is the per-pause duration, not a session counter
-    // (src/sim/events.ts worker_resumed; pausedDurationS at src/sim/pause.ts:44, emit at :89). It is
-    // floorMsToS(pausedForS[id]) of integer sim ms. tickPausedFor (pause.ts:53-62) increments each
+    // (src/sim/events.ts worker_resumed; pausedDurationS, emitted by resumeWorker). It is
+    // floorMsToS(pausedForS[id]) of integer sim ms. tickPausedFor increments each
     // still-paused worker's entry and, separately, the session aggregates sumS / allS. Hidden gaps
     // >= offlineMinSeconds are not sim time: settleHiddenPeriod restores the hide snapshot
-    // (src/game.ts:497) and grants offline (src/game.ts:500), so tickPausedFor does not run on the
+    // and grantOffline pays the gap, so tickPausedFor does not run on the
     // kept state for that gap (pause.ts: "offline time and hidden gaps >= 60 s are not counted
     // (sim time only)"; AC-P13). Therefore a pause of A s before a hide >= 60 s and B s after
     // show has paused_duration_s == A + B, and session 2's paused_worker_s / all_paused_s == B only.
