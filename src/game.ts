@@ -14,6 +14,7 @@ import type { BreedId } from './config/breeds';
 import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
 import type { SimEvent, CollectibleSkin } from './sim/events';
+import { clockWageTipDue, asleepSessionEnd, resetAsleepSession } from './sim/clock-wage';
 import { goldenOn, goldenUnload, spawnDue, sessionEndGoldenFields, grantGolden, goldenFrozen, resetGoldenSession } from './sim/golden';
 import type { GoldenReward } from './sim/events';
 import { broodyOn, broodyCheckDue, broodyReset, broodyView, type BroodyView } from './sim/broody';
@@ -83,12 +84,12 @@ export class Game {
     this.telemetry.sessionEndContext = (src) => { const s = src ?? this.state; return { farm_level: s.farmLevel, coop_hand: !!s.workers.coop_hand, credit: creditedTapsOn(this.b) }; };
     // Row 32 (HoE/breeds-sim-prB-traits): present_* only. Other breeds session_end fields = gen/breeds-telemetry.
     // #119 pause §12: paused_worker_s / all_paused_s on session_end (pause = 1 and rc2Refill = 0 only). Same emit path as present_*.
-    // Registration order: taps, pause, present, breeds, broody, bbv2, golden, then refill (last). Keys do not overlap. Contributor reset() zeros
+    // Registration order: pause, present, breeds, broody, bbv2, golden, refill, then clockWage (last). Keys do not overlap. Contributor reset() zeros
     // this.state; resetSessionFields also zeros the hide snapshot that settleHiddenPeriod restores (MAJOR-1).
     // Refill does not reset pausedForS — #138's resetPausedSession already does (CCR MAJOR-1).
     this.telemetry.registerSessionEnd('pause', { fields: (src) => pauseSessionEnd(src ?? this.state, this.b), reset: () => resetPausedSession(this.state) });
     this.telemetry.registerSessionEnd('present', { fields: (src) => sessionEndPresentFields(src ?? this.state, this.b), reset: () => resetPresentSession(this.state) });
-    // M5.1 breeds §8: breed_* after pause + present (hook order: taps, pause, present, then the rest; refill last).
+    // M5.1 breeds §8: breed_* after pause + present (hook order: pause, present, breeds, broody, bbv2, golden, refill, clockWage last).
     // fields(src) reads the hide snapshot on a long-hide rotate (QA F1); do not close over this.state.
     // resetBreedsTel is idempotent: also applied in resetSessionFields (state-held counters).
     this.telemetry.registerSessionEnd('breeds', { fields: (src) => ({ ...sessionEndBreedsFields(src ?? this.state, this.b) }), reset: () => { this.state = resetBreedsTel(this.state); } });
@@ -98,8 +99,9 @@ export class Game {
     this.telemetry.registerSessionEnd('bbv2', { fields: () => this.bbTel ? this.bbTel.sessionEndFields() : {}, reset: () => { this.bbTel?.resetSession(); } });
     // GE-AC45: golden_* / frenzy_extra_cents only (present_* already registered). fields(src) reads the hide snapshot on a long-hide rotate (QA F1).
     this.telemetry.registerSessionEnd('golden', { fields: (src) => sessionEndGoldenFields(src ?? this.state, this.b), reset: () => resetGoldenSession(this.state) });
-    // G0 M2 / #133: refill last. fields(src) reads the hide snapshot; reset is immutable (assigns the returned state).
+    // G0 M2 / #133: refill, then clockWage last. fields(src) reads the hide snapshot; refill reset is immutable (assigns the returned state).
     this.telemetry.registerSessionEnd('refill', { fields: (src) => refillSessionTotals(src ?? this.state, this.b), reset: () => { this.state = resetRefillSession(this.state); } });
+    this.telemetry.registerSessionEnd('clockWage', { fields: (src) => asleepSessionEnd(src ?? this.state, this.b), reset: () => resetAsleepSession(this.state) });
     this.installId = installId(kv);
     this.telemetry.startSession('load', this.sessionStartFields());
     if (bbv2TelOn(b)) this.bbTel = new Bbv2Tel((t, d) => this.telemetry.track(t, d), b);
@@ -187,7 +189,8 @@ export class Game {
     for (const e0 of evs) { const e = this.withCollectibleId(e0);
       this.notify(e);
       if (e.type === 'collect') this.telemetry.tap(e.eggs, e.credited === undefined ? undefined : { credited: e.credited, bonus_cents: e.bonus_cents, coopHand: !!this.state.workers.coop_hand }); // ST-AC19
-      else if (e.type === 'wage') this.telemetry.sum(`wage_${e.worker}_cents`, e.cents);
+      else if (e.type === 'wage') { this.telemetry.sum(`wage_${e.worker}_cents`, e.cents);
+        if (e.state === 'asleep') this.telemetry.sum(`wage_${e.worker}_asleep_cents`, e.cents); } // S3 (clockWage = 1 only: state is absent flag-off)
       else if (e.type === 'worker_collect') this.telemetry.sum('coop_hand_eggs', e.eggs);
       else if (e.type === 'collectible_collected' && e.skin === 'broody_hen') { this.broodyCents += e.reward_value; this.broodyCollects++; const { type, ...rest } = e; this.telemetry.track(type, rest); }
       else if (e.type === 'sell' && e.by === 'market_hand') { this.telemetry.sum('market_hand_eggs', e.k); this.telemetry.sum('market_hand_cents', e.value); }
@@ -416,7 +419,7 @@ export class Game {
     // ---- end M5.1 breeds flush (fields + resetBreedsTel live on registerSessionEnd('breeds')) ----
     if (this.bbTel) this.bbTel.flushOpen(Math.floor(this.bbSimMs / 1000));
     // R3: a hide >= session_hidden_end_s that never came back ends as the back-dated session_end{hidden}; otherwise {unload}.
-    // session_end fields come from registered contributors (pause #119, then present_*, then breeds, then broody, then bbv2, then golden, then refill); do not track('session_end') here.
+    // session_end fields come from registered contributors (pause #119, then present_*, then breeds, then broody, then bbv2, then golden, then refill, then clockWage); do not track('session_end') here.
     // broody counter zeroing moved into registerSessionEnd('broody').reset().
     const hAt = this.telemetry.clock.hiddenAt;
     if (hAt !== null && hAt < at && !this.readOnly && this.telemetry.rotateDue(at)) {
@@ -426,7 +429,15 @@ export class Game {
       this.splitCoopFull(at); // A2/R4: close coop_full before session_end{unload}, even when hAt === at (MINOR-2)
       this.telemetry.endSession('unload', at, this.state); // Game always passes src (live state on unload/pagehide)
     }
+    // clockWage reset() runs here via the registry (this.state on unload/pagehide). Mid-play rotate: resetSessionFields
+    // also resets the hide snapshot (hidden.state !== this.state).
     this.save(); this.telemetry.flush(true); }
+  // ---- v5 clockWage (failure-cost v0.3.24). S4 totals live in sim state (sim/clock-wage.ts asleep clock, Architect ruling 4).
+  /** AC-FC11 / S5: mark the one-time yawn tip shown (once per save), log tip_shown{id:clock_wage}, save. False when not due. */
+  markClockWageTip(): boolean {
+    if (!clockWageTipDue(this.state, this.b)) return false;
+    this.state = { ...this.state, clockWageTipShown: true }; this.telemetry.track('tip_shown', { id: 'clock_wage' }); this.save(); return true;
+  }
   /** v5 #5 §8 / HoE F4: session_end.broody_cents (Σ broody reward_value) and broody_collects; absent while the flag is off.
    *  Counters restart in the contributor reset() after each session_end (a bfcache restore never re-reports them). */
   private broodyCents = 0; private broodyCollects = 0;

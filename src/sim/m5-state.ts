@@ -75,6 +75,16 @@ export interface M5Fields {
   abilitiesCoachSeen?: boolean;
   // ---- M5.1 breeds (saved, breeds spec §6; sim/breeds.ts) ----
   breeds?: import('./breeds').BreedsSave;
+  // ---- v5 clockWage (saved, failure-cost v0.3.24 AC-FC11; S5, Saves-approved): the one-time yawn tip was shown in this save. Absent = not shown.
+  clockWageTipShown?: boolean;
+  /** AC-FC12 welcome-back window (saved; Architect ruling 2, Saves owns key + sanitiser): per wage role, Asleep (mood asleep, not
+   *  paused) live-sim ms and asleep wage cents since the last welcome-back close. Integers. Absent when empty. */
+  clockWageWindow?: Partial<Record<'market_hand' | 'coop_hand', { asleepMs: number; cents: number }>>;
+  // ---- v5 asleep clock (session only, never saved; Architect ruling 4): this session's totals for session_end. ----
+  /** MH + CH Asleep worker-ms (integer), written only by tickAsleepClock. -> session_end.asleep_s. */
+  asleepSessionMs?: number;
+  /** Cents charged to Asleep workers this session (clockWageAsleepStep). -> session_end.wage_paid_asleep_cents. */
+  asleepPaidCents?: number;
   // ---- rc2 Refill (saved, G0 §1; optional, no SAVE_VERSION bump) ----
   /** Integer charges in [0, charge_cap]. Absent = start_charges (lazy, m3). */
   refillCharges?: number;
@@ -102,7 +112,7 @@ export interface RefillSession {
 }
 
 /** Fields F2 persists (optional, absent = default). */
-export const M5_SAVED_FIELDS = ['evRngState', 'nextSpawnRemainingS', 'frenzyRemainingS', 'broodyNestCents', 'broodyHenIdx', 'abilities', 'abilitiesUnlocked', 'abilitiesCoachSeen', 'breeds', 'refillCharges', 'chargeNextMs'] as const satisfies readonly (keyof M5Fields)[];
+export const M5_SAVED_FIELDS = ['evRngState', 'nextSpawnRemainingS', 'frenzyRemainingS', 'broodyNestCents', 'broodyHenIdx', 'abilities', 'abilitiesUnlocked', 'abilitiesCoachSeen', 'breeds', 'refillCharges', 'chargeNextMs', 'clockWageTipShown', 'clockWageWindow'] as const satisfies readonly (keyof M5Fields)[];
 /** Fields that live only for a page session: F2 strips them before serialize (specs: never saved). */
-export const M5_SESSION_FIELDS = ['goldenEgg', 'streakS', 'streakHoldS', 'tapCreditCdS', 'irefRingCents', 'refWarmS', 'broodyNestScaled', 'brRngState', 'pausedForS', 'stallSession', 'refillAgoMs', 'refillSession'] as const satisfies readonly (keyof M5Fields)[];
+export const M5_SESSION_FIELDS = ['goldenEgg', 'streakS', 'streakHoldS', 'tapCreditCdS', 'irefRingCents', 'refWarmS', 'broodyNestScaled', 'brRngState', 'asleepSessionMs', 'asleepPaidCents', 'pausedForS', 'stallSession', 'refillAgoMs', 'refillSession'] as const satisfies readonly (keyof M5Fields)[];
 export const M5_FIELDS: readonly (keyof M5Fields)[] = [...M5_SAVED_FIELDS, ...M5_SESSION_FIELDS];

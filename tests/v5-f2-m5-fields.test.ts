@@ -78,9 +78,9 @@ describe('F2 persist (save shape)', () => {
     const p: any = m5Persist(s); for (const k of M5_SESSION_KEYS) { expect(k in p).toBe(false); expect(s[k]).toBe(1); }
     expect(p.abilities).toEqual({ market_hand: { readyAt: NOW + 42_500, activeS: 7 } }); expect(JSON.parse(serialize(s, NOW)).state).toEqual(p);
   });
-  it('[CCR-77-m1][D-C4] the strip list IS F1a M5_SESSION_FIELDS, pinned to the 12 keys (8 spec + pausedForS, pause v1.3.16 471fb534 / QA-D-1110-PAUDUR + stallSession, sales-stopped §7.5 session-only, Saves risk-helpers; + refillAgoMs, refillSession); each one is dropped by persist and serialize', () => {
+  it('[CCR-77-m1][D-C4] the strip list IS F1a M5_SESSION_FIELDS, pinned to the 14 keys (8 spec + 2 v5 asleep-clock keys, Architect ruling 4, Hire 2 + pausedForS, pause v1.3.16 471fb534 / QA-D-1110-PAUDUR + stallSession, sales-stopped §7.5 session-only, Saves risk-helpers; + refillAgoMs, refillSession); each one is dropped by persist and serialize', () => {
     expect(M5_SESSION_KEYS).toBe(M5_SESSION_FIELDS);
-    expect([...M5_SESSION_FIELDS].sort()).toEqual(['brRngState', 'broodyNestScaled', 'goldenEgg', 'irefRingCents', 'pausedForS', 'refWarmS', 'refillAgoMs', 'refillSession', 'stallSession', 'streakHoldS', 'streakS', 'tapCreditCdS']);
+    expect([...M5_SESSION_FIELDS].sort()).toEqual(['asleepPaidCents', 'asleepSessionMs', 'brRngState', 'broodyNestScaled', 'goldenEgg', 'irefRingCents', 'pausedForS', 'refWarmS', 'refillAgoMs', 'refillSession', 'stallSession', 'streakHoldS', 'streakS', 'tapCreditCdS']);
     for (const k of M5_SESSION_FIELDS) {
       const s: any = { ...M5(), [k]: 1 };
       expect(k in m5Persist(s)).toBe(false); expect(k in JSON.parse(serialize(s, NOW)).state).toBe(false);

@@ -36,6 +36,8 @@ import { tryDispatch, wouldApply } from './tap-guard';
 import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
 import { trackToastSafe } from './toast-safe';
+import { clockWageOn, clockWageWindowView } from '../sim/clock-wage';
+import { asleepToast, FallAsleepToasts, clockWageTipNow, CLOCK_WAGE_TIP, welcomeBackWageHtml } from './clock-wage-ui';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, upgradesNavName, type NavAria } from './workers-ui';
 import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
 import { WARN_SVG } from './icons'; // m6: the HUD rate's warning sign is the static inline SVG, shown by .warn
@@ -118,7 +120,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         <div id="uRow"></div></div></section></div>`);
   const modal = h(`<div id="modal-layer"></div>`);
   const fxLayer = h(`<div id="fx-layer" aria-hidden="true"></div>`);
-  const toast = h(`<div class="toast" role="status"></div>`);
+  const toast = h(`<div class="toast${clockWageOn(b) ? ' cw-b1' : ''}" role="status"></div>`); // clockWage B-1 wrap rule, flag-on only (flag-off markup unchanged)
   root.append(hud, farm, nav, panelLayer); document.body.append(modal, fxLayer, toast);
   const $ = <T extends HTMLElement = HTMLElement>(sel: string, el: ParentNode = document) => el.querySelector(sel) as T;
   const coinsEl = $('#coins'), basketEl = $('#basket'), queueEl = $('#queue'), scene = $('#scene'), coopImg = $<HTMLImageElement>('#coop');
@@ -169,6 +171,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const el = h(`<button class="cooptip" role="status">${COOP_TIP_TEXT}</button>`); document.body.append(el);
     el.addEventListener('click', () => { g.telemetry.track('coop_hand_tip', { phase: 'tap' }); tab = 'workers'; dirty = true; openPanel('upgrades'); el.remove(); });
     window.setTimeout(() => el.remove(), 8000);
+  };
+  // v5 clockWage AC-FC11: the one-time yawn tip (same .cooptip box, B-3 font); tap dismisses. Shown once per save (Game marks it).
+  const showCwTip = () => {
+    const el = h(`<button class="cooptip cw-tip" role="status">${CLOCK_WAGE_TIP}</button>`); document.body.append(el);
+    el.addEventListener('click', () => el.remove()); window.setTimeout(() => el.remove(), 8000);
   };
   let toastTimer = 0;
   /** WebKit perf: patience ring in 1/120-turn steps (3 deg); a write only when the step changes, so the conic ring repaints ~4x/s, not every frame. */
@@ -340,10 +347,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const showWelcome = () => {
     const eggs = g.state.pendingOfflineEggs; if (eggs <= 0) return;
     modalKind = 'welcome';
+    const cwLines = welcomeBackWageHtml(clockWageWindowView(g.state), b); // AC-FC12 ('' flag-off: markup unchanged); the window resets at close (collect/dismissOffline)
     modal.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-labelledby="wbT">
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button>
       <img src="${A('icon-offline-earnings.svg')}" width="64" height="64" alt="">
-      <h2 id="wbT">Welcome back!</h2><div>You were away ${fmtAway(g.offline.awayS, b.offline.offlineCapSeconds)}</div>
+      <h2 id="wbT">Welcome back!</h2><div>You were away ${fmtAway(g.offline.awayS, b.offline.offlineCapSeconds)}</div>${cwLines}
       <div class="big num"><img src="${A('icon-egg.svg')}" alt="">+${fmtCount(eggs)}\u00a0eggs</div>
       <button class="btn" id="wbCollect">Collect</button></div>`;
     modal.classList.add('open'); sfx('welcomeBack');
@@ -477,6 +485,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   };
 
   // ---------- Game events ----------
+  const fallAsleep = new FallAsleepToasts(); if (clockWageOn(b)) fallAsleep.observe(g.state, b);
   g.on((e: GameEvent) => {
     switch (e.type) {
       case 'sell': {
@@ -501,6 +510,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         pendingLvPop = true; goalNow = true; break;
       }
       case 'worker_hire': case 'grader_tier': goalNow = true; break;
+      case 'worker_state': if (clockWageOn(b) && fallAsleep.onState(e.worker, e.state)) queueToasts([asleepToast(e.worker, b)]); break; // v5 clockWage AC-FC9: Working/Tired -> Asleep only, queued (Architect M1)
       case 'coop_full': if (e.phase === 'start') sfx('coopFull'); break;
     }
     dirty = true;
@@ -746,6 +756,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         maAria = v.aria; if (fb.getAttribute('aria-label') !== v.aria.text) fb.setAttribute('aria-label', v.aria.text); }
     }
     if (yawnSfx.pick(s, b, now())) sfx('workerYawn');
+    if (clockWageTipNow(s, b) && g.markClockWageTip()) showCwTip(); // AC-FC11 (false with clockWage off: no DOM change)
     // market panel
     if (open === 'market' || docked.matches) {
       const basket = Math.floor(s.basket), patience = S.patienceS(F, b);
@@ -889,7 +900,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaFitBanners = () => fitBanners(uRow);
   // QA-only: open the real save-recovery dialog mid-game (R1 resume check); compiled out of release with eggfarmOnb.
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaRecovery = () => showRecoveryDialog({ case: 'F', reason: 'parse', had_backup: false, restored_from_backup: false, copy_failed: false, raw: '{}' } as any, A, [root, modal, toast]);
-  const renderAll = () => { const t = performance.now(); if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
+  const renderAll = () => { const t = performance.now(); if (clockWageOn(b)) fallAsleep.observe(g.state, b); /* AC-FC9 onset baseline */ if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
     render(); if (onbUpdate && !onbUpdate()) { onbUpdate = null; onbFlow = null; } if (!recoveryOpen) renderWorkersIntro(); renderIosTip(); };
   if (g.recoveryOutcome && opts.recovery) {
     // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.

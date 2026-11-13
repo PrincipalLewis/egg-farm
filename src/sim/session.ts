@@ -24,12 +24,14 @@
  * shape change, no SAVE_VERSION bump).
  *
  * Immutable helpers that return a new GameState should copy their deletions onto `s`
- * (the hook is void and mutates in place):
- *   const next = resetAsleepSession(s); if (next !== s) { for (const k of Object.keys(s)) if (!(k in next)) delete (s as unknown as Record<string, unknown>)[k]; Object.assign(s, next); }
+ * (the hook is void and mutates in place). resetAsleepSession mutates in place and is
+ * already idempotent, so it is called directly. The pattern for an immutable helper:
+ *   const next = resetRefillSession(s); if (next !== s) { for (const k of Object.keys(s)) if (!(k in next)) delete (s as unknown as Record<string, unknown>)[k]; Object.assign(s, next); }
  */
 import type { GameState } from './state';
 import { resetPausedSession } from './pause';
 import { resetPresentSession } from './breeds-traits';
+import { resetAsleepSession } from './clock-wage';
 import { resetBreedsTel } from './breeds';
 import { resetGoldenSession } from './golden';
 import { resetRefillSession } from './refill';
@@ -54,5 +56,6 @@ export function resetSessionFields(s: GameState): void {
     for (const k of Object.keys(s)) if (!(k in next)) delete (s as unknown as Record<string, unknown>)[k];
     Object.assign(s, next);
   }
-  // Extension point — clockWage adds its one-line reset (resetAsleepSession) above this comment.
+  // clockWage: in-place, idempotent; session accumulators only (never the worker asleep clocks). Covers the hide snapshot.
+  resetAsleepSession(s);
 }
