@@ -14,7 +14,7 @@ import type { SimEvent } from '../sim/events';
 import { WORKERS } from '../sim/workers';
 import { type M5Flag, flagOn } from '../config/flags';
 import { M5_SESSION_FIELDS } from '../sim/m5-state';
-import { sanitizePausedOnLoad } from '../sim/pause';
+import { sanitizePausedOnLoad, isPaused } from '../sim/pause';
 import { streakAfter, endStreak } from '../sim/streak';
 import { sanitizeBreedsOnLoad, breedsSaveView } from '../sim/breeds';
 import { incomeRefOn, resetIncomeRef } from '../sim/income-ref';
@@ -77,10 +77,48 @@ function endCalls(o: any, b: Balance, ev: SimEvent[]) {
     ev.push({ type: 'ability_ended', worker: id, cause: 'offline', effect_s: granted - clamp(activeS, 0, granted) });
   }
 }
+/** rc2 Refill load sanitiser (G0 §1, Architect m2). Only when rc2Refill=1. Does not mutate `s`; same object when clean.
+ *  restAuto runs only with pause on (after pauseLoad). autoRefill runs only when both flags are on (AC-LR16).
+ *  chargeNextMs: at the cap it is dropped (F-4), including when the cap comes from a clamp or the lazy
+ *  start_charges default. Below the cap — including when refillCharges is absent and start < cap — a
+ *  missing or bad next is written as full regen (F-5a). The charges key itself stays absent when missing. */
+function sanitizeRefillOnLoad(s: GameState, b: Balance): GameState {
+  if (!m5Flag(b, 'rc2Refill')) return s;
+  const cap = tc(b, 'charge_cap'), regen = Math.round(tc(b, 'charge_regen_s') * 1000), start = tc(b, 'start_charges');
+  const badInt = (v: unknown) => !(typeof v === 'number' && Number.isInteger(v) && Number.isFinite(v));
+  let o: any = s;
+  const touch = (): any => { if (o === s) o = { ...s }; return o; };
+  if ('refillCharges' in o) {
+    const v = o.refillCharges, next = badInt(v) || v < 0 ? 0 : Math.min(v, cap);
+    if (next !== v) touch().refillCharges = next;
+  }
+  const charges = 'refillCharges' in o ? o.refillCharges : start, atCap = charges >= cap;
+  if (atCap) {
+    if ('chargeNextMs' in o) { touch(); const { chargeNextMs: _c, ...rest } = o; o = rest; }
+  } else {
+    const v = o.chargeNextMs, next = badInt(v) ? regen : Math.min(regen, Math.max(1, v));
+    if (!('chargeNextMs' in o) || o.chargeNextMs !== next) touch().chargeNextMs = next;
+  }
+  const pauseOn = m5Flag(b, 'pause'), autoOn = m5Flag(b, 'autoRefill');
+  if ((pauseOn || autoOn) && o.workers && typeof o.workers === 'object') {
+    let ws: any = o.workers, copied = false;
+    for (const id of WORKERS) {
+      const w = ws[id]; if (!w || typeof w !== 'object') continue;
+      let n: any = w;
+      if (pauseOn && 'restAuto' in n && !(n.restAuto === true && isPaused(n, b))) { const { restAuto: _r, ...rest } = n; n = rest; }
+      if (autoOn && 'autoRefill' in n && n.autoRefill !== true) { const { autoRefill: _a, ...rest } = n; n = rest; }
+      if (n === w) continue;
+      if (!copied) { if (o === s) o = { ...s }; ws = { ...o.workers }; o.workers = ws; copied = true; }
+      ws[id] = n;
+    }
+  }
+  return o;
+}
 /** Load (a reload counts as a gap of 60 s or more, AB-1): sanitise the fields of every flag that is on (D-C5), clamp readyAt
  *  to [now, now + cd] (non-finite = ready), end a call that spanned the reload once. Fields of an off flag are untouched. */
 export function m5Load(s: GameState, b: Balance, now: number, ev: SimEvent[]): GameState {
-  if (!anyFlag(b) && !m5Flag(b, 'breeds')) return s; // breeds: its own early-out so the six-flag paths stay as they were
+  if (!anyFlag(b) && !m5Flag(b, 'breeds') && !m5Flag(b, 'rc2Refill')) return s; // breeds + rc2Refill: own early-outs (m2: anyFlag excludes both; six-flag paths unchanged)
+  if (!anyFlag(b) && !m5Flag(b, 'breeds')) return sanitizeRefillOnLoad(s, b); // rc2-only: no copy, same object when clean
   const o: any = { ...m5Persist(s) }; // strip only: a stored countdown (including spawn-due 0) is not re-drawn on load
   const num = (k: string, hi: number) => { if (!(k in o)) return; if (!fin(o[k])) delete o[k]; else o[k] = clamp(o[k], 0, hi); };
   if (m5Flag(b, 'golden')) { num('nextSpawnRemainingS', tc(b, 'egg_gap_max_s')); num('frenzyRemainingS', tc(b, 'frenzy_s')); delete o.frenzyEndAt; } // v1.0 wall-clock name, replaced (R23)
@@ -98,7 +136,7 @@ export function m5Load(s: GameState, b: Balance, now: number, ev: SimEvent[]): G
       endCalls(o, b, ev); }
   }
   if (m5Flag(b, 'pause') && o.workers && typeof o.workers === 'object') o.workers = pauseLoad(o.workers, o.farmLevel, b);
-  return sanitizeBreedsOnLoad(o, b, ev); // M5.1 breeds E10-E12 (identity unless m4.flags.breeds and `breeds` present)
+  return sanitizeRefillOnLoad(sanitizeBreedsOnLoad(o, b, ev), b); // refill AFTER pauseLoad + breeds (Architect m2: F-8a sees sanitised paused)
 }
 /** CCR-F4, Pause spec v1.3.6 rule 1 / rule 7 (B5) / E9 / E12: a non-boolean `paused` is false (absent); below
  *  tc_pause_unlock_farm nothing is paused or locked; `callLockoutS` (Market Hand only, sim seconds, not a timestamp) is

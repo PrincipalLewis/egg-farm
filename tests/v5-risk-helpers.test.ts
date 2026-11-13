@@ -248,12 +248,13 @@ describe('Pause / offline / reload (§7.1, §7.2, §7.5)', () => {
     expect(firstShown(s, ON, 200)).toBe(80);
     const t = run(fx(ON), ON, 60, []); resetStallTimers(t); expect(stallView(t, ON)).toMatchObject({ noSaleS: 0, noCollectS: 0, shown: false });
   });
-  it('[SS-43] nothing persisted: the session record is stripped by m5Persist/serialize; M5_SAVED_FIELDS unchanged; SAVE_VERSION 6', () => {
+  it('[SS-43] nothing persisted: the session record is stripped by m5Persist/serialize; stall adds no saved field; SAVE_VERSION 6', () => {
     const s = run(fx(ON_FC), ON_FC, 120, []); expect(stallView(s, ON_FC).shown).toBe(true);
     expect((M5_SESSION_KEYS as readonly string[]).includes('stallSession')).toBe(true);
     expect('stallSession' in m5Persist(s)).toBe(false);
     const raw = serialize(s, 0); expect(raw).not.toMatch(/stall|fatigue|cue/i);
-    expect(M5_SAVED_FIELDS).toEqual(['evRngState', 'nextSpawnRemainingS', 'frenzyRemainingS', 'broodyNestCents', 'broodyHenIdx', 'abilities', 'abilitiesUnlocked', 'abilitiesCoachSeen', 'breeds']);
+    // Union after mergefwd of #128 into #133: #128's 9 saved keys + refillCharges, chargeNextMs (SAVE_VERSION stays 6).
+    expect(M5_SAVED_FIELDS).toEqual(['evRngState', 'nextSpawnRemainingS', 'frenzyRemainingS', 'broodyNestCents', 'broodyHenIdx', 'abilities', 'abilitiesUnlocked', 'abilitiesCoachSeen', 'breeds', 'refillCharges', 'chargeNextMs']);
     expect(SAVE_VERSION).toBe(6);
   });
   it('[SS-44][SS-45] a reloaded state (session stripped) starts a new episode: stall_id 1, no prev_stall_id, no resolved for an old id; one fatigue_cue_shown', () => {

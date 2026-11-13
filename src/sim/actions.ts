@@ -14,6 +14,7 @@ import { spawnGolden, tapGolden, frenzySale } from './golden';
 import { broodySlots, tapBroody } from './broody';
 import { stallObserve } from '../econ/stall';
 import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
+import { rc2RefillOn } from './refill';
 import { isPaused, resumeWorker } from './pause';
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
@@ -114,6 +115,7 @@ function apply0(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true)
       return { ...s, coinsCents: s.coinsCents - cost, graderTier: i + 1 }; // energy unchanged (PM Q6)
     }
     case 'manage': {
+      if (rc2RefillOn(b)) return s; // G0 OPEN-6 / AC-RF10: no-op at rc2Refill=1 (one entry point)
       const w = s.workers[a.worker]; if (!w || s.manageCdS > 1e-9 || !canManageWorker(w, b)) return s; // P4: only at <= 40%
       ev?.push({ type: 'worker_manage', worker: a.worker, energyBefore: Math.round(w.energy) });
       const r = { ...s, workers: { ...s.workers, [a.worker]: { ...w, energy: 100 } }, manageCdS: b.workers.energy.manage_cooldown_s };
@@ -122,6 +124,7 @@ function apply0(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true)
       return isPaused(w, b) ? resumeWorker(r, a.worker, b, ev, 'manage') : r; // emits worker_resumed{cause:"manage"}
     }
     case 'manageAll': { // v1.1 + P4: 3+ hired; refills only hired workers <= manage_prompt_threshold (Unpaid stays Unpaid, ruling 2); one shared cooldown.
+      if (rc2RefillOn(b)) return s; // G0 OPEN-6 / AC-RF10: no-op at rc2Refill=1
       // Pause rule 8 (D1): needManage skips paused workers, so Manage all never refills or resumes them.
       const need = needManage(s.workers, b); // ruling 4: nothing below 100% -> disabled, no cooldown started
       if (!showManageAll(s.workers, b) || s.manageCdS > 1e-9 || !need.length) return s;

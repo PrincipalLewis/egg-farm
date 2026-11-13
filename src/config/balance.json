@@ -449,7 +449,11 @@
       "urgent_at_s": 27,
       "warn_at_s": 20,
       "leave_attended_window_s": 30,
-      "rest_recovery_mult": 0.25
+      "rest_recovery_mult": 0.25,
+      "charge_regen_s": 150,
+      "charge_cap": 2,
+      "refill_threshold_pct": 50,
+      "start_charges": 2
     }
   }
 }

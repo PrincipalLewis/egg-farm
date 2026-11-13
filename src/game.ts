@@ -7,6 +7,8 @@ import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
 import { sessionEndPresentFields, awayBp, resetPresentSession } from './sim/breeds-traits';
 import * as sessionSim from './sim/session';
+import { noteShiftSheetOpened, refillWorker, setRest as setRestSim, setAutoRefill as setAutoRefillSim, takeAutoRefillToast as takeAutoRefillToastSim, restEligibility, refillSessionTotals, resetRefillSession, type ShiftSheetEntry, type RefillCtx } from './sim/refill';
+import type { WorkerId } from './sim/workers';
 import { offlineGrantV5 } from './telemetry/v5-fields';
 import type { BreedId } from './config/breeds';
 import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
@@ -81,11 +83,12 @@ export class Game {
     this.telemetry.sessionEndContext = (src) => { const s = src ?? this.state; return { farm_level: s.farmLevel, coop_hand: !!s.workers.coop_hand, credit: creditedTapsOn(this.b) }; };
     // Row 32 (HoE/breeds-sim-prB-traits): present_* only. Other breeds session_end fields = gen/breeds-telemetry.
     // #119 pause §12: paused_worker_s / all_paused_s on session_end (pause = 1 and rc2Refill = 0 only). Same emit path as present_*.
-    // Registration order matches { ...pauseSessionEnd(), ...sessionEndPresentFields() }. Contributor reset() zeros
+    // Registration order: taps, pause, present, breeds, broody, bbv2, golden, then refill (last). Keys do not overlap. Contributor reset() zeros
     // this.state; resetSessionFields also zeros the hide snapshot that settleHiddenPeriod restores (MAJOR-1).
+    // Refill does not reset pausedForS — #138's resetPausedSession already does (CCR MAJOR-1).
     this.telemetry.registerSessionEnd('pause', { fields: (src) => pauseSessionEnd(src ?? this.state, this.b), reset: () => resetPausedSession(this.state) });
     this.telemetry.registerSessionEnd('present', { fields: (src) => sessionEndPresentFields(src ?? this.state, this.b), reset: () => resetPresentSession(this.state) });
-    // M5.1 breeds §8: breed_* after pause + present (hook order: taps, pause, present, then the rest).
+    // M5.1 breeds §8: breed_* after pause + present (hook order: taps, pause, present, then the rest; refill last).
     // fields(src) reads the hide snapshot on a long-hide rotate (QA F1); do not close over this.state.
     // resetBreedsTel is idempotent: also applied in resetSessionFields (state-held counters).
     this.telemetry.registerSessionEnd('breeds', { fields: (src) => ({ ...sessionEndBreedsFields(src ?? this.state, this.b) }), reset: () => { this.state = resetBreedsTel(this.state); } });
@@ -95,6 +98,8 @@ export class Game {
     this.telemetry.registerSessionEnd('bbv2', { fields: () => this.bbTel ? this.bbTel.sessionEndFields() : {}, reset: () => { this.bbTel?.resetSession(); } });
     // GE-AC45: golden_* / frenzy_extra_cents only (present_* already registered). fields(src) reads the hide snapshot on a long-hide rotate (QA F1).
     this.telemetry.registerSessionEnd('golden', { fields: (src) => sessionEndGoldenFields(src ?? this.state, this.b), reset: () => resetGoldenSession(this.state) });
+    // G0 M2 / #133: refill last. fields(src) reads the hide snapshot; reset is immutable (assigns the returned state).
+    this.telemetry.registerSessionEnd('refill', { fields: (src) => refillSessionTotals(src ?? this.state, this.b), reset: () => { this.state = resetRefillSession(this.state); } });
     this.installId = installId(kv);
     this.telemetry.startSession('load', this.sessionStartFields());
     if (bbv2TelOn(b)) this.bbTel = new Bbv2Tel((t, d) => this.telemetry.track(t, d), b);
@@ -411,7 +416,7 @@ export class Game {
     // ---- end M5.1 breeds flush (fields + resetBreedsTel live on registerSessionEnd('breeds')) ----
     if (this.bbTel) this.bbTel.flushOpen(Math.floor(this.bbSimMs / 1000));
     // R3: a hide >= session_hidden_end_s that never came back ends as the back-dated session_end{hidden}; otherwise {unload}.
-    // session_end fields come from registered contributors (pause #119, then present_*, then breeds, then broody, then bbv2, then golden); do not track('session_end') here.
+    // session_end fields come from registered contributors (pause #119, then present_*, then breeds, then broody, then bbv2, then golden, then refill); do not track('session_end') here.
     // broody counter zeroing moved into registerSessionEnd('broody').reset().
     const hAt = this.telemetry.clock.hiddenAt;
     if (hAt !== null && hAt < at && !this.readOnly && this.telemetry.rotateDue(at)) {
@@ -490,6 +495,34 @@ export class Game {
     this.dispatch(layout ? { type: 'spawnGolden', spots: this.spotProbe(), layout: true } : { type: 'spawnGolden', spots: this.spotProbe() });
   }
 
+  /** G0 §12.1: open a shift sheet. stallId is used only when entry is stall_chip (schema). */
+  openShiftSheet(entry: ShiftSheetEntry, stallId?: number): number {
+    const r = noteShiftSheetOpened(this.state, this.b, entry, stallId);
+    this.state = r.state; this.emit(r.events); return r.sheetId;
+  }
+  refill(id: WorkerId, ctx: RefillCtx): { ok: true } | { ok: false; reason: import('./sim/refill').RefillBlock } {
+    const r = refillWorker(this.state, id, this.b, ctx);
+    this.state = r.state; this.emit(r.events);
+    return r.ok ? { ok: true } : { ok: false, reason: r.reason };
+  }
+  setRest(id: WorkerId, on: boolean, ctx: RefillCtx): { ok: true } | { ok: false; reason: import('./sim/refill').RestBlock } {
+    if (on) {
+      const el = restEligibility(this.state, id, this.b);
+      if (!el.ok) return el;
+    }
+    const r = setRestSim(this.state, id, on, this.b, ctx);
+    this.state = r.state; this.emit(r.events);
+    return { ok: true }; // resume is never blocked (§14a)
+  }
+  setAutoRefill(id: WorkerId, on: boolean): void {
+    const r = setAutoRefillSim(this.state, id, on, this.b);
+    this.state = r.state; this.emit(r.events);
+  }
+  takeAutoRefillToast(): { n: number; worker: WorkerId | null } | null {
+    const r = takeAutoRefillToastSim(this.state);
+    this.state = r.state; return r.toast;
+  }
+
   /** v5 #5 R4 (sizing §12.2): the UI's eligible DRAWN yard slot ids (0..11). Default none: no hen is marked until the yard UI wires it. */
   private yardProbe: () => readonly number[] = () => [];
   setYardProbe(fn: () => readonly number[]) { this.yardProbe = fn; }
@@ -504,6 +537,7 @@ export class Game {
     if (!broodyOn(this.b) || this.inactive || this.held() || this.hidden || !this.attendedNow() || !broodyCheckDue(this.state, this.b, layout)) return;
     this.dispatch({ type: 'broodySlots', slots: this.yardProbe() });
   }
+
   dispatch(a: Action) {
     if (this.inactive || this.held()) return;
     const before = this.state, bbKey = this.bbTel ? buyKeyOf(a) : null;
