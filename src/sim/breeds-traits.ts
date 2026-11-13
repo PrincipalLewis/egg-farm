@@ -70,6 +70,14 @@ export function sessionEndPresentFields(s: GameState, b: Balance): { present_act
     present_lost_count: calm?.lostCount ?? 0,
   };
 }
+/** Zero session_end present_* accumulators on a session rotate (mutates in place). Leaves the calm ring,
+ *  focusMs, pendingCount and open. Idempotent; no-op if breedsCalm is absent (flag-off byte-identical). */
+export function resetPresentSession(s: GameState): void {
+  const calm = s.breedsCalm;
+  if (!calm) return;
+  calm.activeMs = 0;
+  calm.lostCount = 0;
+}
 
 /** Credited-tap stamp for the calm ring. Runs whenever breeds is on (HoE Q-COL-12), even with streak/tapCoins off. */
 export function breedsNoteCreditedTap(s: GameState, b: Balance, credited: boolean | undefined): GameState {
