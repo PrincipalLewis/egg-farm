@@ -1,3 +1,36 @@
+# HoE/v5-reland-138 — #139 Golden — HANDOFF (04:37 CET, 2026-11-13)
+
+**State:** re-landed onto rc/v5 `425ecdaf` (#138 merged). Reused Architect-PASS scratch `48c50bb4` (tree `22691c29`) resolutions; mergefwd tree is identical to that scratch head. `goldenSession` is state-held: contributor `fields(src)` reads `src ?? this.state`, and `resetGoldenSession` runs in both contributor `reset()` and `resetSessionFields` (idempotent; Architect). Local gates green. PR stays Ready. This HANDOFF commit sits on top of the mergefwd tip.
+
+**PR:** https://github.com/PrincipalLewis/egg-farm/pull/139. Branch `gen/golden`, worktree `/workspace/wt-gen-golden`.
+**Gates tip `74a41992`** (tree `22691c29`, parents `cf2e402a` + `425ecdaf`). Src hunks: **same as scratch** `48c50bb4`. This HANDOFF commit sits on top.
+
+**Merges:**
+- `74a41992` = `cf2e402a` + `425ecdaf`. Conflict: `src/game.ts`. Also took scratch `src/sim/golden.ts` and `src/sim/session.ts` (`resetGoldenSession` in `resetSessionFields`). Auto-merged remaining src/tests already matched scratch. Existing #142 HANDOFF file was left untouched in the merge and is superseded by this section.
+
+**Resolved hunks (same as scratch 48c50bb4):**
+- `src/game.ts` ctor: `registerSessionEnd('golden', { fields: (src) => ({ ...sessionEndGoldenFields(src ?? this.state, this.b) }), reset: () => resetGoldenSession(this.state) })`. Hook order: taps, pause, present, then golden. `endSession` no longer `track('session_end')` / `sessionEndPayload`.
+- `src/sim/session.ts`: `resetGoldenSession(s)` in `resetSessionFields`.
+
+## Gates @ 74a41992 (`/workspace/scratch-reland138/logs-phaseb/139/`)
+- tsc 0.
+- Focused: 9 files / 168 pass (golden freeze/game/m5persist/rewards/spawn, session-clock, rotate-hook, tel-envelope, ST-AC19-20).
+- ST-AC20 by name: 5 pass / 11 skipped, EXIT 0.
+- Flag-0 goldens: GOLDEN1 `f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544` / `a54c9cf9d6a4c967ef8fc9d2cb741ba2deab042b8cad5097b38d5c192339fda5` unchanged. 2 files pass.
+- Full npm test: 169 files, 2555 pass / 1 skip, EXIT 0.
+- Build + check-release-build: ok (`m4.1+74a41992`). Re-run on the tip that includes this file is not required (docs-only follow-up).
+
+## Hosted runs @ 74a41992 (auto, 2026-11-13 04:36 CET)
+- ci: https://github.com/PrincipalLewis/egg-farm/actions/runs/43360120691 (queued)
+- pacing-x1-stack: https://github.com/PrincipalLewis/egg-farm/actions/runs/43360120632 (queued)
+- k10-breeds-offset: https://github.com/PrincipalLewis/egg-farm/actions/runs/43360120659 (queued)
+PR Ready, base rc/v5, MERGEABLE, mergefwd head 74a41992. Not waited. Hosted ids above are the mergefwd tip; the docs commit will trigger a new set (not waited).
+
+## Left
+Parked UI stage unchanged. Architect PASS at scratch `48c50bb4` / mergefwd tree `22691c29`.
+
+---
+
 # HoE/v5-139-reland-142 — #139 gen/golden — HANDOFF (02:24 CET, 2026-11-13)
 
 **State:** re-landed onto rc/v5 `b83ce852` (#142 merged). Only conflict was `tests/v5-telemetry-st-ac19-20.test.ts`. Took #142's version **as-is** (no extra case): pause=1/rc2Refill=0 fields are 0; absent when pause is off or rc2Refill=1; no closed key whitelist. Our prior mergefwd test only asserted presence on pause=1 and absence with pause off, which #142 already covers. No product logic change. Local gates green. PR stays Ready. Architect prior verdict **PASS** at previous head `06ac2996` is carried over.
