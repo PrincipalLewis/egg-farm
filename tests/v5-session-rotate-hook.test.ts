@@ -12,6 +12,7 @@ import { pauseWorker, resumeWorker, pauseSessionEnd, resetPausedSession, pausedD
 import type { SimEvent } from '../src/sim/events';
 import { sessionEndPresentFields, resetPresentSession } from '../src/sim/breeds-traits';
 import { sessionEndBreedsFields } from '../src/telemetry/breeds-session';
+import { coopCap } from '../src/sim/tracks';
 import { mem } from './helpers';
 
 const T0 = Date.UTC(2026, 10, 10, 12);
@@ -199,6 +200,12 @@ describe('resetSessionFields (session rotation hook)', () => {
     expect(pauseSessionEnd(g.state, bb)).toEqual({ paused_worker_s: 300, all_paused_s: 100 });
     expect(sessionEndPresentFields(g.state, bb)).toEqual({ present_active_s: 5, present_lost_count: 3 });
     for (let i = 0; i < 4; i++) g.dispatch({ type: 'collect' });
+    // Hide-time values (QA F1 / Saves repro): 3 paused workers × 100 s, present 5.0 / lost 3, 4 taps, F15.
+    const hidePause = pauseSessionEnd(g.state, bb);
+    const hidePresent = sessionEndPresentFields(g.state, bb);
+    const hideFg = g.telemetry.clock.nowFgMs(clock.t);
+    expect(hidePause).toEqual({ paused_worker_s: 300, all_paused_s: 100 });
+    expect(hidePresent).toEqual({ present_active_s: 5, present_lost_count: 3 });
 
     hide(g, clock, 61_000); g.onShown(clock.t);
 
@@ -216,12 +223,24 @@ describe('resetSessionFields (session rotation hook)', () => {
     const ends1 = evs(g).filter(e => e.type === 'session_end');
     expect(ends1).toHaveLength(1);
     const e1 = ends1[0]!;
-    expect(e1.paused_worker_s).toBeGreaterThanOrEqual(300);
-    expect(e1.all_paused_s).toBeGreaterThanOrEqual(100);
-    expect(e1.present_lost_count).toBeGreaterThanOrEqual(3);
-    expect(e1.taps_total).toBe(4);
-    expect(e1.farm_level).toBe(15);
-    expect(e1.coop_hand).toBe(true);
+    // Exact hide-time totals: no discarded hidden-sim time (QA F1; hiddenSimMaxSeconds is 60).
+    expect(e1).toMatchObject({
+      reason: 'hidden',
+      paused_worker_s: 300,
+      all_paused_s: 100,
+      present_active_s: 5,
+      present_lost_count: 3,
+      taps_total: 4,
+      farm_level: 15,
+      coop_hand: true,
+      fg_ms: hideFg,
+      fgMs: hideFg,
+    });
+    expect(e1).toMatchObject({ ...hidePause, ...hidePresent });
+    expect(e1.paused_worker_s).toBe(hidePause.paused_worker_s);
+    expect(e1.all_paused_s).toBe(hidePause.all_paused_s);
+    expect(e1.present_active_s).toBe(hidePresent.present_active_s);
+    expect(e1.present_lost_count).toBe(hidePresent.present_lost_count);
 
     // Session 2: different known activity — one paused worker for 7 s, present 1.0 s / lost 1, 2 taps, F16, no Coop Hand.
     g.state = resumeWorker(g.state, 'grader', bb);
@@ -318,5 +337,54 @@ describe('resetSessionFields (session rotation hook)', () => {
     g.endSession();
     const e2 = evs(g).filter(e => e.type === 'session_end').at(-1)!;
     expect(e2).toMatchObject({ paused_worker_s: B, all_paused_s: B });
+  });
+
+  it('R4: pagehide unload (hAt === at) splits coop_full before session_end{unload} with the final duration', () => {
+    // telemetry-spec: session_end is sent on pagehide; HANDOFF A2/R4: Architect closes an open coop_full
+    // interval at the split so session_end can read the final duration (exit_reason:"hidden").
+    // Even when pagehide sets hiddenAt === now (no prior visibilitychange hide), split before the emit.
+    const { g, clock } = setup();
+    g.state = { ...g.state, coop: coopCap(g.state, b) };
+    g.frame();
+    const start = evs(g).filter(e => e.type === 'coop_full' && e.phase === 'start').at(-1);
+    expect(start).toBeDefined();
+    const sid0 = g.telemetry.clock.sid;
+    clock.t += 5_000;
+    g.endSession();
+    const list = evs(g);
+    const iEnd = list.findIndex(e => e.type === 'session_end');
+    const iSplit = list.findIndex(e => e.type === 'coop_full' && e.phase === 'end');
+    expect(iSplit).toBeGreaterThanOrEqual(0);
+    expect(iSplit).toBeLessThan(iEnd);
+    expect(list[iEnd]).toMatchObject({ reason: 'unload', sid: sid0 });
+    expect(list[iSplit]).toMatchObject({
+      phase: 'end', exit_reason: 'hidden', sid: sid0, ts: clock.t,
+      durationMs: 5_000,
+    });
+    expect((list[iSplit].ts as number) - (start!.ts as number)).toBe(5_000);
+  });
+
+  it('R4/R6: bfcache pagehide then pageshow — coop_full{end} lands before session_end in the old sid', () => {
+    // Same A2/R4 close, on the bfcache path (onHidden + endSession with hAt === at, then onPageShow).
+    // The unload session_end must not be followed by a late coop_full{end} in the old sid.
+    const { g, clock } = setup();
+    g.state = { ...g.state, coop: coopCap(g.state, b) };
+    g.frame();
+    const start = evs(g).filter(e => e.type === 'coop_full' && e.phase === 'start').at(-1);
+    expect(start).toBeDefined();
+    const sid0 = g.telemetry.clock.sid;
+    const hideAt = clock.t;
+    g.onHidden(clock.t); g.endSession();
+    clock.t += 5_000;
+    g.onPageShow(clock.t);
+    const old = evs(g).filter(e => e.sid === sid0);
+    const iEnd = old.findIndex(e => e.type === 'session_end');
+    const iSplit = old.findIndex(e => e.type === 'coop_full' && e.phase === 'end');
+    expect(iEnd).toBeGreaterThanOrEqual(0);
+    expect(iSplit).toBeGreaterThanOrEqual(0);
+    expect(iSplit).toBeLessThan(iEnd);
+    expect(old[iEnd]).toMatchObject({ reason: 'unload', sid: sid0 });
+    expect(old[iSplit]).toMatchObject({ phase: 'end', exit_reason: 'hidden', sid: sid0, ts: hideAt, durationMs: hideAt - (start!.ts as number) });
+    expect(old.slice(iEnd + 1).some(e => e.type === 'coop_full' && e.phase === 'end')).toBe(false);
   });
 });

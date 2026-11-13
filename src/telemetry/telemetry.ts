@@ -1,4 +1,5 @@
 import type { KV } from '../save/save';
+import type { GameState } from '../sim/state';
 import { EVENT_SCHEMA, TELEMETRY_SCHEMA_VERSION, isPinned as pinnedEvent } from './schema';
 import { createSessionClock, type SessionClock, type SessionClockView } from './session-clock';
 export const TELEMETRY_KEY = 'eggfarm.telemetry';
@@ -32,9 +33,15 @@ type TapWin = { start: number; env: Env; count: number; eggs: number; credit?: {
 /** The tap fields of one window: {count, eggs} plus, with the credit system on, {credited, empty_credited, bonus_cents}. */
 const tapFields = (w: TapWin) => ({ count: w.count, eggs: w.eggs, ...(w.credit ?? {}) });
 export interface TelemetryConfig { ring_size: number; flush_interval_s: number; tap_batch_ms: number; worker_summary_s?: number; session_hidden_end_s?: number; }
-/** v5-tel-envelope §3 (clock-api.md): one session_end contributor. fields(at) is merged into session_end in registration order;
- *  counts(at) (A1, pure) is read for session_summary before any reset; reset() runs after session_end + session_summary. */
-export interface SessionEndContributor { fields(at: number): Record<string, unknown>; reset(): void; counts?(at: number): Record<string, unknown>; }
+/** v5-tel-envelope §3 (clock-api.md): one session_end contributor. Stable contract for stacked PRs:
+ *  fields(src) is merged into session_end in registration order. `src` is the GameState to read
+ *  (the hide snapshot for a back-dated session_end{hidden}; otherwise the live state). Game always
+ *  passes src. Bare Telemetry tests may omit it; contributors that only read Telemetry- or Game-owned
+ *  tallies may ignore src. Contributors that read sim state MUST use `src` (fallback `src ?? this.state`);
+ *  do not close over Game.state — that leaks discarded hidden-sim time (QA F1). `at` is not a fields()
+ *  argument; the emit time stays on endSession / track. counts(src) (A1, pure) is read for session_summary
+ *  before any reset; reset() has no args and runs after session_end + session_summary. */
+export interface SessionEndContributor { fields(src?: GameState): Record<string, unknown>; reset(): void; counts?(src?: GameState): Record<string, unknown>; }
 /** Builds the session_summary payload from every contributor's counts (Generalist owns it, A1). null = emit nothing. */
 export type SessionSummaryProducer = (at: number, counts: Readonly<Record<string, Record<string, unknown>>>) => Record<string, unknown> | null;
 export interface TelemetryOpts { newSid?: () => string }
@@ -72,15 +79,15 @@ export class Telemetry {
   private tapWin: TapWin | null = null;
   /** Per page-load session tap totals for session_end (streak §8.1, ST-AC20). Never saved. */
   private ses = { taps_total: 0, taps_moved_eggs: 0, credited_taps: 0, empty_credited: 0, tap_bonus_cents: 0, coopHandSeen: false };
-  /** Set by Game: the state read at session_end. Without it (bare Telemetry) session_end carries the tap totals only. */
-  sessionEndContext: (() => SessionEndContext) | null = null;
+  /** Set by Game: reads farm_level / coop_hand / credit from `src` (or the live state). Without it (bare Telemetry) session_end carries the tap totals only. */
+  sessionEndContext: ((src?: GameState) => SessionEndContext) | null = null;
   private sumWin: { start: number; env: Env; v: Record<string, number> } | null = null;
   writes = 0;
   constructor(private kv: KV, private cfg: TelemetryConfig, private now = () => Date.now(), opts: TelemetryOpts = {}) {
     this.hiddenEndMs = (cfg.session_hidden_end_s ?? 60) * 1000;
     this.ck = createSessionClock({ now, hiddenEndMs: this.hiddenEndMs, newSid: opts.newSid });
     // #123 ST-AC20 tally, behind the contributor interface (registered first, so its fields lead session_end as before).
-    this.registerSessionEnd('taps', { fields: () => this.sessionEndFields(), reset: () => { this.ses = { taps_total: 0, taps_moved_eggs: 0, credited_taps: 0, empty_credited: 0, tap_bonus_cents: 0, coopHandSeen: false }; } });
+    this.registerSessionEnd('taps', { fields: (src) => this.sessionEndFields(src), reset: () => { this.ses = { taps_total: 0, taps_moved_eggs: 0, credited_taps: 0, empty_credited: 0, tap_bonus_cents: 0, coopHandSeen: false }; } });
     try { this.buf = readRing(kv.getItem(TELEMETRY_KEY)); } catch { this.buf = []; }
     this.trim();
   }
@@ -108,13 +115,15 @@ export class Telemetry {
   /** @internal Game only (visible / pageshow{persisted}): resume the clock; returns the Split when it rotated to a new sid. */
   onPageShown(at: number, rotate = true) { return this.ck.resume(at, rotate); }
   /** End this sid (A1 order): session_end{reason, fg_ms, ...contributors}, then session_summary, then every contributor reset(),
-   *  then markEnded. `at` = the end time: the hide time for reason 'hidden' (back-dated, T-AC13). No-op if this sid already ended. */
-  endSession(reason: 'unload' | 'hidden', at: number) {
+   *  then markEnded. `at` = the end time: the hide time for reason 'hidden' (back-dated, T-AC13). `src` is the GameState
+   *  passed to every contributor's fields/counts (the hide snapshot for a back-dated hidden end; otherwise the live
+   *  state). Game always supplies it; bare Telemetry tests may omit it. No-op if this sid already ended. */
+  endSession(reason: 'unload' | 'hidden', at: number, src?: GameState) {
     if (this.ck.ended) return; // one session_end per sid (B3)
     this.closeTapWindow(); this.closeSumWindow(); // windows belong to the sid they opened in; session_end = Σ tap events
     const extra: Record<string, unknown> = {}, counts: Record<string, Record<string, unknown>> = {};
-    for (const c of this.contributors.values()) Object.assign(extra, c.fields(at));
-    for (const [n, c] of this.contributors) if (c.counts) counts[n] = c.counts(at);
+    for (const c of this.contributors.values()) Object.assign(extra, c.fields(src));
+    for (const [n, c] of this.contributors) if (c.counts) counts[n] = c.counts(src);
     const fg_ms = this.ck.nowFgMs(at);
     this.track('session_end', { ...extra, reason, fg_ms }, at);
     const sum = this.sessionSummary?.(at, counts); if (sum) this.track('session_summary', sum, at);
@@ -143,8 +152,8 @@ export class Telemetry {
   /** session_end v5 fields (streak §8.1 / ST-AC20, errata rev. 16 V-2b): taps_total, taps_moved_eggs, farm_level always (v0.6.2
    *  base fields); credited_taps, tap_bonus_cents (ST-AC19 [T-sub]), empty_credited and coop_hand only with credited taps on
    *  (flag-gated fields are absent with their flag off). coop_hand = a Coop Hand was hired at any tap of the session or at emit. */
-  private sessionEndFields(): Record<string, unknown> {
-    const S = this.ses, ctx = this.sessionEndContext?.();
+  private sessionEndFields(src?: GameState): Record<string, unknown> {
+    const S = this.ses, ctx = this.sessionEndContext?.(src);
     const base = { taps_total: S.taps_total, taps_moved_eggs: S.taps_moved_eggs };
     if (!ctx) return base;
     return { ...base, farm_level: ctx.farm_level, ...(ctx.credit ? { credited_taps: S.credited_taps, tap_bonus_cents: S.tap_bonus_cents,
