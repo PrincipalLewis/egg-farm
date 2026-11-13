@@ -10,6 +10,7 @@ import { tcNum } from '../config/formulas';
 import type { GameState } from './state';
 import type { Worker, WorkerId, Workers } from './workers';
 import type { Sink } from './events';
+import { pauseToggleFields } from './pause-events';
 export const isPaused = (w: Worker | undefined, b: Balance): boolean => !!w && w.paused === true && flagOn(b, 'pause');
 /** CCR-F4 load sanitiser (pause spec E9 "non-boolean = false", rule 1/E12 "below the unlock: not paused"): drops `paused` unless it is a
  *  boolean and the farm is at or above tc_pause_unlock_farm (`open`). The same object when nothing changes. Called by save/m5-fields.ts m5Load. */
@@ -21,19 +22,26 @@ export const ENERGY_FULL = 100;
 export function pausedRecoveredEnergy(w: Worker, dt: number, b: Balance): number {
   return Math.min(ENERGY_FULL, w.energy + tcNum(b, 'rest_recovery_mult') * dt / b.workers.energy.drain_s_per_pct);
 }
-/** Rule 1: pause a hired worker at or above tc_pause_unlock_farm. Flag off, below the unlock, missing or already paused: the same state. */
-export function pauseWorker(s: GameState, id: WorkerId, b: Balance): GameState {
+/** Rule 1: pause a hired worker at or above tc_pause_unlock_farm. Flag off, below the unlock, missing or already paused: the same state
+ *  and no event. THE one worker_paused emitter (pause §12 v1.3.18; Saves #132): one event per real transition, fields from the
+ *  pre-pause state (sim/pause-events.ts pauseToggleFields). Exclusive emission (v1.3.11): with rc2Refill = 1 the toggle belongs to
+ *  rest_toggled{on:true} (Refill), so nothing is emitted here; the state change is the same. */
+export function pauseWorker(s: GameState, id: WorkerId, b: Balance, ev?: Sink): GameState {
   if (!flagOn(b, 'pause')) return s;
   const w = s.workers[id];
   if (!w || isPaused(w, b) || s.farmLevel < tcNum(b, 'pause_unlock_farm')) return s;
+  if (ev && !flagOn(b, 'rc2Refill')) { const f = pauseToggleFields(s, id, b);
+    ev.push({ type: 'worker_paused', worker: id, farm: f.farm, energy_pct: Math.min(ENERGY_FULL, Math.max(0, Math.round(w.energy))), mood: f.mood,
+      unpaid: f.unpaid, ability_active: f.ability_active, golden_on_screen: f.golden_on_screen, frenzy_active: f.frenzy_active }); }
   return { ...s, workers: { ...s.workers, [id]: { ...w, paused: true } }, pausedForS: { ...s.pausedForS, [id]: 0 } }; // pause start: count from 0
 }
 /** paused_duration_s (D-PMW-2026-11-10-02, QA-D-1110-PAUDUR; Architect G2 ruling (b), G0-API.md rev 11 §14b): integer
  *  floor of ms/1000 at emit, from the never-saved pausedForS tracker (integer milliseconds internally). Always a
  *  number (never null, NaN or negative); a missing entry (reload, or a pause set without pauseWorker) reads 0, i.e.
- *  the count starts at load time. Known limits: a reload resets the count to load time; offline time and hidden
- *  gaps >= 60 s are not counted (sim time only). The one tracker for worker_resumed / rest_toggled{on:false}.paused_duration_s
- *  and session_end paused_worker_s / all_paused_s. */
+ *  the count starts at load time. Known limits: a reload resets the count to 0 (pausedForS is never saved); a
+ *  session rotation (resetPausedSession) zeros only the session aggregates sumS / allS and keeps each worker's
+ *  per-pause duration. Offline time and hidden gaps >= 60 s are not counted (sim time only). The one tracker for
+ *  worker_resumed / rest_toggled{on:false}.paused_duration_s and session_end paused_worker_s / all_paused_s. */
 export function pausedDurationS(s: GameState, id: WorkerId): number { return floorMsToS(s.pausedForS?.[id]); }
 /** Integer floor of ms/1000 >= 0; anything not a finite positive number reads 0 (QA-D-1110-PAUDUR). Sanitiser shape unchanged. */
 const floorMsToS = (v: unknown): number => typeof v === 'number' && Number.isFinite(v) && v > 0 ? Math.floor(v / 1000) : 0;
@@ -54,11 +62,24 @@ export function tickPausedFor(s: GameState, ws: Workers, dt: number, b: Balance)
 /** session_end additions (pause §12 L299; gate e485f762 card #T TEL-AC8/TEL-AC14): `paused_worker_s` (sum of paused seconds over
  *  workers) and `all_paused_s` (seconds while all hired workers were paused), integer floor of ms/1000 at emit, from the same
  *  never-saved integer-ms tracker (Architect G2 ruling (b), G0-API.md rev 11 §14b). Present only with pause = 1 and rc2Refill = 0;
- *  otherwise {} (absent). Known limits: a reload resets both to load time; offline time and hidden gaps >= 60 s are not counted
- *  (sim time only). Game.endSession spreads this into session_end. */
+ *  otherwise {} (absent). Known limits: a reload or a session rotation (resetPausedSession) resets both to 0;
+ *  offline time and hidden gaps >= 60 s are not counted (sim time only). Game.endSession spreads this into session_end. */
 export function pauseSessionEnd(s: GameState, b: Balance): { paused_worker_s?: number; all_paused_s?: number } {
   if (!flagOn(b, 'pause') || flagOn(b, 'rc2Refill')) return {};
   return { paused_worker_s: floorMsToS(s.pausedForS?.sumS), all_paused_s: floorMsToS(s.pausedForS?.allS) };
+}
+/** Zero the session_end pause aggregates (sumS / allS) on a session rotate (mutates in place). Keeps each
+ *  worker's per-pause duration so a pause that spans the rotation still reports the full paused_duration_s
+ *  on worker_resumed. sumS / allS are separate accumulators (tickPausedFor), not sums of the per-worker
+ *  entries, so zeroing them does not subtract from duration and a second call is a no-op (already absent).
+ *  Idempotent; no-op if pausedForS is absent (flag-off byte-identical). Drops the field if only aggregates remain. */
+export function resetPausedSession(s: GameState): void {
+  const t = s.pausedForS;
+  if (!t) return;
+  if (!('sumS' in t) && !('allS' in t)) return;
+  const { sumS: _s, allS: _a, ...rest } = t;
+  if (Object.keys(rest).length) s.pausedForS = rest;
+  else delete s.pausedForS;
 }
 /** Resume. Market Hand (B5) starts callLockoutS at tc_pause_call_lockout_s (45 sim seconds), on a Manage resume too (HoE 00:16).
  *  Other workers get no lockout. THE one worker_resumed emitter (pause §12, rule 8): cause 'manual' (Resume) or 'manage'

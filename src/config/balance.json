@@ -19,6 +19,7 @@
     "flush_interval_s": 5,
     "tap_batch_ms": 1000,
     "worker_summary_s": 60,
+    "session_hidden_end_s": 60,
     "bbv2": {
       "shown_min_gap_s": 5,
       "zero_gain_eta_max_s": 60,

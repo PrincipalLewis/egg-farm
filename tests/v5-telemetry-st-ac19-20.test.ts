@@ -28,8 +28,8 @@ const evs = (g: Game, type: string) => g.telemetry.events().filter(e => e.type =
 const end = (g: Game) => { g.endSession(); return evs(g, 'session_end').at(-1)!; };
 const sum = (xs: readonly RingEvent[], k: string) => xs.reduce((a, e) => a + (e[k] as number), 0);
 const V5_END = ['taps_total', 'taps_moved_eggs', 'empty_credited', 'coop_hand', 'farm_level', 'credited_taps', 'tap_bonus_cents'];
-const schemaErrs = (e: RingEvent, keys: readonly string[]) => { const { ts, sessionMs: _s, ...rest } = e;
-  return validateEvent({ ...rest, ts, sid: 'a1b2c3', fgMs: 0 } as TEvent).filter(m => keys.some(k => m.startsWith(`${e.type}.${k}:`))); };
+const schemaErrs = (e: RingEvent, keys: readonly string[]) => { const { ts, ...rest } = e;
+  return validateEvent({ ...rest, ts } as TEvent).filter(m => keys.some(k => m.startsWith(`${e.type}.${k}:`))); };
 
 describe('[ST-AC19] tap {count, credited, empty_credited, bonus_cents} (streak §8 L288, errata rev. 16 V-2b)', () => {
   it('[ST-AC19] 50 taps in 1 s at F >= 8, Coop Hand hired, empty coop: one tap event count 50, credited 1, empty_credited 1, bonus_cents = the bonus paid', () => {
@@ -109,7 +109,7 @@ describe('[ST-AC20] session_end v5 fields (streak §8.1, errata rev. 16 V-2b "+ 
     hired = true;
     // after: 400 taps, 250 credited, 200 of those moved 0 eggs; 50 taps moved eggs (all credited)
     for (let i = 0; i < 400; i++) { now += 10; t.tap(i < 50 ? 1 : 0, { credited: i < 250, coopHand: true }); }
-    t.track('session_end'); const e = t.events().find(x => x.type === 'session_end')!;
+    t.endSession('unload', now); const e = t.events().find(x => x.type === 'session_end')!;
     expect(e).toMatchObject({ taps_total: 600, taps_moved_eggs: 200, empty_credited: 200, coop_hand: true, farm_level: 12, credited_taps: 350 });
     const share = ((e.taps_moved_eggs as number) + (e.empty_credited as number)) / (e.taps_total as number);
     expect(share).toBeCloseTo(0.667, 3);
@@ -131,9 +131,13 @@ describe('[ST-AC20] session_end v5 fields (streak §8.1, errata rev. 16 V-2b "+ 
     const { g } = game(CREDIT, { workers: { coop_hand: { ...working } } }); g.dispatch({ type: 'collect' });
     expect(schemaErrs(end(g), V5_END)).toEqual([]);
   });
-  it('Saves-owned session_end paused_* fields are not emitted by this subset', () => {
-    const { g } = game(flags({ streak: 1, pause: 1 })); const e = end(g);
-    expect(e).not.toHaveProperty('paused_worker_s'); expect(e).not.toHaveProperty('all_paused_s');
+  it('Saves #119 session_end paused_* fields: 0 when pause=1 and rc2Refill=0 with no pause time; absent if pause is off or rc2Refill=1', () => {
+    const on = end(game(flags({ streak: 1, pause: 1 })).g);
+    expect(on).toMatchObject({ paused_worker_s: 0, all_paused_s: 0 });
+    const off = end(game(flags({ streak: 1, pause: 0 })).g);
+    expect(off).not.toHaveProperty('paused_worker_s'); expect(off).not.toHaveProperty('all_paused_s');
+    const refill = end(game(flags({ streak: 1, pause: 1, rc2Refill: 1 })).g);
+    expect(refill).not.toHaveProperty('paused_worker_s'); expect(refill).not.toHaveProperty('all_paused_s');
   });
 });
 
@@ -142,7 +146,7 @@ describe('flag-off: credit fields absent, legacy shape kept (errata V-2b "flag-g
     const { g } = game(OFF, { coop: 10000 });
     for (let i = 0; i < 3; i++) g.dispatch({ type: 'collect' });
     const e = end(g);
-    const tap = evs(g, 'tap')[0]; expect(Object.keys(tap).sort()).toEqual(['count', 'eggs', 'sessionMs', 'ts', 'type']);
+    const tap = evs(g, 'tap')[0]; expect(Object.keys(tap).sort()).toEqual(['count', 'eggs', 'fgMs', 'sid', 'ts', 'type']);
     for (const k of ['credited_taps', 'tap_bonus_cents', 'empty_credited', 'coop_hand']) expect(e, k).not.toHaveProperty(k);
     expect(e).toMatchObject({ taps_total: 3, taps_moved_eggs: 3, farm_level: 10 });
   });
