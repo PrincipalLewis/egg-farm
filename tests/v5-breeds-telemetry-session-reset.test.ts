@@ -19,16 +19,14 @@ const boot = (kv: ReturnType<typeof mem>, t: number) => new Game(BR, kv, () => t
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ends = (g: Game) => g.telemetry.events().filter(x => x.type === 'session_end') as any[];
 const freeIncubator = (g: Game) => { g.state = { ...g.state, breeds: { ...g.state.breeds!, incubator: null } }; };
-// Before the fix Game has no pageshow hook; the optional call keeps the red run an assertion failure, not a TypeError.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const pageShow = (g: Game, persisted: boolean) => (g as any).onPageShow?.(persisted);
-
 describe('m1: breeds session counters reset after session_end; bfcache restore starts fresh (no double-count)', () => {
   it('m1-red-1 bfcache restore: pagehide session_end, pageshow{persisted}, 1 more hatch -> the 2nd session_end counts only that hatch', () => {
-    const g = boot(mem(), T0); g.state = st({ owned: { leghorn: { stars: 0 } }, freeHatchUsed: 1 }, 16, 1e12);
+    let t = T0; const g = boot(mem(), T0); (g as any).now = () => t; // eslint-disable-line @typescript-eslint/no-explicit-any
+    g.state = st({ owned: { leghorn: { stars: 0 } }, freeHatchUsed: 1 }, 16, 1e12);
     const c1 = hatchCostCents(g.state, BR); g.dispatch({ type: 'hatch' });
     g.endSession(); // pagehide (main.ts) -> page enters bfcache with the JS heap intact
-    pageShow(g, true); // pageshow{persisted:true}: same Game object resumes
+    t += 5_000;
+    g.onPageShow(t); // #138 R6: pageshow{persisted} with wall time (sid already ended => rotate)
     freeIncubator(g); const c2 = hatchCostCents(g.state, BR); g.dispatch({ type: 'hatch' });
     g.endSession();
     const [e1, e2] = ends(g);
@@ -44,9 +42,14 @@ describe('m1: breeds session counters reset after session_end; bfcache restore s
     expect(sessionEndBreedsFields(g.state, BR)).toMatchObject({ breed_hatches: 0, breed_spend_cents: 0, breed_present_eggs: 0, breed_away_eggs: 0,
       breed_broody_cents: 0, breed_family_s: { P: 0, A: 0, B: 0 } });
   });
-  it('m1-red-3 pageshow{persisted} guard alone starts fresh counters (endSession skipped, e.g. held), non-persisted pageshow is a no-op', () => {
+  // DESIGN: the old m1-red-3 asserted a standalone pageshow{persisted} guard (and a no-op for persisted=false)
+  // even when endSession was skipped (e.g. held). #138 telemetryShown no-ops when hiddenAt is null, and R7
+  // frozen tabs never rotate or reset. The standalone guard would also have wiped a still-live sid.
+  // After #138, a live session keeps its breeds counters until contributor reset() / resetSessionFields
+  // on a real rotation (or endSession).
+  it('m1-red-3 pageshow without a prior hide does not wipe live-session breeds counters (#138 hiddenAt/R7)', () => {
     const g = boot(mem(), T0); g.state = st({}, 10, 0); g.dispatch({ type: 'hatch' });
-    pageShow(g, false); expect(sessionEndBreedsFields(g.state, BR)).toMatchObject({ breed_hatches: 1 });
-    pageShow(g, true); expect(sessionEndBreedsFields(g.state, BR)).toMatchObject({ breed_hatches: 0, breed_spend_cents: 0 });
+    g.onPageShow(T0);
+    expect(sessionEndBreedsFields(g.state, BR)).toMatchObject({ breed_hatches: 1 });
   });
 });

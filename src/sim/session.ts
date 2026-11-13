@@ -38,7 +38,7 @@ export function resetSessionFields(s: GameState): void {
   // M5.1 breeds §8: breedsTel is session-only; apply in place so the hide snapshot is zeroed too (MAJOR-1 analogue).
   const nextBreeds = resetBreedsTel(s);
   if (nextBreeds !== s) {
-    for (const k of Object.keys(s)) if (!(k in nextBreeds)) delete (s as Record<string, unknown>)[k];
+    for (const k of Object.keys(s)) if (!(k in nextBreeds)) delete (s as unknown as Record<string, unknown>)[k];
     Object.assign(s, nextBreeds);
   }
   // Extension point — clockWage / Refill add their one-line resets above this comment.

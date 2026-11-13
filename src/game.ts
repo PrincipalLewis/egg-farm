@@ -78,7 +78,7 @@ export class Game {
     this.telemetry.registerSessionEnd('pause', { fields: () => pauseSessionEnd(this.state, this.b), reset: () => resetPausedSession(this.state) });
     this.telemetry.registerSessionEnd('present', { fields: () => sessionEndPresentFields(this.state, this.b), reset: () => resetPresentSession(this.state) });
     // M5.1 breeds §8: breed_* session_end fields after pause + present (hook order: taps, pause, present, ours).
-    this.telemetry.registerSessionEnd('breeds', { fields: () => sessionEndBreedsFields(this.state, this.b), reset: () => { this.state = resetBreedsTel(this.state); } });
+    this.telemetry.registerSessionEnd('breeds', { fields: () => ({ ...sessionEndBreedsFields(this.state, this.b) }), reset: () => { this.state = resetBreedsTel(this.state); } });
     this.installId = installId(kv);
     this.telemetry.startSession('load', this.sessionStartFields());
     // M41-7 (spec v0.3.3, OQ-7): loadSafe is the single owner of the order. With opts.idbBoot (main.ts) the IndexedDB value is a
