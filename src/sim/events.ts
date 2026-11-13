@@ -14,6 +14,9 @@ export type SimEvent =
   | { type: 'worker_manage'; worker: WorkerId; energyBefore: number }
   | { type: 'worker_manage_all'; workers: WorkerId[]; energyBefore: number[] } // one tap = one Manage action (AC-W5)
   | { type: 'worker_state'; worker: WorkerId; state: WorkerMood }
+  /** Pause §12 (v1.3.18): emitted only by sim/pause.ts pauseWorker, only with pause = 1 and rc2Refill = 0 (exclusive emission);
+   *  every field but energy_pct is sampled from the pre-pause state (pauseToggleFields). */
+  | { type: 'worker_paused'; worker: WorkerId; farm: number; energy_pct: number; mood: WorkerMood; unpaid: boolean; ability_active: boolean; golden_on_screen: boolean; frenzy_active: boolean }
   | { type: 'worker_yawn'; worker_id: WorkerId; energy_pct: number; farm_level: number } // once per entry into Yawning (<= yawn_at_pct)
   | { type: 'wage'; worker: WorkerId; cents: number; state?: 'working' | 'tired' | 'asleep' } // state: m4.flags.clockWage = 1 only (failure-cost AC-FC15)
   | { type: 'grader_tier'; tier: number; mult: number; cost: number }
@@ -39,7 +42,10 @@ export type M5SimEvent =
   | { type: 'abilities_unlocked'; farm: number; hired: WorkerId[] }
   | { type: 'ability_used'; worker: WorkerId; farm: number; energy_pct: number; mood: WorkerMood; via_all: boolean; t_since_ready_s: number; in_sheet: boolean; combo: boolean }
   | { type: 'ability_blocked'; worker: WorkerId; reason: AbilityBlockReason; count: number }
-  | { type: 'ability_ended'; worker: WorkerId; cause: AbilityEndCause; effect_s: number };
+  | { type: 'ability_ended'; worker: WorkerId; cause: AbilityEndCause; effect_s: number }
+  /** Pause §12 (v1.3.16 471fb534): emitted only by sim/pause.ts resumeWorker, only with pause = 1 and rc2Refill = 0 (exclusive emission).
+   *  paused_duration_s: integer floor >= 0 of sim seconds paused (D-PMW-2026-11-10-02, QA-D-1110-PAUDUR). */
+  | { type: 'worker_resumed'; worker: WorkerId; farm: number; energy_pct: number; paused_duration_s: number; cause: 'manual' | 'manage' };
 /** Saves risk-helpers (sales-stopped-spec §8; econ/stall.ts): emitted only with m4.flags.salesStopped on. Fields = schema.ts rows. */
 type StallTag = import('../econ/stall').WorkerStateTag;
 export type SalesStallEvent =
