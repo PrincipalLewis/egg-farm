@@ -6,3 +6,4 @@
   argv[1]-only, no --csv), same single-line change.
 - The unit test restores that line and checks both sha256 values, so the fixtures stay faithful.
 - `stub/m4_active.py`: a deterministic stand-in (active/idle = 1.5) so the real argv and CSV-RECORD code runs without the studio sim.
+- The production gate is `scripts/pacing-x1-ac7-active-idle-gate.py` (same --csv / CSV-RECORD contract as a7dd71b, imports the tree-portable m4 at `scripts/pacing-x1-m4`). `real-gate.test.ts` runs that real path, not these fixtures.

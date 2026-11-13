@@ -2,6 +2,8 @@
 // Usage (read-only; writes only under --out):
 //   npx vite-node scripts/pacing-x1-stack.ts -- shard --profile <optimal|seller15|casual> --out <dir> [--seeds 1-200] [--data <key>]
 //   npx vite-node scripts/pacing-x1-stack.ts -- verdict --in <dir with shard-*.json [+ ac7.json]> --out <dir> [--require-ac7]
+//     If ac7.json is missing, verdict runs the tree gate (scripts/pacing-x1-ac7-active-idle-gate.py) on
+//     data/economy.csv, writes ac7.json + ac7.log + ac7-csv-record.txt, and prints the CSV-RECORD line.
 //   npx vite-node scripts/pacing-x1-stack.ts -- inputs --out <dir>   (QA-D-1030-SHIPFLAGS: balance.txt + inputs/<balance.json copy>)
 // shard: builds balance IN MEMORY from the tree's shipped data/economy.csv + balance.json (tests/pacing-x1/source.ts; sha256
 //   recorded, HoE 10:57), then runs
@@ -11,12 +13,14 @@
 // verdict: compares the shards with the pinned §13.2a table (tests/fixtures/x1/pred-13.2a-7bbb5925.csv (§13.2a e4369888 + row-904 cell per QA-D-1030-X1-TREE / R6)); exit 1 on any
 //   blocks-merge=Y row that misses, else 0. G5-P pause rows are excluded (X1 note). Writes verdict.json and summary.md.
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
-import { execSync } from 'node:child_process';
+import { execSync, spawnSync } from 'node:child_process';
 import { loadTargets, quantile } from '../tests/pacing-guards';
 import { run, PROFS, windowGate } from '../tests/bot-m5';
 import { X1_DATA, X1_SOURCES, type X1SourceKey, type X1Toggle } from '../tests/pacing-x1/source';
 import { evaluate, verdictOf, blockingUnjudged, shardProblems, notJudgedLine, watchListLine, type Shard, type Gate, type Ac7 } from '../tests/pacing-x1/compare';
-import { existsSync } from 'node:fs';
+import { existsSync, realpathSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 import { X1_PRED, X1_RUN, pinned, parsePred, x1Balance, x1Stacks, balanceLine, type BalanceRecord } from '../tests/pacing-x1/harness';
 
 const args = process.argv.slice(2).filter(a => a !== '--'), opt = (k: string, d?: string) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
@@ -40,6 +44,56 @@ function shard() {
   console.log(`pacing-x1-stack shard ${profile}: ${key}, seeds ${s0}-${s1}, ${res.runtimeS}s -> ${outDir}/shard-${profile}.json`);
 }
 
+
+/** Row 904: run the tree AC7 gate on the shipped CSV when the recorded-run ac7.json is not already present.
+ *  The gate honours --csv, exits 2 if the path is missing/unreadable (never falls back), and emits
+ *  `CSV-RECORD path=<realpath> sha256=<sha>` on stderr (merged into the helper log). */
+function runTreeAc7(outDir: string): Ac7 {
+  const root = fileURLToPath(new URL('..', import.meta.url));
+  const script = `${root}/scripts/pacing-x1-ac7-active-idle-gate.py`;
+  const helper = `${root}/scripts/pacing-x1-ac7.py`;
+  const csv = `${root}/data/economy.csv`;
+  const csvAbs = realpathSync(csv);
+  const want = createHash('sha256').update(readFileSync(csv)).digest('hex');
+  mkdirSync(outDir, { recursive: true });
+  const log = `${outDir}/ac7.log`;
+  const r = spawnSync('python3', [helper, 'run', script, csvAbs, want, log], { encoding: 'utf8' });
+  let parsed: Partial<Ac7> = {};
+  try { parsed = JSON.parse(r.stdout || '{}'); } catch { parsed = { status: 'FAIL', why: `AC7 helper stdout not JSON: ${(r.stdout || r.stderr || '').slice(0, 400)}` }; }
+  const scriptSha256 = existsSync(script) ? createHash('sha256').update(readFileSync(script)).digest('hex') : '';
+  const m4 = `${root}/scripts/pacing-x1-m4/m4_active.py`;
+  const j: Ac7 = {
+    status: parsed.status === 'PASS' ? 'PASS' : 'FAIL',
+    why: parsed.why || (parsed.status === 'PASS' ? '' : (r.status ? `AC7 helper exit ${r.status}` : 'AC7 failed')),
+    source: 'tree',
+    script,
+    scriptSha256,
+    csv: 'data/economy.csv',
+    csvSha256: want,
+    csvNamed: !!parsed.csvNamed,
+    csvRecord: parsed.csvRecord,
+    csvRecordOk: !!parsed.csvRecordOk,
+    exitCode: parsed.exitCode ?? r.status,
+    result: parsed.result,
+    sim: {
+      path: m4,
+      sha256: existsSync(m4) ? createHash('sha256').update(readFileSync(m4)).digest('hex') : '',
+      source: 'tree',
+      commit: null,
+      commitSha256: null,
+      match: 'n/a',
+    },
+    ruling: 'QA-D-1030-X1-TREE (R6 of QA-D-1030-PR93-1): AC7 2x active/idle gate; not byte-identity vs c7bb783f',
+  };
+  writeFileSync(`${outDir}/ac7.json`, JSON.stringify(j, null, 1) + '\n');
+  writeFileSync(`${outDir}/ac7-run.json`, (r.stdout || '') + (r.stdout?.endsWith('\n') ? '' : '\n'));
+  writeFileSync(`${outDir}/ac7-csv-record.txt`, (j.csvRecord ?? 'NO CSV-RECORD LINE in ac7.log') + '\n');
+  writeFileSync(`${outDir}/ac7-status.txt`, `${j.status} ${j.why || j.result || ''}\n`);
+  console.log(j.csvRecord ?? 'NO CSV-RECORD LINE in ac7.log');
+  console.log(`AC7 (row 904) ${j.status}${j.why ? ': ' + j.why : j.result ? ': ' + j.result : ''}`);
+  return j;
+}
+
 function verdict() {
   const inDir = opt('--in'), outDir = opt('--out') ?? inDir; if (!inDir || !outDir) { console.error('verdict: --in <dir> [--out <dir>] required'); process.exit(2); }
   const rows = parsePred(pinned(X1_PRED.fixture, X1_PRED.sha256).toString('utf8'));
@@ -51,7 +105,8 @@ function verdict() {
   // QA-D-1030-SHIPFLAGS: every shard must carry the balance.json record (sha256 + m4 flags) and it must match its balanceSha256
   for (const s of ss) { const r = s.balance as BalanceRecord | undefined; if (!r) problems.push(`shard ${s.profile}: no balance.json record (sha256 + m4 flags)`); else if (r.sha256 !== s.balanceSha256) problems.push(`shard ${s.profile}: balance record sha256 ${r.sha256} != balanceSha256 ${s.balanceSha256}`); }
   const bal = ss.find(s => s.balance)?.balance as BalanceRecord | undefined;
-  const ac7File = `${inDir}/ac7.json`, ac7: Ac7 | null = existsSync(ac7File) ? JSON.parse(readFileSync(ac7File, 'utf8')) : null;
+  const ac7File = `${inDir}/ac7.json`;
+  const ac7: Ac7 | null = existsSync(ac7File) ? JSON.parse(readFileSync(ac7File, 'utf8')) : runTreeAc7(outDir!);
   const o = evaluate(rows, shards, ac7, args.includes('--require-ac7')), v = problems.length ? 'FAIL' : verdictOf(o), key = [...keys][0] as X1SourceKey, src = X1_SOURCES[key];
   const drift: string[] = []; const s0 = ss[0];
   const n = (st: string) => o.filter(x => x.status === st).length;
