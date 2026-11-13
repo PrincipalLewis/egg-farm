@@ -78,7 +78,7 @@ describe('flag-off byte-identity: the wiring adds nothing', () => {
     let s = st(leghorn); for (let i = 0; i < 500; i++) s = step(s, 0.1, OFF, undefined, focus);
     expect(s.breedsTel).toBeUndefined();
     const g = boot(OFF); g.state = st(sussex); grant(g, 3_600_000); expect(g.state.breedsTel).toBeUndefined();
-    g.endSession(); expect(Object.keys(ends(g)[0]).sort()).toEqual(['farm_level', 'sessionMs', 'taps_moved_eggs', 'taps_total', 'ts', 'type']);
+    g.endSession(); expect(Object.keys(ends(g)[0]).sort()).toEqual(['farm_level', 'fgMs', 'fg_ms', 'reason', 'sid', 'taps_moved_eggs', 'taps_total', 'ts', 'type']);
     expect(Object.keys(ends(g)[0]).every(k => !k.startsWith('breed'))).toBe(true);
     expect(awayBonusEggs(st(sussex), 3_600_000, OFF, 1_000, 1500)).toBe(0);
   });

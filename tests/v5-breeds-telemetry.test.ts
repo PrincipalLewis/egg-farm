@@ -204,7 +204,7 @@ describe('§8 session_end breeds fields (L698): flag on all present, flag off al
     const g = boot(OFF, mem(), T0); g.state = st({ owned: { leghorn: { stars: 0 } } }, 12, 1e12); g.dispatch({ type: 'hatch' }); g.endSession();
     const e = g.telemetry.events().filter(x => x.type === 'session_end').pop()!;
     // #123 ST-AC20: session_end always carries base farm_level / taps_total / taps_moved_eggs. Breed fields stay absent.
-    expect(Object.keys(e).sort()).toEqual(['farm_level', 'sessionMs', 'taps_moved_eggs', 'taps_total', 'ts', 'type']);
+    expect(Object.keys(e).sort()).toEqual(['farm_level', 'fgMs', 'fg_ms', 'reason', 'sid', 'taps_moved_eggs', 'taps_total', 'ts', 'type']);
     expect(OWN.every(k => !(k in e))).toBe(true);
     expect(sessionEndBreedsFields(g.state, OFF)).toEqual({});
   });
