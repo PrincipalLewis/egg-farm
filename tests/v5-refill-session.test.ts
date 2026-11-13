@@ -234,6 +234,80 @@ describe('[G2][M2][T-AC9] sessionEndFields spreads refillSessionTotals; #138 hoo
     expect(g.state.pausedForS).toEqual({ market_hand: 5_000 });
   });
 
+  it('[G2][M2][QA-D-1029-V5SCAP] rotation: session 2 session_end refill fields equal only session-2 activity (hide >= 60 s)', () => {
+    // Architect F1 / official two-session contract (cf. tests/v5-session-rotate-hook.test.ts:186):
+    // refill activity in session 1, hide >= 60 s, onShown, refill activity in session 2, then EXACT
+    // equality that session 2's session_end refill fields count only session-2 activity.
+    const T0 = Date.UTC(2026, 10, 10, 12);
+    const kv = mem(); let t = T0;
+    const g = new Game(RA, kv, () => t, 7);
+    for (let i = 0; i < 20; i++) { t += 1000; g.frame(); }
+    const CTX = { sheetId: 1, entryPoint: 'nav' as const };
+    const low = (energy: number) => ({ energy, cdS: 0 });
+    const refillFields = (e: { [k: string]: unknown }) => ({
+      shortage_s: e.shortage_s,
+      refills_manual: e.refills_manual,
+      refills_auto: e.refills_auto,
+      charge_starved_s: e.charge_starved_s,
+    });
+    const evs = () => g.telemetry.events().filter(e => !e.legacy && e.type === 'session_end');
+
+    // Session 1: 2 manual refills (charges 2 → 0), then 2500 ms with a leftover refillable (hawker @ 20)
+    // so shortage_s = 2 and charge_starved_s = 2.5. Drop any session keys the 20 warmup frames may have written.
+    const { refillSession: _s1, refillAgoMs: _a1, ...warm } = g.state;
+    g.state = {
+      ...warm,
+      farmLevel: 15,
+      refillCharges: 2,
+      chargeNextMs: 150_000,
+      workers: { market_hand: low(40), coop_hand: low(40), hawker: low(20) },
+    };
+    expect(g.refill('market_hand', CTX)).toEqual({ ok: true });
+    expect(g.refill('coop_hand', CTX)).toEqual({ ok: true });
+    expect(g.state.refillCharges).toBe(0);
+    expect(g.state.refillSession?.refillsManual).toBe(2);
+    g.debugAdvance(2_500);
+    const s1Totals = { shortage_s: 2, refills_manual: 2, refills_auto: 0, charge_starved_s: 2.5 };
+    expect(refillSessionTotals(g.state, RA)).toEqual(s1Totals);
+
+    g.onHidden(t); t += 60_000; g.frame(); g.onShown(t);
+
+    const ends1 = evs();
+    expect(ends1).toHaveLength(1);
+    const e1 = ends1[0]!;
+    expect(refillFields(e1)).toEqual(s1Totals); // session 1 emit is the hide-time totals (before reset)
+
+    // Session 2: 1 manual refill (give 1 charge; energy on a worker set low), then 1000 ms shortage+starved.
+    // Values are deliberately different from session 1 on every non-zero field. A no-op reset would
+    // carry session 1 forward and emit { shortage_s: 3, refills_manual: 3, refills_auto: 0, charge_starved_s: 3.5 }.
+    // Fresh hired workers (do not spread the hide-snapshot objects: a >= 60 s hide can
+    // leave Market Hand unpaid, which blocks refillEligibility).
+    g.state = {
+      ...g.state,
+      refillCharges: 1,
+      chargeNextMs: 150_000,
+      workers: { market_hand: low(40), hawker: low(20) },
+    };
+    expect(g.refill('market_hand', CTX)).toEqual({ ok: true });
+    expect(g.state.refillCharges).toBe(0);
+    g.debugAdvance(1_000);
+    const s2Totals = { shortage_s: 1, refills_manual: 1, refills_auto: 0, charge_starved_s: 1 };
+    // Do not assert refillSessionTotals(g.state) here: that would fail first under a no-op reset
+    // and hide the session_end exact-equality evidence this case exists to record.
+
+    t += 4_000;
+    g.endSession();
+    const ends = evs();
+    expect(ends).toHaveLength(2);
+    const e2 = ends[1]!;
+    expect(e2.sid).not.toBe(e1.sid);
+    expect(e2).toMatchObject({ reason: 'unload' });
+    // EXACT equality: session 2 refill fields count only session-2 activity.
+    expect(refillFields(e2)).toEqual(s2Totals);
+    expect('charges_capped_s' in e2).toBe(false);
+    expect('asleep_s' in e2).toBe(false);
+  });
+
   it('[G2][M2][QA-D-1029-V5SCAP] fields(src) reads from src when given and from live state otherwise', () => {
     const T0 = Date.UTC(2026, 10, 10, 12);
     const liveSess: RefillSession = {
