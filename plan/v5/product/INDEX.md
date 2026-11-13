@@ -1,6 +1,6 @@
 # product/ index
 
-Copies of the v5-relevant Product documents from the studio box `/workspace/egg-farm-studio/product/` (folder structure kept), taken 2026-11-10 ~11:00 CET. Product analyses (`critic/`, `sim/`, `research/`) are under `../analysis/product/`. "Rev" and "Date" are read from the file header (else the file mtime). Hash-suffixed files (e.g. `name.4441a1d9.md`) are **frozen revs cited as pins** in the v5 flag table / build-state / RC manifest; the un-suffixed file is the current rev.
+Copies of the v5-relevant Product documents from the studio box `/workspace/egg-farm-studio/product/` (folder structure kept), taken 2026-11-10 ~11:00 CET. Product analyses (`critic/`, `sim/`, `research/`) are under `../analysis/product/`. "Rev" and "Date" are read from the file header (else the file mtime). Hash-suffixed files (e.g. `name.4441a1d9.md`) are **frozen revs cited as pins** in the v5 flag table / build-state / RC manifest; the un-suffixed file is the current rev. **2026-11-13 refresh:** `decisions.md` (current box sha1 `9db8f9fa`; D-HOP-2026-11-12-02 was pinned at sha1 `9b700863`, the file through that entry) and the newly pinned governing freeze `workers/m5-worker-pause-spec.07540579.md` (v1.3.19).
 
 | File | What it is (first heading) | Rev | Date | Fed (decisions / features) |
 |---|---|---|---|---|
@@ -53,7 +53,7 @@ Copies of the v5-relevant Product documents from the studio box `/workspace/egg-
 | [collection/v5-save-shapes.md](collection/v5-save-shapes.md) | v5 save shapes: Collection (streak/tapCoins, breeds), D-HOP-2026-10-30-38 | v1.3.2 | 2026-10-30 | D-HOP-2026-10-30-38, D-HOE-20261030-19, streak, tapCoins, breeds |
 | [core-loop-spec.md](core-loop-spec.md) | Core Loop Spec — Milestone 1 (MVP) · v1 · 2026-10-15 · Head of Product | — | 2026-10-15 | — |
 | [customer-roadmap-v02-m4-sim.md](customer-roadmap-v02-m4-sim.md) | Customer type roadmap v0.2: re-sim on the full M4 stack (Economy, 2026-10-16) | v0.2 | 2026-10-16 | economy |
-| [decisions.md](decisions.md) | product decisions | v0.2 | 2026-10-15 | — |
+| [decisions.md](decisions.md) | product decisions | v0.2 | 2026-11-13 (refreshed) | D-HOP-2026-11-12-02, pause, abilities-shift |
 | [economy-p1q-diff.md](economy-p1q-diff.md) | economy.p1q.csv: diff vs economy.csv (Economy/Balance Designer, 2026-10-15 23:45 UTC+2) | — | 2026-10-15 | economy |
 | [economy-proposal-m1.md](economy-proposal-m1.md) | Economy M1-R1 — Economy/Balance Designer · 2026-10-15 · APPROVED (Head of Product; offline 0.25 by CEO) and AP | — | 2026-10-15 | economy |
 | [economy.csv](economy.csv) | level,collection_cost,eggs_per_tap,farm_cost,hens,eggs_per_sec,coop_capacity,egg_price,customer_interval_s,dem | — | 2026-11-09 (mtime) | economy |
@@ -279,9 +279,10 @@ Copies of the v5-relevant Product documents from the studio box `/workspace/egg-
 | [workers/m5-worker-pause-spec.471fb534.md](workers/m5-worker-pause-spec.471fb534.md) | M5.0 item 5: Per-worker Pause/Resume (PM, Workers). The ONE reconciled Pause spec | v1.3.16 | 2026-11-10 | D-HOP-2026-11-10-04, D-PMW-2026-11-10-01, pause |
 | [workers/m5-worker-pause-spec.4c081f64.md](workers/m5-worker-pause-spec.4c081f64.md) | M5.0 item 5: Per-worker Pause/Resume (PM, Workers). The ONE reconciled Pause spec | v1.3.15 | 2026-10-30 | QA-D-1030-TELERR5, D-HOE-20261030-33, pause |
 | [workers/m5-worker-pause-spec.74a0122a.md](workers/m5-worker-pause-spec.74a0122a.md) | M5.0 item 5: Per-worker Pause/Resume (PM, Workers). The ONE reconciled Pause spec | v1.3.14 | 2026-10-30 | D-HOE-20261030-20, D-PMW-2026-10-30-10, pause |
-| [workers/m5-worker-pause-spec.7536acfa.md](workers/m5-worker-pause-spec.7536acfa.md) | M5.0 item 5: Per-worker Pause/Resume (PM, Workers). The ONE reconciled Pause spec | v1.3.17 | 2026-11-10 | D-HOP-2026-11-10-15, D-CEO-20261110-08, pause |
+| [workers/m5-worker-pause-spec.7536acfa.md](workers/m5-worker-pause-spec.7536acfa.md) | M5.0 item 5: Per-worker Pause/Resume (PM, Workers). The ONE reconciled Pause spec | v1.3.17 | 2026-11-10 | D-HOP-2026-11-10-15, D-CEO-20261110-08, pause (superseded; history only) |
+| [workers/m5-worker-pause-spec.07540579.md](workers/m5-worker-pause-spec.07540579.md) | M5.0 item 5: Per-worker Pause/Resume (PM, Workers). The ONE reconciled Pause spec | v1.3.19 | 2026-11-10 | D-HOP-2026-11-12-02, D-HOP-2026-11-10-19, pause (governs the build) |
 | [workers/m5-worker-pause-spec.b4f86ca8.md](workers/m5-worker-pause-spec.b4f86ca8.md) | M5.0 item 5: Per-worker Pause/Resume (PM, Workers). The ONE reconciled Pause spec | v1.3.10 | 2026-10-30 | QA-D-1030-ACP1-B, D-HOP-2026-10-30-05, pause, b4 |
-| [workers/m5-worker-pause-spec.md](workers/m5-worker-pause-spec.md) | M5.0 item 5: Per-worker Pause/Resume (PM, Workers). The ONE reconciled Pause spec | v1.3.19 | 2026-11-10 | D-HOP-2026-11-10-19, D-HOP-2026-11-10-16, pause |
+| [workers/m5-worker-pause-spec.md](workers/m5-worker-pause-spec.md) | M5.0 item 5: Per-worker Pause/Resume (PM, Workers). The ONE reconciled Pause spec | v1.3.19 | 2026-11-10 | D-HOP-2026-11-12-02, D-HOP-2026-11-10-19, pause (governs the build; sha1 07540579) |
 | [workers/m5.1-lighter-refill-proposal.064c412d.md](workers/m5.1-lighter-refill-proposal.064c412d.md) | M5.1 lighter Refill: proposal (PM Workers) v0.8.12 | v0.8.12 | 2026-10-24 | D-HOP-2026-10-24-45, QA-D-1030-FC0321, refill |
 | [workers/m5.1-lighter-refill-proposal.08d12ac7.md](workers/m5.1-lighter-refill-proposal.08d12ac7.md) | M5.1 lighter Refill: proposal (PM Workers) v0.8.3 | v0.8.3 | 2026-10-24 | D-HOP-2026-10-24-45, D-HOP-2026-10-25-13, refill, ac7 |
 | [workers/m5.1-lighter-refill-proposal.13577395.md](workers/m5.1-lighter-refill-proposal.13577395.md) | M5.1 lighter Refill: proposal (PM Workers) v0.8.13 | v0.8.13 | 2026-10-24 | D-HOP-2026-10-24-45, QA-D-1030-FREEZE-RR1, refill |
@@ -314,7 +315,7 @@ Copies of the v5-relevant Product documents from the studio box `/workspace/egg-
 | [workers/v5-workers-save-shapes.963a490b.md](workers/v5-workers-save-shapes.963a490b.md) | v5 save shapes: Workers (rc2Refill, autoRefill, clockWage, Pause, abilities), D-HOP-2026-10-30-38 | v1.0.4 | 2026-10-30 | D-HOP-2026-10-30-38, D-PMW-2026-10-30-27, abilities, pause, refill |
 | [workers/v5-workers-save-shapes.md](workers/v5-workers-save-shapes.md) | v5 save shapes: Workers (rc2Refill, autoRefill, clockWage, Pause, abilities), D-HOP-2026-10-30-38 | v1.0.5 | 2026-10-30 | D-HOP-2026-10-30-38, D-PMW-2026-10-30-30, abilities, pause, refill |
 
-## Skipped as superseded (113)
+## Skipped as superseded (112)
 A hash-suffixed frozen rev was skipped when the current un-suffixed file exists and the hash is not cited as a pin in `engineering/v5-flag-table.md`, `v5-sim-build-state.md`, `v5-ui-build-state.md` or `v5-rc-manifest.md`; files marked SUPERSEDED were skipped. Scratch/ and archive/ folders were not copied.
 
 - `product/m5-gate-acs.6f53d9a3.md`
@@ -387,7 +388,6 @@ A hash-suffixed frozen rev was skipped when the current un-suffixed file exists 
 - `product/workers/m4.2-fatigue-visibility-spec.e160a0d3.md`
 - `product/workers/m5.1-worker-failure-cost-proposal.2f830cb0.md`
 - `product/workers/rc2-refill-proposal.a3e2aa6c.md`
-- `product/workers/m5-worker-pause-spec.07540579.md`
 - `product/workers/m5-worker-abilities-spec.c65dfbc5.md`
 - `product/workers/m5.1-worker-failure-cost-proposal.af9850b5.md`
 - `product/workers/m5-worker-pause-spec.140b1508.md`

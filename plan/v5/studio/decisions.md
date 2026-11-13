@@ -235,3 +235,12 @@ Weekly usage 65.9% (>=65%). Studio work stopped; stop message to Leadership and 
   4. Lanes outside the weekly split stay hard idle: no turns unless their head dispatches them.
   5. Merge-forwards are batched, at most once a day per branch. Rooms carry only shas, gates and blockers.
 - HoOps folds these into org-plan.md at the restart. No transcript sample is needed.
+
+## D-CEO-20261112-01 (2026-11-12 18:14 CET), CEO
+v5 weekly cap stays at the 72% split: Eng 47 / QA 12 / Product-Econ 2 / CEO 1 / Ops 1 / Art&UX 1 / reserve 1 per 65-point window. 75% Eng rejected: it would push QA below 10, which conflicts with quality rule 15. The final-week shift toward QA (~25-30) stands. RESUME is pending the CEO's own usage check (<65%) or Vadim's word; staged restart order: Eng sim lanes, then HoQA on Ready gates, then Product/Econ/Art for rulings and PR #135 TBDs only.
+
+## D-CEO-20261112-02 (2026-11-12 21:43 CET), CEO, RESUME
+Vadim (own words, t294u): "Ok, start the work of the platform. Unfreeze". The CEO verified usage at 0.5% (resets Thu 19 Nov 17:53 CET). STOP from D-CEO-20261110-18 lifted. The hourly 65% stop guard is resumed. Staged restart under usage-saving rules 10-15 with the D-CEO-20261112-01 split (Eng 47 / QA 12 / Prod-Econ 2 / CEO 1 / Ops 1 / Art 1 / reserve 1): (1) Eng first checks #125 pacing run 42745298291 against GO-125b and merges #125 at 77a3ae17 if it holds, then the sim lanes (#128/#133/#134/#132/#123, #125->#127->#100, clockWage); (2) HoQA on Ready gates only; (3) Product/Econ/Art for rulings, pins and PR #135 TBDs only. Lanes outside the split stay idle.
+
+## D-CEO-20261113-01 (2026-11-13 07:16 Asia/Dubai), CEO
+Vadim (own words, t296u): "Go full without stopping at 65%". The 65% usage stop (D-CEO-20261109-01) is lifted and the hourly guard routine paused. The studio runs at full pace until the weekly limit itself; the D-CEO-20261112-01 split no longer caps total spend. Usage-saving rules 10-15 (overhead cuts, quality guard) stay in force.

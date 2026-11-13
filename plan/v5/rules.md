@@ -24,7 +24,7 @@ This page summarises; the **authoritative text** is in the studio files (copies 
 - **15 Quality guard (Vadim, 2026-11-10):** usage cuts must never relax a gate (ACs, QA sign-off, pacing ±20%, save compatibility); roll back any cut that causes escaped bugs, reverts, failed gates or rework.
 
 ## Usage stop
-- Vadim's rule: **stop all studio work at 65% weekly usage** (D-CEO-20261109-01, D-CEO-20261110-18). Resume only on Vadim's word or after the weekly reset when usage is below 65%.
+- The 65% weekly-usage stop (D-CEO-20261109-01, D-CEO-20261110-18) was **lifted** by D-CEO-20261113-01 (Vadim, 2026-11-13). The studio runs at full pace until the weekly limit itself (reset Thu 19 Nov 2026, 17:53 CET). There are no extra credits; at 100% every bot stops until the reset. The D-CEO-20261112-01 split (Eng 47 / QA 12 per window; 75% Eng rejected) is a priority guide, not a cap on total spend. Usage-saving rules 10–15 (overhead cuts, quality guard) stay in force.
 
 ## Repo hygiene for this release
 - Every v5 PR targets **`rc/v5`** (or stacks on a PR that does). Flags stay `0` until ship-values flip at the RC.

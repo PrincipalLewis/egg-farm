@@ -2,6 +2,8 @@
 
 **Source:** `engineering/v5-flag-table.md` §(a)–(d) (plan **B** with the parallel-build rulings, accepted D-CEO-20261110-13), updated with branch state from `in-flight.md`. Hours are engineer hours, low–high; ~8 h/day/lane. "→" means "then". Restart order follows org-plan rule 10 (staged restarts: critical-path engineers first, no mass wake).
 
+**Updated Fri 13 Nov 2026:** #125, #128, #123, #119, #132/#140 and #142 have merged into `rc/v5` (merge shas in `gates-and-schedule.md`). The RC is dated after the sim-complete sha; the 65% stop is lifted (D-CEO-20261113-01).
+
 ## Lanes
 
 ### Saves — Senior Engineer, Saves & Persistence `3ba38cf3` — 32–44 h
@@ -60,5 +62,5 @@
 
 - Pole lane: **Backfill 35–50 h** (mid 42.5), Generalist a close second (mid 41.25).
 - Hard serial links: Saves risk-helpers before Backfill's swap; refill G0 on day 1; clockWage merges **after** refill; golden/streak/Broody UIs need **F6**; PR-B before F6; merge train **#125 → #127 → #100**; #119 after restart + CP train + verify-smoke.
-- RC working day in plan B: ~day 7 mid / ~day 8 high after the restart, or ~7.6–8 / ~8.6–9 with HoQA's 13–19 QA h on the pole. **These are engineer-day dates; the real limit is usage (see `gates-and-schedule.md`). The CEO has NOT dated the RC (D-CEO-20261110-13).**
+- RC working day in plan B: ~day 7 mid / ~day 8 high after the restart, or ~7.6–8 / ~8.6–9 with HoQA's 13–19 QA h on the pole. **These are engineer-day dates; the real limit is usage (see `gates-and-schedule.md`). The RC is dated after the sim-complete sha (D-CEO-20261110-13; confirmed in the 2026-11-13 update).**
 - 5-day hours check: FAIL for Backfill (and Generalist high). Quantified-but-not-applied move: shift session-end-base off Generalist to Architect or Hire 3 (pole unchanged).

@@ -2565,3 +2565,14 @@ Basis: Architect contract engineering/reviews/arch-abilities-fireAbility-combo-p
 ## D-HOP-2026-11-10-23 (03:50 CET): `asleep_banner` entry value (HoE ask, D-HOE-59)
 - Yes. `asleep_banner` is added to shift_sheet_opened.entry and to refill_used.entry_point and rest_toggled.entry_point. The enums become nav|card|stall_chip|fatigue_chip|asleep_banner (+auto on both entry_point enums). It is used when the Rule 3 Asleep banner's Manage (rc2Refill=1, #5b) opens the Shift sheet. It carries no stall_id and gets sheet_id as usual. The sheet opens focused on the worker the banner names. Conversion uses the same sheet_id join as fatigue_chip.
 - Errata: telemetry errata rev. 16 (PMC; predecessor rev. 15) and rc2-refill-proposal (PMW), both at the restart. The build may use the enum now under D-HOE-59. QA bars it on rev. 16.
+
+## D-HOP-2026-11-12-01 (21:45 CET): `fatigue_bubble` entry value (HoE ask, amendment to D-HOE-59)
+- Yes. `fatigue_bubble` is added alongside `asleep_banner` for the Rule 4 goal bubble's Manage (rc2Refill=1) opening the Shift sheet. The enums on shift_sheet_opened.entry, refill_used.entry_point and rest_toggled.entry_point become nav|card|stall_chip|fatigue_chip|asleep_banner|fatigue_bubble (+auto on both entry_point enums). No stall_id; sheet_id and the conversion join are as for fatigue_chip.
+- Errata: same telemetry errata rev. 16 (PMC) and rc2-refill-proposal (PMW). The build may use it now; QA bars it on rev. 16.
+
+## D-HOP-2026-11-12-02 (21:50 CET): PR #135 Product TBDs (plan/v5/features.md)
+- L62 pause: m5-worker-pause-spec v1.3.19 sha1 07540579 (HoP pin) governs the v5 build. v1.3.17 7536acfa is history only; the flag table's citation is superseded.
+- L39 `feat/v5-abilities-shift` (1ebcd7af): not a v5 source. v5 scope is the 14-flag table; nothing from that branch merges unless it is re-landed through a flag-table PR with its own review. Reference-only, keep it, do not delete.
+- Not Product's: L17/L88 art pins (Art; golden resolved by HoAUX 28dcff19), L25 hours left (Eng).
+
+- **2026-11-12 21:55 CET · PM Workers · D-PMW-2026-11-12-01 (TASK HoP/PMW-asleep-banner-entry; D-HOP-2026-11-10-20/-23, D-HOP-2026-11-12-01):** rc2-refill-proposal v1.3.17, sha1 a1ebe954f1b67cf20ead8d66f4230d57a328802a (snapshot workers/rc2-refill-proposal.a1ebe954.md; v1.3.16 e4d98651 frozen and backed up). Telemetry text only: entry enums gain asleep_banner|fatigue_bubble; G0-API §7 7.2/7.4/7.5/7.9 recorded.

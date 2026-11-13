@@ -2,6 +2,8 @@
 
 **Main source:** `engineering/v5-flag-table.md` (HoE, 2026-11-10 ~02:10 CET, sha256 `8b7c3e24…`, accepted by D-CEO-20261110-13). Sim state per `engineering/v5-sim-build-state.md` (Architect audit at `rc/v5` `d65391b0`); UI state per `engineering/v5-ui-build-state.md` (at `f20b918`) and the flag table. PR heads were refreshed from GitHub at 2026-11-10 ~11:00 CET (`in-flight.md`).
 
+**Updated Fri 13 Nov 2026:** Product and Art TBD pins in this file are resolved (D-HOP-2026-11-12-02; HoAUX 2026-11-12 21:50 CET and 2026-11-13 07:20 Asia/Dubai). Since 2026-11-12 these sim PRs merged into `rc/v5` (merge shas from `gh`): #125 `006bdd72`, #128 `be77b1c0`, #123 `d84976b8`, #119 `0755a284`, #132/#140 `5552556b` (#140 is the re-land of #132 onto `rc/v5`; #132 itself merged to #119's branch as `6dc56a55`), #142 `b83ce852`. Current `rc/v5` tip: `b83ce852`.
+
 **Legend:** BUILT = on `rc/v5` · IN-PR = open PR · ON-BRANCH = branch, no PR · MISSING = nowhere. Hours = engineer hours to Ready (low–high). "Art pin" and "spec pin" shas are **sha1 of the file contents**; every pin below was re-checked against the copied file in this pack (match noted ✔).
 
 **Owners (roster.md):** Saves = Senior Engineer, Saves & Persistence `3ba38cf3` · Features = Senior Engineer, Features & Economy Wiring `95daf662` · Generalist = Senior Engineer, Generalist `5a6a207d` · Architect = Senior Software Architect `205f4268` (RC lead + reviewer) · Backfill = Senior Engineer, UI (lane U backfill) `1d79672c` · Hire 2 = Senior Engineer, Sim/TS + UI `821caad7` · Hire 3 = Senior Engineer, UI `dec9a396` · Saves QA = QA Engineer, Saves & Release Verification `33ec1b55` · UI QA = QA Engineer, UI/Layout & Gameplay Verification `edb6ef85`. All engineers report to Head of Engineering (HoE) `61b89361`; QA to Head of QA (HoQA) `78e99c2d`.
@@ -14,15 +16,15 @@
 - **What / why:** a rare golden egg spawns on a farm spot; tapping it pays a reward (active-play reward loop). Spec: [`product/collection/m5-golden-egg-spec.md`](product/collection/m5-golden-egg-spec.md) v1.3.3, sha1 `2eb630e3` ✔ (includes `goldenFrozen`). Errata draft: `product/collection/m5-golden-egg-errata-v1.3.3-DRAFT.md`.
 - **Sim:** BUILT (`src/sim/golden.ts:29`; Game driver via #111, merged). **UI:** MISSING — overlay egg + SFX. Only the helper `src/ui/golden-spots.ts` exists; nothing in `src/ui` calls `setSpotProbe`/`tapGolden`.
 - **Remaining:** golden overlay egg UI + SFX hooks, mounted via F6.
-- **How:** register a `goldenEgg` feature on the F6 registry (`src/ui/features.ts` on the F6 branch documents the empty slot); call `setSpotProbe` with valid spot ids and `tapGolden` on tap (`game.ts`, from #111). Art: `art-ux/assets/golden-egg.svg`, `golden-egg@2x.png`, `golden-egg-chip@2x.png`; sound per `art-ux/m5-sound-spec.md`. Art pin for golden UI: **TBD** (no golden-specific art pin sha is cited in the flag table).
+- **How:** register a `goldenEgg` feature on the F6 registry (`src/ui/features.ts` on the F6 branch documents the empty slot); call `setSpotProbe` with valid spot ids and `tapGolden` on tap (`game.ts`, from #111). Art pin (Head of Art & UX, 2026-11-12 21:50 CET, `art-ux/decisions.md`): [`art-ux/m4-timed-collectible.md`](art-ux/m4-timed-collectible.md) v1.1, sha1 `28dcff19` ✔; 960-wide spawn spots in [`art-ux/m5-layout-rects-960.md`](art-ux/m5-layout-rects-960.md) sha1 `54a59d49` ✔. Assets: `art-ux/assets/golden-egg.svg` `70849b49` ✔, `golden-egg@2x.png` `d7110075` ✔, `golden-egg-chip@2x.png` `e59654a1` ✔. Sound per `art-ux/m5-sound-spec.md`. No new art is needed.
 - **Owner:** Generalist (UI). **Deps:** F6 (Features). **Estimate:** UI 9–11.5 h if F6 lands first (11.5–14.5 h slim-mount fallback).
 - **ACs:** `GE-AC*` in the golden spec. **QA bar:** UI QA `edb6ef85` (+ QA bot live smoke), one UI bar on 3 engines, 3–4 h (+2 h re-bar risk).
 
 ## 2. streak — collect streak meter
 - **What / why:** consecutive collects build a streak with combo tiers and A2 pops. Spec: [`product/collection/m5-streak-tap-coins-spec.md`](product/collection/m5-streak-tap-coins-spec.md) v1.3.3, sha1 `b315dea1` ✔. Art: [`art-ux/m5-combo-tiers.md`](art-ux/m5-combo-tiers.md) v0.3, sha1 `ed4ded1d` ✔.
-- **Sim:** BUILT (`src/sim/streak.ts:16,36`); ST-AC19/20 telemetry fields in **PR #123** (`74d640d4`). **UI:** ON-BRANCH `v5/ui-streak-tapcoins` @ `f13d95a8` (Hire 3, pushed, no PR, built against an F6 stub). The flag table (02:10) still says MISSING; the branch was pushed later (04:36).
-- **Remaining:** land #123; when F6 merges, rebase the branch onto it, apply `f6-swap.diff`, delete `streak-f6-stub.ts`, run the full suite + `streak-browser.mjs`/`streak-audio.mjs` per engine; fold in the pending `tc_streak_cool_cue_min_tier` ruling (Econ/HoP) and Art's S-AC19 chip placement; open the PR via HoE. (Handoff: `engineering/tasks/v5-ui-streak-tapcoins/HANDOFF.md`.)
-- **Owner:** Hire 3 (UI); #123 author for the sim fields. **Deps:** F6; #123 before Generalist's session-end. **Estimate:** sim ~1 h (land #123) · UI 18–24 h (plan 20), partly spent — hours left **TBD** (the handoff does not restate them).
+- **Sim:** BUILT (`src/sim/streak.ts:16,36`); ST-AC19/20 telemetry fields **merged** in **PR #123** (`d84976b8`, 2026-11-12 23:38 CET). #142 (`b83ce852`, 2026-11-13 02:09 CET) accepts #119's `paused_*` `session_end` fields for ST-AC20. **UI:** ON-BRANCH `v5/ui-streak-tapcoins` @ `f13d95a8` (Hire 3, pushed, no PR, built against an F6 stub). The flag table (02:10) still says MISSING; the branch was pushed later (04:36).
+- **Remaining:** when F6 merges, rebase the branch onto it, apply `f6-swap.diff`, delete `streak-f6-stub.ts`, run the full suite + `streak-browser.mjs`/`streak-audio.mjs` per engine; fold in the pending `tc_streak_cool_cue_min_tier` ruling (Econ/HoP) and Art's S-AC19 chip placement; open the PR via HoE. (Handoff: `engineering/tasks/v5-ui-streak-tapcoins/HANDOFF.md`.)
+- **Owner:** Hire 3 (UI); #123 author for the sim fields. **Deps:** F6; #123 (now merged) unblocked Generalist's session-end. **Estimate:** sim ~1 h (landed with #123) · UI 18–24 h (plan 20), partly spent — hours left **TBD** (the handoff does not restate them).
 - **ACs:** `ST-AC*`. **QA bar:** Saves QA (#123, 2–3 h) / UI QA (meter UI, 3–4 h).
 
 ## 3. tapCoins — +$ pop on credited taps
@@ -36,7 +38,7 @@
 - **Remaining:** resolve #116's conflict in `src/sim/actions.ts` + bar (~3 h); Boost inside the Shift sheet.
 - **Owner:** Features (#116 + Boost in Shift). **Deps:** rc2Refill G0 API note; Shift sheet; #116 gets a post-freeze re-bar. **Estimate:** ~3 h (#116) + Boost inside Shift 15–21 h.
 - **ACs:** `AC-M*` in the abilities spec. **QA bar:** UI QA (#116 post-freeze re-bar, 2–3 h; Boost in the Shift bar).
-- **Note:** a separate older branch `feat/v5-abilities-shift` (`1ebcd7af`, local-only, owner e80556fd who is unreachable) exists; see `in-flight.md`. Whether it is still needed is **TBD** (no ruling found).
+- **Note:** a separate older branch `feat/v5-abilities-shift` (`1ebcd7af`) is **reference-only, not a v5 source** (D-HOP-2026-11-12-02, `product/decisions.md` sha1 `9b700863` at the pin; current box file is `9db8f9fa` after later D-PMW-2026-11-12-01). v5 scope is the 14-flag table; nothing from that branch merges unless it is re-landed through a flag-table PR with its own review. Keep it, do not delete. See `in-flight.md`.
 
 ## 5. broody — Broody hen nest
 - **What / why:** a broody hen sits on a yard nest that accrues value and glows when ready. Spec: [`product/collection/m5-broody-hen-spec.md`](product/collection/m5-broody-hen-spec.md) v1.3.3 sha1 `4441a1d9` ✔. Art: [`art-ux/m5-broody-hen-art.md`](art-ux/m5-broody-hen-art.md) sha1 `4169c17b` ✔; asset [`art-ux/assets/overlay-broody-nest.svg`](art-ux/assets/overlay-broody-nest.svg) sha1 `7de37176` ✔ (FINAL, D-CEO-20261110-08). UI checklist: `product/collection/broody-yard-ui-build-checklist.md`.
@@ -47,21 +49,21 @@
 
 ## 6. salesStopped — sales-stopped chip (#5b)
 - **What / why:** tells the player when sales have stalled and offers Manage. Spec: [`product/market/sales-stopped-spec.md`](product/market/sales-stopped-spec.md) v1.3.27 sha1 `cfff3817` ✔ (FROZEN for QA). Art (shared with fatigue): [`art-ux/m4.2-fatigue-visibility-ux.md`](art-ux/m4.2-fatigue-visibility-ux.md) sha1 `ffb13c19` ✔.
-- **Sim:** IN-PR **#128** (`saves/v5-risk-helpers` @ `b7a562f8`): risk helpers, stall timers, Rule 2 hysteresis, `sales_stall`/`fatigue_cue_*` emitters. **UI:** IN-PR **#130** (Draft, `ui/v5-sales-stopped` @ `7299bfe3`), incl. SS-36 Manage.
-- **Remaining:** land #128; swap #130 from the pinned stub API (`engineering/tasks/v5-ui-ss-fatigue/SIM-API.md`) to the real helpers (~2 h); then Ready. No merge without HoQA GO; flags stay 0. (Handoff: `engineering/tasks/v5-ui-ss-fatigue/HANDOFF.md`.)
+- **Sim:** BUILT — **#128** merged (`be77b1c0`, 2026-11-12 23:04 CET): risk helpers, stall timers, Rule 2 hysteresis, `sales_stall`/`fatigue_cue_*` emitters. **UI:** IN-PR **#130** (Draft, `ui/v5-sales-stopped` @ `7299bfe3`), incl. SS-36 Manage.
+- **Remaining:** swap #130 from the pinned stub API (`engineering/tasks/v5-ui-ss-fatigue/SIM-API.md`) to the real helpers (~2 h); then Ready. No merge without HoQA GO; flags stay 0. (Handoff: `engineering/tasks/v5-ui-ss-fatigue/HANDOFF.md`.)
 - **Owner:** Saves (sim) / Backfill (UI). **Deps:** Shift sheet for Manage; F6 merge-forward after. **Estimate:** sim 10–14 h (shared with fatigueCue) · UI 17–25 h.
 - **ACs:** `SS-*` rows in the spec (SS-1…SS-37). **QA bar:** Saves QA (helpers/emitters, 3–4 h) / UI QA (#5b incl. SS-36, 4–5 h).
 
 ## 7. fatigueCue — HUD fatigue cue (#11)
 - **What / why:** HUD cue when workers are tired. Product spec: [`product/workers/m4.2-fatigue-visibility-spec.md`](product/workers/m4.2-fatigue-visibility-spec.md) v0.2.5; Art `ffb13c19` ✔ (as above).
-- **Sim:** in #128 (same PR as salesStopped). **UI:** IN-PR **#131** (Draft, `ui/v5-fatigue-cue` @ `df124220`, stacked on #130).
-- **Remaining:** as salesStopped; SS-37/FC-AC9 needs golden spots.
+- **Sim:** BUILT, in #128 (same PR as salesStopped, merge `be77b1c0`). **UI:** IN-PR **#131** (Draft, `ui/v5-fatigue-cue` @ `df124220`, stacked on #130).
+- **Remaining:** as salesStopped (stub→real swap); SS-37/FC-AC9 needs golden spots.
 - **Owner:** Saves (sim) / Backfill (UI). **Estimate:** sim in salesStopped · UI 16–23 h. **ACs:** `AC-F*`/`FC-AC*`. **QA bar:** Saves QA (same sim PR) / UI QA (#11, 3–4 h).
 
 ## 8. pause — pause/resume a worker
-- **What / why:** pause a worker and resume it (Rest stays in the Shift sheet). Spec: [`product/workers/m5-worker-pause-spec.md`](product/workers/m5-worker-pause-spec.md) — the flag table cites v1.3.17 sha1 `7536acfa` (frozen copy `product/workers/m5-worker-pause-spec.7536acfa.md` ✔); the current file is v1.3.19 sha1 `07540579`, which matches HoP's pin. **Which rev governs the build is TBD** (the flag table predates HoP's pin; no reconciling ruling found).
-- **Sim:** core BUILT; drift + `worker_resumed` in **PR #119** (`b65d23c6`, done); `worker_paused` emitter IN-PR **#132** (Draft, `saves/v5-worker-paused` @ `d8e278f8`, stacked on #119). **UI:** ON-BRANCH `wip/hire2/v5-pause-ui` @ `29d66915` (Hire 2, pushed, no PR). Workers-UI drift: **#121** (`2e48305e`).
-- **Remaining:** #119 bar after restart (after the CP train, verify-smoke, rc2Refill=0 and =1); land #132; open the pause-UI Draft PR at the restart with HoE's OK; Art match + QA slot via HoE. (Handoff: `engineering/tasks/v5-pause-ui/HANDOFF.md`.)
+- **What / why:** pause a worker and resume it (Rest stays in the Shift sheet). Spec: [`product/workers/m5-worker-pause-spec.md`](product/workers/m5-worker-pause-spec.md) **v1.3.19, sha1 `07540579` ✔, governs the build** (D-HOP-2026-11-12-02, `product/decisions.md` sha1 `9b700863` at the pin; current box file is `9db8f9fa` after later D-PMW-2026-11-12-01). The flag table's v1.3.17 sha1 `7536acfa` (frozen copy `product/workers/m5-worker-pause-spec.7536acfa.md`) is superseded (history only). Frozen copy of the governing rev: [`product/workers/m5-worker-pause-spec.07540579.md`](product/workers/m5-worker-pause-spec.07540579.md) ✔.
+- **Sim:** core BUILT; drift + `worker_resumed` **merged** in **PR #119** (`0755a284`, 2026-11-13 00:03 CET); `worker_paused` emitter **merged** via **#132/#140** (`5552556b` on `rc/v5`, 2026-11-13 00:30 CET; #140 is the re-land of #132; #132 itself merged to #119's branch as `6dc56a55`). **UI:** ON-BRANCH `wip/hire2/v5-pause-ui` @ `29d66915` (Hire 2, pushed, no PR). Workers-UI drift: **#121** (`2e48305e`).
+- **Remaining:** open the pause-UI Draft PR with HoE's OK; Art match + QA slot via HoE. (Handoff: `engineering/tasks/v5-pause-ui/HANDOFF.md`.)
 - **Owner:** Saves (`worker_paused`, ~1 h) / Hire 2 (toggle/banner UI). **Deps:** #119 lands before refill exclusive-emission; Rest ↔ Shift/rc2Refill. **Estimate:** sim ~1 h · UI 8–12 h.
 - **ACs:** `AC-P*`. **QA bar:** Saves QA (#119 3–4 h, `worker_paused` ~1 h) / UI QA (2–3 h).
 
@@ -85,9 +87,9 @@
 - **ACs:** `AC-FC*` (+ AC-LR20/21). **QA bar:** Saves QA (sim incl. offline + clock change, 4–5 h) + UI QA (~3 h) + 2 h re-bar after the refill rebase.
 
 ## 12. breeds — hen breeds (Flock sheet)
-- **What / why:** hen breeds with traits and a Flock sheet. Spec: [`product/m5.1-breeds-spec.md`](product/m5.1-breeds-spec.md) (rev 3.8.x; cited frozen rev `product/m5.1-breeds-spec.13d5255e.md`). Art: [`art-ux/m5.1-breeds-ui.md`](art-ux/m5.1-breeds-ui.md) (art pin sha **TBD**: none cited) + `art-ux/assets/char-breed-*.svg`.
-- **Sim:** PR-A sim BUILT; #120/#124/#126 merged into `rc/v5` (all at 03:45 CET on 10 Nov; #118 at 03:44; #111 at 01:14); open: **#125** traits (`77a3ae17`), **#127** telemetry (`7a7c7b2a`, base #125). **UI:** PR-A `v5/breeds-ui-a` (Architect, **local only**, now `8ef9b4cd`; push waits on Vadim's direct yes) + clamp-bind follow-up `v5/breeds-ui-a-clamp-bind` (`d5742e63`, local only); PR-B `feat/v5-breeds-ui-prB` @ `cdbebb5a` (Features, pushed, no PR; ~7 h left).
-- **Remaining:** merge order **#125 → #127 (restacked; incl. m1 session-counter reset + pageshow/bfcache guard) → #100**; push PR-A and open it; PR-B: Architect fallback ruling, Saves #126 follow-ups (`presentGateOpen`), #100 goal hook, open Draft once `origin/v5/breeds-ui-a` exists. PR-B before F6. (Handoffs: `engineering/tasks/v5-breeds-ui-a/HANDOFF.md`, `handoffs/worktrees/rev-prB-d66a726/engineering/tasks/v5-breeds-ui-prB/HANDOFF.md`, `engineering/tasks/breeds-telemetry/HANDOFF.md`.)
+- **What / why:** hen breeds with traits and a Flock sheet. Spec: [`product/m5.1-breeds-spec.md`](product/m5.1-breeds-spec.md) (rev 3.8.x; cited frozen rev `product/m5.1-breeds-spec.13d5255e.md`). Art pin (Head of Art & UX, 2026-11-13 07:20 Asia/Dubai, `art-ux/decisions.md`): [`art-ux/m5.1-breeds-ui.md`](art-ux/m5.1-breeds-ui.md) v0.2.7, sha1 `f349f29f` ✔, signed 2026-10-25 against breeds rev. 3.8.1. Assets: the 9 `art-ux/assets/char-breed-*.svg` sprites (combined sha1 `46268448` ✔) plus `art-ux/assets/badge-pause.svg` `683b29e0` ✔. No new art is needed.
+- **Sim:** PR-A sim BUILT; #120/#124/#126 merged into `rc/v5` (all at 03:45 CET on 10 Nov; #118 at 03:44; #111 at 01:14); **#125** traits **merged** (`006bdd72`, 2026-11-12 21:55 CET); still open: **#127** telemetry (`7a7c7b2a`, base #125). **UI:** PR-A `v5/breeds-ui-a` (Architect; later pushed, see `in-flight.md`) + clamp-bind follow-up `v5/breeds-ui-a-clamp-bind`; PR-B `feat/v5-breeds-ui-prB` @ `cdbebb5a` (Features, pushed, no PR; ~7 h left).
+- **Remaining:** merge order **#127 (restacked; incl. m1 session-counter reset + pageshow/bfcache guard) → #100**; open PR-A; PR-B: Architect fallback ruling, Saves #126 follow-ups (`presentGateOpen`), #100 goal hook, open Draft once `origin/v5/breeds-ui-a` exists. PR-B before F6. (Handoffs: `engineering/tasks/v5-breeds-ui-a/HANDOFF.md`, `handoffs/worktrees/rev-prB-d66a726/engineering/tasks/v5-breeds-ui-prB/HANDOFF.md`, `engineering/tasks/breeds-telemetry/HANDOFF.md`.)
 - **Owner:** Saves (land stack) + Generalist (#127) / Architect (PR-A) + Features (PR-B). **Estimate:** sim review/QA + #127 1–2 h · UI PR-B ~7 h.
 - **ACs:** `BR-AC*`. **QA bar:** Saves QA (stack ~5–6 h serial) / UI QA (PR-A ~2 h, PR-B ~3 h).
 
@@ -106,8 +108,8 @@
 ## Non-flag telemetry base (gates `session_end` / TEL-AC1)
 | Item | State | Owner | Hours | Notes |
 |---|---|---|---|---|
-| TEL-AC1 envelope `sid`/`fgMs` (drop `sessionMs`) + hide ≥ 60 s session rotate | local branch `v5/tel-envelope` @ `4c440909` (**not pushed**; "push/PR only on Vadim's own go") | Architect | 7–11 | lands after #123; handoff `engineering/tasks/v5-tel-envelope/HANDOFF.md` |
-| session-end-base (+ §8 `session_summary.counts`) | MISSING | Generalist | 10–14 | after #123; handoff `engineering/tasks/v5-session-end-base/HANDOFF.md` |
+| TEL-AC1 envelope `sid`/`fgMs` (drop `sessionMs`) + hide ≥ 60 s session rotate | branch `v5/tel-envelope` (later pushed; see `in-flight.md`) | Architect | 7–11 | #123 has merged, so this is unblocked; handoff `engineering/tasks/v5-tel-envelope/HANDOFF.md` |
+| session-end-base (+ §8 `session_summary.counts`) | MISSING | Generalist | 10–14 | #123 has merged, so this is unblocked; handoff `engineering/tasks/v5-session-end-base/HANDOFF.md` |
 | Telemetry spec | — | — | — | `product/collection/telemetry-spec.md` + `telemetry-spec-errata-v5.md` (rev15 §10.1 cited by #123) |
 
 ## Economy prerequisite (not a flag)

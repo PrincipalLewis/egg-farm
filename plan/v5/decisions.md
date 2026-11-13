@@ -24,12 +24,12 @@ One line per CEO decision from D-CEO-20261029 onward (v5 era). Full text: [`stud
 | D-CEO-20261105-01 | 20:10 CET | 90% usage STOP lifted; v5 resumes |
 | D-CEO-20261105-02 | 20:30 CET | Operative v5 schedule while Features remains blocked |
 | D-CEO-20261105-03 | 20:21 CET | Vadim resumes every v5 lane, including Features and Economy |
-| D-CEO-20261105-04 | 20:23 CET | Full-speed v5; usage stop lowered to 80% — *stop now 65%* |
-| D-CEO-20261106-01 | 00:11 CET | Usage stop lowered to 67% — *stop now 65%* |
+| D-CEO-20261105-04 | 20:23 CET | Full-speed v5; usage stop lowered to 80% — *65% stop later lifted by 20261113-01* |
+| D-CEO-20261106-01 | 00:11 CET | Usage stop lowered to 67% — *65% stop later lifted by 20261113-01* |
 | D-CEO-20261106-02 | 00:17 CET | No merge-forward re-review / re-gate unless PR code changed |
 | D-CEO-20261106-03 | 00:30 CET | Standing rule 25: do the job once |
 | D-CEO-20261106-04 | 2026-11-06 04:47 | CEO STOP, Vadim 67% usage rule |
-| D-CEO-20261109-01 | 2026-11-09 23:38 | RESUME v5, usage stop now 65% |
+| D-CEO-20261109-01 | 2026-11-09 23:38 | RESUME v5, usage stop now 65% — *lifted by 20261113-01* |
 | D-CEO-20261109-02 | 2026-11-09 23:52 | v5 re-baseline approved |
 | D-CEO-20261110-01 | Tue 10 Nov 00:25 CET | v5 freeze slips for Breeds UI |
 | D-CEO-20261110-02 | Tue 10 Nov 00:30 CET | Usage budget through the v5 freeze |
@@ -46,7 +46,10 @@ One line per CEO decision from D-CEO-20261029 onward (v5 era). Full text: [`stud
 | D-CEO-20261110-13 | Tue 10 Nov 02:12 CET | 14-flag table accepted; Hire 2 and Hire 3 approved; usage named as the binding constraint |
 | D-CEO-20261110-14 | Tue 10 Nov 02:14 CET | Lean operating mode from the restart |
 | D-CEO-20261110-15 | Tue 10 Nov 03:00 CET | Weekly split and parked burn |
-| D-CEO-20261110-16 | Tue 10 Nov 03:02 CET | Un-park in lean mode until the 65% stop |
+| D-CEO-20261110-16 | Tue 10 Nov 03:02 CET | Un-park in lean mode until the 65% stop — *that stop lifted by 20261113-01* |
 | D-CEO-20261110-17 | Tue 10 Nov 03:55 CET | 55% reserve call |
-| D-CEO-20261110-18 | 2026-11-10 04:49 | CEO STOP, Vadim 65% usage rule |
+| D-CEO-20261110-18 | 2026-11-10 04:49 | CEO STOP, Vadim 65% usage rule — *studio resumed 20261112-02; 65% stop lifted by 20261113-01* |
 | D-CEO-20261110-19 | Tue 10 Nov 10:50 CET | Overhead cuts adopted from the HoOps audit |
+| D-CEO-20261112-01 | 2026-11-12 18:14 CET | Weekly cap stays the 72% split: Eng 47 / QA 12 per window; 75% Eng rejected |
+| D-CEO-20261112-02 | 2026-11-12 21:43 CET | RESUME (Vadim unfreeze); 65% guard resumed under the -01 split |
+| D-CEO-20261113-01 | 2026-11-13 07:16 Asia/Dubai | 65% usage stop lifted; full pace until the weekly limit (reset Thu 19 Nov 17:53 CET); the -01 split is a priority guide |

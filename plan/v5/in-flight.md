@@ -4,6 +4,8 @@ Snapshot: **Tue 10 Nov 2026 ~11:00 CET** from `gh pr list -R PrincipalLewis/egg-
 
 Updated **Tue 10 Nov 2026 22:52 CET (Europe/Belgrade)**: Vadim approved saving the at-risk box-only work to GitHub while the studio remains stopped. The Architect's four feature branches and `wip/snapshot-p8-qa-hooks` are on origin (pushed by the Architect). `wip/snapshot-abilities-shift` was pushed from the abilities worktree HEAD. See the new origin rows and the updated box-only section below. Open PR heads were not re-scanned in this update.
 
+Updated **Fri 13 Nov 2026**: the studio resumed (D-CEO-20261112-02) and Vadim lifted the 65% stop (D-CEO-20261113-01). Since 2026-11-12 these PRs in the table below have merged into `rc/v5` (merge shas from `gh`): #125 `006bdd72`, #128 `be77b1c0`, #123 `d84976b8`, #119 `0755a284`, #132/#140 `5552556b`, #142 `b83ce852`. This table is otherwise the 10 Nov snapshot and was not fully re-scanned. `feat/v5-abilities-shift` (`1ebcd7af`) is **reference-only, not a v5 source** (D-HOP-2026-11-12-02, `product/decisions.md` sha1 `9b700863` at the pin; current box file `9db8f9fa`).
+
 ## Open PRs (22)
 
 | PR | Branch → base | Head | Draft | Updated (CET) | Flag / item | What's left → next concrete step | Handoff |
@@ -53,7 +55,7 @@ The six at-risk checkouts from the 11:00 CET snapshot are now on origin. The fou
 | `v5/tel-envelope` | `a41effd4ce532e84755930cb373feb0cd67bb6e4` | Architect | **Pushed** (was local-only `4c440909`). Build continues after #123 | `engineering/tasks/v5-tel-envelope/HANDOFF.md` |
 | `v5/vitest-teardown-fix` | `21be8b7fb962ac99225c163c097bf3bec00a3171` | Architect | **Pushed** (was local-only `a7333048`) | `engineering/reviews/v5-vitest-teardown-cause.md` |
 | `wip/snapshot-p8-qa-hooks` | `50580240a94f18d0cbf8cc9bfb50d55f307db271` | Architect | Snapshot of `/workspace/wt-v5-p8-qa-hooks` (`feat/v5-p8-qa-hooks`). Architect committed the formerly uncommitted files into this sha — `src/ui/app.ts`, `src/ui/qa-seam.ts`, `src/ui/workers-ui.ts`, `tests/v5-p8-qa-hooks.test.ts` — and pushed; the worktree is clean, **no files remain for the owner to commit**. Disposition TBD (QA seam hooks; stacks on old #86). Further pushes only as a fast-forward | `engineering/tasks/p8-qa-hooks/HANDOFF.md` |
-| `wip/snapshot-abilities-shift` | `1ebcd7af59af8662101ffcb0da25e3a68049a3ca` | UI & rc1 Fixes | Snapshot of `/workspace/wt-v5-abilities-shift` (`feat/v5-abilities-shift` HEAD, same sha as the 11:00 CET checkout). Worktree is clean — **no uncommitted files for the owner to commit**. `e80556fd` is still unreachable (D-CEO-20261110-07). Bundles exist in the box `artifacts/`; whether Features' Shift sheet supersedes it is TBD | `engineering/tasks/v5-abilities-shift/HANDOFF.md` |
+| `wip/snapshot-abilities-shift` | `1ebcd7af59af8662101ffcb0da25e3a68049a3ca` | UI & rc1 Fixes | Snapshot of `/workspace/wt-v5-abilities-shift` (`feat/v5-abilities-shift` HEAD, same sha as the 11:00 CET checkout). Worktree is clean — **no uncommitted files for the owner to commit**. `e80556fd` is still unreachable (D-CEO-20261110-07). Bundles exist in the box `artifacts/`; **reference-only, not a v5 source** (D-HOP-2026-11-12-02) — nothing from this branch merges unless it is re-landed through a flag-table PR with its own review; keep it, do not delete | `engineering/tasks/v5-abilities-shift/HANDOFF.md` |
 
 ## WIP that exists ONLY on the box (not on origin)
 

@@ -2,14 +2,16 @@
 
 This folder holds everything a fresh agent needs to finish **v5** of Egg Farm without having been in the studio's conversations. It was assembled on **Tue 10 Nov 2026 (CET, UTC+1)** while the studio was **stopped** at Vadim's 65% weekly-usage cap (D-CEO-20261110-18). Nothing here changes game code.
 
-Source of truth is still the studio box (`/workspace/egg-farm-studio/`). Files under `engineering/`, `product/`, `art-ux/`, `qa/`, `ops/`, `analysis/`, `studio/` and `handoffs/` are **copies taken at 2026-11-10 ~11:00 CET**. If a box file is newer than the copy, the box file wins; refresh the copy in a follow-up docs PR.
+**Updated Fri 13 Nov 2026:** the studio is running again (D-CEO-20261112-02). Vadim lifted the 65% usage stop (D-CEO-20261113-01); the studio runs at full pace until the weekly limit (reset Thu 19 Nov 2026, 17:53 CET). The D-CEO-20261112-01 split (Eng 47 / QA 12 per window; 75% Eng rejected) is now a priority guide, not a cap on total spend. Product and Art TBD pins in `features.md` are resolved; sim-complete progress and remaining TBDs are in `gates-and-schedule.md`.
+
+Source of truth is still the studio box (`/workspace/egg-farm-studio/`). Files under `engineering/`, `product/`, `art-ux/`, `qa/`, `ops/`, `analysis/`, `studio/` and `handoffs/` are **copies taken at 2026-11-10 ~11:00 CET**, except the product, art-ux and studio `decisions.md` files and the governing pause frozen rev (`product/workers/m5-worker-pause-spec.07540579.md`), which were refreshed from the box on 2026-11-13. If a box file is newer than the copy, the box file wins; refresh the copy in a follow-up docs PR.
 
 ## Goal and scope
 
 - **v5 is ONE release with ALL 14 feature flags shipped at 1. No cuts.** Development takes as long as needed. (Vadim, 2026-10-30: D-CEO-20261030-09, D-CEO-20261030-10; re-affirmed D-CEO-20261110-08.)
 - **QA runs once, on the complete release candidate (RC).** Small builds get merge bars only, not full QA (D-CEO-20261030-10, D-CEO-20261110-08).
 - The 14 flags (keys in `src/config/balance.json` → `m4.flags`, all `0` on `rc/v5` today): `golden`, `streak`, `tapCoins`, `abilities`, `broody`, `salesStopped`, `fatigueCue`, `pause`, `rc2Refill`, `autoRefill`, `clockWage`, `breeds`, `zeroGainUi`, `bestBuyV2` (source: `engineering/v5-ui-build-state.md`, `engineering/v5-flag-table.md`).
-- Integration branch: **`rc/v5`** (every v5 PR targets it; tip when this pack was cut: `68f58c0f`, "Merge pull request #126").
+- Integration branch: **`rc/v5`** (every v5 PR targets it; tip when this pack was cut: `68f58c0f`, "Merge pull request #126"; tip as of the 2026-11-13 update: `b83ce852`, "Merge pull request #142").
 - The CEO decides product and design details; Vadim is escalated to only for budget, external accounts, legal, or a change of direction (org-plan.md "Escalation").
 
 ## Definition of done (per flag)
@@ -41,4 +43,4 @@ A flag is done when all of these hold (org-plan.md "Release manifest build state
 
 ## Known gaps
 
-Items marked **TBD** in these files are unknown at the time of writing; each says why. The biggest are listed at the top of `gates-and-schedule.md`.
+Items marked **TBD** in these files are unknown at the time of writing; each says why. The biggest remaining after the 2026-11-13 pin update are listed at the top of `gates-and-schedule.md`.
