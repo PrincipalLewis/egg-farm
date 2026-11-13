@@ -1,12 +1,14 @@
 // unpaid_trickle AC-T1..T13 (spec of record: product/workers/m5-unpaid-trickle-spec.md v1.0.2, sha1 9e2acfe985887ff3543745fd80c7066f313c5f2b).
-// T-R9, legal k {0} ∪ [0.5, 1.0], Q3 incomePerSec, §5 E1–E6 / AC-T11 verbatim (Art f87c5ecd folded in).
+// T-R9, legal k {0} ∪ [0.5, 1.0], Q3 HUD-display only (D-HOP-2026-11-14-15), §5 E1–E6 / AC-T11 verbatim (Art f87c5ecd folded in).
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import { balance as shipped, validateBalance, type Balance } from '../src/config/balance';
 import { isLegalUnpaidTrickle, M5_FLAGS } from '../src/config/flags';
-import { incomePerSec } from '../src/econ/income';
+import { fatigueShare, grossSalesPerSec, incomePerSec, incomePerSecDisplay } from '../src/econ/income';
 import { Game } from '../src/game';
+import { issDollars } from '../src/sim/income-ref';
+import { headerRate, headerRateText } from '../src/ui/s2-economy-ui';
 import { apply } from '../src/sim/actions';
 import type { SimEvent } from '../src/sim/events';
 import { applyOffline } from '../src/sim/offline';
@@ -157,6 +159,29 @@ describe('unpaid_trickle identity (AC-T1, AC-T3(a), AC-T4)', () => {
     save(kvB, c, 1_700_000_000_000, ON(0));
     expect(kvA.getItem(SAVE_KEY)).toBe(kvB.getItem(SAVE_KEY));
   });
+
+  // AC-T3a (D-HOP-2026-11-14-15): a tick after load, coins within 1 cent, trickle continues.
+  it('a tick after load continues the trickle; coins stay within 1 cent of the live no-reload path (AC-T3a)', () => {
+    const b = ON(1);
+    const ev: SimEvent[] = [];
+    const live = run(st({ workers: both }, b), 47, b, ev); // 4.7 s, mid-episode, well under T-R9
+    expect(live.workers.market_hand!.unpaid).toBe(true);
+    expect(live.workers.coop_hand!.unpaid).toBe(true);
+    const pre = live.coinsCents;
+    expect(pre).toBeGreaterThan(0);
+    const kv = mem();
+    save(kv, live, 1_700_000_000_000, b);
+    const loaded = load(kv, b)!;
+    expect(Math.abs(loaded.state.coinsCents - pre)).toBeLessThanOrEqual(1);
+    expect(loaded.state.workers.market_hand!.unpaid).toBe(true);
+    expect(loaded.state.workers.coop_hand!.unpaid).toBe(true);
+    const after = step(loaded.state, DT, b);
+    const liveNext = step(live, DT, b);
+    expect(Math.abs(after.coinsCents - liveNext.coinsCents)).toBeLessThanOrEqual(1);
+    expect(after.coinsCents).toBeGreaterThan(loaded.state.coinsCents);
+    expect(after.workers.market_hand!.unpaid).toBe(true);
+    expect(after.workers.coop_hand!.unpaid).toBe(true);
+  });
 });
 
 describe('unpaid_trickle live rate, T-R9, both-resume (AC-T2, AC-T7, AC-T9)', () => {
@@ -206,6 +231,13 @@ describe('unpaid_trickle live rate, T-R9, both-resume (AC-T2, AC-T7, AC-T9)', ()
     const bp = flags({ unpaidTrickle: 1, pause: 1 }, shipped, 1);
     const pausedOnly = st({ workers: { market_hand: { energy: 40, cdS: 0, unpaid: true, paused: true }, coop_hand: { energy: 40, cdS: 0, unpaid: true, paused: true } } }, bp);
     expect(unpaidTrickleRateCentsPerSec(pausedOnly.workers, F18, bp)).toBe(0);
+    const mixed = st({
+      workers: {
+        market_hand: { energy: 0, cdS: 0, unpaid: true },
+        coop_hand: { energy: 50, cdS: 0, unpaid: true, paused: true },
+      },
+    }, bp);
+    expect(unpaidTrickleRateCentsPerSec(mixed.workers, F18, bp)).toBe(7.5); // AC-T7: k=1, F18, only MH in the sum
     const partial = st({ workers: { market_hand: { energy: 80, cdS: 1e9 }, coop_hand: { energy: 0, cdS: 0, unpaid: true } }, coinsCents: 0 }, b);
     expect(unpaidTrickleRateCentsPerSec(partial.workers, F18, b)).toBe(15);
     expect(isContributing(partial.workers.coop_hand, b)).toBe(true);
@@ -238,6 +270,27 @@ describe('unpaid_trickle live rate, T-R9, both-resume (AC-T2, AC-T7, AC-T9)', ()
     live = step(live, DT, b, evSell);
     expect(live.workers.market_hand!.unpaid).toBe(false);
     expect(live.workers.coop_hand!.unpaid).toBe(false);
+  });
+
+  // AC-T9 (D-HOP-2026-11-14-15): trickle credit is not a sale and does not reset stall-session sale timers.
+  it('trickle credit does not reset stall-session sale timers (AC-T9)', () => {
+    const b = flags({ unpaidTrickle: 1, salesStopped: 1 }, shipped, 1);
+    const ev: SimEvent[] = [];
+    const clock = { focus: true };
+    let s = st({ workers: both, basket: 0, customers: [], coinsCents: 0 }, b);
+    for (let i = 0; i < 15; i++) s = step(s, DT, b, ev, clock);
+    expect(s.stallSession).toBeTruthy();
+    const t0 = s.stallSession!.sinceSaleS;
+    expect(t0).toBeGreaterThan(0);
+    expect(s.coinsCents).toBeGreaterThan(0);
+    expect(ev.some(e => e.type === 'sell')).toBe(false);
+    const ev2: SimEvent[] = [];
+    const coins0 = s.coinsCents;
+    s = step(s, DT, b, ev2, clock);
+    expect(ev2.some(e => e.type === 'sell')).toBe(false);
+    expect(s.coinsCents).toBeGreaterThan(coins0);
+    expect(s.stallSession!.sinceSaleS).toBeGreaterThan(t0);
+    expect(s.stallSession!.sinceSaleS).toBeCloseTo(t0 + DT, 9);
   });
 });
 
@@ -363,16 +416,71 @@ describe('unpaid_trickle offline (AC-T3)', () => {
     // cap: 3 h is the same credit as 2 h (both hit the T-R9 instant)
     expect(applyOffline(s0, 3 * 3600 * 1000, b).state.coinsCents).toBe(on.state.coinsCents);
   });
+
+  // AC-T3c (D-HOP-2026-11-14-15): 7200 s is the binding limit (T-R9 instant pushed past the cap).
+  it('7200 s offline cap is the binding limit when T-R9 is farther than the cap (AC-T3c)', () => {
+    // unpaid_resume_wage_min = 200: combined at = 1350 * 200 = 270_000 ¢; rate 22.5 ¢/s; T-R9 at 12_000 s (> 7200).
+    const b = validateBalance({
+      ...ON(1),
+      workers: { ...ON(1).workers, energy: { ...ON(1).workers.energy, unpaid_trickle: 1, unpaid_resume_wage_min: 200 } },
+    } as B, false);
+    const s0 = st({ workers: both, hensLevel: 8, collectionLevel: 3 }, b);
+    const capS = 7200;
+    const rate = unpaidTrickleRateCentsPerSec(s0.workers, F18, b);
+    expect(rate).toBe(22.5);
+    const at = unpaidResumeAtCents(s0.workers, F18, b, 'coop_hand');
+    expect(at).toBe(270_000);
+    expect(at! / rate).toBeGreaterThan(capS);
+    const capCredit = Math.floor(rate * capS);
+    expect(capCredit).toBe(162_000);
+    const twoH = applyOffline(structuredClone(s0), capS * 1000, b);
+    const threeH = applyOffline(structuredClone(s0), 3 * 3600 * 1000, b);
+    const justUnder = applyOffline(structuredClone(s0), (capS - 1) * 1000, b);
+    expect(twoH.state.coinsCents).toBe(capCredit);
+    expect(threeH.state.coinsCents).toBe(capCredit);
+    expect(justUnder.state.coinsCents).toBe(Math.floor(rate * (capS - 1)));
+    expect(justUnder.state.coinsCents).toBeLessThan(capCredit);
+    expect(twoH.state.workers.market_hand!.unpaid).toBe(true);
+    expect(twoH.state.workers.coop_hand!.unpaid).toBe(true);
+    expect(twoH.state.coinsCents).toBeLessThan(at!);
+  });
 });
 
 describe('unpaid_trickle incomePerSec (Q3) and telemetry (AC-T10)', () => {
-  // Q3 / AC HUD (E6)
-  it('live incomePerSec includes the trickle when the flag is on and rate > 0; assumeWorking does not; flag off is unchanged', () => {
+  // Q3 / D-HOP-2026-11-14-15: trickle is HUD-display only; sim inputs exclude it.
+  it('live incomePerSec, I_ss, grossSalesPerSec and fatigueShare exclude the trickle; the HUD display includes it (Q3)', () => {
     const s = st({ workers: both, hensLevel: 5 });
     const on = ON(1), off = OFF;
-    expect(incomePerSec(s, on) - incomePerSec(s, off)).toBeCloseTo(0.225, 9);
-    expect(incomePerSec(s, on, { assumeWorking: true })).toBe(incomePerSec(s, off, { assumeWorking: true }));
+    expect(incomePerSec(s, on)).toBe(incomePerSec(s, off));
+    expect(issDollars(s, on)).toBe(issDollars(s, off));
+    expect(grossSalesPerSec(s, on)).toBe(grossSalesPerSec(s, off));
+    expect(fatigueShare(s, on)).toBe(fatigueShare(s, off));
+    expect(incomePerSecDisplay(s, on) - incomePerSec(s, on)).toBeCloseTo(0.225, 9);
+    expect(incomePerSecDisplay(s, on) - incomePerSecDisplay(s, off)).toBeCloseTo(0.225, 9);
+    expect(incomePerSecDisplay(s, on, { assumeWorking: true })).toBe(incomePerSec(s, on, { assumeWorking: true }));
+    expect(incomePerSecDisplay(s, on, { assumeWorking: true })).toBe(incomePerSec(s, off, { assumeWorking: true }));
     expect(incomePerSec(s, ON(0))).toBe(incomePerSec(s, off));
+    expect(incomePerSecDisplay(s, ON(0))).toBe(incomePerSec(s, off));
+    // Fatigue share with a non-zero loss (Asleep Grader at F17 tracks; CH Working so collect is live; MH Unpaid for the trickle).
+    // A leak of the trickle into the denominator would make flag-on share smaller than flag-off.
+    const tired = st({
+      farmLevel: 17, hensLevel: 17, eggValueLevel: 17, tracksV7: 1, basket: 100, coinsCents: 1_000_000,
+      nextCustomerInS: 5,
+      customers: [1, 2, 3].map(id => ({ id, demand: 3, filled: 0, waitedS: 0 })),
+      workers: {
+        market_hand: { energy: 100, cdS: 0 },
+        coop_hand: { energy: 0, cdS: 0, unpaid: true },
+        hawker: { energy: 0, cdS: 0 },
+        grader: { energy: 0, cdS: 0 },
+      },
+      graderTier: 1,
+    });
+    expect(fatigueShare(tired, on)).toBeGreaterThan(0);
+    expect(fatigueShare(tired, on)).toBe(fatigueShare(tired, off));
+    expect(incomePerSec(tired, on)).toBe(incomePerSec(tired, off));
+    expect(issDollars(tired, on)).toBe(issDollars(tired, off));
+    expect(grossSalesPerSec(tired, on)).toBe(grossSalesPerSec(tired, off));
+    expect(incomePerSecDisplay(tired, on)).toBeGreaterThan(incomePerSec(tired, on));
   });
 
   // AC-T10
@@ -472,6 +580,29 @@ describe('unpaid_trickle UI §5 E1–E6 (AC-T11, spec v1.0.2 9e2acfe9)', () => {
     expect(workersHtml(s, OFF)).not.toContain('icon-coin.svg');
     expect(workersHtml(s, ON(0))).not.toContain('wk-trickle');
     expect(workersHtml(s, ON(0))).not.toContain('Trickle');
+    // E5 (D-HOP-2026-11-14-15): cue is on the Energy meta line (no extra row), so card height is constant.
+    expect(html).toMatch(/<div class="meta">Energy \d+%?<span class="wk-trickle"/);
+    expect(html).not.toMatch(/<div class="meta">Energy \d+%?<\/div>\s*<span class="wk-trickle"/);
+    expect(html).not.toMatch(/<div class="meta">Energy \d+%?<\/div>\s*<div class="wk-trickle"/);
+    expect(html).not.toMatch(/class="wk-trickle"[^>]*(rshake|juice|pop|bounce)/);
+    expect(html).not.toMatch(/wk-trickle[^>]*c-danger/);
+  });
+
+  // AC-T11 HUD (D-HOP-2026-11-14-15): normal style, no juice; trickle appears in the HUD display, sign is pos.
+  it('HUD income/s is the normal +$ rate (sign pos, no danger, no juice) when the trickle is the only income (AC-T11 HUD)', () => {
+    const s = st({ workers: both, hensLevel: 0, coop: 0, basket: 0, coinsCents: 0 });
+    const on = ON(1), off = OFF;
+    expect(incomePerSec(s, on)).toBe(incomePerSec(s, off));
+    const v = headerRate(s, on);
+    expect(v.sign).toBe('pos');
+    expect(v.text).toMatch(/^\+\$0\.2[23]\/s$/); // 0.225 → $0.23/s (or $0.22 if rounded down)
+    expect(headerRateText(v)).toBe(v.text);
+    expect(headerRateText(v)).not.toMatch(/\u26A0/);
+    expect(headerRateText(v)).not.toMatch(/\u25BC/);
+    expect(v.aria).not.toMatch(/stopped/);
+    const vOff = headerRate(s, off);
+    expect(vOff.sign).not.toBe('pos');
+    expect(headerRateText(vOff)).toMatch(/\u26A0/);
   });
 });
 

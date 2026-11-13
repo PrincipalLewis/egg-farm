@@ -157,7 +157,7 @@ export function workersHtml(s: GameState, b: Balance): string {
     const trickle = trickleSublineHtml(s, b, id);
     const body = `<h3>${WORKER_NAMES[id]} · <span class="st">${label}${m === 'unpaid' ? WARN_SVG : m === 'asleep' ? MOON_SVG : ''}</span></h3>
       <div class="ebar" role="meter" aria-valuenow="${e}" aria-valuemin="0" aria-valuemax="100" aria-label="Energy"><i style="width:${e}%"></i></div>
-      <div class="meta">Energy ${e}%</div>${trickle}${extra}`;
+      <div class="meta">Energy ${e}%${trickle}</div>${extra}`;
     const refill = `<button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" aria-label="Refill ${WORKER_NAMES[id]}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${desc ? ` aria-describedby="${desc}"` : ''}>${manageIcon(s, b, 'icon-manage-all.svg', 28)}<span>Refill</span></button>${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}${unpaid ? `<span class="sr" id="capd-${id}">${unpaidDescription(id, x!)}</span>` : ''}${paid ? `<span class="sr" id="capw-${id}">${stillPaidDescription(WORKER_NAMES[id], wagePerMinCents(id as 'market_hand' | 'coop_hand', F, b))}</span>` : ''}`;
     return `<div class="wk ${m}${yawn ? ' yawn' : ''}${off ? ' is-off' : ''}" data-w="${id}">${banner}${yawn ? `<img class="yawn-ov" src="${ASSET('overlay-yawn.svg')}" width="28" height="28" alt="">` : ''}<div class="wk-body">${body}</div><div class="wk-refill">${refill}</div></div>`;
   }).join('');
@@ -197,7 +197,7 @@ export function trickleSublineHtml(s: GameState, b: Balance, id: WorkerId): stri
   if (rem === null) return '';
   const eta = fmtTrickleEta(rem), time = eta.replace(/^~/, ''), role = WORKER_NAMES[id];
   const full = trickleLine(eta), aria = trickleAria(role, time);
-  return `<div class="wk-trickle" data-trickle="1"><img class="wk-trickle-ico" src="${ASSET('icon-coin.svg')}" width="12" height="12" alt="" aria-hidden="true"><span class="wk-trickle-t" data-full="${full}" data-short="${TRICKLE_FALLBACK}">${full}</span><span class="sr">${aria}</span></div>`;
+  return `<span class="wk-trickle" data-trickle="1"><img class="wk-trickle-ico" src="${ASSET('icon-coin.svg')}" width="12" height="12" alt="" aria-hidden="true"><span class="wk-trickle-t" data-full="${full}" data-short="${TRICKLE_FALLBACK}">${full}</span><span class="sr">${aria}</span></span>`;
 }
 export function navManageView(n: number, cdS: number, docked: boolean, prev: NavAria, nowMs: number): { label: string; countdown: string; badge: string; aria: NavAria } {
   const cd = Math.ceil(cdS - 1e-9);

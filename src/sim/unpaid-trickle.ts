@@ -47,7 +47,7 @@ export function unpaidTrickleRateCentsPerSec(ws: Workers, farm: number, b: Balan
   return k * sum * CENTS_PER_DOLLAR / SECONDS_PER_MINUTE;
 }
 
-/** Dollars per second, for incomePerSec (Q3 / AC HUD). */
+/** Dollars per second, for the HUD income/s display only (Q3, D-HOP-2026-11-14-15). Not a sim input. */
 export const unpaidTrickleDollarsPerSec = (s: GameState, b: Balance): number =>
   unpaidTrickleRateCentsPerSec(s.workers, s.farmLevel, b) / CENTS_PER_DOLLAR;
 
