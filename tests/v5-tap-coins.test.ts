@@ -14,7 +14,7 @@ import { M5_TC_KEYS } from '../src/config/formulas';
 import { ON } from './v5-f2-helpers';
 type B = typeof b;
 const flags = (f: Record<string, number>, bb: B = ON) => ({ ...bb, m4: { ...bb.m4!, flags: { ...bb.m4!.flags, ...f } } }) as B;
-const TC = flags({ tapCoins: 1 }), TC_ONLY = flags({ tapCoins: 1, streak: 0 }), ST_ONLY = flags({ tapCoins: 0, streak: 1 }), NONE = flags({ tapCoins: 0, streak: 0 });
+const TC = flags({ tapCoins: 1 }), TC_ONLY = flags({ tapCoins: 1, streak: 0 }), ST_ONLY = flags({ tapCoins: 0, streak: 1, broody: 0 }), NONE = flags({ tapCoins: 0, streak: 0, broody: 0 }); // v5 #5: broody also runs the I_ref ring (R7)
 const tc = TC.m4!.tc!, DT = 1 / TC.tickHz, PER_S = Math.round(TC.tickHz), CREDIT_TICKS = Math.round(tc.tap_credit_min_s / DT);
 const working = { energy: 100, cdS: 0 };
 const farm = (extra: Partial<GameState> = {}): GameState => ({ ...initialState(TC, 9), farmLevel: 10, collectionLevel: 8, hensLevel: 10, eggValueLevel: 10,

@@ -11,6 +11,7 @@ import { playerSaleCtx } from './effects';
 import { incomeRefOn, recordSale } from './income-ref';
 import { tapCoinsOn, tapCoinsFor } from './tap-coins';
 import { spawnGolden, tapGolden, frenzySale } from './golden';
+import { broodySlots, tapBroody } from './broody';
 import { stallObserve } from '../econ/stall';
 import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
 import { isPaused, resumeWorker } from './pause';
@@ -20,7 +21,8 @@ export type Action =
   | { type: 'hatch' } | { type: 'placeBreed'; slot: number; id: string | null } // M5.1 breeds (no-op unless m4.flags.breeds)
   | { type: 'hire'; worker: WorkerId } | { type: 'manage'; worker: WorkerId } | { type: 'manageAll' } | { type: 'buyGraderTier' }
   | { type: 'buyTrack'; track: Track } | { type: 'markMilestones'; ids: string[] }
-  | { type: 'spawnGolden'; spots: readonly string[]; layout?: boolean } | { type: 'tapGolden' }; // v5 #1 golden (no-op unless m4.flags.golden)
+  | { type: 'spawnGolden'; spots: readonly string[]; layout?: boolean } | { type: 'tapGolden' } // v5 #1 golden (no-op unless m4.flags.golden)
+  | { type: 'broodySlots'; slots: readonly number[] } | { type: 'tapBroody'; slots: readonly number[] }; // v5 #5 Broody (no-op unless m4.flags.broody)
 /** Sell all preview lives in sim/payout.ts (the one payout fn, #25; M4 sale price via salePriceCents); re-exported for #28 callers. */
 export { sellAllPreview } from './payout';
 export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm' || a.type === 'buyTrack';
@@ -95,6 +97,8 @@ function apply0(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true)
     case 'buyTrack': return withMilestones(s, buyTrack(s, a.track, b, ev), b, ev);
     case 'spawnGolden': return spawnGolden(s, a.spots, b, ev, a.layout === true); // #1 R14/R15: the UI's live valid spot ids
     case 'tapGolden': return tapGolden(s, b, ev); // #1 R19/R20 (not a credited tap, R25b)
+    case 'broodySlots': return broodySlots(s, a.slots, b, ev); // #5 R4-R6: the UI's eligible drawn yard slots
+    case 'tapBroody': return tapBroody(s, a.slots, b, ev, attended); // #5 R12/R13 (not a credited tap; refused unattended)
     case 'markMilestones': { const add = a.ids.filter(id => !s.celebratedMilestones.includes(id)); return add.length ? { ...s, celebratedMilestones: [...s.celebratedMilestones, ...add] } : s; }
     case 'hire': {
       const id = a.worker; if (s.workers[id] || s.farmLevel < unlockFarm(id, b)) return s;

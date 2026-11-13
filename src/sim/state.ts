@@ -44,6 +44,9 @@ export interface GameState extends M5Fields {
    *  interval/deferral/R15 retry and the live Frenzy's frenzy_ended stats. Stripped by m5Persist SESSION_ONLY_KEYS. */
   goldenPending?: import('./golden').GoldenPending;
   frenzyRun?: import('./golden').FrenzyRun;
+  /** v5 #5 Broody (session only, outside F1a M5Fields like goldenPending): sub-cent nest, ms remainder, sticky ready, slot/check and
+   *  telemetry counters (sim/broody.ts). Stripped by m5Persist SESSION_ONLY_KEYS. */
+  broodyRun?: import('./broody').BroodyRun;
 }
 export const initialState = (b: Balance, seed = 1): GameState => ({
   coinsCents: 0, coop: 0, basket: 0, collectionLevel: 0, farmLevel: 0,

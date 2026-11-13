@@ -41,7 +41,7 @@ export type GoldenReward = 'cash' | 'frenzy' | 'eggs' | 'eggs_cash';
 export type AbilityEndCause = 'expired' | 'paused' | 'offline' | 'asleep' | 'unpaid'; // final (sizing §13 AB-1)
 export type AbilityBlockReason = 'cooldown' | 'asleep' | 'unpaid' | 'paused' | 'lockout';
 export type M5SimEvent =
-  | { type: 'collectible_spawned'; skin: CollectibleSkin; farm_level: number; collection_level: number; slot_id: string; interval_s: number; deferred_ms: number }
+  | { type: 'collectible_spawned'; skin: CollectibleSkin; farm_level: number; collection_level: number; slot_id: string; interval_s: number; deferred_ms: number; restored?: boolean }
   | { type: 'collectible_collected'; skin: CollectibleSkin; reaction_ms: number; in_warning: boolean; reward_type: GoldenReward | 'broody_cash'; reward_value: number; reward_duration_s: number; farm_level: number; nest_fill_share?: number }
   | { type: 'collectible_expired'; skin: CollectibleSkin; reason: 'timeout' | 'offline' | 'reload' | 'takeover' | 'reset'; farm_level: number }
   | { type: 'frenzy_started'; mult: number; duration_s: number; farm_level: number; grader_tier: number }
