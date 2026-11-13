@@ -1,0 +1,1356 @@
+{
+ "item": "M5.1 zero-gain purchase UI wireframes",
+ "doc": "art-ux/m5.1-zero-gain-ui.md",
+ "spec": "product/collection/m5.1-zero-gain-purchase-ui.md v0.1 sha1 62f0210c3da908250f250066d49acfda71c8c404",
+ "rulings": "art-ux/decisions.md 2026-10-25 02:58 CET (Q-Art-1..8)",
+ "build": "30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134",
+ "build_label_checked": "m4.1+30b29d3",
+ "build_label_source": "<meta name=\"build-id\"> in dist-qa/index.html (no visible HUD tag)",
+ "pr": null,
+ "method": "dist-qa served on 127.0.0.1 under flock .browser-test.lock (server stopped); state injected via window.eggfarm.state; ZG markup/CSS and the Flock entry (m5.1-breeds-ui v0.2.6 \u00a71) injected at runtime. ZG is presentation-forced on the Collection/Hens row (the predicate isZeroGain is HoE's). No code change.",
+ "fixtures": {
+  "stack": "F3 H3 V3 C20, coins 1e12 (Collect per tap row: Limited by coop shows)",
+  "stackUnaff": "same, coins 0",
+  "l30": "F30 H30 V30 C27, coins 1e15 (only Collection buyable)",
+  "compare": "Hens row @360: F10 H5 (normal/ZG/unaff), F5 H8 (locked), F30 H30 (MAX)"
+ },
+ "created": "2026-10-25T02:05:52Z",
+ "files": [
+  {
+   "file": "m5.1-zg-stack-chromium-360x640.png",
+   "engine": "chromium",
+   "sha256": "5c7e1bef05d271af903188fa093c7298945b568e51b7e149b05786b49068a95c",
+   "fixture": "stack",
+   "size": "360x640",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-confirm-chromium-360x640.png",
+   "engine": "chromium",
+   "sha256": "ca70f3bef136c83abd134af36bd0f88ca79b570ef732c1d445dbdac882e91db1",
+   "fixture": "stack + confirm strip OPEN (keyboard: Enter on Buy; focus on Buy anyway); flag OFF in M5.1, wireframe v1.1",
+   "size": "360x640",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-stackUnaff-chromium-360x640.png",
+   "engine": "chromium",
+   "sha256": "e0fc1555ffd3c75c5d8f3f28a5cc52fe45d642fdfeee83f59aa5da985ed04240",
+   "fixture": "stackUnaff",
+   "size": "360x640",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 0
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30-chromium-360x640.png",
+   "engine": "chromium",
+   "sha256": "dc19d0f9ddfd79b46b53919a87d7fb33eec51fe71b66aa5f78f703247290a82e",
+   "fixture": "l30",
+   "size": "360x640",
+   "docked": false,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30farm-chromium-360x640.png",
+   "engine": "chromium",
+   "sha256": "06f6382768865f30d8cb1511615b7bf7e99c000dbf9432bc193807c0953b3865",
+   "fixture": "l30 Farm tab",
+   "size": "360x640",
+   "docked": false,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-stack-chromium-390x844.png",
+   "engine": "chromium",
+   "sha256": "ebd96616eeff71b2f7b482fd86ce52bbad853ae6095e2fd0216ef1c71c882820",
+   "fixture": "stack",
+   "size": "390x844",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-confirm-chromium-390x844.png",
+   "engine": "chromium",
+   "sha256": "c6ac17a6bf13f48de0b1ab2aac5cdfe19a430050b7566905d13a5cbcc781c6bb",
+   "fixture": "stack + confirm strip OPEN (keyboard: Enter on Buy; focus on Buy anyway); flag OFF in M5.1, wireframe v1.1",
+   "size": "390x844",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-stackUnaff-chromium-390x844.png",
+   "engine": "chromium",
+   "sha256": "bd6c890de068caf21f334300d352ff4aeba90b943cbb82daffe293822b18d636",
+   "fixture": "stackUnaff",
+   "size": "390x844",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 0
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30-chromium-390x844.png",
+   "engine": "chromium",
+   "sha256": "9b65f23b412f63162cfc752ac62c5abca11ff575cfd1c06805b3d09d1748479c",
+   "fixture": "l30",
+   "size": "390x844",
+   "docked": false,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30farm-chromium-390x844.png",
+   "engine": "chromium",
+   "sha256": "8c9dfdaf3adbc912ac81d4aa292c3d4b06ef8600be9da6333f6237a1bfb52c9c",
+   "fixture": "l30 Farm tab",
+   "size": "390x844",
+   "docked": false,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-stack-chromium-959x600.png",
+   "engine": "chromium",
+   "sha256": "41f4639f0110c7c3aa4fc572e71be8abf88aa7a3779816063fb3318c5487ebfe",
+   "fixture": "stack",
+   "size": "959x600",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-confirm-chromium-959x600.png",
+   "engine": "chromium",
+   "sha256": "c68df13b2e9c3a007767907fbcb89f84e0ac47cf480d62951842906d3b9009f5",
+   "fixture": "stack + confirm strip OPEN (keyboard: Enter on Buy; focus on Buy anyway); flag OFF in M5.1, wireframe v1.1",
+   "size": "959x600",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-stackUnaff-chromium-959x600.png",
+   "engine": "chromium",
+   "sha256": "cba9cf7b3f1d3a6ff6e14b2aef2bfb49855e1e1d41441de436832f5fbbeb6aa3",
+   "fixture": "stackUnaff",
+   "size": "959x600",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 0
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30-chromium-959x600.png",
+   "engine": "chromium",
+   "sha256": "c743a8e9c4b8a9db85c58b739e5ca15e0cbcf7659fa1a62dd6956c52c6290672",
+   "fixture": "l30",
+   "size": "959x600",
+   "docked": false,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30farm-chromium-959x600.png",
+   "engine": "chromium",
+   "sha256": "c007a340a3a52e70e25f07f86447438e91e86626e37f122990ec9f0fdd14b1a5",
+   "fixture": "l30 Farm tab",
+   "size": "959x600",
+   "docked": false,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-stack-chromium-960x600.png",
+   "engine": "chromium",
+   "sha256": "73434aff480e4ee511ad27ce965bd58758001e40ac407ae70a7aa5aa18e8105d",
+   "fixture": "stack",
+   "size": "960x600",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-confirm-chromium-960x600.png",
+   "engine": "chromium",
+   "sha256": "ed5d1e8ddef5bd4ecd5921a99dc21a8b2403084a28023a4e0ce94c87424fbb59",
+   "fixture": "stack + confirm strip OPEN (keyboard: Enter on Buy; focus on Buy anyway); flag OFF in M5.1, wireframe v1.1",
+   "size": "960x600",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-stackUnaff-chromium-960x600.png",
+   "engine": "chromium",
+   "sha256": "f1e8b409c274e616462e8167cf0367702a9e8f153906be832809e2d1ff7768b6",
+   "fixture": "stackUnaff",
+   "size": "960x600",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 0
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30-chromium-960x600.png",
+   "engine": "chromium",
+   "sha256": "a57aa88c79a2698d1fa99432b815b3fe2845a8a7bbb6f8406465ea0f15eb4cb7",
+   "fixture": "l30",
+   "size": "960x600",
+   "docked": true,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30farm-chromium-960x600.png",
+   "engine": "chromium",
+   "sha256": "1e82bca6643c8992b6294a353a8ee67f70dddaf4840d77d59c09e32214bc6b7e",
+   "fixture": "l30 Farm tab",
+   "size": "960x600",
+   "docked": true,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-stack-chromium-1280x800.png",
+   "engine": "chromium",
+   "sha256": "7ae71964c884f715acd288c1c4aac6390254cc29fb9d040a416addf8f9b17596",
+   "fixture": "stack",
+   "size": "1280x800",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-confirm-chromium-1280x800.png",
+   "engine": "chromium",
+   "sha256": "381931ad0eb84b28d8bf29445337561ebd01f40e23a83a624314b36debf5da98",
+   "fixture": "stack + confirm strip OPEN (keyboard: Enter on Buy; focus on Buy anyway); flag OFF in M5.1, wireframe v1.1",
+   "size": "1280x800",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-stackUnaff-chromium-1280x800.png",
+   "engine": "chromium",
+   "sha256": "ece19cc1710a84c6236ac217e7a4b79ab656587287f67da922315bb5af60d86d",
+   "fixture": "stackUnaff",
+   "size": "1280x800",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 0
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30-chromium-1280x800.png",
+   "engine": "chromium",
+   "sha256": "a3d9b1a91e4e11e9c9b04d2f69b229967684ede4bca5f9a84562e1a43bb33a25",
+   "fixture": "l30",
+   "size": "1280x800",
+   "docked": true,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30farm-chromium-1280x800.png",
+   "engine": "chromium",
+   "sha256": "639588c2ee7aefe58b5d8e575d411bf36f0ce652a71eb2c6dc79469285bb3089",
+   "fixture": "l30 Farm tab",
+   "size": "1280x800",
+   "docked": true,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-stack-firefox-360x640.png",
+   "engine": "firefox",
+   "sha256": "96f58fc19137915e8f9aa502432278520e43efbd0a7a824be0c779c001bac01f",
+   "fixture": "stack",
+   "size": "360x640",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-confirm-firefox-360x640.png",
+   "engine": "firefox",
+   "sha256": "b29686eb5a4c8a9ee00b3173515cce24a0df64d5d719280ce000bef871719046",
+   "fixture": "stack + confirm strip OPEN (keyboard: Enter on Buy; focus on Buy anyway); flag OFF in M5.1, wireframe v1.1",
+   "size": "360x640",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-stackUnaff-firefox-360x640.png",
+   "engine": "firefox",
+   "sha256": "090ce95438a4fb798bcd2a08fb7745e7cb557fa5d2ffe5d2edfc71761d0af4d9",
+   "fixture": "stackUnaff",
+   "size": "360x640",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 0
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30-firefox-360x640.png",
+   "engine": "firefox",
+   "sha256": "10161b6ba8b03c49ca1cc0a195d0c1fd6e378786e9322df8c4100f91c2f9cc85",
+   "fixture": "l30",
+   "size": "360x640",
+   "docked": false,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30farm-firefox-360x640.png",
+   "engine": "firefox",
+   "sha256": "fdbc9f5ac369335fec4b0449a88e5799406668c0c3084b5949f16ee370790f45",
+   "fixture": "l30 Farm tab",
+   "size": "360x640",
+   "docked": false,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-stack-firefox-959x600.png",
+   "engine": "firefox",
+   "sha256": "acf5ff8e994780d7cb20946b941065a8e19ab3a2107900915dc3709a50bb9233",
+   "fixture": "stack",
+   "size": "959x600",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-confirm-firefox-959x600.png",
+   "engine": "firefox",
+   "sha256": "0ba264fb9d7e5c8080de4b57d52443c9e4787f5d837c4ce8904578726afd9123",
+   "fixture": "stack + confirm strip OPEN (keyboard: Enter on Buy; focus on Buy anyway); flag OFF in M5.1, wireframe v1.1",
+   "size": "959x600",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-stackUnaff-firefox-959x600.png",
+   "engine": "firefox",
+   "sha256": "e2045da3cfb2b248e11292a4f821f99afcdb889ce60e38d6ac644825e206049c",
+   "fixture": "stackUnaff",
+   "size": "959x600",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 0
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30-firefox-959x600.png",
+   "engine": "firefox",
+   "sha256": "fd16f72fefd5f7abf31043e07e26f2f7f2d4a5ebb5a4fa1f6747c50d6be8369e",
+   "fixture": "l30",
+   "size": "959x600",
+   "docked": false,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30farm-firefox-959x600.png",
+   "engine": "firefox",
+   "sha256": "a93c5c559c27b3dffcff6231e2d08ebd412ba9e220ba515ebb3b969df842a623",
+   "fixture": "l30 Farm tab",
+   "size": "959x600",
+   "docked": false,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-stack-firefox-960x600.png",
+   "engine": "firefox",
+   "sha256": "bf9475564848c346956176583badaac9f73b5a8cc5cb2593307a66f3c1d39ff4",
+   "fixture": "stack",
+   "size": "960x600",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-confirm-firefox-960x600.png",
+   "engine": "firefox",
+   "sha256": "8500f756a9d69cff7dea3198f5200e1b397014f112725d0f2ae439d51f32edb6",
+   "fixture": "stack + confirm strip OPEN (keyboard: Enter on Buy; focus on Buy anyway); flag OFF in M5.1, wireframe v1.1",
+   "size": "960x600",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-stackUnaff-firefox-960x600.png",
+   "engine": "firefox",
+   "sha256": "2e7153af5e814f4eee3e78026a4a1bbfd5d19166b27d8a5aad92c841f96910b5",
+   "fixture": "stackUnaff",
+   "size": "960x600",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 0
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30-firefox-960x600.png",
+   "engine": "firefox",
+   "sha256": "bebff8d98ad27b3f72cb89cef7e21be549b0386f23fcf45ac6012ffe2d244703",
+   "fixture": "l30",
+   "size": "960x600",
+   "docked": true,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30farm-firefox-960x600.png",
+   "engine": "firefox",
+   "sha256": "300bba46fe49f4b788164803fc3b4bcd29988d72b5c9904091e5d8149246ea04",
+   "fixture": "l30 Farm tab",
+   "size": "960x600",
+   "docked": true,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-stack-firefox-1280x800.png",
+   "engine": "firefox",
+   "sha256": "467e8c8cf8492488f4481252cd62ce2469823104784f0f036af6acfae0e1771d",
+   "fixture": "stack",
+   "size": "1280x800",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-confirm-firefox-1280x800.png",
+   "engine": "firefox",
+   "sha256": "97fbcb796cdc1075753884301b613417fce857e632d5315cd876fe716e9c16b0",
+   "fixture": "stack + confirm strip OPEN (keyboard: Enter on Buy; focus on Buy anyway); flag OFF in M5.1, wireframe v1.1",
+   "size": "1280x800",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-stackUnaff-firefox-1280x800.png",
+   "engine": "firefox",
+   "sha256": "02c1222aa4bd291b72c1f82c67ce8994a6dff24a2de648350c1cc3803fe2e051",
+   "fixture": "stackUnaff",
+   "size": "1280x800",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 0
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30-firefox-1280x800.png",
+   "engine": "firefox",
+   "sha256": "eaa1ec2b52b952c6c02b2681925decf6e4c78243b0819084b66064a159e968ee",
+   "fixture": "l30",
+   "size": "1280x800",
+   "docked": true,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30farm-firefox-1280x800.png",
+   "engine": "firefox",
+   "sha256": "d9c28b7c25ee8a84fd2186900e6764247bcdb5e61845458c83b16933bf7a3295",
+   "fixture": "l30 Farm tab",
+   "size": "1280x800",
+   "docked": true,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-stack-webkit-360x640.png",
+   "engine": "webkit",
+   "sha256": "8b8b36d84878cba054231e53f643627621f7230029f63419b3dc350729b0d56b",
+   "fixture": "stack",
+   "size": "360x640",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-confirm-webkit-360x640.png",
+   "engine": "webkit",
+   "sha256": "e1ebb671de2d3ed7bc0609d1ecb53e1c358de511704d077db27316d668ad3dfa",
+   "fixture": "stack + confirm strip OPEN (keyboard: Enter on Buy; focus on Buy anyway); flag OFF in M5.1, wireframe v1.1",
+   "size": "360x640",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-stackUnaff-webkit-360x640.png",
+   "engine": "webkit",
+   "sha256": "358366de9872e3c61675cd9a5f9d70f1ce65e945245838b7cd0147415c7f6550",
+   "fixture": "stackUnaff",
+   "size": "360x640",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 0
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30-webkit-360x640.png",
+   "engine": "webkit",
+   "sha256": "fffa77215f1114878dc1abd76affeeef0c304e3c425bd6aca13dfd5d0acb33f2",
+   "fixture": "l30",
+   "size": "360x640",
+   "docked": false,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30farm-webkit-360x640.png",
+   "engine": "webkit",
+   "sha256": "a3073ff9e99a28215bfcfdfa082d9ca4fb001cec16840d3774acf76c8cd1efbc",
+   "fixture": "l30 Farm tab",
+   "size": "360x640",
+   "docked": false,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-stack-webkit-959x600.png",
+   "engine": "webkit",
+   "sha256": "77c4e67b44c702367f4e1cd719215cdcfa681caac7ebcf203c8b265f92f3c373",
+   "fixture": "stack",
+   "size": "959x600",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-confirm-webkit-959x600.png",
+   "engine": "webkit",
+   "sha256": "711ec261fdae191d75ed75950b1bea8f6e55ef236779d6584db93b57cc50e82c",
+   "fixture": "stack + confirm strip OPEN (keyboard: Enter on Buy; focus on Buy anyway); flag OFF in M5.1, wireframe v1.1",
+   "size": "959x600",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-stackUnaff-webkit-959x600.png",
+   "engine": "webkit",
+   "sha256": "2ceca3f7f041beb7f1a29ef2ce7380b711f8abc6f21577f2e11fdd38189fda0a",
+   "fixture": "stackUnaff",
+   "size": "959x600",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 0
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30-webkit-959x600.png",
+   "engine": "webkit",
+   "sha256": "515f657dcd441f9a9daaa5a22a9f7c1a47e40059f68dadd3575ab9e81c673719",
+   "fixture": "l30",
+   "size": "959x600",
+   "docked": false,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30farm-webkit-959x600.png",
+   "engine": "webkit",
+   "sha256": "9e047b52161e1f2cb6400f5c8dc3a114604846904175b4518a81dca7d92a62be",
+   "fixture": "l30 Farm tab",
+   "size": "959x600",
+   "docked": false,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-stack-webkit-960x600.png",
+   "engine": "webkit",
+   "sha256": "1efe721fdd3d730b4fa8cabd16e68cda896eb075cc34d31f4bb7b40a160a4ec4",
+   "fixture": "stack",
+   "size": "960x600",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-confirm-webkit-960x600.png",
+   "engine": "webkit",
+   "sha256": "ba97f590a6ca19f326b4e8cdf45db2c71e653d14d2df9a79b851b5d3fd8aa7dd",
+   "fixture": "stack + confirm strip OPEN (keyboard: Enter on Buy; focus on Buy anyway); flag OFF in M5.1, wireframe v1.1",
+   "size": "960x600",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-stackUnaff-webkit-960x600.png",
+   "engine": "webkit",
+   "sha256": "bc0d1776173d197df0b3204969899f56a49fe154544b901db7f2cd186c949817",
+   "fixture": "stackUnaff",
+   "size": "960x600",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 0
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30-webkit-960x600.png",
+   "engine": "webkit",
+   "sha256": "ed89449b7cef7ddb6c4dcb7c6f3cc790a10facfb82e0455d7762b926565c7f59",
+   "fixture": "l30",
+   "size": "960x600",
+   "docked": true,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30farm-webkit-960x600.png",
+   "engine": "webkit",
+   "sha256": "5d1aee62b25c2d7f26bb782af0112f59828db50ba0d274410dacbaeb6d54946a",
+   "fixture": "l30 Farm tab",
+   "size": "960x600",
+   "docked": true,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-stack-webkit-1280x800.png",
+   "engine": "webkit",
+   "sha256": "61428d4fd8500db6478ebc06edccf5a9ff38eb71cb183331443699ad4a18dece",
+   "fixture": "stack",
+   "size": "1280x800",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-confirm-webkit-1280x800.png",
+   "engine": "webkit",
+   "sha256": "1539b00fa73f4f1f789e98f1f7a6542efaeab9b28a88c239896358819edccbfd",
+   "fixture": "stack + confirm strip OPEN (keyboard: Enter on Buy; focus on Buy anyway); flag OFF in M5.1, wireframe v1.1",
+   "size": "1280x800",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-stackUnaff-webkit-1280x800.png",
+   "engine": "webkit",
+   "sha256": "5d36d784b3ad950f59af2d699fb0b7b5b18017a5b3a883cb243a4fa80a4e97ee",
+   "fixture": "stackUnaff",
+   "size": "1280x800",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 0
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30-webkit-1280x800.png",
+   "engine": "webkit",
+   "sha256": "99ef0889daecfb5c8759d628a8eb200fb7f440abf967bf763031a6cdb7ff1b14",
+   "fixture": "l30",
+   "size": "1280x800",
+   "docked": true,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-l30farm-webkit-1280x800.png",
+   "engine": "webkit",
+   "sha256": "3aa436d31f5055e03936c675e790c42a1e43c9386aea3e56399c5e578339c464",
+   "fixture": "l30 Farm tab",
+   "size": "1280x800",
+   "docked": true,
+   "state": {
+    "farmLevel": 30,
+    "hensLevel": 30,
+    "eggValueLevel": 30,
+    "collectionLevel": 27,
+    "coinsCents": 1000000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection)"
+  },
+  {
+   "file": "m5.1-zg-stack-scrolled-chromium-960x600.png",
+   "engine": "chromium",
+   "size": "960x600",
+   "docked": true,
+   "fixture": "stack, docked panel body scrolled to the Limited-by-coop line",
+   "kind": "render",
+   "sha256": "bc0408659cfc059540b740771329704e1375484c64cd27ee01e2b84c1a6f0d5e"
+  },
+  {
+   "file": "m5.1-zg-row-normal-chromium-360.png",
+   "engine": "chromium",
+   "size": "360x640",
+   "fixture": "Hens row, normal",
+   "kind": "element render",
+   "sha256": "b2970ee2e7dd846888cdd6a33bb16f102cd4cf235ecb70d1f70642531ff4e02b"
+  },
+  {
+   "file": "m5.1-zg-row-zg-chromium-360.png",
+   "engine": "chromium",
+   "size": "360x640",
+   "fixture": "Hens row, zg",
+   "kind": "element render",
+   "sha256": "ddbfc530078df65bfa45fe85b7b90624a3437dec8ac75218dcc46320deedce41"
+  },
+  {
+   "file": "m5.1-zg-row-zg-unaff-chromium-360.png",
+   "engine": "chromium",
+   "size": "360x640",
+   "fixture": "Hens row, zg-unaff",
+   "kind": "element render",
+   "sha256": "7764fcb57ba7fdb728c2b4f40705320579f434ebb8764b4cc02c1f85b7d01098"
+  },
+  {
+   "file": "m5.1-zg-row-unaff-chromium-360.png",
+   "engine": "chromium",
+   "size": "360x640",
+   "fixture": "Hens row, unaff",
+   "kind": "element render",
+   "sha256": "1dc21d1d3de82cb9ff9fa557944f69894c20a839332e9c0019877ffeac671add"
+  },
+  {
+   "file": "m5.1-zg-row-locked-chromium-360.png",
+   "engine": "chromium",
+   "size": "360x640",
+   "fixture": "Hens row, locked",
+   "kind": "element render",
+   "sha256": "e3d60a26fd02ab80225bcb7872d3f6f775c92a18545c1a82f8341fbcc484c71e"
+  },
+  {
+   "file": "m5.1-zg-row-max-chromium-360.png",
+   "engine": "chromium",
+   "size": "360x640",
+   "fixture": "Hens row, max",
+   "kind": "element render",
+   "sha256": "0ea3256c22e398bcfc5a15f61aad944d67eba4778e080a6b14aad1ded1611e71"
+  },
+  {
+   "file": "m5.1-zg-compare-chromium-360.png",
+   "kind": "composite, colour",
+   "sha256": "50c15bcc1acf12626220c676f343b89c79030e55e059d9ed4137ce21fa4e3136"
+  },
+  {
+   "file": "m5.1-zg-compare-grey-chromium-360.png",
+   "kind": "composite, greyscale (CSS grayscale(1))",
+   "sha256": "18ca452719dcb1704b6a929bf6009a28ea68f61a5fd3239428be15f9c24ff5fd"
+  },
+  {
+   "file": "m5.1-zg-compare.html",
+   "kind": "composite source",
+   "sha256": "31203fd2a28a13852633b6d77d4667f324692ebe1f45b11d9209813e4d92230f"
+  },
+  {
+   "file": "m5.1-zg-wireframe.css",
+   "kind": "wireframe CSS (paper)",
+   "sha256": "e6a16e34b03f4e82376c387cd56062307faf6596f7113e871ece3cded537a9be"
+  },
+  {
+   "file": "m5.1-zg-wireframe.js",
+   "kind": "wireframe markup injector (paper)",
+   "sha256": "10aea8b404a1ff37c0ad0e664c80948826552889a2fb08d6396b06762af04f3a"
+  },
+  {
+   "file": "m5.1-zg-confirm-closed-chromium-360x640.png",
+   "engine": "chromium",
+   "sha256": "1930d2544759f0b1752db878be3b0d7ad7e070e5a5f5d3d7ad0ee6dc7a67fd27",
+   "fixture": "stack, strip CLOSED by re-activating Buy (Q-ZG-A3): focus stays on Buy, aria-expanded=false",
+   "size": "360x640",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-confirm-closed-chromium-390x844.png",
+   "engine": "chromium",
+   "sha256": "c5d57bd397de76880b4f57f8dfac8afc7a36aacc67d547cdb0b8e0665c494e2f",
+   "fixture": "stack, strip CLOSED by re-activating Buy (Q-ZG-A3): focus stays on Buy, aria-expanded=false",
+   "size": "390x844",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-confirm-closed-chromium-959x600.png",
+   "engine": "chromium",
+   "sha256": "aa691e8daa42c165fa62a6b87b746f0b3ee0198c4c5ab675309c1886e73511ac",
+   "fixture": "stack, strip CLOSED by re-activating Buy (Q-ZG-A3): focus stays on Buy, aria-expanded=false",
+   "size": "959x600",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-confirm-closed-chromium-960x600.png",
+   "engine": "chromium",
+   "sha256": "ee2835014398aede42788a2dc6263c2d37ce63468bb75b51ee13524044ab59db",
+   "fixture": "stack, strip CLOSED by re-activating Buy (Q-ZG-A3): focus stays on Buy, aria-expanded=false",
+   "size": "960x600",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-confirm-closed-chromium-1280x800.png",
+   "engine": "chromium",
+   "sha256": "5a22ea01cd7aa7d5b0d598fe0088c37f96b04673cc3b62a442e10bd078c048f2",
+   "fixture": "stack, strip CLOSED by re-activating Buy (Q-ZG-A3): focus stays on Buy, aria-expanded=false",
+   "size": "1280x800",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-confirm-closed-firefox-360x640.png",
+   "engine": "firefox",
+   "sha256": "82c06a44f67a772b5021481602dbf234200321a20c677aa437e3ecb4ab7d9ca2",
+   "fixture": "stack, strip CLOSED by re-activating Buy (Q-ZG-A3): focus stays on Buy, aria-expanded=false",
+   "size": "360x640",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-confirm-closed-firefox-959x600.png",
+   "engine": "firefox",
+   "sha256": "c1d92c6a90e1d39d610883952ffffd430e5a792e1e27cf8ccb9d86f37f64aeed",
+   "fixture": "stack, strip CLOSED by re-activating Buy (Q-ZG-A3): focus stays on Buy, aria-expanded=false",
+   "size": "959x600",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-confirm-closed-firefox-960x600.png",
+   "engine": "firefox",
+   "sha256": "ecc6988175310a23774e037accabbba9c51235edb176cb0e22addef92aa6872b",
+   "fixture": "stack, strip CLOSED by re-activating Buy (Q-ZG-A3): focus stays on Buy, aria-expanded=false",
+   "size": "960x600",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-confirm-closed-firefox-1280x800.png",
+   "engine": "firefox",
+   "sha256": "f85c170978c8f4b522d323ee9b569d7cabd88fafc89c8f2f92f96b8a4da66759",
+   "fixture": "stack, strip CLOSED by re-activating Buy (Q-ZG-A3): focus stays on Buy, aria-expanded=false",
+   "size": "1280x800",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-confirm-closed-webkit-360x640.png",
+   "engine": "webkit",
+   "sha256": "4e43d3fbf7f9722215bd27834308b53862c5ee63ffd58a6a6f83ae2800fa76fd",
+   "fixture": "stack, strip CLOSED by re-activating Buy (Q-ZG-A3): focus stays on Buy, aria-expanded=false",
+   "size": "360x640",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-confirm-closed-webkit-959x600.png",
+   "engine": "webkit",
+   "sha256": "530c66e45b3c67114e329ead314950a87fd132167ad5f884bdfe451cca766987",
+   "fixture": "stack, strip CLOSED by re-activating Buy (Q-ZG-A3): focus stays on Buy, aria-expanded=false",
+   "size": "959x600",
+   "docked": false,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-confirm-closed-webkit-960x600.png",
+   "engine": "webkit",
+   "sha256": "b316547cf35411e30f1535ecfc3b09349c54872642bfaa05d63fb0da35acda57",
+   "fixture": "stack, strip CLOSED by re-activating Buy (Q-ZG-A3): focus stays on Buy, aria-expanded=false",
+   "size": "960x600",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-confirm-closed-webkit-1280x800.png",
+   "engine": "webkit",
+   "sha256": "0c4c24f7027abc3eba7dd6f4a87ba43ad025a4c0cd0c212f21124b516a28d0dd",
+   "fixture": "stack, strip CLOSED by re-activating Buy (Q-ZG-A3): focus stays on Buy, aria-expanded=false",
+   "size": "1280x800",
+   "docked": true,
+   "state": {
+    "farmLevel": 3,
+    "hensLevel": 3,
+    "eggValueLevel": 3,
+    "collectionLevel": 20,
+    "coinsCents": 1000000000000
+   },
+   "kind": "render (30b29d3 + runtime wireframe injection v1.1)"
+  },
+  {
+   "file": "m5.1-zg-confirm-a11y.json",
+   "sha256": "d384494dfe05b7920009ae2439c7c04b14e4340d33b38c21b2fb88bf42e54f9d",
+   "kind": "data"
+  }
+ ],
+ "revision": "v1.3 (2026-10-25 03:34 CET: C1 key-repeat guard in wireframe JS; no PNG re-rendered)"
+}

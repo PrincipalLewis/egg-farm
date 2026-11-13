@@ -1,0 +1,21 @@
+# re-run of mutants.sh + mutants2.sh on scratch clone at ecf8297 (21:58 CET); original file lost in the ~21:56 CET box reboot, transcribed from the run output
+R1 killed (3 failed)
+R2 killed (2 failed)
+R3 killed (1 failed)
+R4 killed (1 failed)
+R5 killed (1 failed)
+R6 killed (1 failed)
+E1 killed (5 failed)
+E2 killed (2 failed)
+E3 killed (1 failed)
+P1 killed (4 failed)
+P2 killed (4 failed)
+P3 killed (1 failed)
+G1 killed (1 failed)
+G2 SURVIVED
+G3 killed (1 failed)
+S1 killed (1 failed)
+S2 killed (1 failed)
+S3 killed (1 failed)
+D1 SURVIVED
+D2 SURVIVED

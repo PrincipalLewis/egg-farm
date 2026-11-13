@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 900" width="1280" height="900" font-family="Nunito,system-ui,sans-serif">
+<style>.vp{fill:#FFF6E5;stroke:#3E2C23;stroke-width:2}.sky{fill:#8FD3F4}.grass{fill:#BFE6A8}.z{fill:#3E2C23;fill-opacity:.10;stroke:#3E2C23;stroke-width:1}
+.tap{fill:#B83B37;fill-opacity:.14;stroke:#B83B37;stroke-width:1.5}.ro{fill:#6B5D52;fill-opacity:.12;stroke:#6B5D52;stroke-dasharray:4 3}.slot{fill:none;stroke:#6B5D52;stroke-width:1;stroke-dasharray:2 2}
+.ok{fill:#3D7F33;fill-opacity:.10;stroke:#3D7F33;stroke-width:1.5}.no{fill:none;stroke:#B83B37;stroke-width:1;stroke-dasharray:3 2}.gs{fill:#E8B020;fill-opacity:.25;stroke:#8A5528;stroke-width:1.5}
+.lbl{font-size:10px;fill:#3E2C23;font-weight:700}.sm{font-size:9px;fill:#3E2C23}.hit{fill:none;stroke:#3E2C23;stroke-width:2}.marg{fill:none;stroke:#3E2C23;stroke-width:1;stroke-dasharray:4 3}
+.glow{fill:#FFC93C;fill-opacity:.55}.ring{fill:none;stroke:#3E2C23;stroke-width:2}.nest{fill:#A86B3C;stroke:#3E2C23;stroke-width:2}.coin{fill:#E8B020;stroke:#3E2C23;stroke-width:1.5}</style>
+<rect class="vp" x="0" y="0" width="1280" height="800"/>
+<rect class="sky" x="0" y="56" width="880" height="260"/><rect class="grass" x="0" y="316" width="880" height="484"/>
+<rect class="z" x="0" y="0" width="1280" height="56" /><text class="lbl" x="4" y="13">HUD 56</text>
+<rect class="tap" x="12" y="68" width="856" height="81" /><text class="lbl" x="16" y="81">queue / order chips (tap)</text>
+<rect class="ro" x="507" y="64" width="265" height="32" /><text class="lbl" x="511" y="77">toast strip (transient)</text>
+<rect class="slot" x="160" y="188" width="560" height="420" />
+<text class="sm" x="164" y="604">#scene (whole scene = secondary Collect surface)</text>
+<rect class="tap" x="311" y="191" width="258" height="258" /><text class="lbl" x="315" y="204">coop</text>
+<rect class="tap" x="404" y="410" width="72" height="72" /><text class="lbl" x="408" y="424">nest</text>
+<rect class="ro" x="591" y="214" width="40" height="19" /><text class="lbl" x="595" y="227">Full!</text>
+<rect class="ok" x="179" y="450" width="56" height="56" rx="6"/>
+<text class="lbl" x="201" y="482">Y0</text>
+<rect class="no" x="272" y="450" width="56" height="56" rx="6"/>
+<text class="lbl" x="294" y="482">Y1</text>
+<rect class="no" x="365" y="451" width="56" height="56" rx="6"/>
+<text class="lbl" x="387" y="483">Y2</text>
+<rect class="no" x="459" y="451" width="56" height="56" rx="6"/>
+<text class="lbl" x="481" y="483">Y3</text>
+<rect class="no" x="552" y="452" width="56" height="56" rx="6"/>
+<text class="lbl" x="574" y="484">Y4</text>
+<rect class="ok" x="645" y="452" width="56" height="56" rx="6"/>
+<text class="lbl" x="667" y="484">Y5</text>
+<rect class="no" x="179" y="536" width="56" height="56" rx="6"/>
+<text class="lbl" x="201" y="568">Y6</text>
+<rect class="ok" x="272" y="536" width="56" height="56" rx="6"/>
+<text class="lbl" x="294" y="568">Y7</text>
+<rect class="ok" x="365" y="536" width="56" height="56" rx="6"/>
+<text class="lbl" x="387" y="568">Y8</text>
+<rect class="ok" x="459" y="536" width="56" height="56" rx="6"/>
+<text class="lbl" x="481" y="568">Y9</text>
+<rect class="ok" x="552" y="536" width="56" height="56" rx="6"/>
+<text class="lbl" x="574" y="568">Y10</text>
+<rect class="ok" x="645" y="536" width="56" height="56" rx="6"/>
+<text class="lbl" x="667" y="568">Y11</text>
+<rect class="ro" x="164" y="584" width="79" height="21" /><text class="lbl" x="168" y="596">×N hens</text>
+<rect class="ro" x="160" y="648" width="560" height="16" /><text class="lbl" x="164" y="661">meter</text>
+<rect class="tap" x="160" y="672" width="560" height="44" /><text class="lbl" x="164" y="685">next goal (tap)</text>
+<rect class="tap" x="160" y="724" width="560" height="64" /><text class="lbl" x="164" y="737">COLLECT (primary)</text>
+<rect class="ro" x="160" y="788" width="560" height="12" />
+<rect class="z" x="880" y="56" width="400" height="744" /><text class="lbl" x="884" y="69">docked column (never)</text>
+<rect class="gs" x="82" y="212" width="56" height="56" rx="28"/><text class="lbl" x="102" y="244">S1</text>
+<rect class="gs" x="202" y="302" width="56" height="56" rx="28"/><text class="lbl" x="222" y="334">S2</text>
+<rect class="gs" x="82" y="412" width="56" height="56" rx="28"/><text class="lbl" x="102" y="444">S3</text>
+<rect class="gs" x="202" y="512" width="56" height="56" rx="28"/><text class="lbl" x="222" y="544">S4</text>
+<rect class="gs" x="652" y="212" width="56" height="56" rx="28"/><text class="lbl" x="672" y="244">S5</text>
+<rect class="gs" x="742" y="302" width="56" height="56" rx="28"/><text class="lbl" x="762" y="334">S6</text>
+<rect class="gs" x="622" y="412" width="56" height="56" rx="28"/><text class="lbl" x="642" y="444">S7</text>
+<rect class="gs" x="742" y="532" width="56" height="56" rx="28"/><text class="lbl" x="762" y="564">S8</text>
+<circle class="glow" cx="393" cy="564" r="30"/><circle class="ring" cx="393" cy="564" r="27"/>
+<path class="nest" d="M367 574 q26 22 52 0z"/><circle class="coin" cx="377" cy="576" r="4"/><circle class="coin" cx="409" cy="576" r="4"/>
+<rect class="hit" x="365" y="536" width="56" height="56"/><rect class="marg" x="349" y="520" width="88" height="88"/>
+<text class="lbl" x="353" y="516">Broody (Y8) hit 56 + 16</text>
+<text class="lbl" x="6" y="814">M5.0 Broody Hen v0.1 · 1280×800 docked</text>
+<text class="sm" x="6" y="828">green box = eligible broody slot; red dashed = ineligible</text>
+<text class="sm" x="6" y="841">gold circle = golden-egg spot v1.1 (56 hit box)</text>
+<text class="sm" x="6" y="854">red fill = tap target (16 px clear); grey dashed = readout (8 px)</text>
+<text class="sm" x="6" y="867">Live rects: RC 5d9efa6 dist-qa, Chromium, F12 (12 hens), pill shown</text>
+<text class="sm" x="6" y="880">Eligible here: Y0, Y5, Y7, Y8, Y9, Y10, Y11</text>
+</svg>

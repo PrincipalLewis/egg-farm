@@ -1,0 +1,7 @@
+M	src/game.ts
+M	src/sim/actions.ts
+A	src/sim/effects.ts
+M	src/sim/payout.ts
+M	src/sim/tick.ts
+M	src/sim/tracks.ts
+A	tests/v5-f1c-effects.test.ts

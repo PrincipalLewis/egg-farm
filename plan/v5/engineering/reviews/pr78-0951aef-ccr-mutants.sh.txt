@@ -1,0 +1,21 @@
+#!/bin/bash
+# CCR pr78 mutants on the scratch clone /workspace/.pr78-ev/sbx/repo @0951aef; killed = vitest tests/bot-m5.test.ts tests/verify.test.ts fails
+cd /workspace/.pr78-ev/sbx/repo; export TMPDIR=/workspace/.pr78-ev/tmp
+m(){ id=$1 file=$2 from=$3 to=$4; git checkout -q -- .; python3 - "$file" "$from" "$to" <<'PY' || { echo "$id NOT-APPLIED"; return; }
+import sys; f,a,b=sys.argv[1:]; s=open(f).read(); n=s.count(a)
+if n!=1: sys.exit(1)
+open(f,'w').write(s.replace(a,b))
+PY
+  r=$(timeout 900 npx vitest run tests/bot-m5.test.ts tests/verify.test.ts 2>&1 | grep -E '^ +Tests ' | tr -s ' '); echo "$id: $r"; }
+m MA-route-off scripts/verify/sim.ts "if (o.profile === 'm5x-casual') return runM5xCasual(b, o);" ""
+m MB-idle-bot-string scripts/verify/sim.ts "idle: { bot: 'AC7 workers bot" "idle: { bot: 'AC7 worker bot"
+m MC-seed-plus1 scripts/verify/sim.ts "runM5(b, o.seed, M5_PROFS.casual" "runM5(b, o.seed + 1, M5_PROFS.casual"
+m MD-stack-none scripts/verify/sim.ts "M5_PROFS.casual, M5X_STACKS.AssZ, endS" "M5_PROFS.casual, M5X_STACKS.none, endS"
+m ME-streakcap tests/bot-m5.ts "streakCap: 0.28, tapShare: 0.03" "streakCap: 0.27, tapShare: 0.03"
+m MF-rng-const tests/bot-m5.ts "(seed * 2654435761 + 99)" "(seed * 2654435761 + 98)"
+m MG-onSecond-skip-last tests/bot-m5.ts "  if (opt.onSecond && n > 0 && Math.abs(prevT - Math.round(prevT)) < 1e-6) opt.onSecond(prevT, s);" ""
+m MH-trace-no-events scripts/verify/sim.ts "        h.update(\`\${t}|\${JSON.stringify(e)}\\n\`);" ""
+m MI-sold-count scripts/verify/sim.ts "else if (e.type === 'sell') sold += e.k;" "else if (e.type === 'sell') sold += 1;"
+m MJ-casual-catchP tests/bot-m5.ts "casual: { tap: 0.5, checkBase: 30, catchP: 0.6 }" "casual: { tap: 0.5, checkBase: 30, catchP: 0.5 }"
+m MK-observer-mutates tests/bot-m5.ts "if (opt.onEvents && ev.length) opt.onEvents(t, ev);" "if (opt.onEvents && ev.length) { opt.onEvents(t, ev); s = { ...s, coinsCents: s.coinsCents + 1 }; }"
+git checkout -q -- .; git status --porcelain

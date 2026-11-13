@@ -1,0 +1,21 @@
+tests/v5-streak-sim.test.ts > #2 streak: credited taps (R1-R5, R13a) > ST-AC2: a Collect at F >= unlock credits +per_tap, restarts the hold, starts the window and emits streak_started once
+tests/v5-streak-sim.test.ts > #2 streak: credited taps (R1-R5, R13a) > ST-AC16c, ST-AC3, ST-AC4: the window is sim time, hidden ticks included (R2/K1/K19); credited even when the coop is empty (K2)
+tests/v5-streak-sim.test.ts > #2 streak: credited taps (R1-R5, R13a) > ST-AC1, ST-AC29: below the unlock farm or with the flag off: no credit and the rc1 collect event
+tests/v5-streak-sim.test.ts > #2 streak: credited taps (R1-R5, R13a) > ST-AC29: flag default 0 = off: the shipping balance, an absent streak key and streak: 0 are all off
+tests/v5-streak-sim.test.ts > #2 streak: credited taps (R1-R5, R13a) > K4/K18: caps at tc_streak_cap exactly (K4), and K18 clamps a lowered cap on the next tick with no event
+tests/v5-streak-sim.test.ts > #2 streak: credited taps (R1-R5, R13a) > ST-AC11: §3.3 tiers T_k = round_to_step(cap x k/4) from config: cap of record 0.28 and 0.40; Breeds on (cap 0.27); max_tier
+tests/v5-streak-sim.test.ts > #2 streak: credited taps (R1-R5, R13a) > ST-AC14: a Coop Hand collect and the welcome-back Collect are never credited (R3)
+tests/v5-streak-sim.test.ts > #2 streak: hold and decay on the focus clock (R6/R7/R12, D-C3) > ST-AC5: K5 stop at the cap of record 0.28: hold 3 s, -0.03/s, 0 at 12.33 +-0.1 s, one streak_peak{value:0.28, reason:"decay", max_tier:4}
+tests/v5-streak-sim.test.ts > #2 streak: hold and decay on the focus clock (R6/R7/R12, D-C3) > ST-AC13, ST-AC6: K10/R12 unfocused ticks freeze s and the hold; a credited tap during decay stops it and restarts the hold (R7)
+tests/v5-streak-sim.test.ts > #2 streak: hold and decay on the focus clock (R6/R7/R12, D-C3) > ST-AC13: D-C3 (R12) only the first ceil(focusMs/tick) ticks of a frame carry focus
+tests/v5-streak-sim.test.ts > #2 streak: the (1 + s) sale factor (R8/R9/R12) > ST-AC7: player sale and preview get (1 + s); extra_coins accrues the streak share only
+tests/v5-streak-sim.test.ts > #2 streak: the (1 + s) sale factor (R8/R9/R12) > ST-AC7: player Sell and Sell all at x 0.01/0.14/0.28, Grader none/tier 3: (1 + s) on every sale, rounded once per sale
+tests/v5-streak-sim.test.ts > #2 streak: the (1 + s) sale factor (R8/R9/R12) > ST-AC7, ST-AC13: Market Hand sales on a focus tick get (1 + s); on an unfocused tick 1x (R8/R12)
+tests/v5-streak-sim.test.ts > #2 streak: the (1 + s) sale factor (R8/R9/R12) > ST-AC13, ST-AC29: suspended (unfocused tick) and flag off: no factor; a worker sale under a menu is 1x (K10)
+tests/v5-streak-sim.test.ts > #2 streak: the (1 + s) sale factor (R8/R9/R12) > ST-AC29: flag off: step with or without a clock is identical, and no streak fields appear
+tests/v5-streak-sim.test.ts > #2 streak: offline / reload (R10/R11, D-HOP-08 #2) > ST-AC12: a >= 60 s gap: streak_peak{reason:"offline"} with the run stats, s = 0, run dropped; nothing at s = 0
+tests/v5-streak-sim.test.ts > #2 streak: offline / reload (R10/R11, D-HOP-08 #2) > ST-AC12: the run stats are session only (never saved)
+tests/v5-streak-sim.test.ts > #2 streak: offline / reload (R10/R11, D-HOP-08 #2) > ST-AC12a, ST-AC12, ST-AC13: Game: attended frames decay, unattended frames and a 5 s hide freeze (K8); pagehide sends streak_peak{reason:"reload"}
+tests/v5-streak-sim.test.ts > a missing tc_* tunable is caught, never read as 0 (HoE/Architect follow-up on F2) > ST-AC18: tcNum throws on a missing or non-finite key
+tests/v5-streak-sim.test.ts > a missing tc_* tunable is caught, never read as 0 (HoE/Architect follow-up on F2) > ST-AC18: validateBalance rejects a flag that is on without every tc key it reads; off flags need nothing
+tests/v5-streak-sim.test.ts > a missing tc_* tunable is caught, never read as 0 (HoE/Architect follow-up on F2) > ST-AC18: the F2 readers throw instead of defaulting (drawGap without tc_egg_gap_min_s)

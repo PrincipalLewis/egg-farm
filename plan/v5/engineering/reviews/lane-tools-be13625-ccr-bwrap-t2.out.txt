@@ -1,0 +1,11 @@
+== F3a job control (bash -m)
+bash: cannot set terminal process group (1): Inappropriate ioctl for device
+bash: no job control in this shell
+recorded=6
+TERM 6 (group)
+rc=0
+== F5 self-kill via own group
+after exists: no
+== F3b exec failure x20
+1 1 1 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 
+1

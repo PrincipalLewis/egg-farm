@@ -1,0 +1,30 @@
+== 48b6857 full: 48b6857993f0a08b24ed26924448b66a55743feb
+48b6857993f0a08b24ed26924448b66a55743feb 2facc3ffefb74556263327c6be5014535a3cd22d 6bcc194090ea2c24fe7331d97c5ad653d4419dde
+
+diff --git a/tests/v5-f1c-effects.test.ts b/tests/v5-f1c-effects.test.ts
+remerge CONFLICT (add/add): Merge conflict in tests/v5-f1c-effects.test.ts
+index c4d5dd3..9258416 100644
+--- a/tests/v5-f1c-effects.test.ts
++++ b/tests/v5-f1c-effects.test.ts
+@@ -13,11 +13,7 @@ import { SALE_EFFECTS, LAY_EFFECTS, saleEffectFactors, layFactor, playerSaleCtx,
+ import { readdirSync, readFileSync } from 'node:fs';
+ import { join } from 'node:path';
+ 
+-<<<<<<< 2facc3f (Merge feat/v5-f1c-effects (174286e: #80's merge of rc/v5 2fa7318, tree = 5dd36d1) into feat/v5-f3-config)
+ const B = (flags?: Partial<Record<M5Flag, number>>, enabled = 1) => ({ ...balance, m4: { ...balance.m4!, enabled, ...(flags ? { flags: { ...(balance.m4 as any).flags, ...flags } } : {}) } }) as typeof balance;
+-=======
+-const B = (flags?: Partial<Record<M5Flag, number>>, enabled = 1) => ({ ...balance, m4: { ...balance.m4!, enabled, ...(flags ? { flags } : {}) } });
+->>>>>>> 6bcc194 (v5 F1c: timed-effects registry (saleMultipliers / prodEggsPerSec, by attribution) [stacked on #79] (#80))
+ // Fixture effects (values are test inputs, not tunables): a Frenzy-like x2 on all sales, a Rush-like x1.15 on Market Hand sales,
+ // a streak-like (1 + 0.28), and a Sweep-like x1.15 on laying.
+ const frenzy: SaleEffect = { id: 'frenzy', flag: 'golden', factor: () => 2 };
+== diff 2facc3f..48b6857 == diff 2fa7318..6bcc194 restricted?
+ tests/bot-m5.test.ts                | 15 +++++++++++----
+ tests/fixtures/economy-b48be8a4.csv | 32 ++++++++++++++++++++++++++++++++
+ 2 files changed, 43 insertions(+), 4 deletions(-)
+fixture blob 48b6857: a566fb87449eadc2bc19f7f2a5f9141f49938375 rc/v5: a566fb87449eadc2bc19f7f2a5f9141f49938375
+bot-m5 48b6857: aa8392bf6e697dec146a5c366a44985cd05a5120 rc/v5: aa8392bf6e697dec146a5c366a44985cd05a5120
+== #82 vs rc/v5 6bcc194
+ tests/verify.test.ts             |   8 ++-
+ 19 files changed, 403 insertions(+), 19 deletions(-)
+[{"conclusion":"","createdAt":"2026-10-30T07:38:55Z","databaseId":41021364051,"status":"in_progress"},{"conclusion":"cancelled","createdAt":"2026-10-30T07:38:54Z","databaseId":41021362800,"status":"completed"}]

@@ -1,0 +1,2 @@
+TASK saves-qa/schema-0674e14: re-verify F-1 fix at exact tip 0674e14445a9c37dca09fc06931411ce9327c15c against QA-D-1105-SCHEMA.
+Write scope: qa/ only (report qa/m3-recheck/schema-0674e14.md; evidence /workspace/egg-farm-studio/qa/m3-recheck/evidence/schema-0674e14; scratch /workspace/egg-farm-studio/qa/scratch/schema-0674-2207). Engineer worktree read-only. Never push/merge/tag; never print GITHUB_TOKEN. lane-run/lane-kill saves-qa; vitest 1 worker, flock, nice -n 10, load <=11. TS engine only.

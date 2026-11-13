@@ -1,0 +1,46 @@
+✓ tests/v5-f3-config.test.ts > [F3][D-C1] F3 flags block (m4.flags.*, HoE D-C1) > ships every known flag, all 0, with m4.enabled kept as shipped (1)
+✓ tests/v5-f3-config.test.ts > [F3][D-C1] F3 flags block (m4.flags.*, HoE D-C1) > sync keeps the flags block whole (a flipped flag survives a re-sync) and fills absent flags with 0
+✓ tests/v5-f3-config.test.ts > [F3][D-C1] F3 flags block (m4.flags.*, HoE D-C1) > sync refuses an unknown flag or a non-0/1 value (no silent typos)
+✓ tests/v5-f3-config.test.ts > [F3][D-C1] F3 flags block (m4.flags.*, HoE D-C1) > validateBalance refuses an unknown flag or a non-0/1 value
+✓ tests/v5-f3-config.test.ts > [F3][§9.5-1] F3 CSV wiring > [§9.5-1] M5_MAPPED_COLS is exactly the two ruled non-tc_ mappings (no vacuous loop below)
+✓ tests/v5-f3-config.test.ts > [F3][§9.5-1] F3 CSV wiring > every tc_* column lands in m4.tc (auto), plus the explicit non-tc_ mappings, values verbatim from the CSV
+✓ tests/v5-f3-config.test.ts > [F3][§9.5-1] F3 CSV wiring > a mapped column that varies by row, or appears twice (x and tc_x), fails the sync
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > the shipped balance passes
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"egg_w_cash":0.5}
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"egg_gap_min_s":301}
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"warn_at_s":27,"urgent_at_s":27,"egg_despawn_s":30}
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"warn_at_s":20,"urgent_at_s":31,"egg_despawn_s":30}
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"streak_cap":0}
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"streak_cap":1.5}
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"streak_tier_count":0}
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"streak_tier_count":2.5}
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"tap_bonus_income_window_s":0.5}
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"broody_cap_s":0}
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"broody_ready_share":0}
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"stall_hold_s":3}
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"fatigue_cue_min_share":0.3,"fatigue_cue_clear_share":0.3}
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"ability_s":400}
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"rest_recovery_mult":0.4}
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > rejects {"frenzy_price_mult":0.5}
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > [SS-23] tc_stall_hold_s = 0 is the supported kill switch (SS-23); keys a CSV does not carry yet are skipped
+✓ tests/v5-f3-config.test.ts > [F3-validate] F3 validateBalance M5 rules (rules from the specs; values are test inputs) > [Pause-§6] rest_recovery_mult must be > 0 (pause spec §6 range (0, 0.35]): 0 and a negative value fail; 0.35 passes
+✓ tests/v5-f3-config.test.ts > [F3-no-literal] F3 no literal tunables in src/ > no code-default fallback for an m4.tc key
+× tests/v5-f3-config.test.ts > [F3-no-literal] F3 no literal tunables in src/ > M5 modules carry no bare numeric literal (only 0/1/1000/1e-9/uint32 and the ruled named constants)
+✓ tests/v5-f3-qa-seam.test.ts > [Q8] Q8 zero-gain paths (m4 namespace) > ships m4.flags.zeroGainUi = 0, m4.flags.bestBuyV2 = 0, m4.zeroGain.confirm = 0, and no m5 block
+✓ tests/v5-f3-qa-seam.test.ts > [Q8] Q8 zero-gain paths (m4 namespace) > [D-HOP-2026-10-29-05] ships m4.flags.fatigueCue = 0 (Rule 2 chip cut flag, D-HOP-2026-10-29-05) and m4.flags.pause = 0
+✓ tests/v5-f3-qa-seam.test.ts > [Q8] Q8 zero-gain paths (m4 namespace) > confirm is live only with zeroGainUi on (and m4.enabled) and confirm === 1
+✓ tests/v5-f3-qa-seam.test.ts > [Q8] Q8 zero-gain paths (m4 namespace) > sync keeps m4.zeroGain whole (a flipped confirm survives a re-sync; absent = 0) and refuses typos
+✓ tests/v5-f3-qa-seam.test.ts > [Q8] Q8 zero-gain paths (m4 namespace) > validateBalance rejects a non-0/1 confirm or an unknown zeroGain key
+✓ tests/v5-f3-qa-seam.test.ts > [Q8] Q8 release gate rejects eggfarmQa* > a clean bundle passes
+✓ tests/v5-f3-qa-seam.test.ts > [Q8] Q8 release gate rejects eggfarmQa* > fails: window.eggfarmQaZeroGain=()=>{};
+✓ tests/v5-f3-qa-seam.test.ts > [Q8] Q8 release gate rejects eggfarmQa* > fails: const w=window;w.eggfarmQaZeroGain=1;
+✓ tests/v5-f3-qa-seam.test.ts > [Q8] Q8 release gate rejects eggfarmQa* > fails: const f=globalThis.eggfarmQaFitBanners;
+✓ tests/v5-f3-is-paused.test.ts > [row-8 isPaused] isPaused(w, b) > shipped balance has m4.flags.pause = 0
+✓ tests/v5-f3-is-paused.test.ts > [row-8 isPaused] isPaused(w, b) > false whenever pause = 0 (or m4.enabled = 0); true only with pause = 1 and paused === true
+✓ tests/v5-f3-is-paused.test.ts > [row-8 isPaused][AC-P1] pause = 0: paused:true leaves income byte-identical to the unpaused case > asleep
+✓ tests/v5-f3-is-paused.test.ts > [row-8 isPaused][AC-P1] pause = 0: paused:true leaves income byte-identical to the unpaused case > working
+✓ tests/v5-f3-is-paused.test.ts > [row-8 isPaused][AC-P1] pause = 0: paused:true leaves income byte-identical to the unpaused case > tired
+✓ tests/v5-f3-is-paused.test.ts > [row-8 isPaused][AC-P1] pause = 0: paused:true leaves income byte-identical to the unpaused case > unpaid
+✓ tests/v5-f3-is-paused.test.ts > [row-8 isPaused][AC-P1] pause = 0: paused:true leaves income byte-identical to the unpaused case > asleep MH with paused:true and pause = 0 is stalled (sales stop), as if not paused
+✓ tests/v5-f3-is-paused.test.ts > [row-8 isPaused] pause = 1: paused is respected > a paused asleep Market Hand is not stalled (the player sells by hand); unpaused it is
+✓ tests/v5-f3-is-paused.test.ts > [row-8 isPaused][QA-10] every src read of `paused` goes through isPaused > no `.paused` / `["paused"]` / `paused !==|===` read outside sim/pause.ts isPaused

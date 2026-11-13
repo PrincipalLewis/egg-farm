@@ -1,0 +1,32 @@
+== 4b47158 Merge feat/v5-f1b-clock-rng (f5265b7, incl. F1a 2e18aba + rc/v5 d3b5a53 #78) into feat/v5-f1c-effects
+
+diff --git a/src/game.ts b/src/game.ts
+remerge CONFLICT (content): Merge conflict in src/game.ts
+index 746d754..acebcf9 100644
+--- a/src/game.ts
++++ b/src/game.ts
+@@ -393,7 +393,9 @@ export class Game {
+   private attendedProbe: () => boolean = () => false;
+   setAttendedProbe(fn: () => boolean) { this.attendedProbe = fn; }
+   /** The one attended read (frame focus + player-sale suspension, Q-F1c-1 D-HOP-2026-10-29-06): live game and the UI probe says attended. */
+-  private attendedNow() { return !this.readOnly && this.attendedProbe(); }
++  /** CCR N-1 #79: with every M5 flag off the probe is never read (no per-frame / per-dispatch DOM query); attended = false
++   *  then, which changes nothing: no timed effect is live, so suspension has nothing to suspend (goldens byte-identical). */
++  private attendedNow() { return !this.readOnly && anyM5FlagOn(this.b) && this.attendedProbe(); }
+   frame() {
+     if (this.inactive || this.held()) { this.lastFrameAt = this.now(); return; }
+     const t = this.now(); let gap = t - this.lastFrameAt; this.lastFrameAt = t;
+@@ -411,11 +413,7 @@ export class Game {
+     if (gap > 0) {
+       if (!this.bakAllowed) { this.playedMs += Math.min(gap, maxMs); if (this.playedMs >= 60_000) this.allowBackup(); }
+       // v5 F1b: focus (attended) ms for this frame, min(gap, 1.0 s); 0 for a gap >= 60 s (§9.1a) or when not attended.
+-<<<<<<< 1a64e95 (v5 F1c: apply D-HOP-2026-10-29-06 rulings Q-F1c-1 (Market sheet = play surface) and Q-F1c-2 (Sweep not in golden E))
+       const focusMs = focusFrameMs(gap, this.attendedNow(), this.b.offline.offlineMinSeconds);
+-=======
+-      const focusMs = focusFrameMs(gap, !this.readOnly && anyM5FlagOn(this.b) && this.attendedProbe(), this.b.offline.offlineMinSeconds); // CCR N-1 #79: no probe read with every flag off
+->>>>>>> f5265b7 (v5 F1b: AC trace (QA-D-1029-V5SCAP): AC ids in test titles; new [AC-M5A-3] wall-clock cooldown test)
+       const ev: SimEvent[] = []; if (gap >= maxMs) this.state = m5Offline(this.state, this.b, ev); // v5 F2 §9.1a: M5 timed systems take the offline path
+       const r = advance(this.state, Math.min(gap, maxMs), gap >= maxMs ? 0 : this.accMs, this.b, ev, { focusMs, nowMs: t });
+       this.state = r.state; this.accMs = gap >= maxMs ? 0 : r.accMs; this.emit(ev);
+== 90c68ef Merge feat/v5-f1b-clock-rng (b041561, incl. F1a 172ca3f) into feat/v5-f1c-effects
+== aa0ed32 Merge feat/v5-f1b-clock-rng (02e7ede, incl. rc/v5 b563c75 #77) into feat/v5-f1c-effects

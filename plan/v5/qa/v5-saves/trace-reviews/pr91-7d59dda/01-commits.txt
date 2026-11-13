@@ -1,0 +1,34 @@
+7d59ddac8f1e5b610ddef4db9c1b62de9799da5a
+v5 #87 QA follow-ups (pr87-694468e): pin the streak tc keys in ST-AC18; fix the ON helper comment
+
+Tests/comments only, no src change.
+- M1: ST-AC18 now pins the 7 streak tc keys (streak_unlock_farm, streak_per_tap, tap_credit_min_s,
+  streak_hold_s, streak_decay_per_s, streak_cap, streak_tier_count) as a literal list: M5_TC_KEYS.streak
+  must equal it, and validateBalance must reject a streak-on balance missing any of them. Mutant V3
+  (drop 'streak_cap' from M5_TC_KEYS) now fails.
+- tests/v5-f2-helpers.ts: ON comment: shipping has the full F3 flags block with every flag 0.
+
+a202ed1b7c812cbe75123e3c454383cf999b41f3
+Merge origin/rc/v5 458f74c (#87 streak sim) into fix/saves-v5-m5load-pause-sanitize
+
+Conflict: src/save/m5-fields.ts header. Kept both import sets (sanitizePausedOnLoad from sim/pause;
+streakAfter/endStreak from sim/streak), anyFlag includes pause (CCR-F4), and #87's `const tc = tcNum`.
+So pauseLoad reads tc_pause_unlock_farm / tc_pause_call_lockout_s through the throwing tcNum, and
+validateBalance requires both while pause is on (M5_REQUIRED_TC.pause): a missing key fails at load,
+never a silent 0. pauseLoad doc comment says so. No SAVE_VERSION change.
+
+fb4015d831d9211877f4cd0c0bb95240ce044105
+v5 CCR-F4: m5Load sanitises Pause fields (paused, callLockoutS) while m4.flags.pause is on
+
+CCR rcv5-vs-main-1a61b36 F-4 (D-HOE-20261030-08): with only pause on, m5Load returned early (anyFlag
+omitted pause) and callLockoutS was never validated. Pause spec v1.3.6 rule 1 / rule 7 (B5) / E9 / E12:
+- anyFlag includes pause; m5Load runs pauseLoad on state.workers when m4.flags.pause is on.
+- paused: non-boolean -> absent (false); below tc_pause_unlock_farm -> absent (rule 1, E12).
+  The key is touched only in sim/pause.ts (sanitizePausedOnLoad), so the row-8 QA-10 grep allowlists it.
+- callLockoutS (Market Hand only, sim seconds): non-finite / negative / non-number / 0 / other worker /
+  below unlock -> absent; else capped at tc_pause_call_lockout_s (D-C5 clamp style; not a timestamp).
+- M5_REQUIRED_TC.pause = [pause_unlock_farm, pause_call_lockout_s]: validateBalance rejects pause on
+  without them (no silent 0, F-5 for these keys).
+Flag off (shipping, or an M4.1-style balance): m5Load returns the same object; fields preserved (E9).
+No SAVE_VERSION change. No balance.json change.
+

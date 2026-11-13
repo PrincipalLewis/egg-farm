@@ -1,0 +1,14 @@
+# Hash verification 2026-11-05 22:16:51 CET
+b2deab634bff87a409d3a8bb7f45a409c1c75ad3b8fedeb5eb4209edf30595d0  scratch/post-l10/cand/tools/m5mr.ts
+2cef8d3a6016b83bc20e0386f797084c8de0534e7dfe4de613438e8c4390a5f3  scratch/post-l10/cand/tools/runmr.ts
+bc5d9ba1dd60b4f599af8ef95ac3227afc915e9343de4c02a6855b06422bcebe  product/collection/telemetry-spec-errata-v5.a0e8f6d7.md
+6060a4adea02d387a458e010b6435c7526440d46b9a14e129f1d3ab1bd8a17c2  scratch/post-l10/cycle-MR-accounting-audit/order-probe-S01-seed130.json
+d359f240dd415f80dcb7b8cfa249e10386406c20fdfff561b5d54350718543d8  scratch/post-l10/cycle-S01-trace/m5trace-order.ts
+398a989f164e0d46d48327e5d80cb82661de6ea008ac888b82bd931e04dce711  scratch/post-l10/cycle-S1-R04/S01/candidate.csv
+d1cff5ac76e6015f6127d859a9b9c94d5c15da2ac64aad1314f8e7adfd173b65  scratch/post-l10/cycle-2320/R04/candidate.csv
+--- sha1 errata ---
+a0e8f6d7085939756021856c25429a55d8a8d847  product/collection/telemetry-spec-errata-v5.a0e8f6d7.md
+--- note: cycle-2045/R04/candidate.csv does NOT match ADDENDUM R04 hash ---
+5e56421ca371e8e2696d93e053c287d9b4fd9528590e9b1ef6458109849742e7  scratch/post-l10/cycle-2045/R04/candidate.csv
+--- gate/runmr.ts differs from cand/tools/runmr.ts ---
+5b8ef0d1fe0b4af3dcd9d8a1bf56b53078713900a86c66d0092eb5787af12466  scratch/post-l10/gate/runmr.ts

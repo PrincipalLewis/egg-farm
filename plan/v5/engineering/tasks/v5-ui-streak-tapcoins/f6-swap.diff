@@ -1,0 +1,63 @@
+diff --git a/src/ui/features.ts b/src/ui/features.ts
+index a7e2b49..b9ecc2d 100644
+--- a/src/ui/features.ts
++++ b/src/ui/features.ts
+@@ -6,4 +6,4 @@
+  *   import './broody';       // flag m4.flags.broody  (Generalist)
+  * Empty in F6: with nothing registered the overlay adds no DOM (flag-off #app identical to rc/v5).
+  */
+-export {};
++import './streak-meter';
+diff --git a/src/ui/streak-meter.ts b/src/ui/streak-meter.ts
+index 9b96749..1df8d5e 100644
+--- a/src/ui/streak-meter.ts
++++ b/src/ui/streak-meter.ts
+@@ -16,7 +16,7 @@ import { tcNum } from '../config/formulas';
+ import { FOCUS_DT_MAX_S } from '../sim/clock';
+ import type { Game } from '../game';
+ import type { Balance } from '../config/balance';
+-import type { OverlayCtx, OverlayFeature } from './streak-f6-stub';
++import { registerFeature, type OverlayCtx, type OverlayFeature } from './overlay';
+ 
+ /** What the streak UI reads from the F6 OverlayCtx (structural, so F6's real ctx and the stub both satisfy it). `audio` is F6's
+  *  [draft] phase-2 hook player, absent in API v0.2: optional, the stings are silent until it exists. */
+@@ -163,3 +163,4 @@ export const streakMeter: OverlayFeature = {
+   mount(ctx: OverlayCtx) { live = mountStreakUi(ctx); const ui = live; return () => { ui?.destroy(); if (live === ui) live = null; }; },
+   render(_ctx, t) { live?.render(t); },
+ };
++registerFeature(streakMeter);
+diff --git a/tests/v5-streak-app.test.ts b/tests/v5-streak-app.test.ts
+index 9c05640..69350bd 100644
+--- a/tests/v5-streak-app.test.ts
++++ b/tests/v5-streak-app.test.ts
+@@ -30,8 +30,8 @@ async function app(b: Balance, state: object = {}) {
+   document.body.innerHTML = '<div id="app"></div>';
+   const root = document.getElementById('app')!;
+   const play = vi.fn();
+-  mountApp(root, g, b, { enabled: false, play, unlock() {} } as any, 'test', { newGame: false });
+-  return { g, root, play };
++  const ui = mountApp(root, g, b, { enabled: false, play, unlock() {}, load() {}, playFile: () => false, qaLog: null } as any, 'test', { newGame: false }) as any;
++  return { g, root, play, ui };
+ }
+ 
+ describe('flag off: byte-identical app DOM', () => {
+@@ -54,15 +54,15 @@ describe('flag off: byte-identical app DOM', () => {
+ describe('flag on in the real app', () => {
+   it('row = next sibling of #collect inside .collectbar; Collect gets the 48 px class scope; a credited tap shows +1%', async () => {
+     const B = mk({ streak: 1, tapCoins: 1 }), F = balance.m4!.tc!.streak_unlock_farm as number;
+-    const { g, root } = await app(B, { farmLevel: F });
+-    const { ctx } = stubCtx({ g, b: B, root }); const o = mountF6([streakMeter], ctx, f => flagOn(B, f));
++    const { g, root, ui } = await app(B, { farmLevel: F });
++    // F6 swap: mountApp's real mountOverlay mounts the feature (features.ts imports streak-meter); exactly one row
++    expect(document.querySelectorAll('#streak')).toHaveLength(1);
+     const row = document.getElementById('streak')!;
+     expect(row.parentElement!.classList.contains('collectbar')).toBe(true); expect(row.previousElementSibling!.id).toBe('collect');
+     expect(root.classList.contains('m5-streak')).toBe(true);
+-    g.dispatch({ type: 'collect' }); o.render(t); // jsdom clicks are untrusted (R3 filters them); the credited Collect itself
++    g.dispatch({ type: 'collect' }); ui.render(); // jsdom clicks are untrusted (R3 filters them); the credited Collect itself
+     expect(row.classList.contains('on')).toBe(true); expect(row.querySelector('.streak-label')!.textContent).toBe('+1% price');
+     expect(row.getAttribute('aria-valuetext')).toBe('Streak +1% price, tier 0 of 4');
+-    o.destroy(); expect(document.getElementById('streak')).toBeNull();
+   });
+ });
+ 

@@ -1,0 +1,1412 @@
+{
+ "chromium": {
+  "version": "156.0.8078.47",
+  "vp": {
+   "360x640": {
+    "comboSnap": [
+     "- button \"Rush, Combo, Market Hand\"",
+     "- button \"Sweep, Combo, Coop Hand\"",
+     "- button \"Shout, Combo, Hawker\"",
+     "- button \"Inspect, Combo, Egg Grader\""
+    ],
+    "comboVisible": [
+     {
+      "text": "Rush, Combo, Market Hand",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Sweep, Combo, Coop Hand",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Shout, Combo, Hawker",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Inspect, Combo, Egg Grader",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     }
+    ],
+    "comboAxeName": [
+     "Rush, Combo, Market Hand",
+     "Sweep, Combo, Coop Hand",
+     "Shout, Combo, Hawker",
+     "Inspect, Combo, Egg Grader"
+    ],
+    "comboCdp": [
+     "Rush, Combo, Market Hand",
+     "Sweep, Combo, Coop Hand",
+     "Shout, Combo, Hawker",
+     "Inspect, Combo, Egg Grader"
+    ],
+    "contrast": [
+     {
+      "t": ".x",
+      "why": "Element content contains only non-text characters"
+     }
+    ],
+    "boundary": [
+     {
+      "t": 0,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 5,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 9.9,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.05,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.1,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.2,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     }
+    ]
+   },
+   "390x844": {
+    "comboSnap": [
+     "- button \"Rush, Combo, Market Hand\"",
+     "- button \"Sweep, Combo, Coop Hand\"",
+     "- button \"Shout, Combo, Hawker\"",
+     "- button \"Inspect, Combo, Egg Grader\""
+    ],
+    "comboVisible": [
+     {
+      "text": "Rush, Combo, Market Hand",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Sweep, Combo, Coop Hand",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Shout, Combo, Hawker",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Inspect, Combo, Egg Grader",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     }
+    ],
+    "comboAxeName": [
+     "Rush, Combo, Market Hand",
+     "Sweep, Combo, Coop Hand",
+     "Shout, Combo, Hawker",
+     "Inspect, Combo, Egg Grader"
+    ],
+    "comboCdp": [
+     "Rush, Combo, Market Hand",
+     "Sweep, Combo, Coop Hand",
+     "Shout, Combo, Hawker",
+     "Inspect, Combo, Egg Grader"
+    ],
+    "contrast": [
+     {
+      "t": ".x",
+      "why": "Element content contains only non-text characters"
+     }
+    ],
+    "boundary": [
+     {
+      "t": 0,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 5,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 9.9,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.05,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.1,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.2,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     }
+    ]
+   },
+   "1280x800d": {
+    "comboSnap": [
+     "- button \"Rush, Combo, Market Hand\"",
+     "- button \"Sweep, Combo, Coop Hand\"",
+     "- button \"Shout, Combo, Hawker\"",
+     "- button \"Inspect, Combo, Egg Grader\""
+    ],
+    "comboVisible": [
+     {
+      "text": "Rush, Combo, Market Hand",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Sweep, Combo, Coop Hand",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Shout, Combo, Hawker",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Inspect, Combo, Egg Grader",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     }
+    ],
+    "comboAxeName": [
+     "Rush, Combo, Market Hand",
+     "Sweep, Combo, Coop Hand",
+     "Shout, Combo, Hawker",
+     "Inspect, Combo, Egg Grader"
+    ],
+    "comboCdp": [
+     "Rush, Combo, Market Hand",
+     "Sweep, Combo, Coop Hand",
+     "Shout, Combo, Hawker",
+     "Inspect, Combo, Egg Grader"
+    ],
+    "contrast": [
+     {
+      "t": ".x",
+      "why": "Element content contains only non-text characters"
+     }
+    ],
+    "boundary": [
+     {
+      "t": 0,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 5,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 9.9,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.05,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.1,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.2,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     }
+    ]
+   }
+  }
+ },
+ "firefox": {
+  "version": "157.0",
+  "vp": {
+   "360x640": {
+    "comboSnap": [
+     "- button \"Rush, Combo, Market Hand\"",
+     "- button \"Sweep, Combo, Coop Hand\"",
+     "- button \"Shout, Combo, Hawker\"",
+     "- button \"Inspect, Combo, Egg Grader\""
+    ],
+    "comboVisible": [
+     {
+      "text": "Rush, Combo, Market Hand",
+      "w": 34,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Sweep, Combo, Coop Hand",
+      "w": 34,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Shout, Combo, Hawker",
+      "w": 34,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Inspect, Combo, Egg Grader",
+      "w": 34,
+      "room": 40,
+      "clip": false
+     }
+    ],
+    "comboAxeName": [
+     "Rush, Combo, Market Hand",
+     "Sweep, Combo, Coop Hand",
+     "Shout, Combo, Hawker",
+     "Inspect, Combo, Egg Grader"
+    ],
+    "contrast": [
+     {
+      "t": ".x",
+      "why": "Element content contains only non-text characters"
+     }
+    ],
+    "boundary": [
+     {
+      "t": 0,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 5,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 9.9,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.05,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.1,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.2,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     }
+    ]
+   },
+   "390x844": {
+    "comboSnap": [
+     "- button \"Rush, Combo, Market Hand\"",
+     "- button \"Sweep, Combo, Coop Hand\"",
+     "- button \"Shout, Combo, Hawker\"",
+     "- button \"Inspect, Combo, Egg Grader\""
+    ],
+    "comboVisible": [
+     {
+      "text": "Rush, Combo, Market Hand",
+      "w": 34,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Sweep, Combo, Coop Hand",
+      "w": 34,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Shout, Combo, Hawker",
+      "w": 34,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Inspect, Combo, Egg Grader",
+      "w": 34,
+      "room": 40,
+      "clip": false
+     }
+    ],
+    "comboAxeName": [
+     "Rush, Combo, Market Hand",
+     "Sweep, Combo, Coop Hand",
+     "Shout, Combo, Hawker",
+     "Inspect, Combo, Egg Grader"
+    ],
+    "contrast": [
+     {
+      "t": ".x",
+      "why": "Element content contains only non-text characters"
+     }
+    ],
+    "boundary": [
+     {
+      "t": 0,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 5,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 9.9,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.05,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.1,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.2,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     }
+    ]
+   },
+   "1280x800d": {
+    "comboSnap": [
+     "- button \"Rush, Combo, Market Hand\"",
+     "- button \"Sweep, Combo, Coop Hand\"",
+     "- button \"Shout, Combo, Hawker\"",
+     "- button \"Inspect, Combo, Egg Grader\""
+    ],
+    "comboVisible": [
+     {
+      "text": "Rush, Combo, Market Hand",
+      "w": 34,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Sweep, Combo, Coop Hand",
+      "w": 34,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Shout, Combo, Hawker",
+      "w": 34,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Inspect, Combo, Egg Grader",
+      "w": 34,
+      "room": 40,
+      "clip": false
+     }
+    ],
+    "comboAxeName": [
+     "Rush, Combo, Market Hand",
+     "Sweep, Combo, Coop Hand",
+     "Shout, Combo, Hawker",
+     "Inspect, Combo, Egg Grader"
+    ],
+    "contrast": [
+     {
+      "t": ".x",
+      "why": "Element content contains only non-text characters"
+     }
+    ],
+    "boundary": [
+     {
+      "t": 0,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 5,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 9.9,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.05,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.1,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.2,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     }
+    ]
+   }
+  }
+ },
+ "webkit": {
+  "version": "27.2",
+  "vp": {
+   "360x640": {
+    "comboSnap": [
+     "- button \"Rush, Combo, Market Hand\"",
+     "- button \"Sweep, Combo, Coop Hand\"",
+     "- button \"Shout, Combo, Hawker\"",
+     "- button \"Inspect, Combo, Egg Grader\""
+    ],
+    "comboVisible": [
+     {
+      "text": "Rush, Combo, Market Hand",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Sweep, Combo, Coop Hand",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Shout, Combo, Hawker",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Inspect, Combo, Egg Grader",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     }
+    ],
+    "comboAxeName": [
+     "Rush, Combo, Market Hand",
+     "Sweep, Combo, Coop Hand",
+     "Shout, Combo, Hawker",
+     "Inspect, Combo, Egg Grader"
+    ],
+    "contrast": [
+     {
+      "t": ".x",
+      "why": "Element content contains only non-text characters"
+     }
+    ],
+    "boundary": [
+     {
+      "t": 0,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 5,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 9.9,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.05,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.1,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.2,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       300,
+       263,
+       44,
+       44
+      ],
+      "refillY": 371,
+      "rowH": 165,
+      "shift": 0
+     }
+    ]
+   },
+   "390x844": {
+    "comboSnap": [
+     "- button \"Rush, Combo, Market Hand\"",
+     "- button \"Sweep, Combo, Coop Hand\"",
+     "- button \"Shout, Combo, Hawker\"",
+     "- button \"Inspect, Combo, Egg Grader\""
+    ],
+    "comboVisible": [
+     {
+      "text": "Rush, Combo, Market Hand",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Sweep, Combo, Coop Hand",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Shout, Combo, Hawker",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Inspect, Combo, Egg Grader",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     }
+    ],
+    "comboAxeName": [
+     "Rush, Combo, Market Hand",
+     "Sweep, Combo, Coop Hand",
+     "Shout, Combo, Hawker",
+     "Inspect, Combo, Egg Grader"
+    ],
+    "contrast": [
+     {
+      "t": ".x",
+      "why": "Element content contains only non-text characters"
+     }
+    ],
+    "boundary": [
+     {
+      "t": 0,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 5,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 9.9,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.05,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.1,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.2,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       330,
+       314,
+       44,
+       44
+      ],
+      "refillY": 422,
+      "rowH": 165,
+      "shift": 0
+     }
+    ]
+   },
+   "1280x800d": {
+    "comboSnap": [
+     "- button \"Rush, Combo, Market Hand\"",
+     "- button \"Sweep, Combo, Coop Hand\"",
+     "- button \"Shout, Combo, Hawker\"",
+     "- button \"Inspect, Combo, Egg Grader\""
+    ],
+    "comboVisible": [
+     {
+      "text": "Rush, Combo, Market Hand",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Sweep, Combo, Coop Hand",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Shout, Combo, Hawker",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     },
+     {
+      "text": "Inspect, Combo, Egg Grader",
+      "w": 34.02,
+      "room": 40,
+      "clip": false
+     }
+    ],
+    "comboAxeName": [
+     "Rush, Combo, Market Hand",
+     "Sweep, Combo, Coop Hand",
+     "Shout, Combo, Hawker",
+     "Inspect, Combo, Egg Grader"
+    ],
+    "contrast": [
+     {
+      "t": ".x",
+      "why": "Element content contains only non-text characters"
+     }
+    ],
+    "boundary": [
+     {
+      "t": 0,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 5,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 9.9,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10,
+      "state": "combo",
+      "boostDur": 45,
+      "label": "Rush, Combo, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.05,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.1,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     },
+     {
+      "t": 10.2,
+      "state": "ready",
+      "boostDur": 30,
+      "label": "Boost, Rush, Market Hand",
+      "boost": [
+       1220,
+       159,
+       44,
+       44
+      ],
+      "refillY": 267,
+      "rowH": 165,
+      "shift": 0
+     }
+    ]
+   }
+  }
+ }
+}

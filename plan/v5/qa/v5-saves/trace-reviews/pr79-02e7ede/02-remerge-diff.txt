@@ -1,0 +1,17 @@
+diff --git a/src/save/m5-fields.ts b/src/save/m5-fields.ts
+remerge CONFLICT (content): Merge conflict in src/save/m5-fields.ts
+index 7531f0c..de29368 100644
+--- a/src/save/m5-fields.ts
++++ b/src/save/m5-fields.ts
+@@ -8,11 +8,7 @@
+  * visible gap) elapses with no subtraction here; a load clamps the stored value to [now, now + cd] (E2, clock tamper).
+  */
+ import type { Balance } from '../config/balance';
+-<<<<<<< b041561 (v5 F1b: Saves QA trace gaps (V5SCAP): advance()-level D-C3 focus-tick test and Game focus-withheld tests (readOnly, hidden frame, settleHiddenPeriod, debugAdvance) via a recording stepTimers seam)
+ import { type GameState, nextRand } from '../sim/state';
+-=======
+-import { type GameState, mixSeed, nextRand } from '../sim/state';
+->>>>>>> b563c75 (v5 F1a: M5 GameState fields, SimEvent members, m4.flags.* plumbing (#77))
+ import type { SimEvent } from '../sim/events';
+ import { WORKERS } from '../sim/workers';
+ import { type M5Flag, flagOn } from '../config/flags';

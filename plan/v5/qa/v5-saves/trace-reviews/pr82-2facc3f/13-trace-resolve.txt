@@ -1,0 +1,15 @@
+total 46 failed 0
+D-C1                         v5-f3-config.test.ts     [F3][D-C1] F3 flags block (m4.flags.*, HoE D-C1)                       -> 4 match(es) {'passed'}
+§9.5-1                       v5-f3-config.test.ts     [§9.5-1] M5_MAPPED_COLS is exactly the two ruled non-tc_ mappings      -> 1 match(es) {'passed'}
+F3-validate                  v5-f3-config.test.ts     [F3-validate] F3 validateBalance M5 rules (rejects …)                  -> 19 match(es) {'passed'}
+SS-23                        v5-f3-config.test.ts     [SS-23] tc_stall_hold_s = 0 is the supported kill switch               -> 1 match(es) {'passed'}
+Pause-§6 (D-HOE-20261030-02) v5-f3-config.test.ts     [Pause-§6] rest_recovery_mult range [0, 0.35] (pause spec §6; D-HOE-20 -> 1 match(es) {'passed'}
+§12.2                        v5-f3-config.test.ts     [F3-no-literal] F3 no literal tunables in src/                         -> 2 match(es) {'passed'}
+D-HOE-20261030-01            v5-f3-config.test.ts     [F3-no-literal] F3 no literal tunables in src/ > M5 modules carry no b -> 1 match(es) {'passed'}
+row 8                        v5-f3-is-paused.test.ts  [row-8 isPaused] isPaused(w, b)                                        -> 2 match(es) {'passed'}
+row 8                        v5-f3-is-paused.test.ts  pause = 1: paused is respected                                         -> 1 match(es) {'passed'}
+AC-P1                        v5-f3-is-paused.test.ts  [row-8 isPaused][AC-P1] pause = 0: paused:true leaves income byte-iden -> 5 match(es) {'passed'}
+QA-10                        v5-f3-is-paused.test.ts  [row-8 isPaused][QA-10] every src read of `paused` goes through isPaus -> 1 match(es) {'passed'}
+Q8                           v5-f3-qa-seam.test.ts    [Q8] Q8 zero-gain paths                                                -> 5 match(es) {'passed'}
+Q8                           v5-f3-qa-seam.test.ts    [Q8] release gate rejects eggfarmQa*                                   -> 0 match(es) set()
+D-HOP-2026-10-29-05          v5-f3-qa-seam.test.ts    [D-HOP-2026-10-29-05] ships m4.flags.fatigueCue = 0 and m4.flags.pause -> 0 match(es) set()

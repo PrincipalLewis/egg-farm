@@ -1,0 +1,16 @@
+#!/bin/sh
+# runs INSIDE bwrap: / is tmpfs; /repo = scratch clone @0951aef (rw); /out = evidence. Hostile env for scripts/bot-m5x.ts and verify --profile.
+cd /repo
+B="timeout 120 node node_modules/vite-node/vite-node.mjs scripts/bot-m5x.ts"
+r(){ n=$1; shift; env "$@" $B > /out/$n.out 2> /out/$n.err; e=$?; echo "=== $n exit=$e [$*] stdout=$(head -c 160 /out/$n.out) stderr1=$(head -c 200 /out/$n.err | tr '\n' ' ')"; }
+r H1-cfg-proto CSV=data/economy.csv SEEDS=1 T=300 CFG=__proto__ PROFS=casual NOWIN=1
+r H2-prof-proto CSV=data/economy.csv SEEDS=1 T=300 CFG=AssZ PROFS=__proto__ NOWIN=1
+r H3-prof-tostring CSV=data/economy.csv SEEDS=1 T=300 CFG=AssZ PROFS=toString NOWIN=1
+r H4-cfg-constructor CSV=data/economy.csv SEEDS=1 T=300 CFG=constructor PROFS=casual NOWIN=1
+r H5-seeds-nan CSV=data/economy.csv SEEDS=abc T=300 CFG=AssZ PROFS=casual
+r H6-T-neg CSV=data/economy.csv SEEDS=1 T=-5 CFG=AssZ PROFS=casual
+r H7-csv-missing CSV=/nope.csv SEEDS=1 T=300
+r H8-csv-notcsv CSV=/repo/package.json SEEDS=1 T=300
+r H9-csv-etcpasswd CSV=/etc/passwd SEEDS=1 T=300
+r H10-step0 CSV=data/economy.csv SEEDS=1 T=1200 STEP=0 CFG=AssZ PROFS=casual
+echo "--- files written outside /out by bot-m5x (git status of /repo, find / -newer):"; git status --porcelain; find / -xdev -newer /out/.start -type f -not -path '/out/*' -not -path '/proc/*' 2>/dev/null | head

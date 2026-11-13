@@ -1,0 +1,8 @@
+# telemetry-check 2d7c85e1fd9cea33 selftest modes (flags-on fixture = 3f582db balance with ship-set 56090a61 flags)
+=== shipped-flags0 rc=0 PASS=51 FAIL=0 :: SELFTEST: OK
+=== shipped-flagsON rc=0 PASS=52 FAIL=0 :: SELFTEST: OK
+=== shipped-real3f582db rc=0 PASS=51 FAIL=0 :: SELFTEST: OK
+=== v062-flags0 rc=0 PASS=39 FAIL=0 :: SELFTEST: OK
+=== v062-flagsON rc=0 PASS=39 FAIL=0 :: SELFTEST: OK
+=== v062-real3f582db rc=0 PASS=39 FAIL=0 :: SELFTEST: OK
+=== mismatch(neg, expect rc=2) rc=2 PASS=0 FAIL=0 :: --flags 'golden,streak' != balance.json flags-on 'abilities,autoRefill,breeds,broody,clockWage,fatigueCue,golden,pause,r

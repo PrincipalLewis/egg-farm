@@ -1,0 +1,44 @@
+# CCR re-review: PR #62 (M41-8 F4 next-goal strip + UX-M4 ★ Best buy chip) @ 54118ecea55af3ed2f00f987b2e8fadc98b16dbd
+Reviewer: Claude Code Reviewer (read-only). 2026-10-22 ~21:30 CEST. Worktree /workspace/review-pr62-54118ec (detached, npm ci; removed after). Claude calls: 0.
+Delta: one commit on fcf9823 (FF), 9 files +296/−36: src/ui/{app,goal-label,next-goal}.ts, styles.css, scripts/rc0-browser.mjs, scripts/m41-8-shots.mjs, new scripts/m41-8-f4-14a.mjs, 2 tests. No src/sim, src/econ, src/config, src/save, data or engineering/golden change since dd223f5.
+Prior report: pr62-fcf9823.md (B1 / M1 / m1 / m2 / n1–n4).
+Spec: product/farm/m4a-spec.md, sha256 2a4e2c13c51a… (= qa/m41/m4a-spec.v1.25.2a4e2c13.md). Diff vs frozen v1.24 (38e95a5d…) is exactly two hunks: the F4-13 v1.25 clarification + AC F4-13a (line 464) and the F4-14 v1.25 amendment + AC F4-14a (line 466). Sign-off: product/decisions.md D-HOP-2026-10-22-02 (20:25, F4-14a) and D-HOP-2026-10-22-05 (21:02, F4-13 affordability, option A); art-ux/decisions.md:191 (Head of Art & UX, 20:30, no objection). No other spec string or threshold changed.
+
+**Verdict: PASS (mergeable on CCR's side). Blocker 0 / Major 0 / Minor 1 / Nit 4.** All prior findings are fixed except n2 (left as is, consistent with spec F4-16; see below).
+
+## Prior findings
+- **B1 → FIXED (F4-14a).** For F4 targets app.ts:428 removes aria-label, sets aria-describedby="goalDesc" (visually hidden, aria-hidden node, app.ts:84) to goalAria(gl): the F4-14 sentence + status sentence, wording unchanged. Name comes from content: the ★ span and a JS `…` are aria-hidden (goal-label.ts:104), level + suffix are in one inline .ng-tail flex item. FARM / workers / done / flag-off keep the old aria-label (else branch). Uses the spec's allowed fallback (aria-describedby).
+  - axe: rc0 PT1-6 `[]` (no label-content-name-mismatch on #goal); scripts/m41-8-f4-14a.mjs chromium 93/93, axe 0 at 360/390/430 for hens-pct, value-pct, value-milestone, collection, fresh-noincome, broke-waiting. CDP names e.g. `Hens  L1 · +33% income Ready!`, desc `Next goal: best buy, Hens level 1, plus 33 percent income. Ready now.`
+  - rc0-browser.mjs was edited (B3 only, :122-135). The F4 branch now asserts: no aria-label, describedby present, browser-computed name (ariaSnapshot) ⊇ visible label (minus ★/…) and status, description shape, no `…`/`★`, timer number present in the description, no "1 minutes". The non-F4 branch is the old check plus a non-null aria-label. The old check could not hold under v1.25 (it required the visible label inside the spelled-out aria). It is legitimate and mostly stricter. One thing was lost, see m1-new.
+  - Mutation: setting aria-label again on F4 → 3 fail; JS `…` not aria-hidden → 2 fail; no .ng-tail wrapper → 1 fail.
+- **M1 → FIXED (F4-11).** next-goal.ts:68 passes `rateCentsPerS > 0` as incomeNow; goal-label.ts:92 hides the % when false. Fresh save → `Hens L1`, aria `Next goal: Hens level 1. Sell eggs to earn coins.` (also visible in rc0 B3 output). Mutation (ignore incomeNow) → 2 fail.
+- **m1 → FIXED.** app.ts:416/420 bypasses the 1 Hz gate when bestBuyMark(hintPick) changes. My repro (/tmp/ccr-stale.test.ts.keep) is now tests/m41-8-best-chip.test.ts "m1 (CCR repro …)": same state search and timing, and it also checks the reverse flip. Mutation (drop the `|| bestBuyMark(hintPick) !== prevMark` bypass) → that test fails.
+- **F4-13a → matches spec.** Spec :464: "in a broke state the strip has no ★ and the row has no chip; once that buy becomes affordable, both appear together." "Gate skipped on affordability flip" is the implementation of that, not spec text. Same predicate (bestBuyMark) for chip (app.ts:496) and ★ (app.ts:422).
+  - Churn probe (scratch jsdom, MutationObserver on #goal + #goalDesc): 120 steady frames @16 ms → 3 attribute records (the single 1 Hz tick; same as before, aria-label was also re-set per tick). 30 forced flips → one strip redraw per flip, none in between. render() doesn't re-enter, so there's no loop. Redraws are bounded by real coin crossings (sales / wage events).
+- **m2 → FIXED.** tests/m41-8-best-chip.test.ts "m2: … ONE render()". Mutation (move renderGoal() at app.ts:580 back after the rows block) → m2 and m1 tests fail (2).
+- **n1 → FIXED.** The chip-move test now asserts `after === bestBuyMark(fresh DualPicker hint)`.
+- **n2 → NOT CHANGED.** Aria still prints raw digits (`plus 1234567 per tap`, goal-label.ts:55 suffixAria); the art file's `1.2 thousand` / `+1.2K/tap` style isn't used. The PR follows spec F4-16 (raw integer) and lists it as spec conflict 3; unreachable on shipped data (Δtap ≤ 5). Accepted; it remains a spec/Art alignment item, not a code defect.
+- **n3 → FIXED.** goal-label.ts:70 adds a compact last step (`123K`, `1.2M`, …) only when level + suffix alone exceed 26; my 28-char case is now `H… L1234567 · +123K% income` (27). Property test up to 1e21 × L9999. Mutation (disable step) → 1 fail. Aria keeps raw digits.
+- **n4 → FIXED.** Four worker states (Tired/Asleep) where working vs live base give different X. Mutation (drop assumeWorking, goal-label.ts:~38) → 4 fail.
+
+## New findings
+- **m1-new (Minor) rc0 B3 (F4 branch) no longer ties the spoken sentence to the visible target.** The old B3 asserted the aria contained the visible target; the new F4 branch only checks the description's shape `/^Next goal: .+\. (…)\.$/` (scripts/rc0-browser.mjs:134). m41-8-f4-14a.mjs:13 SENT and the jsdom F4-14a test (tests/m41-8-best-chip.test.ts, "%s target: no aria-label…") are also shape-only. A description for a different/stale target (e.g. `Egg value level 9` while the strip shows `Hens L1`) would pass all three. Today it's correct by construction (label and description come from the same `gl` in one renderGoal call), so this is a test gap only. Spec F4-14a says "description equals the F4-14 sentence + status sentence". Fix: in B3 (and the jsdom test), map the visible label back (`Value`→`Egg value`, `Coll.`→`Collection`, `L{n}`→`level {n}`) and assert the description contains `{Track} level {n}`, or assert desc === goalAria(selectGoal(...)) in jsdom.
+- **n5 (Nit) accessible name has a doubled space.** Chromium computes `Hens  L1 · …` (space + NBSP between .ng-name and .ng-tail flex items). The checks compare whitespace-normalised, and axe passes. Spec text says "exactly as in the DOM"; the PR flags it as an ambiguity for HoP. No action needed unless HoP wants a strict match.
+- **n6 (Nit) rc0 B3 now runs on the no-% variant.** Its state has no rolling income, so B3 sees `Hens L1` / status `—` (no %, no timer, so the `num` check is skipped, as it also was at fcf9823). The %-variant label-in-name evidence is in scripts/m41-8-f4-14a.mjs, which isn't part of rc0. Consider seeding one sale in B3 (as the f4-14a script does) so the release gate covers the % + timer case.
+- **n7 (Nit) F4-11 hides the % whenever the 60 s rolling income is 0 (format.ts IncomeRate), not only before the first sale.** This is the spec's literal "income/s now = 0" and matches the strip's own `noincome` state, so it's accepted. Mentioned so HoP/Art aren't surprised by the % disappearing after a minute with no sales.
+- **n8 (Process) spec housekeeping.** product/farm/m4a-spec.md line 1 still reads "v1.24", with no v1.25 changelog line and no product/farm/frozen/m4a-spec.v1.25.md (QA holds the snapshot qa/m41/m4a-spec.v1.25.2a4e2c13.md). The rulings are signed in decisions.md, so this is not a blocker for #62. PM should freeze v1.25.
+- HoQA's p62 harness reads aria-label and needs updating to v1.25 (PR body says so too). Not a code issue.
+
+## Determinism / sim / flag-off
+- No sim/econ/config/save/data changes since dd223f5. The flag-off path keeps the aria-label branch (gl.parts undefined). The only flag-off DOM change is an empty aria-hidden #goalDesc div. Golden flag-off f90d1678 (+4 storage pins) and M4-on a54c9cf9 unchanged.
+
+## Gates @ 54118ec (my runs)
+- tsc --noEmit: PASS.
+- vitest (npm test, incl. sync-economy --check): 88 files, **1022/1022**.
+- test:flagoff (tests/m4a-flag-off + engineering/golden): **6/6**; golden pins f90d1678 / a54c9cf9 unchanged.
+- build + check-release-build: PASS (`m3-rc1-pre+54118ec ok`). build:html: PASS (build id matches HEAD).
+- check-globals (Chromium, PORT unset, lane flock): 3/3.
+- rc0 Chromium (build:qa, AXE_PATH=/tmp/ccr-axe axe-core 4.14.0): **348/348**; PT1-6 axe `[]`, B3 PASS.
+- scripts/m41-8-f4-14a.mjs chromium: 93/93 (axe 0 at 360/390/430).
+- Mutations (src restored after each; 54 tests in the M41-8 + next-goal suites): A no flip-bypass → 1 fail; B renderGoal after rows → 2; C ignore incomeNow → 2; D aria-label on F4 → 3; E `…` not hidden → 2; F no assumeWorking → 4; G no compact step → 1; H no .ng-tail → 1. No survivors among the key fixes.
+- Not run: Firefox/WebKit (F4-17 shots are the PR's/QA's evidence), test:slow.

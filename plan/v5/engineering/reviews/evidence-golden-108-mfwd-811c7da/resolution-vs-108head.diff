@@ -1,0 +1,54 @@
+diff --git a/src/save/m5-fields.ts b/src/save/m5-fields.ts
+index fcc90dc..93dd3a6 100644
+--- a/src/save/m5-fields.ts
++++ b/src/save/m5-fields.ts
+@@ -60,12 +60,21 @@ export function m5Persist(s: GameState, b?: Balance): GameState {
+   }
+   return stripSession(s);
+ }
+-/** End every running call with cause `offline` (AB-1: effect_s = tc_ability_s - activeS, the focus seconds it ran). */
++/** End every running call with cause `offline`. Never resume mid-call: activeS and durS are both cleared (readyAt stays).
++ *  Granted focus seconds (D-HOE-41 / abilities v1.3.12): finite durS > 0, else tc_ability_s (missing or invalid durS is today's
++ *  path). When balance has tc combo_boost_duration_s, granted is capped at max(tc_ability_s, that value). activeS clamps to
++ *  [0, granted]; effect_s = granted - activeS (the focus seconds the call ran). */
+ function endCalls(o: any, b: Balance, ev: SimEvent[]) {
+-  const dur = tc(b, 'ability_s');
+-  for (const id of WORKERS) { const a = o.abilities[id]; if (!a || typeof a !== 'object' || !('activeS' in a)) continue;
+-    const { activeS, ...rest } = a; o.abilities[id] = rest;
+-    if (fin(activeS) && activeS > 0) ev.push({ type: 'ability_ended', worker: id, cause: 'offline', effect_s: dur - Math.min(activeS, dur) }); }
++  const base = tc(b, 'ability_s'), combo = b.m4?.tc?.combo_boost_duration_s;
++  const cap = typeof combo === 'number' && Number.isFinite(combo) ? Math.max(base, combo) : undefined;
++  for (const id of WORKERS) {
++    const a = o.abilities[id]; if (!a || typeof a !== 'object' || (!('activeS' in a) && !('durS' in a))) continue;
++    const { activeS, durS, ...rest } = a; o.abilities[id] = rest;
++    if (!(fin(activeS) && activeS > 0)) continue;
++    let granted = fin(durS) && durS > 0 ? durS : base;
++    if (cap !== undefined) granted = Math.min(granted, cap);
++    ev.push({ type: 'ability_ended', worker: id, cause: 'offline', effect_s: granted - clamp(activeS, 0, granted) });
++  }
+ }
+ /** Load (a reload counts as a gap of 60 s or more, AB-1): sanitise the fields of every flag that is on (D-C5), clamp readyAt
+  *  to [now, now + cd] (non-finite = ready), end a call that spanned the reload once. Fields of an off flag are untouched. */
+diff --git a/src/sim/timers.ts b/src/sim/timers.ts
+index 62428d8..eeb8265 100644
+--- a/src/sim/timers.ts
++++ b/src/sim/timers.ts
+@@ -14,6 +14,7 @@ import { incomeRefTick } from './income-ref';
+ import { frenzyTick, goldenTick } from './golden';
+ import { ensureBreeds } from './breeds';
+ import { breedsTick } from './breeds-hatch';
++import { abilitiesTick } from './abilities';
+ /** dt = sim seconds of this tick; focusS = focus seconds of this tick (dt or 0). */
+ export type TimerSystem = (s: GameState, dt: number, focusS: number, b: Balance, clock: StepClock | undefined, ev?: Sink) => GameState;
+ /** Seeds evRngState once on the first tick golden or broody is on (D-C2, Q4 ruling). Never touches state.rng.
+@@ -32,7 +33,9 @@ const incomeRef: TimerSystem = (s, dt, _f, b) => incomeRefTick(s, dt, b);
+ const frenzy: TimerSystem = (s, _dt, f, b, _c, ev) => frenzyTick(s, f, b, ev);
+ /** #1 golden R1-R3/R15/R18: first-spawn and gap countdown, deferral, on-screen lifetime + timeout, all on focus seconds. */
+ const golden: TimerSystem = (s, _dt, f, b, _c, ev) => goldenTick(s, f, b, ev);
+-export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak, breeds, incomeRef, frenzy, golden];
++/** #4 abilities (rules 6, 10): early end, then focus countdown / expiry of running calls. Identity unless m4.flags.abilities. */
++const abilities: TimerSystem = (s, _dt, f, b, _c, ev) => abilitiesTick(s, f, b, ev);
++export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak, breeds, incomeRef, frenzy, golden, abilities];
+ export const anyM5FlagOn = (b: Balance) => M5_FLAGS.some(f => flagOn(b, f));
+ export function stepTimers(s: GameState, dt: number, b: Balance, clock?: StepClock, ev?: Sink, systems: readonly TimerSystem[] = TIMER_SYSTEMS): GameState {
+   const f = tickFocusS(dt, clock);

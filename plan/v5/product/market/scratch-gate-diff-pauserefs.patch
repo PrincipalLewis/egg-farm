@@ -1,0 +1,11 @@
+--- ../scratch/m5-gate-acs.c4f9ddd2.pre-pauserefs.bak	2026-11-10 00:23:17.713976364 +0100
++++ m5-gate-acs.md	2026-11-10 00:23:17.729976295 +0100
+@@ -648,7 +648,7 @@
+ - **Sources pinned:**
+   - Sales-stopped spec **v1.3.27 `7148a34d`** (FROZEN for QA; current file `89dadb43` = + errata notes 1–2, no line shifts in §§1–12): §8 L274–333 (F-4c firing L283–287; G-13 field types L289–300; `fatigue_chip` conversion L326), §7.5 save shapes L252–268 and SS-43–SS-46 L469–481 (**Saves CONFIRMED vs rc/v5 e77fc5c**), SS-47–SS-49. Earlier: v1.3.24 `b95d5cf8`, v1.3.23 `15b36fe7`, v1.3.22 `8244e066`.
+   - rc2-refill **v1.3.16** `e4d98651…` (re-pinned 14:37 CET per PMW, post-freeze dated errata D-PMW-2026-10-30-24/-26, no AC change, over freeze v1.3.14 `944ca78e`; was v1.3.15 `40a1f0b0`; was v1.3.8 `acfb03e3`). Telemetry block L209–224 (L215 merged `rest_toggled`, L219 G-3/G-4 answers), L145 / L156–158 (Boost, B1/B2).
+-  - Pause **v1.3.16** `471fb534…` (re-cited 2026-11-10 per HoP D-HOP-2026-11-10-05, dated erratum AC-P11 only, no AC change; was v1.3.15 `4c081f64`, re-pinned 14:37 CET per PMW, D-PMW-2026-10-30-24/-26; was v1.3.14 `74a0122a`): §12 L293–298 (`worker_paused` with `golden_on_screen` / `frenzy_active`; L298 `session_end.paused_worker_s` / `all_paused_s` **only when rc2Refill = 0**, per D-HOE-20261030-19 G-3), L148.
++  - Pause **v1.3.16** `471fb534…` (re-cited 2026-11-10 per HoP D-HOP-2026-11-10-05, dated erratum AC-P11 only, no card #T AC change (AC-P11 only); was v1.3.15 `4c081f64`, re-pinned 14:37 CET per PMW, D-PMW-2026-10-30-24/-26; was v1.3.14 `74a0122a`): §12 L294–299 (`worker_paused` with `golden_on_screen` / `frenzy_active`; L299 `session_end.paused_worker_s` / `all_paused_s` **only when rc2Refill = 0**, per D-HOE-20261030-19 G-3), L149.
+   - Lighter-refill **v0.8.12** `064c412d…`: §6 L61–66 (was v0.8.10 `f71e4516`).
+   - Failure-cost **v0.3.23** `8c03eb07…`: §6 L165–171 (was v0.3.19 `4f5bbc5c`).
+   - Abilities **v1.3.9** `133adb21…` (manifest rows 15/18/19, HoE 14:05): §9 L433 (`ability_used` L437, incl. `in_sheet` and `combo`), Shift-sheet Boost L164 (was v1.3.6 `8797f5ff`).

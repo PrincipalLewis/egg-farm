@@ -1,0 +1,20 @@
+--- ../scratch/m5-gate-acs.64fba874.pre-pause1316.bak	2026-11-10 00:22:46.914122326 +0100
++++ m5-gate-acs.md	2026-11-10 00:22:46.930122242 +0100
+@@ -648,7 +648,7 @@
+ - **Sources pinned:**
+   - Sales-stopped spec **v1.3.27 `7148a34d`** (FROZEN for QA; current file `89dadb43` = + errata notes 1–2, no line shifts in §§1–12): §8 L274–333 (F-4c firing L283–287; G-13 field types L289–300; `fatigue_chip` conversion L326), §7.5 save shapes L252–268 and SS-43–SS-46 L469–481 (**Saves CONFIRMED vs rc/v5 e77fc5c**), SS-47–SS-49. Earlier: v1.3.24 `b95d5cf8`, v1.3.23 `15b36fe7`, v1.3.22 `8244e066`.
+   - rc2-refill **v1.3.16** `e4d98651…` (re-pinned 14:37 CET per PMW, post-freeze dated errata D-PMW-2026-10-30-24/-26, no AC change, over freeze v1.3.14 `944ca78e`; was v1.3.15 `40a1f0b0`; was v1.3.8 `acfb03e3`). Telemetry block L209–224 (L215 merged `rest_toggled`, L219 G-3/G-4 answers), L145 / L156–158 (Boost, B1/B2).
+-  - Pause **v1.3.15** `4c081f64…` (re-pinned 14:37 CET per PMW, D-PMW-2026-10-30-24/-26, no AC change; was v1.3.14 `74a0122a`): §12 L293–298 (`worker_paused` with `golden_on_screen` / `frenzy_active`; L298 `session_end.paused_worker_s` / `all_paused_s` **only when rc2Refill = 0**, per D-HOE-20261030-19 G-3), L148.
++  - Pause **v1.3.16** `471fb534…` (re-cited 2026-11-10 per HoP D-HOP-2026-11-10-05, dated erratum AC-P11 only, no AC change; was v1.3.15 `4c081f64`, re-pinned 14:37 CET per PMW, D-PMW-2026-10-30-24/-26; was v1.3.14 `74a0122a`): §12 L293–298 (`worker_paused` with `golden_on_screen` / `frenzy_active`; L298 `session_end.paused_worker_s` / `all_paused_s` **only when rc2Refill = 0**, per D-HOE-20261030-19 G-3), L148.
+   - Lighter-refill **v0.8.12** `064c412d…`: §6 L61–66 (was v0.8.10 `f71e4516`).
+   - Failure-cost **v0.3.23** `8c03eb07…`: §6 L165–171 (was v0.3.19 `4f5bbc5c`).
+   - Abilities **v1.3.9** `133adb21…` (manifest rows 15/18/19, HoE 14:05): §9 L433 (`ability_used` L437, incl. `in_sheet` and `combo`), Shift-sheet Boost L164 (was v1.3.6 `8797f5ff`).
+@@ -815,7 +815,7 @@
+      - The emitting subset (`sid`/`fgMs`, `session_end`, `shortage_s` accumulation, `asleep_cents`), moved ahead of the #95 follow-up: **likely Sat 31 Oct 09:00 CET, high Sat 15:00** (D-HOE-20261030-22 L428).
+      - `session_end.shortage_s` is **confirmed by Saves** (13:37): it's in schema.ts, and the accumulation ships in the subset PR. `stall_id` as a per-session counter is confirmed (in schema.ts), and its type is ruled by D-HOE-20261030-24: int, min 1, never saved.
+      - Both land before freeze. `boost_used` isn't allowlisted.
+-  10. **PMW (errata G-2), updated 14:37 CET:** current rc2 **v1.3.16 `e4d98651`** and pause **v1.3.15 `4c081f64`** (post-freeze dated errata D-PMW-2026-10-30-24/-26 over the D-PMW-2026-10-30-23 freeze; no AC change). The card cites these.
++  10. **PMW (errata G-2), updated 14:37 CET:** current rc2 **v1.3.16 `e4d98651`** and pause **v1.3.16 `471fb534`** (re-cited 2026-11-10, D-HOP-2026-11-10-05; was v1.3.15 `4c081f64`) (post-freeze dated errata D-PMW-2026-10-30-24/-26 over the D-PMW-2026-10-30-23 freeze; no AC change). The card cites these.
+   11. **Open, errata rev 6 V-8 items (L144–151):** G-2 (PMW shas), G-8 (Saves schema.ts), G-14 (PMW: abilities v1.3.8 re-pin for the combo rules) and the PMC breeds row.
+       - **G-1:** HoE approved the cap (D-HOE-19). **Saves** sizes `session_summary` and the 200 KB pinned budget for the 19 new pinned entries (worst-case test in schema.ts); anything over goes back to HoE.
+       - ~~G-3~~ *Ruled (D-HOE-20261030-19 G-3, L392):* with rc2Refill = 1 the toggle-time fields (`golden_on_screen`, `frenzy_active`, `farm`, `mood`, `unpaid`, `ability_active`) ride on `rest_toggled{on:true}`. `paused_worker_s` / `all_paused_s` exist **only with rc2Refill = 0** (TEL-AC8). Aligned in errata rev 4 L139.

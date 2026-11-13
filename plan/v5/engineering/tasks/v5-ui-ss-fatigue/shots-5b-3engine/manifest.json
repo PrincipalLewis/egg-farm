@@ -1,0 +1,579 @@
+{
+  "pr": 130,
+  "branch": "ui/v5-sales-stopped",
+  "sha": "7299bfe329e6b59dd8fca2e1d46023769bd68e03",
+  "pushed": true,
+  "build_label_checked": true,
+  "rev": 1,
+  "author": "Senior Engineer, UI (lane U backfill)",
+  "created": "2026-11-10T03:14:12.321Z",
+  "shots": [
+    {
+      "file": "5b-chip-onbreak-sellall-360x780.png",
+      "engine": "chromium",
+      "size": "360x780",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=0: Market Hand on break · Sell all"
+    },
+    {
+      "file": "5b-farm-banner-360x780.png",
+      "engine": "chromium",
+      "size": "360x780",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 3 banner: Coop Hand asleep (out of flow)"
+    },
+    {
+      "file": "5b-bubble-refill-360x780.png",
+      "engine": "chromium",
+      "size": "360x780",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble Refill workers · +$999.9K/s"
+    },
+    {
+      "file": "5b-chip-asleep-manage-360x780.png",
+      "engine": "chromium",
+      "size": "360x780",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=1: Market Hand asleep · Manage"
+    },
+    {
+      "file": "5b-bubble-manage-360x780.png",
+      "engine": "chromium",
+      "size": "360x780",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble rc2Refill=1: Manage workers · +$999.9K/s"
+    },
+    {
+      "file": "5b-chip-onbreak-sellall-375x812.png",
+      "engine": "chromium",
+      "size": "375x812",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=0: Market Hand on break · Sell all"
+    },
+    {
+      "file": "5b-farm-banner-375x812.png",
+      "engine": "chromium",
+      "size": "375x812",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 3 banner: Coop Hand asleep (out of flow)"
+    },
+    {
+      "file": "5b-bubble-refill-375x812.png",
+      "engine": "chromium",
+      "size": "375x812",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble Refill workers · +$999.9K/s"
+    },
+    {
+      "file": "5b-chip-asleep-manage-375x812.png",
+      "engine": "chromium",
+      "size": "375x812",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=1: Market Hand asleep · Manage"
+    },
+    {
+      "file": "5b-bubble-manage-375x812.png",
+      "engine": "chromium",
+      "size": "375x812",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble rc2Refill=1: Manage workers · +$999.9K/s"
+    },
+    {
+      "file": "5b-chip-onbreak-sellall-390x844.png",
+      "engine": "chromium",
+      "size": "390x844",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=0: Market Hand on break · Sell all"
+    },
+    {
+      "file": "5b-farm-banner-390x844.png",
+      "engine": "chromium",
+      "size": "390x844",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 3 banner: Coop Hand asleep (out of flow)"
+    },
+    {
+      "file": "5b-bubble-refill-390x844.png",
+      "engine": "chromium",
+      "size": "390x844",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble Refill workers · +$999.9K/s"
+    },
+    {
+      "file": "5b-chip-asleep-manage-390x844.png",
+      "engine": "chromium",
+      "size": "390x844",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=1: Market Hand asleep · Manage"
+    },
+    {
+      "file": "5b-bubble-manage-390x844.png",
+      "engine": "chromium",
+      "size": "390x844",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble rc2Refill=1: Manage workers · +$999.9K/s"
+    },
+    {
+      "file": "5b-chip-onbreak-sellall-1280x800.png",
+      "engine": "chromium",
+      "size": "1280x800",
+      "docked": true,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=0: Market Hand on break · Sell all"
+    },
+    {
+      "file": "5b-farm-banner-1280x800.png",
+      "engine": "chromium",
+      "size": "1280x800",
+      "docked": true,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 3 banner: Coop Hand asleep (out of flow)"
+    },
+    {
+      "file": "5b-bubble-refill-1280x800.png",
+      "engine": "chromium",
+      "size": "1280x800",
+      "docked": true,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble Refill workers · +$999.9K/s"
+    },
+    {
+      "file": "5b-chip-asleep-manage-1280x800.png",
+      "engine": "chromium",
+      "size": "1280x800",
+      "docked": true,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=1: Market Hand asleep · Manage"
+    },
+    {
+      "file": "5b-bubble-manage-1280x800.png",
+      "engine": "chromium",
+      "size": "1280x800",
+      "docked": true,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble rc2Refill=1: Manage workers · +$999.9K/s"
+    },
+    {
+      "file": "build-label-settings-360x780.png",
+      "engine": "chromium",
+      "size": "360x780",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Settings: build label Egg Farm 7299bfe"
+    },
+    {
+      "file": "firefox/5b-chip-onbreak-sellall-360x780.png",
+      "engine": "firefox",
+      "size": "360x780",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=0: Market Hand on break · Sell all"
+    },
+    {
+      "file": "firefox/5b-farm-banner-360x780.png",
+      "engine": "firefox",
+      "size": "360x780",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 3 banner: Coop Hand asleep (out of flow)"
+    },
+    {
+      "file": "firefox/5b-bubble-refill-360x780.png",
+      "engine": "firefox",
+      "size": "360x780",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble Refill workers · +$999.9K/s"
+    },
+    {
+      "file": "firefox/5b-chip-asleep-manage-360x780.png",
+      "engine": "firefox",
+      "size": "360x780",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=1: Market Hand asleep · Manage"
+    },
+    {
+      "file": "firefox/5b-bubble-manage-360x780.png",
+      "engine": "firefox",
+      "size": "360x780",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble rc2Refill=1: Manage workers · +$999.9K/s"
+    },
+    {
+      "file": "firefox/5b-chip-onbreak-sellall-375x812.png",
+      "engine": "firefox",
+      "size": "375x812",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=0: Market Hand on break · Sell all"
+    },
+    {
+      "file": "firefox/5b-farm-banner-375x812.png",
+      "engine": "firefox",
+      "size": "375x812",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 3 banner: Coop Hand asleep (out of flow)"
+    },
+    {
+      "file": "firefox/5b-bubble-refill-375x812.png",
+      "engine": "firefox",
+      "size": "375x812",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble Refill workers · +$999.9K/s"
+    },
+    {
+      "file": "firefox/5b-chip-asleep-manage-375x812.png",
+      "engine": "firefox",
+      "size": "375x812",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=1: Market Hand asleep · Manage"
+    },
+    {
+      "file": "firefox/5b-bubble-manage-375x812.png",
+      "engine": "firefox",
+      "size": "375x812",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble rc2Refill=1: Manage workers · +$999.9K/s"
+    },
+    {
+      "file": "firefox/5b-chip-onbreak-sellall-390x844.png",
+      "engine": "firefox",
+      "size": "390x844",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=0: Market Hand on break · Sell all"
+    },
+    {
+      "file": "firefox/5b-farm-banner-390x844.png",
+      "engine": "firefox",
+      "size": "390x844",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 3 banner: Coop Hand asleep (out of flow)"
+    },
+    {
+      "file": "firefox/5b-bubble-refill-390x844.png",
+      "engine": "firefox",
+      "size": "390x844",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble Refill workers · +$999.9K/s"
+    },
+    {
+      "file": "firefox/5b-chip-asleep-manage-390x844.png",
+      "engine": "firefox",
+      "size": "390x844",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=1: Market Hand asleep · Manage"
+    },
+    {
+      "file": "firefox/5b-bubble-manage-390x844.png",
+      "engine": "firefox",
+      "size": "390x844",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble rc2Refill=1: Manage workers · +$999.9K/s"
+    },
+    {
+      "file": "firefox/5b-chip-onbreak-sellall-1280x800.png",
+      "engine": "firefox",
+      "size": "1280x800",
+      "docked": true,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=0: Market Hand on break · Sell all"
+    },
+    {
+      "file": "firefox/5b-farm-banner-1280x800.png",
+      "engine": "firefox",
+      "size": "1280x800",
+      "docked": true,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 3 banner: Coop Hand asleep (out of flow)"
+    },
+    {
+      "file": "firefox/5b-bubble-refill-1280x800.png",
+      "engine": "firefox",
+      "size": "1280x800",
+      "docked": true,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble Refill workers · +$999.9K/s"
+    },
+    {
+      "file": "firefox/5b-chip-asleep-manage-1280x800.png",
+      "engine": "firefox",
+      "size": "1280x800",
+      "docked": true,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=1: Market Hand asleep · Manage"
+    },
+    {
+      "file": "firefox/5b-bubble-manage-1280x800.png",
+      "engine": "firefox",
+      "size": "1280x800",
+      "docked": true,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble rc2Refill=1: Manage workers · +$999.9K/s"
+    },
+    {
+      "file": "firefox/build-label-settings-360x780.png",
+      "engine": "firefox",
+      "size": "360x780",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Settings: build label Egg Farm 7299bfe"
+    },
+    {
+      "file": "webkit/5b-chip-onbreak-sellall-360x780.png",
+      "engine": "webkit",
+      "size": "360x780",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=0: Market Hand on break · Sell all"
+    },
+    {
+      "file": "webkit/5b-farm-banner-360x780.png",
+      "engine": "webkit",
+      "size": "360x780",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 3 banner: Coop Hand asleep (out of flow)"
+    },
+    {
+      "file": "webkit/5b-bubble-refill-360x780.png",
+      "engine": "webkit",
+      "size": "360x780",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble Refill workers · +$999.9K/s"
+    },
+    {
+      "file": "webkit/5b-chip-asleep-manage-360x780.png",
+      "engine": "webkit",
+      "size": "360x780",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=1: Market Hand asleep · Manage"
+    },
+    {
+      "file": "webkit/5b-bubble-manage-360x780.png",
+      "engine": "webkit",
+      "size": "360x780",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble rc2Refill=1: Manage workers · +$999.9K/s"
+    },
+    {
+      "file": "webkit/5b-chip-onbreak-sellall-375x812.png",
+      "engine": "webkit",
+      "size": "375x812",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=0: Market Hand on break · Sell all"
+    },
+    {
+      "file": "webkit/5b-farm-banner-375x812.png",
+      "engine": "webkit",
+      "size": "375x812",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 3 banner: Coop Hand asleep (out of flow)"
+    },
+    {
+      "file": "webkit/5b-bubble-refill-375x812.png",
+      "engine": "webkit",
+      "size": "375x812",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble Refill workers · +$999.9K/s"
+    },
+    {
+      "file": "webkit/5b-chip-asleep-manage-375x812.png",
+      "engine": "webkit",
+      "size": "375x812",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=1: Market Hand asleep · Manage"
+    },
+    {
+      "file": "webkit/5b-bubble-manage-375x812.png",
+      "engine": "webkit",
+      "size": "375x812",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble rc2Refill=1: Manage workers · +$999.9K/s"
+    },
+    {
+      "file": "webkit/5b-chip-onbreak-sellall-390x844.png",
+      "engine": "webkit",
+      "size": "390x844",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=0: Market Hand on break · Sell all"
+    },
+    {
+      "file": "webkit/5b-farm-banner-390x844.png",
+      "engine": "webkit",
+      "size": "390x844",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 3 banner: Coop Hand asleep (out of flow)"
+    },
+    {
+      "file": "webkit/5b-bubble-refill-390x844.png",
+      "engine": "webkit",
+      "size": "390x844",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble Refill workers · +$999.9K/s"
+    },
+    {
+      "file": "webkit/5b-chip-asleep-manage-390x844.png",
+      "engine": "webkit",
+      "size": "390x844",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=1: Market Hand asleep · Manage"
+    },
+    {
+      "file": "webkit/5b-bubble-manage-390x844.png",
+      "engine": "webkit",
+      "size": "390x844",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble rc2Refill=1: Manage workers · +$999.9K/s"
+    },
+    {
+      "file": "webkit/5b-chip-onbreak-sellall-1280x800.png",
+      "engine": "webkit",
+      "size": "1280x800",
+      "docked": true,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=0: Market Hand on break · Sell all"
+    },
+    {
+      "file": "webkit/5b-farm-banner-1280x800.png",
+      "engine": "webkit",
+      "size": "1280x800",
+      "docked": true,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 3 banner: Coop Hand asleep (out of flow)"
+    },
+    {
+      "file": "webkit/5b-bubble-refill-1280x800.png",
+      "engine": "webkit",
+      "size": "1280x800",
+      "docked": true,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble Refill workers · +$999.9K/s"
+    },
+    {
+      "file": "webkit/5b-chip-asleep-manage-1280x800.png",
+      "engine": "webkit",
+      "size": "1280x800",
+      "docked": true,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "stall chip, worst rc2Refill=1: Market Hand asleep · Manage"
+    },
+    {
+      "file": "webkit/5b-bubble-manage-1280x800.png",
+      "engine": "webkit",
+      "size": "1280x800",
+      "docked": true,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Rule 4 bubble rc2Refill=1: Manage workers · +$999.9K/s"
+    },
+    {
+      "file": "webkit/build-label-settings-360x780.png",
+      "engine": "webkit",
+      "size": "360x780",
+      "docked": false,
+      "save": "fresh + in-page state (eggfarm.state, stub views)",
+      "seed": null,
+      "state": "Settings: build label Egg Farm 7299bfe"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+VERDICT: FAIL
+
+COUNTS: blocking/major/minor/nit = 0/1/3/1
+
+Reviewed `22eac98c..1a61b36` (HEAD = `1a61b36091e634aef87ec6d02866323130a3a7cc`). Nothing was edited or written.
+
+I found no sim, save or offline correctness problem with every `m4.flags.*` at 0. The one FAIL item is the missing O-3 guard in tooling.
+
+## Findings (follow-ups for HoE triage)
+
+**F-1 — major — No guard against bot-m5's own M5 mechanics and the real flagged M5 code running together (O-3).**
+- Owner: Architect, with Economy as co-owner of the bot.
+- Location: `tests/bot-m5.ts:33-37,84,113,124` (`run`); `scripts/verify/sim.ts:77,115-135` (`runM5xCasual`); `scripts/bot-m5x.ts:11-15`; `tests/bot-m5.ts:167` (`windowGate`).
+- Evidence:
+  - `rg "flags|anyM5FlagOn|flagOn"` over `tests/bot-m5.ts`, `tests/bot-m5.test.ts` and `scripts/verify/sim.ts` finds no flag check anywhere in them.
+  - `run()` takes any `Balance`, then calls the real `step()` and `apply()`. With a flag on, `step()` takes the `live` branch and `stepTimers` runs. At the same time the bot adds its own golden, streak, tap-coin, Broody, ability and pause effects (`tests/bot-m5.ts:56-107`).
+  - The only thing that stops this is an incidental check. `--flags m4.flags.X=1` makes verify exit 4 as `flagsDifferFromBuild` (see `tests/verify.test.ts:251-262`), but that is a generic message and it doesn't protect direct callers. `runVerify()`, `windowGate()` and `scripts/bot-m5x.ts` are unguarded. Once a release sets a flag to 1 in `balance.json`, there is no override, so `npm run verify -- --profile m5x-casual` and `bot-m5x` run both models silently.
+- Today it is latent. `SALE_EFFECTS`, `LAY_EFFECTS` and `TIMER_SYSTEMS` hold only `seedEvRng` (`src/sim/effects.ts:29-30`, `src/sim/timers.ts:19`). The only visible effect now is an extra `evRngState` key in the end state and trace hash. The double count starts as soon as the first feature PR registers an entry.
+- Repro: run `runVerify(withFlags(balance, {'m4.flags.golden': 1}), {hours: 0.25, seed: 1, profile: 'm5x-casual'})`. It returns a result with no error, and `end.evRngState` is set.
+- Fix: in `run()` / `runM5xCasual` / `windowGate`, throw if `anyM5FlagOn(b)` and `K.on`. Say in the message that the bot models M5 itself. Add a test.
+- Severity: HoE may downgrade this to minor if the guard can wait for the first feature PR. I rated it major because O-3 was stated as a must.
+
+**F-2 — minor — UI previews ignore the attended context, and the attended probe is never wired.**
+- Owner: UI.
+- Location: `src/ui/app.ts:607,613`; `src/game.ts:394-402`.
+- Evidence:
+  - `saleValueCents(s, k, b)` and `sellAllPreview(s, b)` default to `PLAYER_SALE` (attended).
+  - `Game.dispatch` credits with `attendedNow()`. That is `anyM5FlagOn(b) && attendedProbe()`, and the probe defaults to `() => false`.
+  - `rg setAttendedProbe src` finds only the definition, so nothing calls it.
+- Effect with any flag on and the probe unwired: no focus time ever accrues, and every player sale is credited suspended while the card and Sell-all previews show the uplift. This is invisible now because the registries are empty.
+- Repro: add a fixture `SaleEffect` as `tests/v5-f1c-effects.test.ts` does, turn its flag on, then compare `saleValueCents(s, k, b)` with the credit from `new Game(...).dispatch({type: 'sell', customerId})`.
+- Fix: UI passes `game.playerSaleCtx()` into both previews and calls `setAttendedProbe` (F6). Add a preview-equals-credit test through `Game`.
+
+**F-3 — minor — The Broody nest clamp (1e15 cents) can't satisfy the `broodyNestScaled` ×10000 representation.**
+- Owner: Saves, with Architect.
+- Location: `src/save/m5-fields.ts:25,62`; `src/sim/m5-state.ts:53-55`.
+- Evidence:
+  - `m5Load` allows `broodyNestCents` up to `BROODY_NEST_MAX_CENTS = 1e15`.
+  - `m5-state.ts:53-55` says load sets `broodyNestScaled = broodyNestCents × 10000`. At the clamp that is 1e19, above 2^53 (9.007e15).
+  - Exact integers hold only up to 9.007e11 cents ($9.0e9). Above that the product silently loses cents.
+  - 1e15 itself is safe against 2^53; only the ×1e4 scaling breaks.
+- Not triggered today: nothing reads or sets `broodyNestScaled` yet.
+- Fix: clamp the saved nest at `Math.floor(Number.MAX_SAFE_INTEGER / 1e4)` (900719925474), or keep the scaled nest as cents plus a fractional remainder. Add a test at the clamp boundary when the Broody PR lands.
+
+**F-4 — minor — `m5Load` sanitises only golden, broody and abilities fields. Pause and streak state is not covered.**
+- Owner: Saves.
+- Location: `src/save/m5-fields.ts:19,56`; `src/sim/workers.ts` (`Worker.paused`, `callLockoutS`).
+- Evidence:
+  - `anyFlag` omits `pause`, so with only `m4.flags.pause=1` `m5Load` returns at line 56 before any check.
+  - `workers[id].callLockoutS` is saved with the whole state and never validated: `NaN` (saved as `null`), negative or 1e308 all pass through.
+  - `paused` is safe because `isPaused` requires `=== true`.
+  - No reader of `callLockoutS` exists yet, so there is no live effect.
+- Rollback note, informational: main loads a worker with `paused: true` as an ordinary worker (it ignores the key and writes it back unchanged).
+- Fix: when the Pause PR lands, sanitise `callLockoutS` (finite, ≥ 0, ≤ the lockout tc) and `paused` (boolean) in `m5Load`.
+
+**F-5 — nit — A missing tunable silently becomes 0 in the load clamps.**
+- Owner: Economy.
+- Location: `src/save/m5-fields.ts:20,59`; `src/config/m5-rules.ts:12`.
+- Evidence: `tc()` returns 0 when a key is absent, and `M5_REQUIRED_TC` is empty. With golden on and `egg_gap_max_s` or `frenzy_s` missing, `num()` clamps the saved `nextSpawnRemainingS` and `frenzyRemainingS` to 0 without error. The current `balance.json` has both keys, so this fires only if a CSV regeneration drops them.
+- Fix: put `egg_gap_max_s` and `frenzy_s` into `M5_REQUIRED_TC.golden` (and `ability_cd_s`, `ability_s` into `.abilities`) when the corresponding feature PR lands.
+
+## CHECKED, NO ISSUE
+
+**A. Determinism, flags off**
+- `step`, `advance` and `apply` are byte-identical to main with every flag at 0:
+  - `tick.ts`: `live = anyM5FlagOn(b)` is false, so `fx` is undefined, `stepTimers` never runs, and `prodEggsPerSec(s,b,undefined)` is the old value × `layFactor` = 1 (an exact multiply by 1.0 in IEEE).
+  - `payout.ts`: `saleMultipliers` returns `[g]` when there are no effects, so the `m === 1 ? k*base : Math.round(...)` path is unchanged. `sellTo` and `apply` defaults leave results unchanged.
+  - Nothing in `src/sim` adds state keys with flags off (no `evRngState` or focus fields), and `initialState` is untouched. A `StepClock` is allocated per tick but never read.
+- `npm test` passes: 127 files, 1724 passed, 1 skipped.
+- Flag-off golden `f90d1678c260e1b6…` and M4-on golden `a54c9cf9d6a4c967…` reproduce, and the storage-byte pins pass.
+- Sim trace `2c0d3ec3`: that string appears nowhere in the repo, and I could not run `verify` (it writes files), so I did not independently confirm it. The `verify.test.ts` suite passes, including goldens and the 24 h seed-1 round-trip.
+- No `Date.now`, `performance.now` or `Math.random` in `src/sim`, `src/save/m5-fields.ts` or `src/config` (`rg`).
+- Flags on, RNG isolation:
+  - `evRngState = mixSeed((rng ^ salt) >>> 0)` is seeded once, at the end of the first flag-on tick. It matches GE-AC33 for `initialState` (`tests/v5-f1b-clock-rng.test.ts:29,37`).
+  - `evDraw` and `brDraw` never touch `state.rng`. `brDraw` never advances `evRngState`.
+  - `brRngState` is session-only and derived from `evRngState`. After a reload it re-derives from the current, possibly advanced, `evRngState`, which matches the stated D-C4 rule.
+  - A rolled-back hidden provisional sim discards its evRng draws.
+- Focus clock: the first `ceil(focusMs/tick)` ticks of a frame carry focus. `focusFrameMs` is 0 for non-attended, non-positive or ≥ 60 s gaps, otherwise capped at 1.0 s. Hidden and short-gap `advance` calls pass no clock, so they never carry focus.
+
+**B. Save compatibility**
+- `SAVE_VERSION` stays 6. The `save.ts` change is `serialize` → `JSON.stringify(m5Persist(state))`, which returns the same object, so the same bytes, when no session key is present.
+- Main loads a flags-on rc/v5 save without loss or rejection: `migrate` spreads `{...initialState, ...d.state}`, the checksum re-stringifies identically, and `validate` has no strict key check. `tests/v5-f2-downgrade.test.ts` covers this for LS, `.bak` and IndexedDB. I did not run main itself.
+- `M5_SESSION_FIELDS` are stripped in `serialize`, and `m5Load` strips them too when a flag is on. `m5Load` handles `NaN` (null), negative, huge and wrong-type values:
+  - `evRngState` must be a non-zero uint32.
+  - `broodyHenIdx` must be an integer in 0..11.
+  - `abilities` and its per-worker entries must be objects, with `readyAt` clamped to `[now, now+cd]` and non-finite treated as ready.
+  - `activeS` is stripped and ends the call as `offline`.
+
+**C. Offline and clock**
+- `src/sim/offline.ts` is untouched. With flags off, `m5Load`, `m5Offline` and `m5ShortGap` return their input object, so offline coins are unchanged.
+- Flags on:
+  - Gaps ≥ 60 s run `m5Offline` before `advance` in `frame()`, and before `grantOffline` in `settleHiddenPeriod`.
+  - Gaps < 60 s run `m5ShortGap` after the uncovered advance.
+  - A negative gap (clock moved back) skips the frame work and gets focus 0.
+  - A readyAt set far in the future is capped to one cooldown on both load and every read (`wallRemainingMs`).
+  - Moving the device clock forward skips a wall-clock cooldown. That follows from the spec'd wall-clock design (abilities E2b); nothing in this change can prevent it.
+
+**D. Money**
+- `saleValueCents` rounds once and stays integer cents. The multiplier product follows the fixed registry order, so it is deterministic.
+- `1e15 < 2^53`, so the clamp itself is safe. The ×1e4 issue is F-3.
+
+**E. Tooling**
+- `sync-economy --check` passes ("balance.json up to date"), and `keepFlags` and `keepZeroGain` keep the blocks whole and reject unknown or non-0/1 values.
+- `verify --flags` rejects `m4.flags.*` values other than 0 and 1.
+- The bot-m5 parity pin reads the `b48be8a4` CSV fixture, and its test passes.
+- No `window` or `globalThis` additions in `src` (`rg`), `tests/release-bundle.test.ts` passes (no `window.eggfarm` or debug handles), and `bot-m5` lives under `tests/` and `scripts/`, not `src/`.
+- `npm run check-globals` could not run here: it needs `dist/assets`, which does not exist, and building is not on the allowed list. `npm run check-economy-copy` skipped itself as opt-in.

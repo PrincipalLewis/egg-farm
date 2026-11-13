@@ -1,0 +1,65 @@
+BID=m4.1+75efc4f
+=== V1-root-usage-nodir exit=2 [VERIFY_OUT_ROOT=/ --hours 0]
+=== V2-root-usage-dir exit=2 [VERIFY_OUT_ROOT=/ --hours 0]
+< F /m4.1+75efc4f/verify.json a971f6e95d92
+> F /m4.1+75efc4f/verify.json cc85ea8c009c
+< F /m4.1+75efc4f/verify.png bd87fd1b47ce
+=== V3-root-full exit=1 [VERIFY_OUT_ROOT=/ --hours 0.1 --skip-build --no-shot]
+< F /m4.1+75efc4f/verify.json cc85ea8c009c
+> F /m4.1+75efc4f/verify.json a0a87b1ac0c9
+=== V4-dotdot-usage exit=2 [VERIFY_OUT_ROOT=.. --hours 0]
+=== V5-dotdot-full exit=1 [VERIFY_OUT_ROOT=.. --hours 0.1 --skip-build --no-shot]
+> D /work/m4.1+75efc4f
+> F /work/m4.1+75efc4f/verify.json a0a87b1ac0c9
+=== V6-symlinked-root exit=2 [VERIFY_OUT_ROOT=/linkroot --hours 0]
+< F /target/m4.1+75efc4f/verify.json a971f6e95d92
+> F /target/m4.1+75efc4f/verify.json cc85ea8c009c
+< F /target/m4.1+75efc4f/verify.png bd87fd1b47ce
+=== V7-symlinked-files exit=2 [VERIFY_OUT_ROOT=/symroot --hours 0]
+< L /symroot/m4.1+75efc4f/verify.json -> /target/precious.json
+< L /symroot/m4.1+75efc4f/verify.png -> /target/precious.png
+> F /symroot/m4.1+75efc4f/verify.json cc85ea8c009c
+=== V8-iddir-is-symlink exit=2 [VERIFY_OUT_ROOT=/dirroot --hours 0]
+< F /target/victimdir/verify.json a971f6e95d92
+> F /target/victimdir/verify.json cc85ea8c009c
+< F /target/victimdir/verify.png bd87fd1b47ce
+=== V9-empty exit=2 [VERIFY_OUT_ROOT= --hours 0]
+=== V10-after-shot-out-root exit=1 [VERIFY_TEST_THROW=after-shot --hours 0.1 --skip-build --no-shot --out /]
+< F /verify.json a971f6e95d92
+> F /verify.json 9033a7686944
+< F /verify.png bd87fd1b47ce
+=== V11-after-shot-default exit=1 [VERIFY_OUT_ROOT=/ VERIFY_TEST_THROW=after-shot --hours 0.1 --skip-build --no-shot]
+< F /m4.1+75efc4f/verify.json a0a87b1ac0c9
+> F /m4.1+75efc4f/verify.json 9033a7686944
+=== V12-throw-bogus exit=1 [VERIFY_TEST_THROW=yes --hours 0.1 --skip-build --no-shot --out /work]
+< F /work/verify.json a971f6e95d92
+> F /work/verify.json a0a87b1ac0c9
+< F /work/verify.png bd87fd1b47ce
+=== V13-traversal-buildid exit=1 [VERIFY_OUT_ROOT=/trav/a/b VERIFY_HTML=/work/trav.html --hours 0.1 --skip-build --no-shot]
+> D /trav/victim
+> F /trav/victim/verify.json 74f6c89d583b
+=== V14-reporoot-full exit=1 [VERIFY_OUT_ROOT=/repo --hours 0.1 --skip-build --no-shot]
+> D /repo/m4.1+75efc4f
+> F /repo/m4.1+75efc4f/verify.json a0a87b1ac0c9
+--- precious:
+PRECIOUS-JSON
+PRECIOUS-PNG
+total 8
+drwxr-xr-x 2 box box  80 Oct 28 02:04 .
+drwxr-xr-x 3 box box  60 Oct 28 02:04 ..
+-rw-r--r-- 1 box box   6 Oct 28 02:04 decoy.json
+-rw-r--r-- 1 box box 282 Oct 28 02:04 verify.json
+--- /verify.json
+{   "schemaVersion": 4,   "tool": "scripts/verify.ts",   "complete": false,   "result": "FAIL",   "exit": 1,   "stage": "run",   "reason": "uncaught error: VERIFY_TEST_THROW: forced crash after the browser step (test hook)",   "sha": "75efc4fff2d5713a512346004
+--- /m4.1+75efc4f/verify.json
+{   "schemaVersion": 4,   "tool": "scripts/verify.ts",   "complete": false,   "result": "FAIL",   "exit": 1,   "stage": "run",   "reason": "uncaught error: VERIFY_TEST_THROW: forced crash after the browser step (test hook)",   "sha": "75efc4fff2d5713a512346004
+--- /work/verify.json
+{   "schemaVersion": 4,   "tool": "scripts/verify.ts",   "complete": true,   "buildId": "m4.1+75efc4f",   "sha": "75efc4fff2d5713a512346004b3fb6d4f2240b22",   "dirty": false,   "asset": {     "path": "dist-html/egg-farm.html",     "sha256": "b4990a4a166cd81d1d
+--- /work/m4.1+75efc4f/verify.json
+{   "schemaVersion": 4,   "tool": "scripts/verify.ts",   "complete": true,   "buildId": "m4.1+75efc4f",   "sha": "75efc4fff2d5713a512346004b3fb6d4f2240b22",   "dirty": false,   "asset": {     "path": "dist-html/egg-farm.html",     "sha256": "b4990a4a166cd81d1d
+--- /target/m4.1+75efc4f/verify.json
+{   "schemaVersion": 4,   "tool": "scripts/verify.ts",   "complete": false,   "result": "FAIL",   "exit": 2,   "stage": "usage",   "reason": "usage: --hours must be a number in (0, 720]",   "sha": "75efc4fff2d5713a512346004b3fb6d4f2240b22",   "screenshot": {  
+--- /target/victimdir/verify.json
+{   "schemaVersion": 4,   "tool": "scripts/verify.ts",   "complete": false,   "result": "FAIL",   "exit": 2,   "stage": "usage",   "reason": "usage: --hours must be a number in (0, 720]",   "sha": "75efc4fff2d5713a512346004b3fb6d4f2240b22",   "screenshot": {  
+--- /victim/verify.json
+STALE-JSON 

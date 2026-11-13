@@ -1,0 +1,9 @@
+ok   positive: six fields, sum <= 4, no suppressed_by_stall on tapped, dead_zone pinned none_affordable (rc=0) G8V: PASS
+ok   negative (new FAIL fixture): no n_tired+n_asleep+n_paused <= 4 check -> sum 5 accepted FAILS G8V-C1b only (rc=1) G8V: FAIL (1) G8V-C1b
+ok   negative: tapped = {surface, loss_per_s} (schema.ts:171 shape) FAILS G8V-C1a (rc=1) G8V: FAIL (2) G8V-C1a G8V-C1b
+ok   negative: tapped accepts suppressed_by_stall FAILS G8V-C1c only (rc=1) G8V: FAIL (1) G8V-C1c
+ok   negative: dead_zone reason=cap accepted (not single-value none_affordable, L105) FAILS G8V-DZ only (rc=1) G8V: FAIL (1) G8V-DZ
+ok   negative: zero_gain_purchase accepts a capped marker FAILS G8V-ZG only (rc=1) G8V: FAIL (1) G8V-ZG
+ok   negative: schema.ts absent FAILS G8V-0 (rc=1) G8V: FAIL (1) G8V-0
+ok   real rc/v5 tip 65a7443: FAIL closed (schema.ts not on rc/v5; expected until the schema.ts PR lands) (rc=1) G8V: FAIL (1) G8V-0
+RESULT pass=8 fail=0

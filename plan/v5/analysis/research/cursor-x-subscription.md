@@ -1,0 +1,5 @@
+**Question:** Can studio bots use Cursor, and what does it cost us?
+**Answer:** Yes. Vadim's Grok and Cursor accounts are unified on one X Subscription (Vadim, 2026-10-27 20:52). Grok Bot staff can start Cursor cloud agents for repo work: each agent gets its own VM, clones the repo, runs code and opens a PR. Grok, Grok Bot and Cursor all spend ONE shared weekly usage limit; anything beyond it comes from prepaid credits. Third-party models inside Cursor (Claude, GPT) are not included and are billed at API list prices from credits. Claude Code bots are separate: they use Vadim's own Claude login. Cursor's visual "design mode / Annotate" feature is for a person in the Cursor editor, so bots can't use it. Unifying can't be undone. Plan tier, pool size and renewal date are unknown (owner Vadim).
+**Sources:** https://docs.x.ai/x-subscription/unify-accounts ; https://cursor.com/help/the-x-subscription/overview ; https://docs.x.ai/x-subscription/eligibility ; Grok Bot release note 2026-10-18 ; https://x.com/cursor_ai/status/2115159585548021814
+**Checked:** 2026-10-27, Tools & Accounts Admin
+**Refresh rule:** re-check after 30 days or on any plan or billing change.

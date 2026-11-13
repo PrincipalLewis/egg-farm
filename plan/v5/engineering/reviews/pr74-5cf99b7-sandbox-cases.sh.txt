@@ -1,0 +1,25 @@
+#!/bin/sh
+# runs INSIDE bwrap: / is a tmpfs; /repo is the disposable scratch clone; /out collects evidence
+set -u
+ID=$(cd /repo && git -c safe.directory='*' log -1 --format=%h); BID="m4.1+$ID"
+L(){ find / \( -path /proc -o -path /dev -o -path /usr -o -path /etc -o -path /opt -o -path /sys -o -path /out -o -path /tmp -o -path /home -o -path /repo/node_modules -o -path /repo/.git -o -path /repo/dist-html -o -path /repo/src -o -path /repo/tests -o -path /repo/scripts -o -path /repo/vendor -o -path /repo/public -o -path /repo/docs -o -path /repo/engineering -o -path /repo/data \) -prune -o -print 2>/dev/null | sort | while read f; do if [ -L "$f" ]; then echo "L $f -> $(readlink "$f")"; elif [ -d "$f" ]; then echo "D $f"; else echo "F $f $(sha256sum < "$f" | cut -c1-12)"; fi; done; }
+seed(){ d=$1; mkdir -p "$d"; echo STALE-JSON > "$d/verify.json"; echo STALE-PNG > "$d/verify.png"; echo decoy > "$d/decoy.json"; echo bak > "$d/verify.json.bak"; echo old > "$d/verify.png.old"; cp /repo/package.json "$d/package.json.copy"; }
+seed /; seed /work; mkdir -p /work/sub; seed /repo; seed "/repo/verify-out/$BID"
+mkdir -p /target/outdir; seed /target/outdir; ln -s /target/outdir /linkdir
+mkdir -p /symfiles; echo PRECIOUS-JSON > /target/precious.json; echo PRECIOUS-PNG > /target/precious.png; ln -s /target/precious.json /symfiles/verify.json; ln -s /target/precious.png /symfiles/verify.png; echo decoy > /symfiles/decoy.json
+mkdir -p /dirjson/verify.json; echo inner > /dirjson/verify.json/inner.txt; echo STALE-PNG > /dirjson/verify.png; echo decoy > /dirjson/decoy.json
+V="node /repo/node_modules/vite-node/vite-node.mjs /repo/scripts/verify.ts --"
+run(){ name=$1; cwd=$2; shift 2; L > /out/$name.before; (cd "$cwd" && $V "$@" > /out/$name.log 2>&1); e=$?; L > /out/$name.after; echo "=== $name exit=$e"; diff /out/$name.before /out/$name.after | grep '^[<>]'; }
+run C1-dot /work --hours 0.1 --skip-build --no-shot --out .
+run C2-root /work --hours 0.1 --skip-build --no-shot --out /
+run C3-dotdot /work/sub --hours 0.1 --skip-build --no-shot --out ..
+run C4-symlinked-dir /work --hours 0.1 --skip-build --no-shot --out /linkdir
+run C5-symlinked-files /work --hours 0.1 --skip-build --no-shot --out /symfiles
+run C6-repo-root /work --hours 0.1 --skip-build --no-shot --out /repo
+run C7-default /repo --hours 0.1 --skip-build --no-shot
+run C8-json-is-dir /work --hours 0.1 --skip-build --no-shot --out /dirjson
+run C9-usage-root /work --hours 0 --out /
+run C10-usage-newdir /work --hours 0 --out /work/new/deep
+run C11-usage-default /repo --hours 0
+for f in /verify.json /work/verify.json /linkdir/verify.json /repo/verify.json "/repo/verify-out/$BID/verify.json"; do echo "--- $f"; head -c 300 "$f" 2>/dev/null | tr '\n' ' '; echo; done
+echo "--- precious:"; cat /target/precious.json /target/precious.png; ls -la /symfiles

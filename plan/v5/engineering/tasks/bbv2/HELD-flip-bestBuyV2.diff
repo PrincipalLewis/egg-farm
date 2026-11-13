@@ -1,0 +1,29 @@
+diff --git a/src/config/balance.json b/src/config/balance.json
+index 1d25c81..159c613 100644
+--- a/src/config/balance.json
++++ b/src/config/balance.json
+@@ -183,7 +183,7 @@
+       "clockWage": 0,
+       "breeds": 0,
+       "zeroGainUi": 0,
+-      "bestBuyV2": 0
++      "bestBuyV2": 1
+     },
+     "zeroGain": {
+       "confirm": 0
+diff --git a/tests/v5-f3-qa-seam.test.ts b/tests/v5-f3-qa-seam.test.ts
+index 2d00f69..74398ad 100644
+--- a/tests/v5-f3-qa-seam.test.ts
++++ b/tests/v5-f3-qa-seam.test.ts
+@@ -14,9 +14,9 @@ const withM4 = (m4: any) => ({ ...structuredClone(balance), m4: { ...structuredC
+ const at = (o: any, path: string) => path.split('.').reduce((x, k) => x?.[k], o);
+ 
+ describe('[Q8] Q8 zero-gain paths (m4 namespace)', () => {
+-  it('ships m4.flags.zeroGainUi = 0, m4.flags.bestBuyV2 = 0, m4.zeroGain.confirm = 0, and no m5 block', () => {
++  it('ships m4.flags.zeroGainUi = 0, m4.flags.bestBuyV2 = 1 (BBv2 PR last commit, D-HOE-35), m4.zeroGain.confirm = 0, and no m5 block', () => {
+     expect(at(raw, 'm4.flags.zeroGainUi')).toBe(0);
+-    expect(at(raw, 'm4.flags.bestBuyV2')).toBe(0);
++    expect(at(raw, 'm4.flags.bestBuyV2')).toBe(1);
+     expect(at(raw, 'm4.zeroGain.confirm')).toBe(0);
+     expect(raw.m4.zeroGain).toEqual({ confirm: 0 });
+     expect('m5' in raw).toBe(false);

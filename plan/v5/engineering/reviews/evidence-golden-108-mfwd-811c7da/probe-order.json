@@ -1,0 +1,27 @@
+{
+ "n": 20000,
+ "stateDiff": {
+  "P_note": 0,
+  "Q_abil_before_golden": 0,
+  "R_golden_first": 0,
+  "S_abil_first": 0
+ },
+ "multisetDiff": {
+  "P_note": 0,
+  "Q_abil_before_golden": 0,
+  "R_golden_first": 0,
+  "S_abil_first": 0
+ },
+ "seqDiff": {
+  "P_note": 0,
+  "Q_abil_before_golden": 3108,
+  "R_golden_first": 1386,
+  "S_abil_first": 5662
+ },
+ "multiFire": 5934,
+ "fired": {
+  "frenzy_ended": 4772,
+  "collectible_expired": 4053,
+  "ability_ended": 21022
+ }
+}

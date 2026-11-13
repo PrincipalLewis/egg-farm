@@ -1,0 +1,14 @@
+# M5 Refill sheet-row button: axe check (Art & UX, 2026-10-30 12:50 CET)
+- Fixture: `fixture.html`. It renders the three row-button states with the ruled names: `Refill, {Role}` (enabled); `Next charge in progress, {Role}` (0 charges, DOM text `Next charge in`, digits from an aria-hidden `.cd[data-cd]::after`, ba398b6 pattern); `Rested, refill below 50%, {Role}` (aria-disabled). Build fonts are from `wt-m41-p2/dist-qa/fonts`, with the live #83 tokens.
+- Tool: axe-core 4.14.0 (`artifacts/v5-ui/tools/axe-core-4.14.0/axe.min.js`) via playwright-core, run in Chromium 156.0.8078.47, Firefox 157.0 and WebKit 27.2 at 360/390/1280 (`run.cjs`).
+- Result (`results.json`): `label-content-name-mismatch` showed **0 violations** (3 nodes pass) in every engine × width. The full axe pass showed **0 violations** and 0 incomplete in every engine × width.
+- Earlier runs are kept as data, not hidden. `results-run1.json` had 1 moderate `page-has-heading-one` and `results-run2.json` had 1 moderate `heading-order`. Both were fixture-structure issues (no h1, then h1 → h3), not button issues, and both were fixed in the fixture. The rule result was 0 in all runs.
+- Fit sweep inside the real button at 360 (flex row, button 276px, text box 224px), all labels `Next charge in 0:01` … `9:59` + `Refill` + `Rested`: widest countdown `Next charge in 2:22` at 156.67 / 156.85 / 156.84 px; `Rested, refill below 50%` at 192.91 / 192.90 / 192.91 px; no clipping.
+- Screenshots: `fixture-{chromium,firefox,webkit}-360.png`.
+
+## v1.0.1 re-run (Art & UX, 2026-10-30 13:18 CET)
+- Fixture `fixture.html` (13:09) now uses the v0.3.19 markup: names from visually hidden `.sr` content spans, **no `aria-label`** on any Refill button; 4 states (enabled, 0 charges, Rested, Unpaid with describedby). Runner `run-v101.cjs` (axe 4.14.0 + DOM, Playwright `ariaSnapshot`, Chromium CDP `getFullAXTree`, pixel and 0:01–9:59 sweep). Started via `ops/tools/lane-run.sh art -- timeout 900 flock -w 600 .browser-test.lock …` (PID 3319832). Earlier 13:10 attempt crashed (`getNodeFromTree` without `axe.setup`, log kept until overwritten); 13:11 attempt timed out waiting for the lock.
+- Result `results-v101.json`: full axe **0 violations / 0 incomplete** in Chromium 156, Firefox 157, WebKit 27.2 × 360/390/1280. `label-content-name-mismatch` has **0 applicable nodes** (no aria-label any more), so it proves nothing about 2.5.3 now.
+- Names: axe/accname exact (`Refill, Market Hand` etc.). Chromium AX tree and Playwright ariaSnapshot (all engines) give `Refill , Market Hand`, `Rested, refill below 50% , Egg Grader`, `Refill , Field Hand` (space before the comma; `Next charge in progress, Coop Hand` is exact). Open question to HoQA (m5-refill-flows §13 Q1).
+- Fit: 276px buttons, 224px box, 0 overflow, 1 line, spread 0; widest countdown `Next charge in 2:22` 156.67/156.85/156.84px.
+- Shots `fixture-v101-{chromium,firefox,webkit}-{360,1280}.png`.

@@ -1,0 +1,27 @@
+t=21 F10 H13 V12 C10 G0 coins $1263 ★=COLL hint=COLL(aff true) highlight=VALUE
+  model: prod 14.00 demand 16.72 collect 82.50 eggs/s; income(working) $78.4/s; caps H13 V13
+  FARM  $    1368 gain   -0.013 $/s  single pb Infinity  bundle pb 314
+  VALUE $    1470 gain    6.440 $/s  single pb      228  bundle pb 228
+  COLL  $    1099 gain    0.000 $/s  single pb Infinity  bundle pb 399
+t=543 F17 H20 V18 C14 G0 coins $7215 ★=COLL hint=COLL(aff true) highlight=FARM
+  model: prod 21.00 demand 27.51 collect 112.50 eggs/s; income(working) $189.0/s; caps H20 V20
+  FARM  $   10185 gain   -0.012 $/s  single pb Infinity  bundle pb 166
+  VALUE $    8138 gain   12.180 $/s  single pb      668  bundle pb 211
+  COLL  $    7205 gain    0.000 $/s  single pb Infinity  bundle pb 242
+t=942 F20 H23 V22 C16 G2 coins $18784 ★=COLL hint=COLL(aff true) highlight=FARM
+  model: prod 24.00 demand 32.12 collect 127.50 eggs/s; income(working) $687.6/s; caps H23 V23
+  FARM  $   31050 gain   -0.013 $/s  single pb Infinity  bundle pb 299
+  VALUE $   25466 gain   39.840 $/s  single pb      639  bundle pb 347
+  COLL  $   18446 gain    0.000 $/s  single pb Infinity  bundle pb 406
+t=1293 F22 H25 V25 C18 G4 coins $51432 ★=COLL hint=COLL(aff true) highlight=FARM
+  model: prod 26.00 demand 34.72 collect 142.50 eggs/s; income(working) $1316.4/s; caps H25 V25
+  FARM  $   56589 gain   -0.012 $/s  single pb Infinity  bundle pb 403
+  COLL  $   47223 gain    0.000 $/s  single pb Infinity  bundle pb 2100
+t=2055 F28 H30 V30 C21 G5 coins $204075 ★=COLL hint=COLL(aff true) highlight=FARM
+  model: prod 31.00 demand 43.75 collect 165.00 eggs/s; income(working) $2781.0/s; caps H30 V30
+  FARM  $  239792 gain   -0.013 $/s  single pb Infinity  bundle pb null
+  COLL  $  193428 gain    0.000 $/s  single pb Infinity  bundle pb null
+t=2250 F29 H30 V30 C22 G5 coins $310361 ★=COLL hint=COLL(aff true) highlight=FARM
+  model: prod 31.00 demand 45.00 collect 172.50 eggs/s; income(working) $2781.0/s; caps H30 V30
+  FARM  $  323719 gain   -0.012 $/s  single pb Infinity  bundle pb null
+  COLL  $  309485 gain    0.000 $/s  single pb Infinity  bundle pb null

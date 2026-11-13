@@ -1,0 +1,69 @@
+VERDICT: PASS
+COUNTS: blocking/major/minor/nit = 0/0/2/2
+
+I found no blocking or major issues. One caveat on method: `npm run verify` is outside my allowed commands, so the O-3 findings come from a code trace. I did not execute them.
+
+## Findings
+
+**F-1 (minor) — O-3: nothing fails loudly when bot-m5's own M5 mechanics and the real flagged M5 code are both active.**
+- **Location:** `scripts/verify/sim.ts:120-135` (`runM5xCasual`), `tests/bot-m5.ts:33-35`, `scripts/verify/cli.ts:49-60`, `scripts/verify.ts:64,100,117`.
+- **Trace:**
+  - `flagsOf` now lists `m4.flags.*` (`cli.ts:52`). `withFlags` accepts `m4.flags.streak=1` (`cli.ts:59-60`), and `verify.ts:64` passes the flagged balance to `runVerify`. For `m5x-casual`, that reaches `runM5(b, …)`.
+  - `bot-m5.run()` takes `bal` and spreads it (`bot-m5.ts:35`). It never reads `m4.flags` (`rg flags tests/bot-m5.ts scripts/bot-m5x.ts` finds only a comment at `bot-m5.ts:8`). It layers its own streak, golden, abilities, Broody and pause on top (`bot-m5.ts:41-75`).
+  - No assertion, throw or test checks `anyM5FlagOn(b)` (`src/sim/timers.ts:20`) against this profile. `tests/bot-m5.test.ts` and `tests/verify.test.ts` never run `m5x-casual` with an M5 flag on.
+- **Why it's only minor today:** only `seedEvRng` (golden/broody) and `isPaused` are wired, plus an empty effects registry. A double count is not yet possible. An override such as `m4.flags.streak=1` also forces exit 4 (`flagsDifferFromBuild`, `verify.ts:117-120`), but the message only says the flags differ from the build.
+- **Where it gets worse:** when a feature PR lands and the shipped flag flips to 1, an unflagged `--profile m5x-casual` run will silently double count. It will exit 0, and the golden checks will not catch it because the bot is not on the golden path.
+- **Repro (traced, not run):** `npm run verify -- --hours 1 --profile m5x-casual --flags m4.flags.golden=1 --no-shot`. There is no usage error. The run completes with the bot's golden model plus `evRngState` seeded by the real `seedEvRng`, and exits 4.
+- **Suggested fix:** in `runM5xCasual` (or at the top of `bot-m5.run`), throw when `anyM5FlagOn(b)` is true, with a message like "bot-m5 models M5 itself; flags must be off". Add a test for it. Do this before the first feature PR flips a flag.
+
+**F-2 (minor) — `src/config/m5-rules.ts:14,29`: `M5_REQUIRED_TC` is empty, so a flag turned ON with its tc keys missing validates, and the save sanitiser silently defaults them to 0.**
+- **Evidence:**
+  - `src/save/m5-fields.ts:20` defines `tc = (b,k) => b.m4?.tc?.[k] ?? 0`.
+  - It is already used under flags at `m5-fields.ts:33` (`egg_gap_*`), `:39` (`streak_decay_per_s`), `:48` (`ability_s`), `:59` (`frenzy_s`) and `:68` (`ability_cd_s`).
+  - The header says "the feature PR that reads a key adds it", but F2 already reads these keys. `validateM5` with `flags.golden=1` and `egg_gap_max_s` removed does not throw (`has()` is false, so every rule is skipped and `M5_REQUIRED_TC` is `{}`).
+  - The `no tc.x ?? n` grep test at `tests/v5-f3-config.test.ts:113` does not catch this form (`tc(b,k)` with `?? 0`).
+  - The required-key loop at `m5-rules.ts:29` is dead code with no test.
+- **Impact:** nothing is wrong at ship, since all five keys exist in `balance.json:385-408`. This only matters for a future CSV or hand edit that drops a column with the flag on.
+- **Repro:** `validateBalance(withTc without egg_gap_max_s, flags.golden = 1)` passes. `sanitizeM5` then sets `nextSpawnRemainingS = 0`.
+- **Suggested fix:** populate `M5_REQUIRED_TC` for the keys F2 already reads (golden, streak, abilities) and add one test.
+
+**F-3 (nit) — `src/config/m5-rules.ts`: the newly mapped `leave_attended_window_s` has no validation rule.** Zero or negative values are accepted. If the abilities spec §7 gives a bound, add it. `tap_income_share` also has only an upper bound (`m5-rules.ts:41`).
+
+**F-4 (nit) — `tests/v5-f3-qa-seam.test.ts:51-54`: temp-dir cleanup has a small leak window.** `mkdtempSync`, `mkdirSync` and `writeFileSync` run before the `try`. If `mkdirSync` or `writeFileSync` throws, the directory is never removed or tracked in `made`. Move them inside the `try`, or push to `made` right after `mkdtempSync`. In the normal path the `finally` removes the directory and the `afterAll` asserts it is gone, and that assertion passed.
+
+## Answers to the specific questions
+
+1. **Flag-off identity: unchanged.**
+   - The new `balance.json` keys are an all-zero `m4.flags` block, `m4.zeroGain.confirm`, and the two `tc` keys.
+   - The goldens print as expected: flag-off `f90d1678…`, M4-on `a54c9cf9…`, and the storage-bytes goldens (`b69c5783…`, `b1e07c13…`) are unchanged.
+   - The trace hash tests in `tests/m4a-flag-off.test.ts` and `verify.test.ts` ("goldens … reproduces both pinned GOLDEN1 hashes") pass. I did not independently identify `2c0d3ec3`.
+   - `verify.json` changes only as a function of the new flag keys: `flagsOf` now lists them, and the updated test covers that.
+   - `rg` finds nothing that hashes `balance` or `balance.json` in `src`, `scripts` or `tests` (`JSON.stringify(balance)` appears only in a tests-only read-only check).
+   - `npm test` (127 files, 1724 passed, 1 skipped) starts with `balance.json up to date with economy.csv`.
+   - I ran `npx tsx scripts/sync-economy.ts --check` as asked. It only printed an npx install warning and no result. The real `--check` is the vite-node CLI that `npm test` runs first, and it passes.
+2. **`isPaused` is the only read of `paused` in `src`.**
+   - `rg -n paused src` shows the only `.paused` read at `src/sim/pause.ts:10`. The other hits are comments, the `Worker` type, `pausedMirror`, an unrelated onboarding parameter and CSS.
+   - Against base, `marketHandStalled` with a stray `paused:true` and the flag off now returns stalled where it previously did not. That is deliberate (`tests/v5-f3-is-paused.test.ts:28-37`, `income()` byte-identical over 10 functions).
+   - The function feeds live income only: the header rate and `incomePerSec` at `income.ts:50` (also `salesStopped`). It is not in `settle` or offline earnings. A real flag-off save cannot carry `paused`, so there is no money or offline impact. `incomePerSec` was already guarded by `assumeWorking`.
+   - The grep guard test misses `'paused' in w` and optional-chained destructuring only in theory, not in practice, so I did not file it.
+3. **`validateM5`: no production or test balance regresses.**
+   - The shipped `rest_recovery_mult` is 0.25, which is in range. The full suite passes with the new validation, so no existing test balance is rejected.
+   - Non-0/1 flag values, unknown flag names, non-object blocks, negative, NaN or Infinity `rest_recovery_mult`, and a value of 0.4 are all refused. A value of 0 or 0.35 is accepted, as the spec allows.
+   - Missing tc keys for an ON flag are accepted (F-2).
+   - `scripts/verify/cli.ts:60`: for `m4.flags.*`, any value other than 0 or 1 throws `UsageError`, which `verify.ts:64` turns into exit 2. `tests/verify.test.ts:149-152` covers `2`, `-1` and `0.5`; NaN can't come from `parseFlags`. There is no spawn-level exit-2 test for this case (very minor).
+4. **O-3:** see F-1. Not guarded; minor now, becomes real when a feature flag flips.
+5. **Tooling.**
+   - `sync-economy` `--check` still catches drift. `buildBalance` regenerates tc and the mapped columns from the CSV and compares the full JSON text. The tests cover a varying mapped column and a duplicated `x` / `tc_x` (`v5-f3-config.test.ts:48-51`).
+   - Flags and `zeroGain` are kept from `balance.json` on purpose. A hand-flipped flag survives `--check`, but a vitest assertion pins that every flag ships as 0.
+   - Unknown or non-0/1 flags make the sync throw.
+   - `npm run check-globals` passes. `check-economy-copy` is opt-in and skipped.
+   - The QA-seam cleanup is discussed in F-4.
+
+## CHECKED, NO ISSUE
+- Save compatibility: no `src/save` migration or `SAVE_VERSION` change. The storage-bytes goldens are unchanged.
+- No new RNG consumers. `main`, `evRng` and `brRng` are untouched by this diff; `seedEvRng` is unchanged from F1b. The F3 diff has no sim-tick change, so determinism is unchanged.
+- No money or big-number changes, and no cents or rounding changes. The `income.ts` change is a boolean guard only.
+- `m41-p1` income fixtures: `income-before.json` is not changed, and the live tests now use `pauseOn` for the paused states.
+- The `m5-fields` tests still assert `SAVE_VERSION` 6 and every M5 flag off.
+- `flagOn` / `zeroGainConfirmOn`: `zeroGainConfirmOn` also requires `m4.enabled`.
+- Not run: `tsc` / typecheck, and `npm run verify` (neither is in the allow list).

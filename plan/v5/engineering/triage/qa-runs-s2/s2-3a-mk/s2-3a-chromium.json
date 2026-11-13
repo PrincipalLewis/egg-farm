@@ -1,0 +1,80 @@
+[
+ {
+  "n": "MK-16 served card shows \"Thanks! +$X\" ~1.5 s then leaves",
+  "pass": false,
+  "i": {
+   "n": 25,
+   "min": 900,
+   "max": 1501,
+   "txt": [
+    "Thanks!+$349.65",
+    "Thanks!+$382.95",
+    "Thanks!+$492.84",
+    "Thanks!+$329.67"
+   ]
+  }
+ },
+ {
+  "n": "MK-21 Market Hand, F12, 1500 stock: card on screen >= 40% over 60 s",
+  "pass": true,
+  "i": {
+   "share": 70.2,
+   "liveShare": 16.2,
+   "txt": [
+    "Thanks!+$349.65",
+    "Thanks!+$382.95",
+    "Thanks!+$492.84",
+    "Thanks!+$329.67"
+   ],
+   "maxServed": 4,
+   "errs": []
+  }
+ },
+ {
+  "n": "MK-21b no workers: card on screen ~91.8% (>= 85%)",
+  "pass": true,
+  "i": {
+   "share": 100,
+   "liveShare": 100,
+   "txt": [],
+   "maxServed": 0
+  }
+ },
+ {
+  "n": "MK-18 served card: pointer-events none, aria-hidden, click does nothing",
+  "pass": true,
+  "i": {
+   "pe": "none",
+   "hitIsServed": false,
+   "aria": "true",
+   "coinsSame": true,
+   "opened": false,
+   "ids": 0
+  }
+ },
+ {
+  "n": "MK-19 reduced motion: static \"Thanks!\" card, same ~1.5 s dwell",
+  "pass": true,
+  "i": {
+   "rm": {
+    "rm": true,
+    "anim": "none"
+   },
+   "life": [
+    1300,
+    1600,
+    1600,
+    1600,
+    1600
+   ]
+  }
+ },
+ {
+  "n": "MK-22 first customer appears within 1 s of closing welcome-back",
+  "pass": true,
+  "i": {
+   "before": 0,
+   "ms": 60
+  }
+ }
+]

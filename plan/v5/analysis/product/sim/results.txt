@@ -1,0 +1,49 @@
+
+## baseline (economy.csv v1)  (20 seeds, 30 min, sell every 15 s, tap 1/s)
+| model | first upg (s) | upg @5m | Farm @5m | Farm @10m | Farm @20m | Farm @30m | t(F10) min | t(F18) min | Coll @30m | basket @30m | lost cust % | partial % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| seller15 | 30/30/45 | 9/11/12 | 3/3/3 | 6/6/7 | 11/11/11 | 14/15/15 | 14.8/15.5/16.0 | n/r | 30/30/30 | 10936/11274/11472 | 0.0/0.0/0.0 | 0.0/0.0/0.0 |
+| cheapest | 30/30/45 | 8/9/10 | 1/1/1 | 3/3/4 | 8/8/8 | 11/11/11 | 23.8/24.6/25.8 | n/r | 29/29/30 | 7785/8093/8342 | 0.0/0.0/0.0 | 0.0/0.0/0.0 |
+| legacy | 30/30/45 | 7/8/10 | 5/5/6 | 10/10/10 | 15/15/16 | 18/18/18 | 8.8/9.2/10.0 | 26.0/26.8/27.8 | 11/11/11 | 14054/14294/14541 | 0.0/0.0/0.0 | 0.0/0.0/0.0 |
+cheapest/seller Farm-level ratio: @10m 50%, @30m 73%
+
+### baseline (economy.csv v1): supply vs demand per Farm level
+| F | eggs/s | demand eggs/s | demand/supply | price $ | queue | farm cost | offline 2h eggs | offline eggs / spare demand (min to sell) |
+|---|---|---|---|---|---|---|---|---|
+| 0 | 1.0 | 0.55 | 0.55 | 1.00 | 3 | 25 | 3600 | never (no spare demand) |
+| 3 | 4.0 | 1.17 | 0.29 | 1.30 | 3 | 61 | 14400 | never (no spare demand) |
+| 5 | 6.0 | 1.68 | 0.28 | 1.50 | 3 | 112 | 21600 | never (no spare demand) |
+| 10 | 11.0 | 3.42 | 0.31 | 2.00 | 4 | 502 | 39600 | never (no spare demand) |
+| 15 | 16.0 | 6.05 | 0.38 | 2.50 | 4 | 2253 | 57600 | never (no spare demand) |
+| 18 | 19.0 | 8.19 | 0.43 | 2.80 | 4 | 5545 | 68400 | never (no spare demand) |
+| 20 | 21.0 | 9.92 | 0.47 | 3.00 | 5 | 10106 | 75600 | never (no spare demand) |
+| 25 | 26.0 | 14.33 | 0.55 | 3.50 | 5 | 45319 | 93600 | never (no spare demand) |
+| 30 | 31.0 | 16.83 | 0.54 | 4.00 | 6 | 203213 | 111600 | never (no spare demand) |
+
+### baseline (economy.csv v1): Collection marginal value (seller15, Farm @30m median, Collection capped at C)
+C≤0: F18 · C≤1: F18 · C≤3: F18 · C≤5: F18 · C≤8: F18
+
+## M1-R1 final  (20 seeds, 30 min, sell every 15 s, tap 1/s)
+| model | first upg (s) | upg @5m | Farm @5m | Farm @10m | Farm @20m | Farm @30m | t(F10) min | t(F18) min | Coll @30m | basket @30m | lost cust % | partial % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| seller15 | 15/15/30 | 10/10/10 | 4/4/4 | 9/10/10 | 15/15/15 | 18/18/18 | 10.0/10.0/10.2 | 28.0/28.0/28.2 | 15/15/15 | 0/0/33 | 13.1/14.9/17.3 | 0.3/0.9/1.5 |
+| cheapest | 15/15/30 | 9/9/9 | 2/2/2 | 8/8/8 | 14/14/14 | 17/17/17 | 11.8/11.8/11.8 | n/r | 16/16/16 | 0/0/23 | 13.2/15.2/17.4 | 0.3/1.3/2.6 |
+| legacy | 15/15/30 | 6/6/7 | 4/4/5 | 10/10/10 | 15/15/15 | 18/18/18 | 9.8/9.8/9.8 | 28.0/28.0/28.0 | 11/11/11 | 0/0/48 | 13.0/15.3/17.8 | 0.0/0.3/1.8 |
+cheapest/seller Farm-level ratio: @10m 80%, @30m 94%
+
+### M1-R1 final: supply vs demand per Farm level
+| F | eggs/s | demand eggs/s | demand/supply | price $ | queue | farm cost | offline 2h eggs | offline eggs / spare demand (min to sell) |
+|---|---|---|---|---|---|---|---|---|
+| 0 | 1.0 | 1.20 | 1.20 | 1.00 | 3 | 100 | 1800 | 150 |
+| 3 | 4.0 | 4.84 | 1.21 | 1.15 | 3 | 246 | 7200 | 142 |
+| 5 | 6.0 | 7.30 | 1.22 | 1.25 | 3 | 448 | 10800 | 138 |
+| 10 | 11.0 | 13.27 | 1.21 | 1.50 | 4 | 2010 | 19800 | 145 |
+| 15 | 16.0 | 19.33 | 1.21 | 1.75 | 4 | 9015 | 28800 | 144 |
+| 18 | 19.0 | 22.92 | 1.21 | 1.90 | 4 | 22182 | 34200 | 145 |
+| 20 | 21.0 | 25.42 | 1.21 | 2.00 | 5 | 40427 | 37800 | 143 |
+| 25 | 26.0 | 31.33 | 1.21 | 2.25 | 5 | 181277 | 46800 | 146 |
+| 30 | 31.0 | 37.33 | 1.20 | 2.50 | 6 | 812854 | 55800 | 147 |
+
+### M1-R1 final: Collection marginal value (seller15, Farm @30m median, Collection capped at C)
+C≤0: F12 · C≤1: F15 · C≤3: F16 · C≤5: F17 · C≤8: F18
+wrote proposal-m1-r1.csv

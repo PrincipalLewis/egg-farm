@@ -1,0 +1,17 @@
+summary.txt: OK
+tsc.log: OK
+vitest-targeted.log: OK
+ALL-OK
+2930938993b6ae7b97f807f591ba2a2a5dd5078f220f6c85e569608dfdfe59d8  SHA256SUMS
+gate v5-streak-sim-14894bd
+HEAD 14894bd32fdb072f5f54369bce677853e6b53962 tree c6b85f16a03c3bb755b13b66733bb025206b2f13
+parent 5573593399ea918a08d8cbfdda6152ad68e6ac35
+origin/rc/v5 2fa7318d5780c1b70ee8c7a532fd70029411ca5d
+diff vs origin/rc/v5:  14 files changed, 295 insertions(+), 29 deletions(-)
+SAVE_VERSION lines in diff: 0
+start 2026-10-30 08:11:12 CET loadavg 2.07 2.41 2.75 4/1836 309365
+tsc exit=0 (3s)
+vitest-targeted exit=0 (4s)
+deferred under load caps: full unit suite, golden, builds, check-globals, rc0 on 3 engines
+end 2026-10-30 08:11:19 CET loadavg 2.72 2.54 2.79 6/1845 310100
+DONE

@@ -1,0 +1,1 @@
+- 2026-10-16 22:14 Architect confirmed v1.10: LS v6_backup {migrationId, raw} + state.v6BackupId stays in M4-A (only IDB copy -> S-4); 2x headroom adopted in M4-16, commit after HoQA/CR rechecks (~23:30).

@@ -1,0 +1,88 @@
+{
+ "spec": "art-ux/m5.1-breeds-ui.md v0.2.6 (v0.2.5 SIGNED HoAUX 23:40; breeds rev. 3.5 a2e596a5)",
+ "rc": "5d9efa61c5e6ee31ca9ebdec20ee70167d31d463",
+ "engine": "chromium (google-chrome) via playwright",
+ "updated": "2026-10-24 23:39 CEST",
+ "files": [
+  {
+   "file": "m5.1-breeds-entry-1024x474.png",
+   "sha256": "35b80ba554e92e85c185659cc486221c82f94ecd045533afc31f741767fcf53d"
+  },
+  {
+   "file": "m5.1-breeds-entry-1280x800.png",
+   "sha256": "cd940da142afbe225ead7d8f65fd0d68396e54114bafc7ecd0ed78d6fa207825"
+  },
+  {
+   "file": "m5.1-breeds-entry-360x640.png",
+   "sha256": "4bc665fa4d1cf7bb9dbf7d1ca5edd23ec02ecec727f2d9e58dc7d95f498ec43f"
+  },
+  {
+   "file": "m5.1-breeds-entry-390x844.png",
+   "sha256": "bc043ac15edac1cf72eda1ffb3c20fcb706dd64863910260974c384d2c5e08f5"
+  },
+  {
+   "file": "m5.1-breeds-reveal-360-context.png",
+   "sha256": "f35c87c999b9e1e2185f4e671d536bdeb7aacf17d3f879e6c90d90a9c56cf2b6"
+  },
+  {
+   "file": "m5.1-breeds-reveal-360.png",
+   "sha256": "d35cdb1a5cd1946b87516f9f0d51ca6e1f434df9eb864acdceb95a4a144c7f87"
+  },
+  {
+   "file": "m5.1-breeds-settling-ring.png",
+   "sha256": "d8055f51791a6609b0c33474cebf4955499f48b6d94fe103a0c710c2a18925ed"
+  },
+  {
+   "file": "m5.1-breeds-sheet-1024x474.png",
+   "sha256": "a3c37823266ee26c7ad198e251cc0971e9a116f4ee73c86efc3b505b69aedb9a"
+  },
+  {
+   "file": "m5.1-breeds-sheet-1280.png",
+   "sha256": "355fdcdfa2c0274f1c7dbad0997cf241b4023dea048f5313b282cf616f11e9c6"
+  },
+  {
+   "file": "m5.1-breeds-sheet-360-f10.png",
+   "sha256": "d1467dc25f423cac56ed606f1e37d119919d0b7c785787bfac47b87f6799248b"
+  },
+  {
+   "file": "m5.1-breeds-sheet-360.png",
+   "sha256": "70029265f88fb0ed82f65a3255c7a18a328c26c29038c21035323a95b93913e1"
+  },
+  {
+   "file": "m5.1-breeds-states.png",
+   "sha256": "eea5189449fec816bbc9869eb3c307c0e2d4a091bbeb00fcad33d4cf4c86bcad"
+  },
+  {
+   "file": "m5.1-breeds-entry-1280x800-refill.png",
+   "sha256": "0ebc5078ab3cf367fbaced332e56291945b9d49d64c5ccc1cfe2436a59165233"
+  },
+  {
+   "file": "m5.1-breeds-entry-1024x474-refill.png",
+   "sha256": "0a9dba7ad9ac7c5cc487a82c0a84d2568a295027d1f1e400ac27a851686fa9d6"
+  },
+  {
+   "file": "m5.1-breeds-present-active.png",
+   "sha256": "3be29f3b026868cd0d62fc0dee4337850bc20033d12e75b8464a9c5df50ae887",
+   "v": "0.2.4 (whole-number label)",
+   "rev": "v0.2.5 (D-HOP-47: ring removed, tooltip \"Bonus returns when you tap slower\"; build 30b29d3)"
+  },
+  {
+   "file": "m5.1-breeds-present-pending.png",
+   "sha256": "d4d47898ace28376ae69f04f43b968bc88750fea9ec37c334f6927f0cebee2e5",
+   "v": "0.2.4 (whole-number label)",
+   "rev": "v0.2.5 (D-HOP-47: ring removed, tooltip \"Bonus returns when you tap slower\"; build 30b29d3)"
+  },
+  {
+   "file": "m5.1-breeds-present-returning.png",
+   "sha256": "7e35c25fd025fcfacb2fc7144c3780f861966fb2ec375202f8fb150f6d2da66b",
+   "v": "0.2.4 (whole-number label)",
+   "rev": "v0.2.5 (D-HOP-47: ring removed, tooltip \"Bonus returns when you tap slower\"; build 30b29d3)"
+  },
+  {
+   "file": "m5.1-breeds-sheet-360-farmsoon.png",
+   "sha256": "0f21b993451fb27e55c6341b98fc10440107f3b1d4e2b7971e0f57e3ccd5c808",
+   "rev": "v0.2.5 new (Q-COL-15 'Needs next Farm upgrade'; wireframe HTML scratch/m51-breeds/www/wf.html?fs=1)"
+  }
+ ],
+ "build_v0.2.3": "30b29d3f60d7eeae5b78feb3ec5c1fcbcf9a1134 (PR #70) for the -refill and -present-* files; other files RC 5d9efa6"
+}

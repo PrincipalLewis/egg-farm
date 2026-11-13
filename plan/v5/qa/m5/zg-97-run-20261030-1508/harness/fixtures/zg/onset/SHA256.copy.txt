@@ -1,0 +1,6 @@
+# copied read-only 2026-10-30 14:0x CET from /workspace/egg-farm-studio/scratch/fx-l30-onset (Econ, READ-ONLY source; sha256sum -c SHA256SUMS: all 10 OK at source); pinned CSV 9f72ca84 on rc/v5 65a7443
+21d03a28345d42e4ba131d2b266058331c2683e74043ce469c5abde11f8e8b77  FX-L30-onset.json
+97c2da9b775d4e4aff140887aef23138d25d8c9b7191705036a5b248908478ad  FX-L30-ON.pre.json
+923dfbde829c1ab8662c0f3ccd0beda439d8f9e4954157d8d5d387660d2fb7fb  EXPECTED.md
+145c9b7d95d4086d2070d7232f8153d1579e135ea8a4c9d6fe0fcf2db0579b51  FX-L30-onset.diff
+855df90f7ea07e0b65e1adbcc6f352706ff5df9cd2a4c742e5e46c72e143030c  SHA256SUMS

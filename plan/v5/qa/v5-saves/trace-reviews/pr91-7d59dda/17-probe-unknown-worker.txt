@@ -1,0 +1,5 @@
+QA ship validate ok= true  ghost= {"energy":1,"cdS":0,"paused":"x","callLockoutS":-5} mh= {"energy":40,"cdS":0,"paused":true,"callLockoutS":null}
+QA   m5Load ghost= {"energy":1,"cdS":0,"paused":"x","callLockoutS":-5} mh= {"energy":40,"cdS":0,"paused":true,"callLockoutS":null}
+QA pause validate ok= true  ghost= {"energy":1,"cdS":0,"paused":"x","callLockoutS":-5} mh= {"energy":40,"cdS":0,"paused":true,"callLockoutS":null}
+QA   m5Load ghost= {"energy":1,"cdS":0,"paused":"x","callLockoutS":-5} mh= {"energy":40,"cdS":0,"paused":true}
+ ✓ tests/zz-qa-unknown.test.ts (1 test) 2ms

@@ -1,0 +1,19 @@
+FO golden       | shipped 0      off PASS | validateBalance PASS | state vs 458f74c (exp1 tracksV7: Game =, fixed =, =input true) PASS | PASS
+FO streak       | shipped 0      off PASS | validateBalance PASS | state vs 458f74c (exp1 tracksV7: Game =, fixed =, =input true) PASS | PASS
+FO tapCoins     | shipped 0      off PASS | validateBalance PASS | state vs 458f74c (exp1 tracksV7: Game =, fixed =, =input true) PASS | PASS
+FO abilities    | shipped 0      off PASS | validateBalance PASS | state vs 458f74c (exp1 tracksV7: Game =, fixed =, =input true) PASS | PASS
+FO broody       | shipped 0      off PASS | validateBalance PASS | state vs 458f74c (exp1 tracksV7: Game =, fixed =, =input true) PASS | PASS
+FO salesStopped | shipped 0      off PASS | validateBalance PASS | state vs 458f74c (exp1 tracksV7: Game =, fixed =, =input true) PASS | PASS
+FO fatigueCue   | shipped 0      off PASS | validateBalance PASS | state vs 458f74c (exp1 tracksV7: Game =, fixed =, =input true) PASS | PASS
+FO pause        | shipped 0      off PASS | validateBalance PASS | state vs 458f74c (exp1 tracksV7: Game =, fixed =, =input true) PASS | PASS
+FO rc2Refill    | shipped 0      off PASS | validateBalance PASS | state vs 458f74c (exp1 tracksV7: Game =, fixed =, =input true) PASS | PASS
+FO autoRefill   | shipped 0      off PASS | validateBalance PASS | state vs 458f74c (exp1 tracksV7: Game =, fixed =, =input true) PASS | PASS
+info m4-exp1-committed-unseen.json#ls.eggfarm.save  committed=true fixed-file = fixed-state = game-state = (vs 458f74c)
+info m1-rc2-v4-12min.json                           committed=false fixed-file = fixed-state = game-state = (vs 458f74c)
+info m2-rc1-v5-12min.json                           committed=false fixed-file = fixed-state = game-state = (vs 458f74c)
+info m2-rc1-v5-40min.json                           committed=false fixed-file = fixed-state = game-state = (vs 458f74c)
+info m2-rc1-v5-40min-edge.json                      committed=false fixed-file = fixed-state = game-state = (vs 458f74c)
+info m4-pre-v7-F30-C30.json                         committed=false fixed-file = fixed-state = game-state = (vs 458f74c)
+VERDICT PASS (0 failing rows)
+compare exit=0
+DONE

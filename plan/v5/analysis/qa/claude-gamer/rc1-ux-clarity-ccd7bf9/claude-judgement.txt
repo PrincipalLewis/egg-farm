@@ -1,0 +1,48 @@
+[gamer] call 1/10 (pass) model=sonnet effort=medium timeout=600s perms=on
+I read the events file and all the screenshots you listed. Two paths needed correcting: desk-04 and desk-11 are `desk-04-0m12-sell-feedback.png` and `desk-11-4m21-workers-manage.png`. The m390-13 stuck-run screenshot is named `m390-13-6m42-periodic.png`, so I couldn't open `run1-stuck/m390-13` under that name. I used `run1-stuck/m390-13-6m42-periodic.png` for the stuck-run claims below.
+
+**(a) Is the next goal clear?**
+- Mostly yes. The goal chip ("★ Farm L14 · +11% income ~0:34 ›", `m390-17`) is always on the Farm screen.
+- Upgrade cards say what they do: "Eggs per tap 25 → 30", "+8% income", "Pays back in ~6 min 2 s", and "Affordable in ~0:22" under a greyed price (`m390-05`).
+- The Farm card lists five changes at once and "Limited by collecting ›" is cramped against "Level 0 / 30" (`m390-07`). A new player can't tell which line matters.
+- Collection cards are the bait. "Best buy" is on L0 at $10, but by L13 the card says "Pays back in ~27 min" for $4,503 (events 17:16). L14 is 36 min for $7,205 (21:51).
+
+**(b) Dead and slow stretches (events file)**
+- Buy gaps grow steadily: 6–20s early, then 39–52s around minutes 3–7, then 57s at 14:52, 59s at 13:55, 72s at 16:03, 80s at 18:37 and 99s at 20:16.
+- **Farm L14 (min 17–19):** the L14 buy came at 16:03 and the L15 buy at 18:37, with 73s and 80s gaps around it. The next Farm purchase landed at 20:16, a 99s gap. Across minutes 16–20 there were only 4 purchases. The goal chip showed 0:34 → 0:19 → 0:03 and then ~1:27 after the buy (`m390-17`, `m390-18`).
+- Minute 4:37 to 5:12 has no sell lines at all. That is 35s with the Market Hand just hired and nothing happening on screen.
+- The events file has stray rows (23:06, 23:22, 23:55) interleaved. They show $165 flat for about 50s with the goal ETA stuck at "~0:16". That is the stuck-run pattern, and it means the ETA lies when the coop is full.
+
+**(c) Confusing labels and disabled buttons**
+- Refill is disabled and greyed with only "Rested, refill below 40%" under it (`m390-11`, `desk-11-4m21-workers-manage.png`). The Workers tab also still lists "Manage"-style entries with no hint about wage cost.
+- The Workers tab shows "Unlocks at Farm L3/L7/L8/L18" (`m390-08`). That is a clear goal, but it is far away: Egg Grader at L18 is beyond the 22-minute run.
+- A full coop shows a small red "Full!" tag and "250 / 250", while the Collect button still says "Collect +40" in bright yellow (`run1-stuck/m390-13-6m42-periodic.png`). Nothing says "sell or upgrade". The ETA stays "~0:14" even though income isn't growing.
+- At 0 ready, Collect greys out with "+75 · 0 ready" and no reason given (`m390-18`).
+- The Market tab dot is red, but no order is marked as sellable (`m390-18`).
+- The tutorial hand overlaps the price button on the first upgrade (`m390-05` area: "…00" is covered), and the "Workers get tired" tooltip covers the tab bar (`m390-11`).
+- The "Queue full +4" panel hides four customers and their needs (`m390-17`).
+
+**(d) Feel**
+- Tapping Collect is satisfying: floating "+1", "+5" and "+$22.10" numbers appear (`m390-03`, `m390-17`).
+- Selling feedback is good. "+$7.00" floats up and the coin-sprinkle plays (`m390-04`).
+- But "No eggs to sell" over a half-faded customer card feels like a stall (`m390-04`, `desk-04-0m12-sell-feedback.png`).
+- Sell-all sizes stay ~10–15 eggs and ~$50 once orders grow, so selling feels like a chore as income climbs past $60/s.
+
+**TOP 3 LIKES**
+1. Upgrade cards give before → after numbers and a payback time (`m390-05`).
+2. The goal chip with its ETA is always visible (`m390-17`).
+3. Collect and sell feedback is juicy (`m390-03`, `m390-04`).
+
+**TOP 3 FRUSTRATIONS**
+1. Purchase gaps stretch to 80–99s with nothing new to do (events 18:37, 20:16).
+2. The full coop has no explanation, and the ETA freezes (`run1-stuck/m390-13-6m42-periodic.png`).
+3. Disabled buttons give no reason: Refill, Collect at 0 ready, and "No eggs to sell" (`m390-11`, `m390-18`).
+
+**SUGGESTIONS**
+1. When the coop is full, turn Collect red and relabel it "Coop full — sell eggs or upgrade". Never show an ETA that can't be met.
+2. Add a mid-game purchase target around minutes 15–20, such as a cheaper side upgrade, so there is never a 90s+ gap.
+3. Show a one-line reason under each disabled button, e.g. "Rested — refill at 40%" or "0 eggs ready".
+4. Cap the Farm card at 3 lines and highlight the one key change. Mark Collection cards "weak" once payback exceeds ~15 minutes.
+5. Move tutorial hands and tooltips off prices and tabs.
+
+**Verdict:** Clear goals and good feedback, but the 80–99s dead stretches from minute 16 on and the silent full-coop and disabled states are not yet RC-quality.

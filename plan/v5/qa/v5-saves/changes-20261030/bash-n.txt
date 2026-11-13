@@ -1,0 +1,4 @@
+bash -n v5-saves-gate.sh: OK
+bash -n selftest-gate-sums.sh: OK
+bash -n selftest-gate-timer.sh: OK
+bash -n publish-verify.sh: OK

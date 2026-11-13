@@ -1,0 +1,12 @@
+MA-route-off:  Tests 3 failed | 56 passed (59)
+MB-idle-bot-string:  Tests 1 failed | 58 passed (59)
+MC-seed-plus1:  Tests 1 failed | 58 passed (59)
+MD-stack-none:  Tests 1 failed | 58 passed (59)
+ME-streakcap:  Tests 1 failed | 58 passed (59)
+MF-rng-const:  Tests 1 failed | 58 passed (59)
+MG-onSecond-skip-last:  Tests 2 failed | 57 passed (59)
+MH-trace-no-events:  Tests 59 passed (59)
+MI-sold-count NOT-APPLIED
+MJ-casual-catchP:  Tests 1 failed | 58 passed (59)
+MK-observer-mutates:  Tests 2 failed | 57 passed (59)
+MI-sold-count (re-applied with context): Tests 59 passed (59) -> SURVIVED

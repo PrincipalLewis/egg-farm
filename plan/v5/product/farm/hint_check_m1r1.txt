@@ -1,0 +1,4 @@
+# table: /workspace/egg-farm-studio/product/farm/../economy.csv
+seller15 (sell 15 s): n=75415 median |err| 11.2%  within ±10% 46.8%  within ±25% 74.5%  bias +0.0%  p90 |err| 36%
+active (sell 1 s): n=74237 median |err| 3.7%  within ±10% 65.2%  within ±25% 78.3%  bias +0.0%  p90 |err| 34%
+casual (20 s, Poisson): n=69540 median |err| 23.3%  within ±10% 23.6%  within ±25% 53.2%  bias -3.8%  p90 |err| 66%

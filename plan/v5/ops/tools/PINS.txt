@@ -1,0 +1,9 @@
+# Pinned lane helpers (HoO, 2026-11-05 20:25 CET; 5.1 hardening pass).
+# Prior pins (2026-10-30 08:07, lane-kill m6): lane-run sha256 061e7c4f…1901 / sha1 f286a9a0;
+# lane-kill sha256 9c89ddc0…3817 / sha1 be136252. Backups: ops/.lane-*.bak-5.1-20261105-2016
+sha1   fd2a033082f9801d66b733e85377802526f128ed  lane-run.sh
+sha1   7b5e561a0c86e2d33e39226eab0b00b534178be9  lane-kill.sh
+sha256 03db32308f9f844e09685b0054f62f7111ead87c5cab83b57a4481ba300ce130  lane-run.sh
+sha256 712703da9b1ef82af7b926292593411ee380fbdfaa9352a45feccc7531ec6c99  lane-kill.sh
+Superseded: lane-kill be136252 / 9c89ddc0…3817; lane-run f286a9a0 / 061e7c4f…1901;
+also lane-kill 7e8b5f4d (ops/.lane-kill.sh.bak-0807), lane-kill 2fc4353e and lane-run 1a8756ca (ops/.lane-*.bak-0730).
