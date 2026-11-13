@@ -90,4 +90,6 @@ export class Bbv2Tel {
   flushOpen(sec: number) { this.endStretch(sec, true); this.lastSec = null; }
   /** session_end field (rev 11 M-2). */
   sessionEndFields(): Record<string, unknown> { return { zero_gain_purchase_dropped: this.dropped }; }
+  /** Zero per-session #21 counters (zgCount + dropped). Idempotent. Called from registerSessionEnd('bbv2').reset(). */
+  resetSession() { this.zgCount = 0; this.dropped = 0; }
 }

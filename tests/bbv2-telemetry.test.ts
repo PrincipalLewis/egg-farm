@@ -142,4 +142,26 @@ describe('BBV2-AC16 [B] Game wiring; flag 0 emits nothing (spec §5)', () => {
     const dz = g.telemetry.events().filter(e => e.type === 'dead_zone'); expect(dz).toHaveLength(1);
     expect(dz[0]).toMatchObject({ farm: 17, reason: 'none_affordable', open: true }); expect(dz[0].s as number).toBeGreaterThanOrEqual(30);
   });
+  // Architect recheck 008969da: Bbv2Tel.dropped / zgCount are per-session (errata L80 row #21). After a hide >= 60 s
+  // rotation, session 2 must accept zero_gain_purchase again and session_end.zero_gain_purchase_dropped counts only
+  // session 2's overflow (not session 1's).
+  it('cap resets on a hide >= 60 s rotate: session 2 accepts zero_gain_purchase again and dropped counts only session 2 overflow', () => {
+    const T0 = Date.UTC(2026, 10, 10, 12); let t = T0;
+    const g = new Game(ON, kvm(), () => t, 1, 'x'); expect(g.bbTel).not.toBeNull();
+    const zgBuy = () => g.bbTel!.purchase(L17(600_000), 'COLL', ctx());
+    for (let i = 0; i < 53; i++) zgBuy(); // session 1: 50 emitted, 3 dropped
+    g.onHidden(t); t += 61_000; g.frame(); g.onShown(t);
+    const ends1 = g.telemetry.events().filter(e => e.type === 'session_end');
+    expect(ends1).toHaveLength(1);
+    expect(ends1[0]).toMatchObject({ zero_gain_purchase_dropped: 3, reason: 'hidden' });
+    const sid1 = ends1[0]!.sid;
+    expect(g.telemetry.events().filter(e => e.type === 'zero_gain_purchase' && e.sid === sid1)).toHaveLength(50);
+    for (let i = 0; i < 52; i++) zgBuy(); // session 2: should emit 50, drop 2 (red: still at cap, 0 emitted, dropped accumulates)
+    g.endSession();
+    const ends = g.telemetry.events().filter(e => e.type === 'session_end');
+    expect(ends).toHaveLength(2);
+    const sid2 = ends[1]!.sid; expect(sid2).not.toBe(sid1);
+    expect(g.telemetry.events().filter(e => e.type === 'zero_gain_purchase' && e.sid === sid2)).toHaveLength(50);
+    expect(ends[1]).toMatchObject({ zero_gain_purchase_dropped: 2 });
+  });
 });

@@ -81,8 +81,8 @@ export class Game {
     // this.state; resetSessionFields also zeros the hide snapshot that settleHiddenPeriod restores (MAJOR-1).
     this.telemetry.registerSessionEnd('pause', { fields: (src) => pauseSessionEnd(src ?? this.state, this.b), reset: () => resetPausedSession(this.state) });
     this.telemetry.registerSessionEnd('present', { fields: (src) => sessionEndPresentFields(src ?? this.state, this.b), reset: () => resetPresentSession(this.state) });
-    // BBv2: zero_gain_purchase_dropped lives on Bbv2Tel, not GameState — src is ignored; reset() is a no-op (Architect).
-    this.telemetry.registerSessionEnd('bbv2', { fields: () => this.bbTel ? this.bbTel.sessionEndFields() : {}, reset: () => {} });
+    // BBv2: dropped/zgCount live on Bbv2Tel, not GameState — src is ignored. resetSession() is idempotent (Architect 008969da).
+    this.telemetry.registerSessionEnd('bbv2', { fields: () => this.bbTel ? this.bbTel.sessionEndFields() : {}, reset: () => { this.bbTel?.resetSession(); } });
     this.installId = installId(kv);
     this.telemetry.startSession('load', this.sessionStartFields());
     if (bbv2TelOn(b)) this.bbTel = new Bbv2Tel((t, d) => this.telemetry.track(t, d), b);
