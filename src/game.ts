@@ -67,14 +67,15 @@ export class Game {
     this.mirror = mirror;
     // v5-tel-envelope R8/B4: the hidden split threshold is telemetry.session_hidden_end_s (== offline.offlineMinSeconds, validateBalance).
     this.telemetry = new Telemetry(kv, { ...b.telemetry, session_hidden_end_s: b.telemetry.session_hidden_end_s ?? b.offline.offlineMinSeconds }, now);
-    // ST-AC20 (streak §8.1): session_end reads Farm level, Coop Hand and the credited-tap flag from the live state at emit.
-    this.telemetry.sessionEndContext = () => ({ farm_level: this.state.farmLevel, coop_hand: !!this.state.workers.coop_hand, credit: creditedTapsOn(this.b) });
+    // ST-AC20 (streak §8.1): session_end reads Farm level, Coop Hand and the credited-tap flag from the source state
+    // (the hide snapshot for a back-dated hidden end; otherwise the live state at emit).
+    this.telemetry.sessionEndContext = (src) => { const s = src ?? this.state; return { farm_level: s.farmLevel, coop_hand: !!s.workers.coop_hand, credit: creditedTapsOn(this.b) }; };
     // Row 32 (HoE/breeds-sim-prB-traits): present_* only. Other breeds session_end fields = gen/breeds-telemetry.
     // #119 pause §12: paused_worker_s / all_paused_s on session_end (pause = 1 and rc2Refill = 0 only). Same emit path as present_*.
     // Registration order matches { ...pauseSessionEnd(), ...sessionEndPresentFields() }. Contributor reset() zeros
     // this.state; resetSessionFields also zeros the hide snapshot that settleHiddenPeriod restores (MAJOR-1).
-    this.telemetry.registerSessionEnd('pause', { fields: () => pauseSessionEnd(this.state, this.b), reset: () => resetPausedSession(this.state) });
-    this.telemetry.registerSessionEnd('present', { fields: () => sessionEndPresentFields(this.state, this.b), reset: () => resetPresentSession(this.state) });
+    this.telemetry.registerSessionEnd('pause', { fields: (_at, src) => pauseSessionEnd(src ?? this.state, this.b), reset: () => resetPausedSession(this.state) });
+    this.telemetry.registerSessionEnd('present', { fields: (_at, src) => sessionEndPresentFields(src ?? this.state, this.b), reset: () => resetPresentSession(this.state) });
     this.installId = installId(kv);
     this.telemetry.startSession('load', this.sessionStartFields());
     // M41-7 (spec v0.3.3, OQ-7): loadSafe is the single owner of the order. With opts.idbBoot (main.ts) the IndexedDB value is a
@@ -362,8 +363,9 @@ export class Game {
   private telemetryShown(at: number) {
     const T = this.telemetry, hAt = T.clock.hiddenAt; if (hAt === null) return;
     if (this.sessionFrozen() || !T.rotateDue(at)) { T.onPageShown(at, false); return; }
+    const src = this.hidden?.state ?? this.state; // hide snapshot: discarded provisional this.state must not leak into session_end (QA F1)
     const reopen = this.splitCoopFull(hAt);
-    T.endSession('hidden', hAt); // no-op when pagehide already ended this sid (one session_end per sid)
+    T.endSession('hidden', hAt, src); // no-op when pagehide already ended this sid (one session_end per sid)
     // A1: session_end, then session_summary, then every reset() — this sim hook is the last reset, once per rotation.
     sessionSim.resetSessionFields(this.state);
     // A hide >= offlineMinSeconds later restores the hide snapshot (settleHiddenPeriod: this.state = h.state) and drops the
@@ -382,8 +384,13 @@ export class Game {
     // R3: a hide >= session_hidden_end_s that never came back ends as the back-dated session_end{hidden}; otherwise {unload}.
     // session_end fields come from registered contributors (pause #119, then present_*); do not track('session_end') here.
     const hAt = this.telemetry.clock.hiddenAt;
-    if (hAt !== null && hAt < at && !this.readOnly && this.telemetry.rotateDue(at)) { this.splitCoopFull(hAt); this.telemetry.endSession('hidden', hAt); }
-    else this.telemetry.endSession('unload', at);
+    if (hAt !== null && hAt < at && !this.readOnly && this.telemetry.rotateDue(at)) {
+      this.splitCoopFull(hAt);
+      this.telemetry.endSession('hidden', hAt, this.hidden?.state ?? this.state);
+    } else {
+      this.splitCoopFull(at); // A2/R4: close coop_full before session_end{unload}, even when hAt === at (MINOR-2)
+      this.telemetry.endSession('unload', at);
+    }
     this.save(); this.telemetry.flush(true); }
   /** "Reset save" (Settings confirm, debug panel): stop saving, close the golden egg / Frenzy (A24-1: silent), log save_reset, flush. */
   beginReset() {
