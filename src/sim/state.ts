@@ -20,6 +20,12 @@ export interface GameState extends M5Fields {
   coopFullS: number;
   /** S2-8 (Product): wage cents owed but not yet charged (fraction < 1 per worker); charged exactly at the economy.csv rate over time. v6. */
   wageFracCents: { market_hand?: number; coop_hand?: number };
+  /** unpaid_trickle §2.3/§2.7: sub-cent carry + episode/session accumulators. Session only (m5Persist SESSION_ONLY_KEYS); never saved, no SAVE_VERSION bump. */
+  unpaidTrickleFrac?: number;
+  unpaidTrickleWasOn?: boolean;
+  unpaidTrickleEp?: { ms: number; coins: number; farm: number; hands: 1 | 2 };
+  unpaidTrickleSessionMs?: number;
+  unpaidTrickleSessionCents?: number;
   /** M4-A tracks (sim/tracks.ts; live only with balance.m4.enabled). Saved in the v6 file (SAVE_VERSION stays 6); a pre-M4 farm is price-matched once on load (H = F, V per M4A-28). */
   hensLevel: number; eggValueLevel: number;
   /** M4-A: set once the tracks exist for this farm (new M4 game or migrated by migrateTracksV7). A marker in the v6 save, not a save version. Absent = pre-M4 farm. */

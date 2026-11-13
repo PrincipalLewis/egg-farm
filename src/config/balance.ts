@@ -1,6 +1,7 @@
 import raw from './balance.json';
 import { validateCostGrowthSegments, validateCostTable, M5_TC_KEYS, m4On, tcNum, type EconomyParams } from './formulas';
 import { validateM5 } from './m5-rules';
+import { isLegalUnpaidTrickle } from './flags';
 /** TEST-ONLY scenario hooks (m2-proposal §8 item 17, AC-W1 casual). Never in balance.json; rejected in production builds. */
 export interface SimTestHooks { poisson_arrivals?: boolean; demand_scale?: number; }
 export type Balance = typeof raw & EconomyParams & { sim_test?: SimTestHooks };
@@ -53,6 +54,9 @@ export function validateBalance(b: Balance, prod = !!import.meta.env?.PROD): Bal
     'workers.market_hand.hire_cost', 'workers.coop_hand.hire_cost', 'workers.hawker.hire_cost', 'workers.grader.tier_cost_share_of_farm_cost', 'workers.tips.coop_hand_tip_full_s']) pos(b, p);
   const W = b.workers;
   if (W.energy.tired_below_pct > 100 || W.energy.start_pct > 100) throw new Error('balance.workers.energy pct must be <= 100');
+  // D-HOP-2026-11-14-10 Q2: legal set {0} ∪ [0.5, 1.0]. 0 is the shipping value (not in pos(), which requires > 0). (0, 0.5) and >1.0 are rejected.
+  if (W.energy.unpaid_trickle !== undefined && !isLegalUnpaidTrickle(W.energy.unpaid_trickle))
+    throw new Error('balance.workers.energy.unpaid_trickle must be in {0} ∪ [0.5, 1.0] (D-HOP-2026-11-14-10 Q2; values >1.0 and values in (0, 0.5) are rejected; 0 is the shipping value)');
   if (W.hawker.demand_mult < W.hawker.tired_demand_mult || W.hawker.tired_demand_mult < 1) throw new Error('balance.workers.hawker: 1 <= tired_demand_mult <= demand_mult');
   if (!W.grader.tiers.length || W.grader.tiers.some((t, i, a) => t.mult <= 1 || (i > 0 && (t.farm <= a[i - 1].farm || t.mult <= a[i - 1].mult))))
     throw new Error('balance.workers.grader.tiers: farm and mult must increase, mult > 1');

@@ -15,6 +15,7 @@ import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
 import type { SimEvent, CollectibleSkin } from './sim/events';
 import { clockWageTipDue, asleepSessionEnd, resetAsleepSession } from './sim/clock-wage';
+import { unpaidTrickleSessionEnd, resetUnpaidTrickleSession } from './sim/unpaid-trickle';
 import { goldenOn, goldenUnload, spawnDue, sessionEndGoldenFields, grantGolden, goldenFrozen, resetGoldenSession } from './sim/golden';
 import type { GoldenReward } from './sim/events';
 import { broodyOn, broodyCheckDue, broodyReset, broodyView, type BroodyView } from './sim/broody';
@@ -102,6 +103,7 @@ export class Game {
     // G0 M2 / #133: refill, then clockWage last. fields(src) reads the hide snapshot; refill reset is immutable (assigns the returned state).
     this.telemetry.registerSessionEnd('refill', { fields: (src) => refillSessionTotals(src ?? this.state, this.b), reset: () => { this.state = resetRefillSession(this.state); } });
     this.telemetry.registerSessionEnd('clockWage', { fields: (src) => asleepSessionEnd(src ?? this.state, this.b), reset: () => resetAsleepSession(this.state) });
+    this.telemetry.registerSessionEnd('unpaidTrickle', { fields: (src) => unpaidTrickleSessionEnd(src ?? this.state, this.b), reset: () => { this.state = resetUnpaidTrickleSession(this.state); } });
     this.installId = installId(kv);
     this.telemetry.startSession('load', this.sessionStartFields());
     if (bbv2TelOn(b)) this.bbTel = new Bbv2Tel((t, d) => this.telemetry.track(t, d), b);

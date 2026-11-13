@@ -7,6 +7,7 @@ import type { Sink } from './events';
 import { breedsCalmClearRing, awayBp } from './breeds-traits';
 import { BP_ONE } from '../config/breeds';
 import { broodyKeepOffline } from './broody';
+import { applyUnpaidTrickleOffline } from './unpaid-trickle';
 /** spec v1.14 M4A-4 (M4 on): floor(min(min(away, cap) x CSV offline_eggs_per_sec[H], CSV offline_max_eggs_2h[H]) x Hens milestone mult).
  *  Rate and cap are read from data (balance.m4.offline via sync-economy), never derived from rate x eps. Flag off: unchanged (AC11). */
 /** BR-R13: optional awayBpN (0 = unchanged). Callers pass awayBp(=familyActiveBp), already clamped to bc_away_cap_bp.
@@ -36,5 +37,6 @@ export function applyOffline(s: GameState, awayMs: number, b: Balance, ev?: Sink
   let state = br.state;
   if (m4On(b) && b.m4?.flags?.breeds === 1 && awayMs >= b.offline.offlineMinSeconds * 1000) state = breedsCalmClearRing(state);
   state = broodyKeepOffline(s, state, b); // v5 #5 Broody R9: the offline grant never touches the nest or the hen (identity when off)
+  state = applyUnpaidTrickleOffline(state, awayMs, b); // unpaid_trickle §2.5: coin credit only, eggs untouched, identity when off; R9 on return
   return { state: eggs > 0 ? { ...state, pendingOfflineEggs: state.pendingOfflineEggs + eggs } : state, eggs, awayS, reveal: br.reveal };
 }

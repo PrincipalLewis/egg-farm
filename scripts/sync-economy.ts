@@ -6,7 +6,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from 'node:url';
 import { tableRow, validateCostGrowthSegments, type EconomyParams, type CostGrowthSegment } from '../src/config/formulas';
-import { M5_FLAGS } from '../src/config/flags';
+import { M5_FLAGS, isLegalUnpaidTrickle } from '../src/config/flags';
 const here = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 export const CSV_PATH = here('../data/economy.csv');
 export const OUT_PATH = here('../src/config/balance.json');
@@ -120,6 +120,12 @@ export function fitWorkers(rows: Row[], prev: any, perLevel = false) {
     const v = R[0][c]; for (const r of R) if (r[c] !== v) throw new Error(`sync-economy: economy.csv ${c} must be constant (L${r.level}=${r[c]}, L0=${v})`);
     return v;
   };
+  const unpaidTrickle = () => {
+    if (!has('unpaid_trickle')) return 0;
+    const v = one('unpaid_trickle');
+    if (!isLegalUnpaidTrickle(v)) throw new Error(`sync-economy: unpaid_trickle must be in {0} ∪ [0.5, 1.0] (D-HOP-2026-11-14-10 Q2; values >1.0 and values in (0, 0.5) are rejected; 0 is the shipping value), got ${v}`);
+    return v;
+  };
   const W = prev.workers ?? {};
   const perFarmWage = (col: string, unlock: number) => {
     const r = R.find(x => x.level === unlock)!; const v = r4(r[col] / unlock);
@@ -140,6 +146,9 @@ export function fitWorkers(rows: Row[], prev: any, perLevel = false) {
     energy: { start_pct: one('energy_start_pct'), drain_s_per_pct: one('drain_s_per_pct'), tired_below_pct: one('tired_below_pct'),
       yawn_at_pct: one('yawn_at_pct'), manage_cooldown_s: one('manage_cooldown_s'), manage_all_min_workers: one('manage_all_min_workers'),
       unpaid_resume_wage_min: one('unpaid_resume_wage_min'),
+      // D-HOP-2026-11-14-07 / HoE unpaid_trickle: constant, last CSV column; 0 is the shipping value; values > 1.0 are rejected.
+      // Absent on historical fixture CSVs (rc1, ad27fe73, …) maps to 0 so those files stay byte-pinned.
+      unpaid_trickle: unpaidTrickle(),
       // B5 (Product, Oct 15; 0.4 = Yawning): Manage / 'Manage all (N need it)' count a worker only at energy <= this share.
       ...(has('manage_prompt_threshold') ? { manage_prompt_threshold: one('manage_prompt_threshold') } : {}) },
     market_hand: { ...W.market_hand, unlock_farm: u1, hire_cost: hire('w1_cost', u1), wage_per_farm_per_min: perFarmWage('w1_wage_per_min', u1), every_s: one('w1_every_s'), tired_every_s: one('w1_tired_every_s') },

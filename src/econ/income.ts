@@ -12,6 +12,7 @@ import { prodEggsPerSec, salePriceCents } from '../sim/tracks';
 import { mood, isOff, graderMult, hawkerDemandMult, WORKERS, type WorkerId, type Workers } from '../sim/workers';
 import { isPaused } from '../sim/pause';
 import { bestBuyV2On } from '../config/flags';
+import { unpaidTrickleDollarsPerSec } from '../sim/unpaid-trickle';
 
 export type IncomeOpts = {
   /** When true, treat every hired worker as Working (Economy best() scoring). */
@@ -76,10 +77,12 @@ export function wagesPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): nu
   return w;
 }
 
-/** Gross eggs sold/s × price − wages. Live moods unless assumeWorking. */
+/** Gross eggs sold/s × price − wages. Live moods unless assumeWorking.
+ *  Q3 / §5: with m4.flags.unpaidTrickle on and rate > 0, the live path includes the trickle (HUD income/s). The planner path (assumeWorking) does not. Flag off: unchanged. */
 export function incomePerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): number {
   const eggs = Math.min(prodEggsPerSec(s, b), demandPerSec(s, b, opts), collectPerSec(s, b, opts));
-  return eggs * priceDollars(s, b, opts) - wagesPerSec(s, b, opts);
+  const trickle = opts.assumeWorking ? 0 : unpaidTrickleDollarsPerSec(s, b);
+  return eggs * priceDollars(s, b, opts) - wagesPerSec(s, b, opts) + trickle;
 }
 
 /** TEST-ONLY (CCR #70 n1): no src/ caller. Gross sales per second ($), before wages. */
