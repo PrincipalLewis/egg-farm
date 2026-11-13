@@ -11,6 +11,7 @@ import { M5_SESSION_FIELDS } from '../src/sim/m5-state';
 import { pauseWorker, resumeWorker, pauseSessionEnd, resetPausedSession, pausedDurationS } from '../src/sim/pause';
 import type { SimEvent } from '../src/sim/events';
 import { sessionEndPresentFields, resetPresentSession } from '../src/sim/breeds-traits';
+import { sessionEndBreedsFields } from '../src/telemetry/breeds-session';
 import { mem } from './helpers';
 
 const T0 = Date.UTC(2026, 10, 10, 12);
@@ -234,6 +235,7 @@ describe('resetSessionFields (session rotation hook)', () => {
     expect(sessionEndPresentFields(g.state, bb)).toEqual({ present_active_s: 1, present_lost_count: 1 });
     for (let i = 0; i < 2; i++) g.dispatch({ type: 'collect' });
     clock.t += 4_000;
+    const breedsEnd = sessionEndBreedsFields(g.state, bb); // #127: breeds=1 (needed for present_*) also emits breed_*
     g.endSession();
 
     const ends = evs(g).filter(e => e.type === 'session_end');
@@ -271,6 +273,7 @@ describe('resetSessionFields (session rotation hook)', () => {
       empty_credited: 0,
       fg_ms: 4_000,
       reason: 'unload',
+      ...breedsEnd,
     };
     for (const k of Object.keys(e2)) {
       if (k === 'type' || k === 'ts' || k === 'sid' || k === 'fgMs') continue;
