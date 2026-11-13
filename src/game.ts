@@ -74,8 +74,8 @@ export class Game {
     // #119 pause §12: paused_worker_s / all_paused_s on session_end (pause = 1 and rc2Refill = 0 only). Same emit path as present_*.
     // Registration order matches { ...pauseSessionEnd(), ...sessionEndPresentFields() }. Contributor reset() zeros
     // this.state; resetSessionFields also zeros the hide snapshot that settleHiddenPeriod restores (MAJOR-1).
-    this.telemetry.registerSessionEnd('pause', { fields: (_at, src) => pauseSessionEnd(src ?? this.state, this.b), reset: () => resetPausedSession(this.state) });
-    this.telemetry.registerSessionEnd('present', { fields: (_at, src) => sessionEndPresentFields(src ?? this.state, this.b), reset: () => resetPresentSession(this.state) });
+    this.telemetry.registerSessionEnd('pause', { fields: (src) => pauseSessionEnd(src ?? this.state, this.b), reset: () => resetPausedSession(this.state) });
+    this.telemetry.registerSessionEnd('present', { fields: (src) => sessionEndPresentFields(src ?? this.state, this.b), reset: () => resetPresentSession(this.state) });
     this.installId = installId(kv);
     this.telemetry.startSession('load', this.sessionStartFields());
     // M41-7 (spec v0.3.3, OQ-7): loadSafe is the single owner of the order. With opts.idbBoot (main.ts) the IndexedDB value is a
@@ -389,7 +389,7 @@ export class Game {
       this.telemetry.endSession('hidden', hAt, this.hidden?.state ?? this.state);
     } else {
       this.splitCoopFull(at); // A2/R4: close coop_full before session_end{unload}, even when hAt === at (MINOR-2)
-      this.telemetry.endSession('unload', at);
+      this.telemetry.endSession('unload', at, this.state); // Game always passes src (live state on unload/pagehide)
     }
     this.save(); this.telemetry.flush(true); }
   /** "Reset save" (Settings confirm, debug panel): stop saving, close the golden egg / Frenzy (A24-1: silent), log save_reset, flush. */
