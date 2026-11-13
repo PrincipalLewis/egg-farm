@@ -5,8 +5,6 @@ import { balance as b } from '../src/config/balance';
 import { Game } from '../src/game';
 import { Telemetry, TELEMETRY_KEY, ringPinned, type TEvent as RingEvent } from '../src/telemetry/telemetry';
 import { validateEvent, type TEvent } from '../src/telemetry/schema';
-import { pauseSessionEnd } from '../src/sim/pause';
-import { sessionEndPresentFields } from '../src/sim/breeds-traits';
 import { mem } from './helpers';
 import { ON } from './v5-f2-helpers';
 
@@ -133,24 +131,13 @@ describe('[ST-AC20] session_end v5 fields (streak §8.1, errata rev. 16 V-2b "+ 
     const { g } = game(CREDIT, { workers: { coop_hand: { ...working } } }); g.dispatch({ type: 'collect' });
     expect(schemaErrs(end(g), V5_END)).toEqual([]);
   });
-  it('Saves-owned session_end paused_* fields match pauseSessionEnd (#119)', () => {
-    const bb = flags({ streak: 1, pause: 1 });
-    const { g } = game(bb);
-    const pauseEnd = pauseSessionEnd(g.state, bb);
-    const presentEnd = sessionEndPresentFields(g.state, bb);
-    const e = end(g);
-    const pausedKeys = Object.keys(pauseEnd);
-    expect(pausedKeys.length).toBeGreaterThan(0); // pause=1, rc2Refill=0: #119 emits the paused_* pair
-    expect(Object.keys(e).filter(k => k === 'paused_worker_s' || k === 'all_paused_s').sort()).toEqual([...pausedKeys].sort());
-    for (const k of pausedKeys) {
-      expect(e[k]).toBe(pauseEnd[k as keyof typeof pauseEnd]);
-      expect(typeof e[k]).toBe('number');
-      expect(Number.isInteger(e[k])).toBe(true);
-      expect(e[k] as number).toBeGreaterThanOrEqual(0);
-    }
-    // session_end carries only the ST-AC20 subset, #119 paused_* keys, rc/v5-owned present_* (if any), and the track() envelope
-    const allowed = new Set(['type', 'ts', 'sessionMs', ...V5_END, ...pausedKeys, ...Object.keys(presentEnd)]);
-    expect(Object.keys(e).filter(k => !allowed.has(k))).toEqual([]);
+  it('Saves #119 session_end paused_* fields: 0 when pause=1 and rc2Refill=0 with no pause time; absent if pause is off or rc2Refill=1', () => {
+    const on = end(game(flags({ streak: 1, pause: 1 })).g);
+    expect(on).toMatchObject({ paused_worker_s: 0, all_paused_s: 0 });
+    const off = end(game(flags({ streak: 1, pause: 0 })).g);
+    expect(off).not.toHaveProperty('paused_worker_s'); expect(off).not.toHaveProperty('all_paused_s');
+    const refill = end(game(flags({ streak: 1, pause: 1, rc2Refill: 1 })).g);
+    expect(refill).not.toHaveProperty('paused_worker_s'); expect(refill).not.toHaveProperty('all_paused_s');
   });
 });
 
