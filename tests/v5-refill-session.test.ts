@@ -1,16 +1,19 @@
 // HoE/v5-refill-sim G2 M2 (G0-API.md rev 12 sha256 82eeac34; Architect M2 + M2 note 22:18 CET).
-// resetRefillSession is a pure function, tested on its own. One-line hook-up into
-// resetSessionFields is it.todo: HoE ruled NEVER merge Draft #138 into #133, and
-// do not create src/sim/session.ts locally. After #138 lands on rc/v5 we mergefwd
-// and wire the real one-line call. No registerSessionEnd, no custom rotate wiring.
+// resetRefillSession is a pure function, tested on its own, and is plugged into
+// resetSessionFields (#138 contract) plus Game's session_end contributor (fields(src)).
 // refillSessionTotals feeds session_end (m7 gating). autoRefillOn is a pure per-worker read (D-HOE-61).
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { balance as b, type Balance } from '../src/config/balance';
 import { initialState, type GameState } from '../src/sim/state';
 import { m5Persist } from '../src/save/m5-fields';
 import { M5_SESSION_FIELDS } from '../src/sim/m5-state';
 import { WORKERS, type WorkerId } from '../src/sim/workers';
 import { resetRefillSession, refillSessionTotals, autoRefillOn, sessionEndFields } from '../src/sim/refill';
+import { resetSessionFields } from '../src/sim/session';
+import { Game } from '../src/game';
+import { mem } from './helpers';
 import type { RefillSession } from '../src/sim/m5-state';
 
 const fl = (f: Record<string, number>): Balance =>
@@ -149,7 +152,7 @@ describe('[G0 §11][lighter L64] asleep_s counts MH+CH only; autoRefill/clockWag
   // Full AC (asleep Hawker/Grader adds 0 to asleep_s, field still emitted) is on Hire 2's wip/hire2/v5-clockwage branch.
 });
 
-describe('[G2][M2][T-AC9] sessionEndFields spreads refillSessionTotals; resetSessionFields hook pending #138', () => {
+describe('[G2][M2][T-AC9] sessionEndFields spreads refillSessionTotals; #138 hook + contributor (QA-D-1029-V5SCAP)', () => {
   it('flag off: sessionEndFields has no refill keys (present_* may still appear)', () => {
     const s = live();
     const f = sessionEndFields(s, b);
@@ -168,15 +171,98 @@ describe('[G2][M2][T-AC9] sessionEndFields spreads refillSessionTotals; resetSes
     expect('charges_capped_s' in f).toBe(false);
     expect('asleep_s' in f).toBe(false);
   });
-  it('[T-AC9] Game.session_end calls a single helper (no comma-bearing literal)', () => {
-    const { readFileSync } = require('fs');
-    const { join } = require('path');
-    const src = readFileSync(join(__dirname, '../src/game.ts'), 'utf8');
-    expect(src).toMatch(/track\('session_end', sessionEndFields\(/);
-    expect(src).not.toMatch(/track\('session_end', \{/);
+  it('[T-AC9] session_end track() literals are plain keys or spreads only (no comma-bearing calls)', () => {
+    const gameSrc = readFileSync(join(__dirname, '../src/game.ts'), 'utf8');
+    const telSrc = readFileSync(join(__dirname, '../src/telemetry/telemetry.ts'), 'utf8');
+    // Game does not emit session_end itself; Telemetry.endSession is the single emit path.
+    // (A comment in Game.endSession mentions track('session_end') — that is not a call.)
+    expect(gameSrc).toMatch(/this\.telemetry\.endSession\(/);
+    expect(gameSrc).not.toMatch(/this\.telemetry\.track\('session_end'/);
+    expect(gameSrc).not.toMatch(/\.track\('session_end'/);
+    // T-AC9: the one track literal is `{ ...extra, reason, fg_ms }` — spreads and plain keys only.
+    expect(telSrc).toMatch(/track\('session_end', \{\s*\.\.\.extra,\s*reason,\s*fg_ms\s*\}/);
+    expect(telSrc).not.toMatch(/track\('session_end', \{[^}]*\(/);
   });
-  // HoE: never merge Draft #138 into #133; do not create src/sim/session.ts locally.
-  it.todo('[G2][M2] one-line resetRefillSession(s) inside resetSessionFields — pending #138 merge into rc/v5, then mergefwd; HoE: never merge Draft #138 into #133, do not create src/sim/session.ts locally');
+
+  it('[G2][M2][QA-D-1029-V5SCAP] resetSessionFields clears refill session keys; saved and page-lifetime stay; pausedForS is #138\'s reset only', () => {
+    const s: GameState = {
+      ...live(),
+      streakS: 0.4,
+      irefRingCents: [1, 2],
+      pausedForS: { market_hand: 5_000, sumS: 5_500, allS: 2_500 },
+    };
+    const charges = s.refillCharges;
+    resetSessionFields(s);
+    expect('refillSession' in s).toBe(false);
+    expect('refillAgoMs' in s).toBe(false);
+    expect(s.refillCharges).toBe(charges);
+    expect(s.streakS).toBe(0.4);
+    expect(s.irefRingCents).toEqual([1, 2]);
+    // #138 CCR MAJOR-1: zeros sumS/allS only, keeps per-worker durations. We do not add a second reset.
+    expect(s.pausedForS).toEqual({ market_hand: 5_000 });
+    const ref = s.pausedForS;
+    resetSessionFields(s); // idempotent
+    expect('refillSession' in s).toBe(false);
+    expect(s.pausedForS).toBe(ref);
+    expect(s.pausedForS).toEqual({ market_hand: 5_000 });
+  });
+
+  it('[G2][M2][QA-D-1029-V5SCAP] rotate (hide >= 60 s then shown) resets refill session fields on the surviving state', () => {
+    const T0 = Date.UTC(2026, 10, 10, 12);
+    const kv = mem(); let t = T0;
+    const g = new Game(RA, kv, () => t, 7);
+    for (let i = 0; i < 20; i++) { t += 1000; g.frame(); }
+    g.state = {
+      ...g.state,
+      farmLevel: 15,
+      refillCharges: 1,
+      chargeNextMs: 9_000,
+      refillAgoMs: { market_hand: 4_000 },
+      refillSession: SESS(),
+      streakS: 0.4,
+      pausedForS: { market_hand: 5_000, sumS: 5_500, allS: 2_500 },
+    };
+    g.onHidden(t); t += 60_000; g.frame(); g.onShown(t);
+    const ends = g.telemetry.events().filter(e => !e.legacy && e.type === 'session_end');
+    expect(ends).toHaveLength(1);
+    expect(ends[0]).toMatchObject({ shortage_s: 2, refills_manual: 3, refills_auto: 5, charge_starved_s: 12.4 });
+    expect('charges_capped_s' in ends[0]).toBe(false);
+    expect('refillSession' in g.state).toBe(false);
+    expect('refillAgoMs' in g.state).toBe(false);
+    expect(g.state.refillCharges).toBe(1);
+    expect(g.state.streakS).toBe(0.4);
+    expect(g.state.pausedForS).toEqual({ market_hand: 5_000 });
+  });
+
+  it('[G2][M2][QA-D-1029-V5SCAP] fields(src) reads from src when given and from live state otherwise', () => {
+    const T0 = Date.UTC(2026, 10, 10, 12);
+    const liveSess: RefillSession = {
+      sheetSeq: 1, refillsManual: 9, refillsAuto: 8, chargeStarvedS: 12_350, shortageS: 5_000, chargesCappedS: 1, autoToastQueue: [],
+    };
+    const srcSess: RefillSession = {
+      sheetSeq: 1, refillsManual: 1, refillsAuto: 2, chargeStarvedS: 1_000, shortageS: 3_000, chargesCappedS: 1, autoToastQueue: [],
+    };
+    const ev = (g: Game) => g.telemetry.events().filter(e => !e.legacy && e.type === 'session_end')[0];
+
+    const gSrc = new Game(RA, mem(), () => T0, 7);
+    gSrc.state = { ...gSrc.state, refillSession: liveSess, refillCharges: 2 };
+    const src = { ...gSrc.state, refillSession: srcSess };
+    gSrc.telemetry.endSession('unload', T0, src);
+    const fromSrc = ev(gSrc);
+    expect(fromSrc.shortage_s).toBe(3);       // floor(3000/1000) from src, not live 5
+    expect(fromSrc.refills_manual).toBe(1);
+    expect(fromSrc.refills_auto).toBe(2);
+    expect(fromSrc.charge_starved_s).toBe(1); // 1000 ms → 1.0 s from src, not live 12.4
+
+    const gLive = new Game(RA, mem(), () => T0, 7);
+    gLive.state = { ...gLive.state, refillSession: liveSess, refillCharges: 2 };
+    gLive.telemetry.endSession('unload', T0); // no src: contributor falls back to this.state
+    const fromLive = ev(gLive);
+    expect(fromLive.shortage_s).toBe(5);
+    expect(fromLive.refills_manual).toBe(9);
+    expect(fromLive.refills_auto).toBe(8);
+    expect(fromLive.charge_starved_s).toBe(12.4);
+  });
 });
 
 describe('[G2][G0-exclusive] sessionEndFields pause totals exclusive by rc2Refill (both flag states)', () => {

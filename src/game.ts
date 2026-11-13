@@ -7,7 +7,7 @@ import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
 import { sessionEndPresentFields, awayBp, resetPresentSession } from './sim/breeds-traits';
 import * as sessionSim from './sim/session';
-import { noteShiftSheetOpened, refillWorker, setRest as setRestSim, setAutoRefill as setAutoRefillSim, takeAutoRefillToast as takeAutoRefillToastSim, restEligibility, type ShiftSheetEntry, type RefillCtx } from './sim/refill';
+import { noteShiftSheetOpened, refillWorker, setRest as setRestSim, setAutoRefill as setAutoRefillSim, takeAutoRefillToast as takeAutoRefillToastSim, restEligibility, refillSessionTotals, resetRefillSession, type ShiftSheetEntry, type RefillCtx } from './sim/refill';
 import type { WorkerId } from './sim/workers';
 import { offlineGrantV5 } from './telemetry/v5-fields';
 import type { BreedId } from './config/breeds';
@@ -74,10 +74,12 @@ export class Game {
     this.telemetry.sessionEndContext = (src) => { const s = src ?? this.state; return { farm_level: s.farmLevel, coop_hand: !!s.workers.coop_hand, credit: creditedTapsOn(this.b) }; };
     // Row 32 (HoE/breeds-sim-prB-traits): present_* only. Other breeds session_end fields = gen/breeds-telemetry.
     // #119 pause §12: paused_worker_s / all_paused_s on session_end (pause = 1 and rc2Refill = 0 only). Same emit path as present_*.
-    // Registration order matches { ...pauseSessionEnd(), ...sessionEndPresentFields() }. Contributor reset() zeros
+    // Registration order: pause, present, refill. Keys do not overlap. Contributor reset() zeros
     // this.state; resetSessionFields also zeros the hide snapshot that settleHiddenPeriod restores (MAJOR-1).
+    // Refill does not reset pausedForS — #138's resetPausedSession already does (CCR MAJOR-1).
     this.telemetry.registerSessionEnd('pause', { fields: (src) => pauseSessionEnd(src ?? this.state, this.b), reset: () => resetPausedSession(this.state) });
     this.telemetry.registerSessionEnd('present', { fields: (src) => sessionEndPresentFields(src ?? this.state, this.b), reset: () => resetPresentSession(this.state) });
+    this.telemetry.registerSessionEnd('refill', { fields: (src) => refillSessionTotals(src ?? this.state, this.b), reset: () => { this.state = resetRefillSession(this.state); } });
     this.installId = installId(kv);
     this.telemetry.startSession('load', this.sessionStartFields());
     // M41-7 (spec v0.3.3, OQ-7): loadSafe is the single owner of the order. With opts.idbBoot (main.ts) the IndexedDB value is a
@@ -384,7 +386,7 @@ export class Game {
     const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
     this.goldenEnd('reload'); // v5 #1 R10c (Saves-confirmed order): expired{reload} + fresh gap, in the same flush, before session_end/save
     // R3: a hide >= session_hidden_end_s that never came back ends as the back-dated session_end{hidden}; otherwise {unload}.
-    // session_end fields come from registered contributors (pause #119, then present_*); do not track('session_end') here.
+    // session_end fields come from registered contributors (pause #119, present_*, refill); do not track('session_end') here.
     const hAt = this.telemetry.clock.hiddenAt;
     if (hAt !== null && hAt < at && !this.readOnly && this.telemetry.rotateDue(at)) {
       this.splitCoopFull(hAt);

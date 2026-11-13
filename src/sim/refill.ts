@@ -4,11 +4,11 @@
  * UI-safe views: no side effects. Refill never writes asleep_s or clockWage state (D-HOE-61).
  * M4: sim-clock only; no wall-clock or RNG calls.
  *
- * TODO(G2/M2): one-line hook-up of resetRefillSession into resetSessionFields
- * (src/sim/session.ts:24) after #138 merges into rc/v5 and we merge rc/v5 forward.
- * HoE ruling: NEVER merge Draft #138 into #133; do NOT create src/sim/session.ts
- * locally (it would conflict with #138). Do NOT add registerSessionEnd.
- * Same pattern as clockWage's resetAsleepSession.
+ * G2/M2: resetRefillSession is plugged into resetSessionFields (src/sim/session.ts)
+ * via the immutable-helper mutation pattern. Game registers the refill session_end
+ * contributor (fields(src) → refillSessionTotals(src ?? this.state, this.b); reset
+ * applies resetRefillSession onto live state). This file does not call registerSessionEnd.
+ * #138 already resets pausedForS at rotation (CCR MAJOR-1); this module does not.
  */
 import type { Balance } from '../config/balance';
 import { tcNum } from '../config/formulas';
@@ -53,7 +53,7 @@ export function resetRefillSession(s: GameState): GameState {
 }
 
 /** session_end view (Architect M2, m7). Accumulators are integer ms (M4); shortage_s is whole seconds (floor), charge_starved_s is S1 (0.1 s). Flag off: {}. charges_capped_s is never emitted (7.2). */
-export interface RefillSessionTotals {
+export type RefillSessionTotals = {
   shortage_s?: number;
   refills_manual?: number;
   refills_auto?: number;
