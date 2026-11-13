@@ -105,6 +105,10 @@ export function sessionEndGoldenFields(s: GameState, b: Balance): {
   return { ...out, golden_frozen_s: Math.round(g.frozenS * 10) / 10 };
 }
 /** Fields for worker_paused (GE-AC45). The emitter is Saves-owned; this is the shared snapshot. */
+/** Zero GE-AC45 session_end counters after emit (contributor reset + resetSessionFields hide snapshot). */
+export function resetGoldenSession(s: GameState): void {
+  if (s.goldenSession) delete s.goldenSession;
+}
 export const goldenWorkerPausedFields = (s: GameState): { golden_on_screen: boolean; frenzy_active: boolean } => ({
   golden_on_screen: s.goldenEgg != null, frenzy_active: (s.frenzyRemainingS ?? 0) > 0,
 });
