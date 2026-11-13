@@ -7,6 +7,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from 'node:url';
 import { tableRow, validateCostGrowthSegments, type EconomyParams, type CostGrowthSegment } from '../src/config/formulas';
 import { M5_FLAGS } from '../src/config/flags';
+import { BC_SPEC_DEFAULTS, BREED_IDS } from '../src/config/breeds';
 const here = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 export const CSV_PATH = here('../data/economy.csv');
 export const OUT_PATH = here('../src/config/balance.json');
@@ -185,6 +186,23 @@ export function keepZeroGain(prev: any): { confirm: number } {
   const v = p.confirm ?? 0; if (v !== 0 && v !== 1) throw new Error(`sync-economy: m4.zeroGain.confirm must be 0 or 1, got ${JSON.stringify(v)}`);
   return { confirm: v };
 }
+/** Known bc_* headers: every BC_SPEC_DEFAULTS key plus each roster trait. Unknown bc_* fails the sync so --check covers every column. */
+export const BC_KNOWN_COLS = [
+  ...Object.keys(BC_SPEC_DEFAULTS).map(k => `bc_${k}`),
+  ...BREED_IDS.map(id => `bc_trait_${id}_bp`),
+] as const;
+/** Map constant bc_* columns into m4.bc (keys drop the bc_ prefix). No bc_* headers => no block (shipping CSV at 32307f32). */
+export function fitBc(rows: Row[]): Record<string, number> | undefined {
+  if (!rows.length) return undefined;
+  const keys = Object.keys(rows[0]).filter(c => c.startsWith('bc_')).sort();
+  if (!keys.length) return undefined;
+  const known = new Set<string>(BC_KNOWN_COLS);
+  for (const c of keys) if (!known.has(c)) throw new Error(`sync-economy: unknown column ${c}`);
+  const one = (c: string) => { const v = rows[0][c]; for (const r of rows) if (r[c] !== v) throw new Error(`sync-economy: economy.csv ${c} must be constant (L${r.level}=${r[c]}, L0=${v})`); return v; };
+  const bc: Record<string, number> = {};
+  for (const c of keys) bc[c.slice(3)] = one(c);
+  return bc;
+}
 /** hens_cost / egg_value_cost are floor(base x growth^L) per row; caps, milestone/grade/Balanced/price-term and tc_* are constant.
  *  A CSV with no M4 columns at all produces no m4 block. From balance.json only `enabled`, the `flags` block and `zeroGain` are kept. */
 export function fitM4(rows: Row[], prev: any) {
@@ -202,6 +220,7 @@ export function fitM4(rows: Row[], prev: any) {
     if (!out.length) throw new Error(`sync-economy: economy.csv has no ${pre}1_level column`);
     return out;
   };
+  const bc = fitBc(R);
   return { enabled: prev.m4?.enabled ?? 0, flags: keepFlags(prev), zeroGain: keepZeroGain(prev),
     hens: { ...geo('hens_cost'), capOverFarm: one('hens_cap_over_farm') },
     offline: { eggsPerSec: R.map(r => r.offline_eggs_per_sec), maxEggs2h: R.map(r => r.offline_max_eggs_2h) }, // spec v1.14 M4A-4
@@ -210,7 +229,7 @@ export function fitM4(rows: Row[], prev: any) {
       hens: list('hens_ms', { level: 'level', coopMult: 'coop_mult', offlineMult: 'offline_mult' }),
       grades: list('egg_grade', { level: 'level', mult: 'mult', minFarm: 'farm_gate' }),
       balanced: list('balanced', { level: 'level', mult: 'mult' }),
-    }, tc };
+    }, tc, ...(bc ? { bc } : {}) };
 }
 export function buildBalance(rows: Row[], prev: any, cfg: EconomyConfig = {}) {
   const p = fitParams(rows, prev, cfg);
