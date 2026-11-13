@@ -2,7 +2,7 @@
 
 **State:** Draft. Implementation + local unit tests only. Full gates (suite, seeds 1–200 byte-identity sweep across all profiles, pacing, k10) and Ready wait until #148 (unpaid-trickle) merges; then mergefwd the new origin/rc/v5 tip into `rc5/bc-wiring` and run the gates once. Do not queue HoQA until that pass. `engineering/status.md` untouched.
 
-**PR:** (filled after open). Branch `rc5/bc-wiring`, worktree `/workspace/wt-rc5-bc-wiring` (standalone clone; the shared `game/.git` in this sandbox was missing HEAD/config).
+**PR:** https://github.com/PrincipalLewis/egg-farm/pull/149 (Draft). Branch `rc5/bc-wiring`, worktree `/workspace/wt-rc5-bc-wiring` (standalone clone; the shared `game/.git` in this sandbox was missing HEAD/config).
 **Base:** origin/rc/v5 `32307f32` (Merge #146, tree `232de8aa`). #148 still OPEN at implementation time (`ea5f5328`, title unpaid_trickle).
 
 This PR is step 1 for closing RC item 2 (HoQA QA-D-1114-K10-WIRE). Authority: Econ BRIEF `93ac121e` §1 + D-HOP-2026-11-14-14 (bc()/ROSTER reading Balance, byte-identical at defaults).
