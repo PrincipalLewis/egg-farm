@@ -35,6 +35,6 @@ import { resetAsleepSession } from './clock-wage';
 export function resetSessionFields(s: GameState): void {
   resetPausedSession(s);
   resetPresentSession(s);
-  const next = resetAsleepSession(s); if (next !== s) { for (const k of Object.keys(s)) if (!(k in next)) delete (s as unknown as Record<string, unknown>)[k]; Object.assign(s, next); }
+  resetAsleepSession(s);
   // Extension point — clockWage / Refill add their one-line resets above this comment.
 }

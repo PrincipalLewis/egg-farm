@@ -77,7 +77,7 @@ export class Game {
     // this.state; resetSessionFields also zeros the hide snapshot that settleHiddenPeriod restores (MAJOR-1).
     this.telemetry.registerSessionEnd('pause', { fields: (src) => pauseSessionEnd(src ?? this.state, this.b), reset: () => resetPausedSession(this.state) });
     this.telemetry.registerSessionEnd('present', { fields: (src) => sessionEndPresentFields(src ?? this.state, this.b), reset: () => resetPresentSession(this.state) });
-    this.telemetry.registerSessionEnd('clockWage', { fields: () => asleepSessionEnd(this.state, this.b), reset() {} }); // T-AC9; fields(src)+reset wired after merge
+    this.telemetry.registerSessionEnd('clockWage', { fields: (src) => asleepSessionEnd(src ?? this.state, this.b), reset: () => resetAsleepSession(this.state) });
     this.installId = installId(kv);
     this.telemetry.startSession('load', this.sessionStartFields());
     // M41-7 (spec v0.3.3, OQ-7): loadSafe is the single owner of the order. With opts.idbBoot (main.ts) the IndexedDB value is a
@@ -394,8 +394,8 @@ export class Game {
       this.splitCoopFull(at); // A2/R4: close coop_full before session_end{unload}, even when hAt === at (MINOR-2)
       this.telemetry.endSession('unload', at, this.state); // Game always passes src (live state on unload/pagehide)
     }
-    // Temporary until clockWage contributor reset() is wired: pagehide is not a rotation, so resetSessionFields does not run.
-    this.state = resetAsleepSession(this.state);
+    // clockWage reset() runs here via the registry (this.state on unload/pagehide). Mid-play rotate: resetSessionFields
+    // also resets the hide snapshot (hidden.state !== this.state).
     this.save(); this.telemetry.flush(true); }
   // ---- v5 clockWage (failure-cost v0.3.24). S4 totals live in sim state (sim/clock-wage.ts asleep clock, Architect ruling 4).
   /** AC-FC11 / S5: mark the one-time yawn tip shown (once per save), log tip_shown{id:clock_wage}, save. False when not due. */

@@ -46,7 +46,10 @@ describe('[S4 / ruling 4] asleep clock in sim state', () => {
   it('session field is never saved (M5_SESSION_FIELDS) and resetAsleepSession clears it', () => {
     expect(M5_SESSION_FIELDS).toEqual(expect.arrayContaining(['asleepSessionMs', 'asleepPaidCents']));
     const s = runN(st({ workers: { market_hand: { energy: 0, cdS: 0.5 } } }), 20, C);
+    const workers = s.workers, window = s.clockWageWindow, cdS = s.workers.market_hand!.cdS;
     expect('asleepSessionMs' in m5Persist(s)).toBe(false); expect('asleepSessionMs' in resetAsleepSession(s)).toBe(false);
+    expect(s.workers).toBe(workers); expect(s.workers.market_hand!.cdS).toBe(cdS);
+    expect(s.clockWageWindow).toBe(window); // worker asleep clocks / window untouched; tickAsleepClock stays the writer
   });
 });
 
@@ -242,14 +245,20 @@ describe('[session rotation] resetSessionFields hook', () => {
     expect('asleepPaidCents' in g.state).toBe(false);
     const ends = g.telemetry.events().filter(e => e.type === 'session_end');
     expect(ends).toHaveLength(1);
-    expect(ends[0]).toEqual(expect.objectContaining({ asleep_s: expect.any(Number), wage_paid_asleep_cents: expect.any(Number) }));
-    expect(ends[0].asleep_s).toBeGreaterThanOrEqual(10);
-    // A second rotation resets once more (still empty, and only one additional session_end).
+    expect(ends[0].asleep_s).toBe(10);
+    expect(ends[0].wage_paid_asleep_cents).toEqual(expect.any(Number));
+    // Session 2 accrues only its own asleep time (exact; not a carry of session 1).
     const sid2 = g.telemetry.clock.sid;
+    tick(8_000);
+    expect(g.state.asleepSessionMs).toBe(8_000);
+    const paid2 = g.state.asleepPaidCents ?? 0;
     g.onHidden(); at(60_000); g.frame(); g.onShown();
     expect(g.telemetry.clock.sid).not.toBe(sid2);
     expect('asleepSessionMs' in g.state).toBe(false);
-    expect(g.telemetry.events().filter(e => e.type === 'session_end')).toHaveLength(2);
+    const ends2 = g.telemetry.events().filter(e => e.type === 'session_end');
+    expect(ends2).toHaveLength(2);
+    expect(ends2[1].asleep_s).toBe(8);
+    expect(ends2[1].wage_paid_asleep_cents).toBe(paid2);
   });
 
   it('hide under 60 s does not reset asleep totals and does not rotate', () => {

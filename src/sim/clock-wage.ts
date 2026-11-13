@@ -76,10 +76,15 @@ export function tickAsleepClock(s: GameState, dtMs: number, b: Balance): GameSta
 export function asleepSessionEnd(s: GameState, b: Balance): { asleep_s?: number; wage_paid_asleep_cents?: number } {
   return { ...(asleepClockOn(s, b) ? { asleep_s: Number(((s.asleepSessionMs ?? 0) / 1000).toFixed(1)) } : {}), ...(clockWageOn(b) ? { wage_paid_asleep_cents: s.asleepPaidCents ?? 0 } : {}) };
 }
-/** Session rotation (and session_end): a new session starts at 0. Shared with Refill's G0 M2 reset. */
+/** Session rotation (and session_end): a new session starts at 0. Shared with Refill's G0 M2 reset.
+ *  Mutates in place (idempotent) so registerSessionEnd reset() and resetSessionFields can share this helper.
+ *  Drops only the session accumulators asleepSessionMs / asleepPaidCents. Never touches workers, cdS,
+ *  clockWageWindow, or any other field — tickAsleepClock stays the single writer of asleep_s. */
 export function resetAsleepSession(s: GameState): GameState {
   if (!('asleepSessionMs' in s) && !('asleepPaidCents' in s)) return s;
-  const { asleepSessionMs: _a, asleepPaidCents: _c, ...rest } = s; return rest as GameState;
+  delete (s as { asleepSessionMs?: number }).asleepSessionMs;
+  delete (s as { asleepPaidCents?: number }).asleepPaidCents;
+  return s;
 }
 /** AC-FC12 read view: per role {asleepS, cents} since the last welcome-back close. */
 export function clockWageWindowView(s: GameState): Record<WageWorker, { asleepS: number; cents: number }> {
