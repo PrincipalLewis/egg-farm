@@ -15,7 +15,7 @@ const load = (raw: string, bb: typeof b) => { const v = validate(raw, bb); if (!
 
 describe('[S5] clockWageTipShown optional key, v5 -> v6 round-trip', () => {
   it('pin: registered once in M5_SAVED_FIELDS (saved, not session); exact saved list', () => {
-    expect(M5_SAVED_FIELDS).toEqual(['evRngState', 'nextSpawnRemainingS', 'frenzyRemainingS', 'broodyNestCents', 'broodyHenIdx', 'abilities', 'abilitiesUnlocked', 'abilitiesCoachSeen', 'breeds', 'clockWageTipShown', 'clockWageWindow']);
+    expect(M5_SAVED_FIELDS).toEqual(['evRngState', 'nextSpawnRemainingS', 'frenzyRemainingS', 'broodyNestCents', 'broodyHenIdx', 'abilities', 'abilitiesUnlocked', 'abilitiesCoachSeen', 'breeds', 'refillCharges', 'chargeNextMs', 'clockWageTipShown', 'clockWageWindow']);
     expect((M5_SESSION_FIELDS as readonly string[]).includes('clockWageTipShown')).toBe(false);
   });
   it('m5Load sanitises with clockWage alone on and alongside other M5 flags (both m5Load branches)', () => {

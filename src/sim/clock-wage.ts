@@ -3,7 +3,7 @@
  *  tick.ts/workers.ts seam (Saves + Architect): it is NOT wired here. Proposed seam change (HANDOFF S1/S2):
  *    in workerActions, for MH/CH: `if (m === 'asleep' && !isPaused(w, b) && clockWageOn(b)) { s = clockWageAsleepStep(s, id, dt, b, ev); continue; }`
  *    before the existing `if (isOff(m) || isPaused(w, b)) continue;`, and `wageState(m, b)` spread into the existing wage event.
- *  Everything here returns the same state object when the flag is off. */
+ *  Helpers return the same state object when the flag is off. resetAsleepSession mutates in place (idempotent) and always returns the same object. */
 import type { Balance } from '../config/balance';
 import { flagOn, M5_FLAGS } from '../config/flags';
 import { CENTS_PER_DOLLAR } from '../config/breeds';
@@ -11,7 +11,7 @@ import type { Sink } from './events';
 import { isPaused } from './pause';
 import type { GameState } from './state';
 import { mood, wageCharge, type WorkerMood, WORKERS } from './workers';
-import { autoRefillOn } from './auto-refill-on'; // STUB: change to './refill' when #133 G2 lands
+import { autoRefillOn } from './refill';
 export type WageWorker = 'market_hand' | 'coop_hand';
 export const clockWageOn = (b: Balance): boolean => flagOn(b, 'clockWage');
 /** AC-FC15 / §6: `wage.state` enum, flag-on only. Spread into the wage event: `{ type:'wage', worker, cents, ...wageState(m, b) }`. */

@@ -2,7 +2,7 @@
 // M3 / ruling 4: sim-state asleep clock (one writer tickAsleepClock, one predicate asleepClockOn, integer ms, session field never saved,
 // reset on session end); M4: mood 'asleep' only (Unpaid excluded); M2 / ruling 2: AC-FC12 window in the saved key clockWageWindow,
 // reset at welcome-back close (also when Y = 0). failure-cost v0.3.24 AC-FC12 / AC-FC15.
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { balance as b } from '../src/config/balance';
@@ -14,7 +14,6 @@ import { m5Load, m5Persist } from '../src/save/m5-fields';
 import { M5_SAVED_FIELDS, M5_SESSION_FIELDS } from '../src/sim/m5-state';
 import { asleepClockOn, tickAsleepClock, asleepSessionEnd, resetAsleepSession, clockWageWindowView } from '../src/sim/clock-wage';
 import * as sessionSim from '../src/sim/session';
-import { stubAutoRefillOn } from '../src/sim/auto-refill-on';
 import { Game } from '../src/game';
 import { mem } from './helpers';
 const flags = (o: Record<string, number>) => ({ ...b, m4: { ...b.m4!, enabled: 1, flags: { ...b.m4!.flags, ...o } } }) as typeof b;
@@ -128,12 +127,12 @@ describe('[M2 / ruling 2] clockWageWindow: saved, survives reload, resets at wel
 });
 
 describe('[D-HOE-61 / G0 rev 10 §11] emission OR; counted set is always MH+CH', () => {
-  afterEach(() => stubAutoRefillOn(null));
+  // Real autoRefillOn (#133 G2): flagOn(rc2Refill) && flagOn(autoRefill) && worker.autoRefill === true.
 
-  it('stub autoRefillOn=true, clockWage off: tickAsleepClock accumulates asleep_s, charges no wages, no window', () => {
-    stubAutoRefillOn(() => true);
-    const bb = flags({ autoRefill: 1, clockWage: 0 });
-    const s0 = st({ workers: { market_hand: { energy: 0, cdS: 0.5 } } });
+  it('refill auto-on alone (clockWage off): asleepClockOn is true; tick accumulates asleep_s; wages and window stay clockWage-only', () => {
+    const bb = flags({ rc2Refill: 1, autoRefill: 1, clockWage: 0 });
+    // refillCharges 0 + long chargeNextMs: tickRefill cannot auto-refill or regen within 120 s (charge_regen_s = 150).
+    const s0 = st({ refillCharges: 0, chargeNextMs: 1_000_000, workers: { market_hand: { energy: 0, cdS: 0.5, autoRefill: true } } });
     expect(asleepClockOn(s0, bb)).toBe(true);
     const s = runN(s0, 1200, bb);
     expect(s.asleepSessionMs).toBe(120_000);
@@ -143,8 +142,7 @@ describe('[D-HOE-61 / G0 rev 10 §11] emission OR; counted set is always MH+CH',
     expect('asleepPaidCents' in s).toBe(false);
   });
 
-  it('stub autoRefillOn=false, clockWage off, M5 off: unchanged (identity, no field)', () => {
-    stubAutoRefillOn(() => false);
+  it('autoRefillOn false, clockWage off, M5 off: unchanged (identity, no field)', () => {
     const s = st({ workers: { market_hand: { energy: 0, cdS: 0.5 } } });
     expect(tickAsleepClock(s, 100, b)).toBe(s);
     expect(asleepClockOn(s, b)).toBe(false);
@@ -154,19 +152,17 @@ describe('[D-HOE-61 / G0 rev 10 §11] emission OR; counted set is always MH+CH',
   });
 
   it('counted set is always unpaused asleep MH+CH (clockWage off; only MH autoRefillOn): both count', () => {
-    stubAutoRefillOn((_s, id) => id === 'market_hand');
-    const bb = flags({ autoRefill: 1, clockWage: 0 });
-    const s = st({ workers: { market_hand: { energy: 0, cdS: 0.5 }, coop_hand: { energy: 0, cdS: 0.5 } } });
+    const bb = flags({ rc2Refill: 1, autoRefill: 1, clockWage: 0 });
+    const s = st({ workers: { market_hand: { energy: 0, cdS: 0.5, autoRefill: true }, coop_hand: { energy: 0, cdS: 0.5 } } });
     const r = tickAsleepClock(s, 1000, bb);
     expect(r.asleepSessionMs).toBe(2000); // both, not just MH
     expect(asleepSessionEnd(r, bb)).toEqual({ asleep_s: 2 });
   });
 
-  it('G0 §11: autoRefill=1 (stub) and clockWage=0, an asleep Hawker or Grader adds 0 and asleep_s is still emitted', () => {
-    stubAutoRefillOn(() => true);
-    const bb = flags({ autoRefill: 1, clockWage: 0 });
+  it('G0 §11: autoRefill=1 and clockWage=0, an asleep Hawker or Grader adds 0 and asleep_s is still emitted', () => {
+    const bb = flags({ rc2Refill: 1, autoRefill: 1, clockWage: 0 });
     for (const id of ['hawker', 'grader'] as const) {
-      const s0 = st({ workers: { [id]: { energy: 0, cdS: 0.5 } }, graderTier: 1 });
+      const s0 = st({ workers: { [id]: { energy: 0, cdS: 0.5, autoRefill: true } }, graderTier: 1 });
       const r = tickAsleepClock(s0, 10_000, bb);
       expect(r).toBe(s0);
       expect('asleepSessionMs' in r).toBe(false);
@@ -176,10 +172,9 @@ describe('[D-HOE-61 / G0 rev 10 §11] emission OR; counted set is always MH+CH',
   });
 
   it('paused and Unpaid still add nothing when autoRefillOn is true', () => {
-    stubAutoRefillOn(() => true);
-    const P = flags({ clockWage: 0, pause: 1, autoRefill: 1 });
-    expect(tickAsleepClock(st({ workers: { market_hand: { energy: 0, cdS: 0.5, paused: true } } }), 1000, P).asleepSessionMs).toBeUndefined();
-    expect(tickAsleepClock(st({ workers: { coop_hand: { energy: 0, cdS: 0, unpaid: true } } }), 1000, P).asleepSessionMs).toBeUndefined();
+    const P = flags({ clockWage: 0, pause: 1, rc2Refill: 1, autoRefill: 1 });
+    expect(tickAsleepClock(st({ workers: { market_hand: { energy: 0, cdS: 0.5, paused: true, autoRefill: true } } }), 1000, P).asleepSessionMs).toBeUndefined();
+    expect(tickAsleepClock(st({ workers: { coop_hand: { energy: 0, cdS: 0, unpaid: true, autoRefill: true } } }), 1000, P).asleepSessionMs).toBeUndefined();
   });
 
   it('tickAsleepClock is the single writer of asleepSessionMs in src/', () => {

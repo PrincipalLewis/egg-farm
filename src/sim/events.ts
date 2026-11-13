@@ -1,4 +1,5 @@
 import type { WorkerId, WorkerMood } from './workers';
+import type { BreedId } from '../config/breeds';
 /** Events the pure sim reports to an optional sink (telemetry lives outside the sim). */
 export type SimEvent =
   | { type: 'save_migrated'; migration: 'breeds_sanitise'; from: 6; to: 6; reason: 'invalid_root' | 'invalid_values'; refund_cents: number; farm_level: number; backup_stores: [] } // M5.1 breeds E12 / D1 (BR-AC26)
@@ -22,8 +23,20 @@ export type SimEvent =
   | { type: 'grader_tier'; tier: number; mult: number; cost: number }
   | { type: 'milestone_reached'; id: string; track: 'hens' | 'egg_value'; level: number; mult: number }
   | { type: 'balanced_tier'; id: string; tier: number; min_level: number }
+  | { type: 'shift_sheet_opened'; entry: 'nav' | 'card' | 'stall_chip' | 'fatigue_chip'; sheet_id: number; stall_id?: number }
+  | { type: 'refill_used'; worker: WorkerId; energy_pct: number; charges_left: number; rank_by_risk: number; by: 'manual' | 'auto'; sheet_id: number | null; entry_point: 'nav' | 'card' | 'stall_chip' | 'fatigue_chip' | 'auto'; stall_id?: number; refillable_n: number; best_worker: WorkerId; lowest_worker: WorkerId }
+  | { type: 'rest_toggled'; worker: WorkerId; on: boolean; energy_pct: number; state: 'active' | 'paused' | 'resting'; cause: 'manual' | 'auto_full' | 'manage'; sheet_id: number | null; entry_point: 'nav' | 'card' | 'stall_chip' | 'fatigue_chip' | 'auto'; stall_id?: number; farm?: number; mood?: WorkerMood; unpaid?: boolean; ability_active?: boolean; golden_on_screen?: boolean; frenzy_active?: boolean; paused_duration_s?: number }
+  | { type: 'autorefill_toggled'; worker: WorkerId; on: boolean; farm_level: number }
   | M5SimEvent
+  | BreedsSimEvent
   | SalesStallEvent;
+/** M5.1 breeds §8 telemetry (rev 3.8.9 ea922eb8 L692-695; errata rev 15 5e12a591 #15-18). Emitted only with m4.flags.breeds on. */
+export type BreedRarityName = 'Common' | 'Rare' | 'Epic' | 'Legendary';
+export type BreedsSimEvent =
+  | { type: 'hatch_started'; breed_id: BreedId; rarity: BreedRarityName; cost: number; coinsBefore: number; pity_before: number; free: boolean; farm_level: number }
+  | { type: 'breed_revealed'; breed_id: BreedId; rarity: BreedRarityName; dupe: boolean; stars_after: number; offline: boolean; wait_ms: number }
+  | { type: 'breed_slotted'; slot: number; prev_slot: number | null; breed_id: BreedId | null; prev_breed_id: BreedId | null; cause: 'manual' | 'auto_reveal' | 'move'; loadout: string; settling: number; count: number }
+  | { type: 'flock_complete'; hatches: number; farm_level: number; elapsed_since_unlock_s: number; backfilled: boolean };
 /** M5.0 sim events (F1(d)); emitted only with their m4.flags.* on. Field names follow telemetry-spec v0.6.2 as quoted in the
  *  feature specs. Game adds the UI-only fields when forwarding to telemetry: `collectible_id` (per-session counter shared by
  *  golden egg and Broody), `layout`, and for Broody `slot_id` Y0..Y11 / `restored`. */
@@ -32,7 +45,7 @@ export type GoldenReward = 'cash' | 'frenzy' | 'eggs' | 'eggs_cash';
 export type AbilityEndCause = 'expired' | 'paused' | 'offline' | 'asleep' | 'unpaid'; // final (sizing §13 AB-1)
 export type AbilityBlockReason = 'cooldown' | 'asleep' | 'unpaid' | 'paused' | 'lockout';
 export type M5SimEvent =
-  | { type: 'collectible_spawned'; skin: CollectibleSkin; farm_level: number; collection_level: number; slot_id: string; interval_s: number; deferred_ms: number }
+  | { type: 'collectible_spawned'; skin: CollectibleSkin; farm_level: number; collection_level: number; slot_id: string; interval_s: number; deferred_ms: number; restored?: boolean }
   | { type: 'collectible_collected'; skin: CollectibleSkin; reaction_ms: number; in_warning: boolean; reward_type: GoldenReward | 'broody_cash'; reward_value: number; reward_duration_s: number; farm_level: number; nest_fill_share?: number }
   | { type: 'collectible_expired'; skin: CollectibleSkin; reason: 'timeout' | 'offline' | 'reload' | 'takeover' | 'reset'; farm_level: number }
   | { type: 'frenzy_started'; mult: number; duration_s: number; farm_level: number; grader_tier: number }

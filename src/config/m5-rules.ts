@@ -11,6 +11,7 @@ const has = (tc: TC, ...k: string[]) => k.every(x => typeof tc[x] === 'number');
 /** tc keys that must exist while their flag is on (feature PRs append; empty until a reader lands). */
 export const M5_REQUIRED_TC: Partial<Record<(typeof M5_FLAGS)[number], readonly string[]>> = {
   pause: ['pause_unlock_farm', 'pause_call_lockout_s', 'rest_recovery_mult'], // rule 1 / B5 (m5Load) + rule 3 recovery (sim/pause.ts)
+  rc2Refill: ['charge_regen_s', 'charge_cap', 'refill_threshold_pct', 'start_charges'], // G0 M1; autorefill keys wait on the Econ CSV
 };
 export function validateM5(m4: any, workers: any): void {
   if (!m4) return;
@@ -57,4 +58,9 @@ export function validateM5(m4: any, workers: any): void {
   // D-HOE-20261030-02: [0, 0.35]; 0 is valid (pause spec §6, AC-P17). Non-finite is refused here too, not only by the leaf check.
   if (has(tc, 'rest_recovery_mult') && !(Number.isFinite(tc.rest_recovery_mult) && tc.rest_recovery_mult >= 0)) fail('tc.rest_recovery_mult must be a finite number >= 0 (pause spec §6; 0 is valid, AC-P17)');
   if (has(tc, 'rest_recovery_mult') && !(tc.rest_recovery_mult <= 0.35)) fail('tc.rest_recovery_mult must be <= 0.35 (pause spec §6, decisions.md:9)');
+  // rc2 Refill (G0 M1): cap int ≥ 1, start int 0..cap, regen > 0, threshold int 1..100. Run whenever the keys exist.
+  if (has(tc, 'charge_cap') && !(Number.isInteger(tc.charge_cap) && tc.charge_cap >= 1)) fail('tc.charge_cap must be an integer >= 1');
+  if (has(tc, 'start_charges', 'charge_cap') && !(Number.isInteger(tc.start_charges) && tc.start_charges >= 0 && tc.start_charges <= tc.charge_cap)) fail('tc.start_charges must be an integer in [0, charge_cap]');
+  if (has(tc, 'charge_regen_s') && !(tc.charge_regen_s > 0)) fail('tc.charge_regen_s must be > 0');
+  if (has(tc, 'refill_threshold_pct') && !(Number.isInteger(tc.refill_threshold_pct) && tc.refill_threshold_pct >= 1 && tc.refill_threshold_pct <= 100)) fail('tc.refill_threshold_pct must be an integer in [1, 100]');
 }

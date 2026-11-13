@@ -12,8 +12,10 @@ import { playerSaleCtx } from './effects';
 import { incomeRefOn, recordSale } from './income-ref';
 import { tapCoinsOn, tapCoinsFor } from './tap-coins';
 import { spawnGolden, tapGolden, frenzySale } from './golden';
+import { broodySlots, tapBroody } from './broody';
 import { stallObserve } from '../econ/stall';
 import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
+import { rc2RefillOn } from './refill';
 import { isPaused, resumeWorker } from './pause';
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
@@ -21,7 +23,8 @@ export type Action =
   | { type: 'hatch' } | { type: 'placeBreed'; slot: number; id: string | null } // M5.1 breeds (no-op unless m4.flags.breeds)
   | { type: 'hire'; worker: WorkerId } | { type: 'manage'; worker: WorkerId } | { type: 'manageAll' } | { type: 'buyGraderTier' }
   | { type: 'buyTrack'; track: Track } | { type: 'markMilestones'; ids: string[] }
-  | { type: 'spawnGolden'; spots: readonly string[]; layout?: boolean } | { type: 'tapGolden' }; // v5 #1 golden (no-op unless m4.flags.golden)
+  | { type: 'spawnGolden'; spots: readonly string[]; layout?: boolean } | { type: 'tapGolden' } // v5 #1 golden (no-op unless m4.flags.golden)
+  | { type: 'broodySlots'; slots: readonly number[] } | { type: 'tapBroody'; slots: readonly number[] }; // v5 #5 Broody (no-op unless m4.flags.broody)
 /** Sell all preview lives in sim/payout.ts (the one payout fn, #25; M4 sale price via salePriceCents); re-exported for #28 callers. */
 export { sellAllPreview } from './payout';
 export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm' || a.type === 'buyTrack';
@@ -96,6 +99,8 @@ function apply0(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true)
     case 'buyTrack': return withMilestones(s, buyTrack(s, a.track, b, ev), b, ev);
     case 'spawnGolden': return spawnGolden(s, a.spots, b, ev, a.layout === true); // #1 R14/R15: the UI's live valid spot ids
     case 'tapGolden': return tapGolden(s, b, ev); // #1 R19/R20 (not a credited tap, R25b)
+    case 'broodySlots': return broodySlots(s, a.slots, b, ev); // #5 R4-R6: the UI's eligible drawn yard slots
+    case 'tapBroody': return tapBroody(s, a.slots, b, ev, attended); // #5 R12/R13 (not a credited tap; refused unattended)
     case 'markMilestones': { const add = a.ids.filter(id => !s.celebratedMilestones.includes(id)); return add.length ? { ...s, celebratedMilestones: [...s.celebratedMilestones, ...add] } : s; }
     case 'hire': {
       const id = a.worker; if (s.workers[id] || s.farmLevel < unlockFarm(id, b)) return s;
@@ -111,6 +116,7 @@ function apply0(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true)
       return { ...s, coinsCents: s.coinsCents - cost, graderTier: i + 1 }; // energy unchanged (PM Q6)
     }
     case 'manage': {
+      if (rc2RefillOn(b)) return s; // G0 OPEN-6 / AC-RF10: no-op at rc2Refill=1 (one entry point)
       const w = s.workers[a.worker]; if (!w || s.manageCdS > 1e-9 || !canManageWorker(w, b)) return s; // P4: only at <= 40%
       ev?.push({ type: 'worker_manage', worker: a.worker, energyBefore: Math.round(w.energy) });
       const r = { ...s, workers: { ...s.workers, [a.worker]: { ...w, energy: 100 } }, manageCdS: b.workers.energy.manage_cooldown_s };
@@ -119,6 +125,7 @@ function apply0(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true)
       return isPaused(w, b) ? resumeWorker(r, a.worker, b, ev, 'manage') : r; // emits worker_resumed{cause:"manage"}
     }
     case 'manageAll': { // v1.1 + P4: 3+ hired; refills only hired workers <= manage_prompt_threshold (Unpaid stays Unpaid, ruling 2); one shared cooldown.
+      if (rc2RefillOn(b)) return s; // G0 OPEN-6 / AC-RF10: no-op at rc2Refill=1
       // Pause rule 8 (D1): needManage skips paused workers, so Manage all never refills or resumes them.
       const need = needManage(s.workers, b); // ruling 4: nothing below 100% -> disabled, no cooldown started
       if (!showManageAll(s.workers, b) || s.manageCdS > 1e-9 || !need.length) return s;
@@ -127,8 +134,8 @@ function apply0(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true)
       ev?.push({ type: 'worker_manage_all', workers: need, energyBefore: need.map(id => Math.round(s.workers[id]!.energy)) });
       return { ...s, workers, manageCdS: b.workers.energy.manage_cooldown_s };
     }
-    case 'hatch': return startHatch(s, b);
-    case 'placeBreed': return placeBreed(s, b, a.slot, a.id);
+    case 'hatch': return startHatch(s, b, ev); // §8 hatch_started (drift row 34)
+    case 'placeBreed': return placeBreed(s, b, a.slot, a.id); // §8 breed_slotted: opens a 1,000 ms window; the tick sink emits it on close
     case 'markCelebrated': return { ...s, celebratedTier: Math.max(s.celebratedTier, a.tier) };
     // Closing the welcome-back modal without tapping Collect still grants the eggs.
     // S2-3a / MK-22: closing the welcome-back modal brings the first customer on the next tick (deterministic: timer -> 0).

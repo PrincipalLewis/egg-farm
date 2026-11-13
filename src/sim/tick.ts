@@ -9,6 +9,7 @@ import { stallTick } from '../econ/stall';
 import { isPaused, pausedRecoveredEnergy, tickCallLockout, tickPausedFor } from './pause';
 import { clockWageOn, clockWageAsleepStep, wageState, tickAsleepClock } from './clock-wage';
 import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge, unpaidResumeAtCents } from './workers';
+import { rc2RefillOn, tickRefill } from './refill';
 /** Pure: advance sim by dt seconds. Optional `ev` collects events.
  *  Order within a tick: worker energy -> coop fill -> timeouts -> arrivals -> Coop Hand -> Market Hand.
  *  AC3: timeouts are processed BEFORE arrivals, so a customer leaving on the same tick frees a queue slot for a new one. */
@@ -59,12 +60,13 @@ export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: St
       customers.push(c); ev?.push({ type: 'customer_arrive', id: c.id, N: c.demand });
     } else ev?.push({ type: 'customer_lost', reason: 'full_queue' }); // lost, no backlog
   }
-  let out: GameState = { ...s, coop, coopFullS, customers, nextCustomerInS, nextCustomerId, rng, workers, manageCdS: Math.max(0, s.manageCdS - dt) };
+  let out: GameState = { ...s, coop, coopFullS, customers, nextCustomerInS, nextCustomerId, rng, workers, manageCdS: rc2RefillOn(b) ? s.manageCdS : Math.max(0, s.manageCdS - dt) }; // AC-RF10: manageCdS is not ticked at rc2Refill=1
   out = tickAsleepClock(out, Math.round(dt * 1000), b); // v5 asleep clock (Architect ruling 4): mood asleep, unpaused MH/CH, integer ms; identity when off
   const pausedForS = tickPausedFor(s, workers, dt, b); // pause: sim seconds paused (never saved; see sim/pause.ts known limits)
   if (pausedForS !== s.pausedForS) out.pausedForS = pausedForS;
   if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev, !!fx?.suspended);
   if (live) out = stallTick(stepTimers(out, dt, b, clock, ev), tickFocusS(dt, clock), b, ev, ev0); // risk-helpers: identity unless salesStopped
+  if (rc2RefillOn(b)) out = tickRefill(out, Math.round(dt * 1000), b, ev); // M4: integer ms; frozen when this tick does not run (offline / hidden ≥ 60 s)
   return out;
 }
 /** Coop Hand: collects eggs_per_tap every every_s (tired_every_s when Tired). Market Hand: serves the queue
