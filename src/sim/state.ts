@@ -35,10 +35,21 @@ export interface GameState extends M5Fields {
   /** M5.1 breeds E10 / PMC Q5 (session only, outside F1a M5Fields like streakRun): raw unknown slot ids from the save, written
    *  back by m5Persist (breedsSaveView) while that slot stays null; stripped by m5Persist SESSION_ONLY_KEYS. */
   breedsRawSlots?: (string | null)[];
+  /** M5.1 breeds §8 telemetry (session only, like breedsRawSlots): breed_slotted windows + session_end accumulators. Stripped by
+   *  m5Persist SESSION_ONLY_KEYS; absent until the first hatch / slot change / settled tick (HoE/breeds-telemetry-emitters). */
+  breedsTel?: import('./breeds').BreedsTel;
+  /** M5.1 breeds BR-R12b calm ring (session only, outside F1a; not saved). Empty / absent = gate open. */
+  breedsCalm?: import('./breeds-traits').BreedsCalm;
   /** v5 #1 golden (session only, outside F1a M5Fields like streakRun; Architect slice-2 ruling 2/5): the pending spawn's
    *  interval/deferral/R15 retry and the live Frenzy's frenzy_ended stats. Stripped by m5Persist SESSION_ONLY_KEYS. */
   goldenPending?: import('./golden').GoldenPending;
   frenzyRun?: import('./golden').FrenzyRun;
+  /** v5 #5 Broody (session only, outside F1a M5Fields like goldenPending): sub-cent nest, ms remainder, sticky ready, slot/check and
+   *  telemetry counters (sim/broody.ts). Stripped by m5Persist SESSION_ONLY_KEYS. */
+  broodyRun?: import('./broody').BroodyRun;
+  /** Session-only (v1.3.3 GE-AC45 / §8): session_end counters + QA forceReward. Stripped by m5Persist. */
+  goldenSession?: import('./golden').GoldenSession;
+  goldenForceReward?: import('./events').GoldenReward;
 }
 export const initialState = (b: Balance, seed = 1): GameState => ({
   coinsCents: 0, coop: 0, basket: 0, collectionLevel: 0, farmLevel: 0,

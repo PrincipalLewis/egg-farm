@@ -165,7 +165,7 @@ export const isM4Col = (c: string) => (M4_COLS as readonly string[]).includes(c)
 /** v5 F3: CSV columns that M5 specs read under a non-`tc_` name. Each is copied into m4.tc under its own name (constant on
  *  every row), so `tc` stays the one home of scalar tunables. Economy may later rename them tc_*; then drop the entry here.
  *  leave_attended_window_s: abilities spec rule 9 / §7 (HoE §9.5(1)); rest_recovery_mult: pause spec rule 3 / §6. */
-export const M5_MAPPED_COLS = ['leave_attended_window_s', 'rest_recovery_mult'] as const;
+export const M5_MAPPED_COLS = ['leave_attended_window_s', 'rest_recovery_mult', 'charge_regen_s', 'charge_cap', 'refill_threshold_pct', 'start_charges'] as const; // + rc2 Refill (G0 M1: own names, no alias; combo_* renamed by Econ, D-HOE-57)
 /** v5 F3 (HoE D-C1): release flags live in balance.json m4.flags, never in the CSV. Kept whole from balance.json; every known
  *  flag is present (absent = 0); an unknown name or a value other than 0/1 fails the sync (no silent typos). */
 export function keepFlags(prev: any): Record<string, number> {

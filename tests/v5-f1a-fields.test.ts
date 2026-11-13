@@ -39,7 +39,7 @@ describe('F1a M5 fields', () => {
 // (collectible_id, layout, Broody restored) are not sim fields (API sheet §4). The type-level Eq below makes tsc fail if a
 // member or field is renamed, added or dropped in src/sim/events.ts; the runtime test pins the member names.
 const M5_EVENT_SPEC = {
-  collectible_spawned: ['skin', 'farm_level', 'collection_level', 'slot_id', 'interval_s', 'deferred_ms'],
+  collectible_spawned: ['skin', 'farm_level', 'collection_level', 'slot_id', 'interval_s', 'deferred_ms', 'restored'], // restored: broody spec v1.3.3 §8 (ready at load), optional; golden never sets it
   collectible_collected: ['skin', 'reaction_ms', 'in_warning', 'reward_type', 'reward_value', 'reward_duration_s', 'farm_level', 'nest_fill_share'],
   collectible_expired: ['skin', 'reason', 'farm_level'],
   frenzy_started: ['mult', 'duration_s', 'farm_level', 'grader_tier'],
@@ -50,6 +50,7 @@ const M5_EVENT_SPEC = {
   ability_used: ['worker', 'farm', 'energy_pct', 'mood', 'via_all', 't_since_ready_s', 'in_sheet', 'combo'], // combo: spec v1.3.8 D-HOP-42; Architect fireAbility addendum 2026-11-05 21:29 CET (amend on land)
   ability_blocked: ['worker', 'reason', 'count'],
   ability_ended: ['worker', 'cause', 'effect_s'],
+  worker_resumed: ['worker', 'farm', 'energy_pct', 'paused_duration_s', 'cause'], // pause §12 v1.3.16 471fb534 (HoE/workers-drift-d1d2, PAU-AC8)
 } as const;
 type Eq<A, B> = (<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2) ? true : false;
 type Spec = typeof M5_EVENT_SPEC;
@@ -57,18 +58,18 @@ type SimFields<K> = Exclude<keyof Extract<M5SimEvent, { type: K }>, 'type'>;
 const _membersPinned: Eq<M5SimEvent['type'], keyof Spec> = true;
 const _fieldsPinned: { [K in keyof Spec]: Eq<SimFields<K>, Spec[K][number]> } = {
   collectible_spawned: true, collectible_collected: true, collectible_expired: true, frenzy_started: true, frenzy_ended: true,
-  streak_started: true, streak_peak: true, abilities_unlocked: true, ability_used: true, ability_blocked: true, ability_ended: true,
+  streak_started: true, streak_peak: true, abilities_unlocked: true, ability_used: true, ability_blocked: true, ability_ended: true, worker_resumed: true,
 };
 type CollectExtra = Exclude<keyof Extract<SimEvent, { type: 'collect' }>, 'type' | 'eggs'>;
 const _collectPinned: Eq<CollectExtra, 'credited' | 'bonus_cents'> = true;
 
 describe('F1a SimEvent members', () => {
-  it('[F1(d)] M5SimEvent members and sim fields are pinned to the spec telemetry tables (11 members; collect + credited/bonus_cents)', () => {
+  it('[F1(d)] M5SimEvent members and sim fields are pinned to the spec telemetry tables (12 members incl. worker_resumed; collect + credited/bonus_cents)', () => {
     expect(_membersPinned && _collectPinned && Object.values(_fieldsPinned).every(v => v === true)).toBe(true);
     expect(Object.keys(M5_EVENT_SPEC)).toEqual(['collectible_spawned', 'collectible_collected', 'collectible_expired', 'frenzy_started', 'frenzy_ended',
-      'streak_started', 'streak_peak', 'abilities_unlocked', 'ability_used', 'ability_blocked', 'ability_ended']);
+      'streak_started', 'streak_peak', 'abilities_unlocked', 'ability_used', 'ability_blocked', 'ability_ended', 'worker_resumed']);
   });
-  const M5_TYPES = new Set(['collectible_spawned', 'collectible_collected', 'collectible_expired', 'frenzy_started', 'frenzy_ended', 'streak_started', 'streak_peak', 'abilities_unlocked', 'ability_used', 'ability_blocked', 'ability_ended']);
+  const M5_TYPES = new Set(['collectible_spawned', 'collectible_collected', 'collectible_expired', 'frenzy_started', 'frenzy_ended', 'streak_started', 'streak_peak', 'abilities_unlocked', 'ability_used', 'ability_blocked', 'ability_ended', 'worker_resumed']);
   it('[F1(d)] 10 min of play with every flag off emits no M5SimEvent and no collect.credited / bonus_cents', () => {
     const ev: SimEvent[] = []; let s: any = { ...initialState(balance, 5), coinsCents: 5_000_000 };
     for (let i = 0; i < 6000; i++) {

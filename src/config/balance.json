@@ -19,6 +19,7 @@
     "flush_interval_s": 5,
     "tap_batch_ms": 1000,
     "worker_summary_s": 60,
+    "session_hidden_end_s": 60,
     "bbv2": {
       "shown_min_gap_s": 5,
       "zero_gain_eta_max_s": 60,
@@ -397,6 +398,8 @@
       "ability_w2_mode": 0,
       "ability_w3_price_mult": 1.15,
       "ability_w4_tier_add": 0.5,
+      "autorefill_at_pct": 30,
+      "autorefill_reserve": 0,
       "broody_cap_s": 150,
       "broody_income_share": 0.05,
       "broody_max_on_screen": 1,
@@ -433,6 +436,7 @@
       "stall_rearm_s": 5,
       "stall_tap_guard_ms": 500,
       "streak_cap": 0.28,
+      "streak_cool_cue_min_tier": 2,
       "streak_decay_per_s": 0.03,
       "streak_hold_s": 3,
       "streak_max_taps_per_s": 1,
@@ -445,7 +449,11 @@
       "urgent_at_s": 27,
       "warn_at_s": 20,
       "leave_attended_window_s": 30,
-      "rest_recovery_mult": 0.25
+      "rest_recovery_mult": 0.25,
+      "charge_regen_s": 150,
+      "charge_cap": 2,
+      "refill_threshold_pct": 50,
+      "start_charges": 2
     }
   }
 }

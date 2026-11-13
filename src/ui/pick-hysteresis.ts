@@ -10,7 +10,8 @@
  *  - re-evaluate on every state change; 5 s periodic re-check as the fallback. */
 import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
-import { options, paybackOf, BUY_ORDER, type BuyKey } from '../econ/best-buy';
+import { options, paybackOf, rankable, infTie, BUY_ORDER, type BuyKey } from '../econ/best-buy';
+import { bestBuyV2On } from '../config/flags';
 
 export const SWITCH_RATIO = 0.9, MIN_SHOWN_MS = 2000, RECHECK_MS = 5000;
 export type FarmKey = 'FARM' | 'HENS' | 'VALUE';
@@ -23,20 +24,21 @@ const LEVEL: Record<BuyKey, (s: GameState) => number> = {
   FARM: s => s.farmLevel, HENS: s => s.hensLevel, VALUE: s => s.eggValueLevel, COLL: s => s.collectionLevel,
   W1: s => +!!s.workers.market_hand, W2: s => +!!s.workers.coop_hand, W3: s => +!!s.workers.hawker, W4: s => s.workers.grader ? s.graderTier : 0 };
 /** Offered (not capped / MAX / locked) options in `keys` with their bundle payback. */
-export const scorerFor = (keys: readonly BuyKey[]): Scorer => (s, b) => options(s, b)
-  .filter(o => keys.includes(o.key))
-  .map(o => ({ key: o.key, costCents: Math.round(o.cost * 100), payback: paybackOf(s, b, o.key), level: LEVEL[o.key](s) }));
+export const scorerFor = (keys: readonly BuyKey[]): Scorer => (s, b) => { const ks = rankable(s, b, keys); return options(s, b) // BBv2-1/2 (flag on): zero-gain rows never scored, so never kept
+  .filter(o => ks.includes(o.key))
+  .map(o => ({ key: o.key, costCents: Math.round(o.cost * 100), payback: paybackOf(s, b, o.key), level: LEVEL[o.key](s) })); };
 /** Highlight instance: Farm-tab rows only (M4A-18). */
 export const defaultScorer: Scorer = scorerFor(FARM_ROWS);
 /** Hint instance: every option incl. Collection and workers (clarity UC7). */
 export const allScorer: Scorer = scorerFor(['FARM', 'HENS', 'VALUE', 'COLL', 'W1', 'W2', 'W3', 'W4']);
 
-const better = (a: RowScore, z: RowScore) => {
+const better = (a: RowScore, z: RowScore, bb = false) => {
   const tie = a.payback === z.payback || Math.abs(a.payback - z.payback) <= 1e-12;
   if (!tie) return a.payback < z.payback;
+  if (infTie(bb, a.payback, z.payback)) return BUY_ORDER.indexOf(a.key) < BUY_ORDER.indexOf(z.key); // BBv2-3
   return a.costCents !== z.costCents ? a.costCents < z.costCents : BUY_ORDER.indexOf(a.key) < BUY_ORDER.indexOf(z.key);
 };
-const bestOf = (r: RowScore[]) => r.reduce<RowScore | null>((m, x) => !m || better(x, m) ? x : m, null);
+const bestOf = (r: RowScore[], bb = false) => r.reduce<RowScore | null>((m, x) => !m || better(x, m, bb) ? x : m, null);
 
 export class PickHysteresis {
   shown: SharedPick | null = null;
@@ -52,8 +54,8 @@ export class PickHysteresis {
   }
   evaluate(s: GameState, b: Balance, nowMs: number): SharedPick | null {
     this.evals++; this.lastEval = nowMs; this.lastSig = this.sig(s);
-    const rows = this.scorer(s, b), coins = Math.round(s.coinsCents);
-    const aff = rows.filter(r => coins >= r.costCents), best = bestOf(aff.length ? aff : rows);
+    const rows = this.scorer(s, b), coins = Math.round(s.coinsCents), bb = bestBuyV2On(b);
+    const aff = rows.filter(r => coins >= r.costCents), best = bestOf(aff.length ? aff : rows, bb);
     if (!best) return this.set(null, nowMs);
     const cur = this.shown && rows.find(r => r.key === this.shown!.key);
     const mk = (r: RowScore): SharedPick => ({ key: r.key, affordable: aff.includes(r), costCents: r.costCents, payback: r.payback });
@@ -62,7 +64,7 @@ export class PickHysteresis {
     if (!keepable) return this.set(mk(best), nowMs, best.level); // no current pick / bought / unaffordable / cap: at once
     // HoP 16:15: a row that just became affordable skips the 2 s hold but must still clear the 0.9x bar.
     // Every newly affordable row is checked; the best of those clearing 0.9x wins at once.
-    const freshWin = bestOf(aff.filter(r => !prevAff.has(r.key) && r.key !== cur.key && r.payback <= SWITCH_RATIO * cur.payback));
+    const freshWin = bestOf(aff.filter(r => !prevAff.has(r.key) && r.key !== cur.key && r.payback <= SWITCH_RATIO * cur.payback), bb);
     if (freshWin) return this.set(mk(freshWin), nowMs, freshWin.level);
     if (best.key !== cur.key && best.payback <= SWITCH_RATIO * cur.payback && nowMs - this.shownAt >= MIN_SHOWN_MS) return this.set(mk(best), nowMs, best.level);
     this.shown = mk(cur); return this.shown; // refresh numbers, keep shownAt
