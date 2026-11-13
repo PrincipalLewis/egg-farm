@@ -8,7 +8,8 @@ import { fmtTimeToAfford } from './format';
 import { m4On } from '../config/formulas';
 import { trackLock, trackCost, trackLevel } from '../sim/tracks';
 import { trackGoalLabel } from './tracks-ui';
-import { bestPaybackAmong } from '../econ/best-buy';
+import { bestPaybackAmong, rankable, meaningfulKeys } from '../econ/best-buy';
+import { bestBuyV2On, zeroGainUiOn } from '../config/flags';
 import { goalLabelParts, goalLabelSpec, type GoalLabelParts } from './goal-label';
 export type GoalKey = 'FARM' | 'HENS' | 'VALUE' | 'COLL' | 'W1' | 'W2' | 'W3' | 'W4';
 export type GoalState = 'ready' | 'waiting' | 'noincome' | 'done';
@@ -18,7 +19,7 @@ const WK = { W1: 'market_hand', W2: 'coop_hand', W3: 'hawker' } as const;
 const WNAME = { market_hand: 'Market Hand', coop_hand: 'Coop Hand', hawker: 'Hawker' } as const;
 export interface Candidate { key: GoalKey; costCents: number; }
 export interface Goal { key: GoalKey | null; state: GoalState; label: string; status: string; costCents: number; tab: 'farm' | 'collection' | 'workers';
-  /** M41-8 F4 (M4 on, HENS / VALUE / COLL): rendered spans + untruncated aria; `label` is then parts.text. */
+  /** M41-8 F4 (M4 on, HENS / VALUE / COLL) + BBv2 v1.0.4 FARM ★: rendered spans + untruncated aria; `label` is then parts.text. */
   parts?: GoalLabelParts; }
 export function candidates(s: GameState, b: Balance): Candidate[] {
   const out: Candidate[] = [], F = s.farmLevel;
@@ -53,19 +54,34 @@ export function labelFor(key: GoalKey, s: GameState, b: Balance): string {
  *  always matches the Farm-tab highlight (M4A-41). Omitted = stateless best-payback / cheapest rule. */
 /** `star` (M41-8 F4): the key that carries ★ = goal-label.ts bestBuyMark (the same source as the UX-M4 row chip). */
 export function selectGoal(s: GameState, b: Balance, rateCentsPerS: number, shared?: GoalKey | null, star?: GoalKey | null): Goal {
-  const c = candidates(s, b);
-  if (!c.length) return { key: null, state: 'done', label: 'All upgrades done!', status: '', costCents: 0, tab: 'workers' };
+  const c0 = candidates(s, b), rk = rankable(s, b, c0.map(x => x.key)); // BBv2-1/-4 (flag on): rank meaningful rows only, before affordable-first
+  const cf = rk.length === c0.length ? c0 : c0.filter(x => rk.includes(x.key));
+  // Ship (bb1+zg1): empty BBv2 set → no-pick strip (v1.0.4 §4.1 / D-HOP-14); do not fall back to income-zero capacity rows.
+  const shipEmpty = bestBuyV2On(b) && zeroGainUiOn(b) && meaningfulKeys(s, b).size === 0;
+  const c = cf.length ? cf : (shipEmpty ? [] : c0);
+  if (!c0.length || (shipEmpty && !c.length)) return { key: null, state: 'done', label: 'All upgrades done!', status: '', costCents: 0, tab: 'workers' };
   const coins = Math.round(s.coinsCents); // coins at 2 dp vs integer cost; equal = affordable
   const aff = c.filter(x => coins >= x.costCents), ready = aff.length > 0;
   // M4-A (HoP 15:29): with the flag on, the hint follows the same best-payback rule as the Farm-tab highlight. Off = main.
   const pool = ready ? aff : c, bp = m4On(b) ? bestPaybackAmong(s, b, pool.map(x => x.key)) : null;
-  const forced = m4On(b) && shared ? c.find(x => x.key === shared) : undefined;
+  const forced = m4On(b) && shared ? c0.find(x => x.key === shared) : undefined;
   const t = forced ?? (bp ? pool.find(x => x.key === bp.key) : null) ?? cheapest(pool)!;
   const state: GoalState = (forced ? coins >= forced.costCents : ready) ? 'ready' : rateCentsPerS > 0 ? 'waiting' : 'noincome';
   const status = state === 'ready' ? 'Ready!' : state === 'noincome' ? '—' : fmtTimeToAfford((t.costCents - coins) / rateCentsPerS);
   // M41-8 F4 (M4 on only; flag-off keeps the AC5 labels byte-identical): ★ / % / truncation for HENS, VALUE, COLL.
   // F4-11: the % is hidden while the strip's own income rate is 0 (fresh save before the first sale).
-  const parts = m4On(b) && (t.key === 'HENS' || t.key === 'VALUE' || t.key === 'COLL') ? goalLabelParts(goalLabelSpec(t.key, s, b, !!star && star === t.key, rateCentsPerS > 0)) : undefined;
+  // BBv2 v1.0.4 §6 Farm strip ★ (behind bestBuyV2): when FARM is the hint AND affordable (star==='FARM'),
+  // the strip shows ★ via the same ng markup as F4; unaffordable FARM keeps the plain m3 farmLabel (no ★).
+  // FARM is NOT routed through the 27-char F4 truncator (m3 farm labels can be longer than 27).
+  const starred = !!star && star === t.key;
+  let parts: GoalLabelParts | undefined;
+  if (m4On(b) && (t.key === 'HENS' || t.key === 'VALUE' || t.key === 'COLL')) {
+    parts = goalLabelParts(goalLabelSpec(t.key, s, b, starred, rateCentsPerS > 0));
+  } else if (m4On(b) && bestBuyV2On(b) && t.key === 'FARM' && starred) {
+    const fl = farmLabel(s.farmLevel, b);
+    parts = { star: '★ ', name: fl, level: '', suffix: '', text: `★ ${fl}`,
+      aria: `best buy, ${fl.replace(/\bL(\d+)\b/, 'level $1').replace(':', ',')}`, accName: fl };
+  }
   return { key: t.key, state, label: parts ? parts.text : labelFor(t.key, s, b), ...(parts ? { parts } : {}), status, costCents: t.costCents, tab: t.key === 'FARM' || t.key === 'HENS' || t.key === 'VALUE' ? 'farm' : t.key === 'COLL' ? 'collection' : 'workers' };
 }
 /** Anti-flicker (spec §1): without a purchase, a change of target or Ready<->Waiting is applied only after the new

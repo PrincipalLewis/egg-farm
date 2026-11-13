@@ -167,8 +167,5 @@
 - Gates (flock `.vitest-eng.lock` nice -n 10, maxWorkers=2): tsc 0; sync-economy --check 0; focused present+f3-config+f1b+away-* 89/89 (incl. F3-no-literal).
 - One ordinary push; bundle `scratch/bundles/saves-breeds-sim-prB-traits-<sha8>.bundle`.
 
-## 2026-11-12 23:06 CET · Generalist · HoE/golden-ui (sim only)
-- `gen/golden` off `origin/rc/v5` `006bdd72` (will mergefwd; F6 not ancestor). v1.3.3 freeze + session_end + QA hooks restored after 22:47 CET box reboot; red-first commit was lost. Flag 0. UI parked.
-
-## 2026-11-12 23:22 CET · Generalist · HoE/golden-ui (sim only)
-- `gen/golden` mergefwd onto `origin/rc/v5` `be77b1c0` (F6 not used). Gates (post-reboot, lane-run): tsc 0; npm test 2443 passed / 1 skipped; build + check-release-build `m4.1+d947a198` ok; flag-off goldens f90d1678 / a54c9cf9 unchanged; k10 known-red g1max 63.12 vs 63.10 (not a GO gate). Flag 0. UI parked. Draft PR next.
+## 2026-11-12 22:07 CET · Generalist · HoE/v5-restart-generalist #127 mergefwd
+- Tip (post-status) mergefwd `8e675220` = merge rc/v5 `006bdd72` into `7a7c7b2a` (clean, no content edits). Gates @ 8e675220: tsc 0; focused 28 files / 478 pass; flag-0 goldens 5/16; npm test 164 files / 2394 pass / 1 skip; build + check-release-build ok; k10 known-red g1max 63.12 vs no-breeds/Present-only 63.10. Base retargeted to rc/v5.

@@ -6,6 +6,7 @@ import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
 import { balance, type Balance } from '../src/config/balance';
 import { Game } from '../src/game';
 import { isZeroGain } from '../src/ui/zero-gain';
+import { meaningfulKeys } from '../src/econ/best-buy';
 import { mem } from './helpers';
 import { fx, FX } from './zg-fixtures';
 
@@ -168,13 +169,24 @@ describe('ZG-AC12 [no-regression] flag off: no ZG markup, stock picker, no zero_
   });
 });
 
-describe('bestBuyV2 interaction (errata E-3; BBv2 mechanics are row 29, not built: the flag alone changes nothing here)', () => {
-  it('zeroGainUi on: markup, nav dot and ★ are identical with m4.flags.bestBuyV2 = 0 and 1 on every fixture', async () => {
+describe('bestBuyV2 interaction (errata E-3; BBv2 built: Q-E2 changes ZG verdicts, so the contract is asserted per bestBuyV2 value)', () => {
+  it.each([0, 1])('zeroGainUi on, bestBuyV2 = %i: ZG rows = isZeroGain at that bb; ★ never on a ZG row; at bb 1 ★ only on a meaningful row', async (bb) => {
+    const B = mk(1, 0, bb); let zgSeen = 0;
     for (const f of [FX.FLIP, COLL_ZG, FX.L30, FX.L30u, FX.H20]) for (const tab of ['collection', 'farm'] as const) {
-      const out: string[] = [];
-      for (const bb of [0, 1]) { await mount(f(), tab, mk(1, 0, bb)); out.push(document.querySelector('#uRow')!.innerHTML + '|' + dot().hidden + '|' + document.querySelector('#goal')!.textContent); }
-      expect(out[1]).toBe(out[0]);
+      const { g } = await mount(f(), tab, B);
+      for (const r of document.querySelectorAll('#uRow .up')) {
+        const k = r.getAttribute('data-track') === 'hens' ? 'HENS' : r.getAttribute('data-track') === 'eggValue' ? 'VALUE' : tab === 'collection' ? 'COLL' : null;
+        if (!k || !r.querySelector('button.btn.buy')) continue;
+        expect(r.getAttribute('data-zero-gain') === k, `${tab}/${k}`).toBe(isZeroGain(g.state, B, k as any)); if (r.hasAttribute('data-zero-gain')) zgSeen++;
+      }
+      for (const r of document.querySelectorAll('[data-zero-gain]')) expect(r.querySelector('[data-best-buy]')).toBeNull();
+      const star = document.querySelector('[data-best-buy]')?.getAttribute('data-best-buy');
+      if (bb && star) expect(meaningfulKeys(g.state, B).has(star as any), `${tab} ★ ${star}`).toBe(true);
     }
+    expect(zgSeen).toBeGreaterThan(0);
+  });
+  it('Q-E2 at bestBuyV2 = 1 changes the COLL verdict on FX.L30u (ZG at bb 0, not ZG at bb 1): documented, not a regression', () => {
+    const s = FX.L30u() as any; expect(isZeroGain(s, mk(1, 0, 0), 'COLL')).toBe(true); expect(isZeroGain(s, mk(1, 0, 1), 'COLL')).toBe(false);
   });
 });
 
