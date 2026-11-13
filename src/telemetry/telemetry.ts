@@ -16,6 +16,7 @@ export const isPinned = (type: string) => type === 'session_start' || type === '
   || type === 'worker_hire' || type.startsWith('worker_manage') || type === 'save_reset'
   || type === 'milestone_reached' || type === 'balanced_tier'
   || type === 'save_migrated' || type === 'save_migration_aborted' // M4A-34 (only emitted with the M4 flag on); m4-design §3c migration events
+  || type === 'hatch_started' || type === 'flock_complete' // M5.1 breeds §8 L692/L695 (pinned; only emitted with m4.flags.breeds on)
   || type === 'zero_gain_purchase' || type === 'dead_zone'; // BBv2 errata v5 rev 12 #21/#22 (pinned; emitted only with bestBuyV2 = 1); #19/#20 stay ring
 /** TEL-AC1 envelope (telemetry-spec v0.6.2 L17-20): every emitted event carries type, ts (wall ms), sid (6-char base36) and fgMs
  *  (foreground ms of that sid, hidden time excluded, non-decreasing per sid). No sessionMs (T-AC1). Stored legacy events may lack sid/fgMs. */

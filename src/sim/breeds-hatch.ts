@@ -9,21 +9,28 @@ import { BP_HALF, BP_ONE, FARM_SOON_HATCH_MULT, BREED_IDS, CENTS_PER_DOLLAR, RAR
 import { farmCost } from '../config/formulas';
 import { incomePerSec } from '../econ/income';
 import { nextRand, type GameState } from './state';
-import { on, revealHatch, isFlockComplete, dropRawSlots, type BreedsSave } from './breeds';
+import { on, revealHatch, isFlockComplete, dropRawSlots, rarityName, noteSlotChange, tickSlotWindows, addFamilyMs, noteHatch, type BreedsSave } from './breeds';
+import type { Sink } from './events';
 const br = (s: GameState) => s.breeds as BreedsSave;
 /** Tick (note point 1), at the end of step after streak, on SIM dt (never focus): (a) settle timers of slots filled before this
  *  tick, (b) incubator, reveal + auto-slot (full settle, not decremented this tick), (c) sinceUnlockMs (frozen after flock_complete).
  *  Q4 (D-HOE-20261030-14): `slotsFarm` = the Farm level at the START of the frame, so a slot unlocked by a purchase in this
  *  frame can't take the auto-slot (E15: reveal first, then the unlock). No clock (bots, hidden sim) = the current level. */
-export function breedsTick(s: GameState, dt: number, b: Balance, slotsFarm?: number): GameState {
+/** §8 telemetry (ev): open breed_slotted windows advance by dt first (a window opened this tick is not counted down this tick);
+ *  breed_family_s adds dt for each slot settled at the start of the tick; revealHatch emits breed_revealed / flock_complete and the
+ *  auto-slot opens a window (cause auto_reveal). Session-only `breedsTel` only; the saved `breeds` blob is unchanged by telemetry. */
+export function breedsTick(s: GameState, dt: number, b: Balance, slotsFarm?: number, ev?: Sink): GameState {
   if (!on(s, b)) return s;
   const dtMs = Math.round(dt * 1000); let x = br(s);
+  s = addFamilyMs(tickSlotWindows(s, dtMs, ev), x, dtMs);
   if (x.settleMs.some(v => v > 0)) x = { ...x, settleMs: x.settleMs.map(v => Math.max(0, v - dtMs)) as BreedsSave['settleMs'] };
+  let slot = -1;
   if (x.incubator) {
     x = { ...x, incubator: { ...x.incubator, remainingMs: x.incubator.remainingMs - dtMs } };
-    if (x.incubator!.remainingMs <= 0) x = revealHatch(x, b, unlockedSlots(Math.min(s.farmLevel, slotsFarm ?? s.farmLevel), b)).br;
+    if (x.incubator!.remainingMs <= 0) { const r = revealHatch(x, b, unlockedSlots(Math.min(s.farmLevel, slotsFarm ?? s.farmLevel), b), { ev, farm: s.farmLevel }); x = r.br; slot = r.slot; }
   }
   if (s.farmLevel >= bc(b, 'unlock_farm') && x.flockCompleteLogged !== 1) x = { ...x, sinceUnlockMs: (x.sinceUnlockMs ?? 0) + dtMs };
+  if (slot >= 0) s = noteSlotChange(s, slot, null, null, 'auto_reveal', x); // §8 breed_slotted cause auto_reveal
   return dropRawSlots({ ...s, breeds: x }, br(s).slots, x.slots); // E10 / PMC Q5: the auto-slot index drops its raw id
 }
 /** BR-R10 eligibility: not owned or below the star cap, and the rarity's Farm gate is open (Rare/Epic F14, Legendary F24). */
@@ -59,17 +66,22 @@ export function hatchCostFrom(planRefCents: number, farmStepCents: number, b: Ba
 }
 /** BR-R6/R7 the Hatch press: F >= unlock, incubator free, flock not complete, something eligible, coins >= this frame's cost
  *  (first hatch free, always Common). Otherwise nothing is charged and nothing starts (E1/E4/E5). */
-export function startHatch(s: GameState, b: Balance): GameState {
+/** §8 hatch_started (errata #15): emitted only for a press that starts a hatch (a refused / unaffordable press emits nothing);
+ *  cost / coinsBefore in cents, never `track` / `cost_cents`; not an `upgrade` (no TTFU / is_first_upgrade / upgrades count). */
+export function startHatch(s: GameState, b: Balance, ev?: Sink): GameState {
   if (!on(s, b) || s.farmLevel < bc(b, 'unlock_farm')) return s;
   const x = br(s), free = x.freeHatchUsed !== 1; if (x.incubator || isFlockComplete(x, b)) return s;
   const cost = free ? 0 : hatchCostCents(s, b); if (s.coinsCents < cost) return s;
   const r = rollBreed(x, s.farmLevel, b, free); if (!r) return s;
   const rare = ROSTER[r.id][0] !== 'C';
-  return { ...s, coinsCents: s.coinsCents - cost, breeds: { ...x, rng: r.rng, hatches: x.hatches + 1, pity: rare ? 0 : x.pity + 1, freeHatchUsed: 1,
+  ev?.push({ type: 'hatch_started', breed_id: r.id, rarity: rarityName(r.id), cost, coinsBefore: s.coinsCents, pity_before: x.pity, free, farm_level: s.farmLevel });
+  return { ...noteHatch(s, cost), coinsCents: s.coinsCents - cost, breeds: { ...x, rng: r.rng, hatches: x.hatches + 1, pity: rare ? 0 : x.pity + 1, freeHatchUsed: 1,
     incubator: { breed: r.id, remainingMs: bc(b, 'hatch_time_s') * 1000, costCents: cost } } };
 }
 /** BR-R3/R4: place an owned breed (or null) in an unlocked slot. Moving a slotted breed keeps its settle state (E7, E23);
  *  a breed newly placed settles for bc_settle_s. */
+/** §8 breed_slotted (errata #17): a real change opens / joins the destination slot's 1,000 ms window (a move = 1 change, cause
+ *  move); a no-op (same breed into the same slot, empty over empty) emits nothing. */
 export function placeBreed(s: GameState, b: Balance, slot: number, id: string | null): GameState {
   if (!on(s, b) || !Number.isInteger(slot) || slot < 0 || slot >= unlockedSlots(s.farmLevel, b)) return s;
   const x = br(s); if (id !== null && !(isBreedId(id) && x.owned[id])) return s;
@@ -77,8 +89,10 @@ export function placeBreed(s: GameState, b: Balance, slot: number, id: string | 
   if (from === slot) return s;
   const carry = from >= 0 ? settleMs[from] : bc(b, 'settle_s') * 1000; if (from >= 0) { slots[from] = null; settleMs[from] = 0; }
   slots[slot] = id; settleMs[slot] = id === null ? 0 : carry;
+  const nx = { ...x, slots, settleMs }, was = x.slots[slot];
+  const t = was === id ? s : noteSlotChange(s, slot, from >= 0 ? from : null, isBreedId(was) ? was : null, from >= 0 ? 'move' : 'manual', nx);
   // E10 / PMC Q5: a real change overwrites the raw id at every index written (the target, and the source of a move)
-  return dropRawSlots({ ...s, breeds: { ...x, slots, settleMs } }, x.slots, slots, slot);
+  return dropRawSlots({ ...t, breeds: nx }, x.slots, slots, slot);
 }
 /** BR-R4 settle gate + §4.3 star value: a slot's trait bp, 0 while settling or empty. floor(base x (1 + stars x star_bonus)). */
 export function slotTraitBp(x: BreedsSave, slot: number, b: Balance): number {

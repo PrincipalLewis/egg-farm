@@ -167,5 +167,5 @@
 - Gates (flock `.vitest-eng.lock` nice -n 10, maxWorkers=2): tsc 0; sync-economy --check 0; focused present+f3-config+f1b+away-* 89/89 (incl. F3-no-literal).
 - One ordinary push; bundle `scratch/bundles/saves-breeds-sim-prB-traits-<sha8>.bundle`.
 
-## 2026-11-12 22:32 CET · Generalist · HoE/v5-restart-generalist #100 mergefwd
-- Tip (post-status) mergefwd `c73e8056` = merge rc/v5 `006bdd72` into `2e76d0c5` (one conflict, `src/game.ts`, both sides kept). Flags bestBuyV2=0 / zeroGainUi=0 HELD. Gates @ c73e8056: tsc 0; focused 19 files / 288 pass; flag-0 goldens 5/16 (DOM byte-identical); npm test 168 files / 2428 pass / 1 skip; build + check-release-build ok; k10 known-red g1max 63.12 vs 63.10.
+## 2026-11-12 22:07 CET · Generalist · HoE/v5-restart-generalist #127 mergefwd
+- Tip (post-status) mergefwd `8e675220` = merge rc/v5 `006bdd72` into `7a7c7b2a` (clean, no content edits). Gates @ 8e675220: tsc 0; focused 28 files / 478 pass; flag-0 goldens 5/16; npm test 164 files / 2394 pass / 1 skip; build + check-release-build ok; k10 known-red g1max 63.12 vs no-breeds/Present-only 63.10. Base retargeted to rc/v5.
