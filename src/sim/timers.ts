@@ -12,7 +12,7 @@ import { ensureEvRng } from './rng';
 import { streakTick } from './streak';
 import { incomeRefTick } from './income-ref';
 import { frenzyTick, goldenTick } from './golden';
-import { ensureBreeds } from './breeds';
+import { ensureBreeds, noteTraitEggs } from './breeds';
 import { breedsTick } from './breeds-hatch';
 import { breedsPresentTick } from './breeds-traits';
 import { abilitiesTick } from './abilities';
@@ -27,7 +27,10 @@ const seedEvRng: TimerSystem = (s, _dt, _f, b) => (evRngFlagOn(b) ? ensureEvRng(
 const streak: TimerSystem = (s, dt, f, b, _c, ev) => streakTick(s, dt, f, b, ev);
 /** M5.1 breeds (tick-semantics note point 1): settle -> incubator/reveal -> sinceUnlockMs on sim dt (breedsTick), then Q2
  *  creates `breeds` at the end of the first flag-on tick (so the creating tick counts nothing). Identity unless m4.flags.breeds. */
-const breeds: TimerSystem = (s, dt, f, b, c) => breedsPresentTick(ensureBreeds(breedsTick(s, dt, b, c?.slotsFarm), b), dt, f, b, c?.focusFtMs);
+const breeds: TimerSystem = (s, dt, f, b, c, ev) => {
+  const pre = ensureBreeds(breedsTick(s, dt, b, c?.slotsFarm, ev), b), out = breedsPresentTick(pre, dt, f, b, c?.focusFtMs);
+  return out === pre ? out : noteTraitEggs(out, 'presentEggs', out.coop - pre.coop); // §8 breed_present_eggs = coop eggs BR-R12 added (post-cap)
+};
 /** #3 I_ref (§4.1/§4.1a): the 1 s sim-time ring rolls and refWarmS advances on sim dt (hidden ticks too). Identity unless m4.flags.tapCoins. */
 const incomeRef: TimerSystem = (s, dt, _f, b) => incomeRefTick(s, dt, b);
 /** #1 golden R23: frenzyRemainingS counts down on focus seconds (frozen under menus / hidden). Identity unless m4.flags.golden. */

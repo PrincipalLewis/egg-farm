@@ -30,9 +30,17 @@
 import type { GameState } from './state';
 import { resetPausedSession } from './pause';
 import { resetPresentSession } from './breeds-traits';
+import { resetBreedsTel } from './breeds';
 
 export function resetSessionFields(s: GameState): void {
   resetPausedSession(s);
   resetPresentSession(s);
+  // M5.1 breeds §8: breedsTel is session-only (state-held). Apply in place so the hide snapshot is zeroed too (MAJOR-1 analogue).
+  // Idempotent: contributor reset() also calls resetBreedsTel; a second pass is a no-op or equal-value rewrite.
+  const nextBreeds = resetBreedsTel(s);
+  if (nextBreeds !== s) {
+    for (const k of Object.keys(s)) if (!(k in nextBreeds)) delete (s as unknown as Record<string, unknown>)[k];
+    Object.assign(s, nextBreeds);
+  }
   // Extension point — clockWage / Refill add their one-line resets above this comment.
 }

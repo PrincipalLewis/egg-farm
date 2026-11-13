@@ -23,6 +23,8 @@ import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, val
 import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY, Telemetry, installId } from './telemetry/telemetry';
 import { migrateStoredTracksV7 } from './sim/migrate-v7';
+import { flushBreedsTel, resetBreedsTel, noteTraitEggs } from './sim/breeds'; // M5.1 breeds §8 (drift row 34)
+import { sessionEndBreedsFields, awayBonusEggs } from './telemetry/breeds-session'; // M5.1 breeds §8 (drift row 34)
 /** v5 #1: collectible_* / frenzy_* events are forwarded with Game's per-session collectible_id (not a sim or save field). */
 export type GameEvent = (SimEvent & { collectible_id?: number }) | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
 /** Glue between sim, storage and telemetry; UI only talks to this. */
@@ -76,6 +78,10 @@ export class Game {
     // this.state; resetSessionFields also zeros the hide snapshot that settleHiddenPeriod restores (MAJOR-1).
     this.telemetry.registerSessionEnd('pause', { fields: (src) => pauseSessionEnd(src ?? this.state, this.b), reset: () => resetPausedSession(this.state) });
     this.telemetry.registerSessionEnd('present', { fields: (src) => sessionEndPresentFields(src ?? this.state, this.b), reset: () => resetPresentSession(this.state) });
+    // M5.1 breeds §8: breed_* after pause + present (hook order: taps, pause, present, ours).
+    // fields(src) reads the hide snapshot on a long-hide rotate (QA F1); do not close over this.state.
+    // resetBreedsTel is idempotent: also applied in resetSessionFields (state-held counters).
+    this.telemetry.registerSessionEnd('breeds', { fields: (src) => ({ ...sessionEndBreedsFields(src ?? this.state, this.b) }), reset: () => { this.state = resetBreedsTel(this.state); } });
     this.installId = installId(kv);
     this.telemetry.startSession('load', this.sessionStartFields());
     // M41-7 (spec v0.3.3, OQ-7): loadSafe is the single owner of the order. With opts.idbBoot (main.ts) the IndexedDB value is a
@@ -130,10 +136,12 @@ export class Game {
   private grantOffline(gapMs: number) {
     // F3: capture Away bp applied to the grant BEFORE applyOffline (hatch reveal can star-up a slotted Away).
     const appliedAwayBp = awayBp(this.state, this.b);
-    const r = applyOffline(this.state, gapMs, this.b); this.state = r.state; if (r.reveal) this.pendingReveal = r.reveal;
+    const pre = this.state, ev: SimEvent[] = []; const r = applyOffline(pre, gapMs, this.b, ev); this.state = r.state; if (r.reveal) this.pendingReveal = r.reveal;
+    this.emit(ev); // M5.1 breeds §8: breed_revealed{offline:true} / flock_complete / breed_slotted from the grant step (none flag off)
     // F5 / BR-R18 / PMC: emit offline_grant ONLY when the offline rules apply (gap >= offlineMinSeconds).
     // Same trigger as flag-off. Sub-60 s loads emit NOTHING. Eggs=0 still emits when breeds on (errata V-2b).
     if (gapMs < this.b.offline.offlineMinSeconds * 1000) return r.eggs;
+    this.state = noteTraitEggs(this.state, 'awayEggs', awayBonusEggs(pre, gapMs, this.b, r.eggs, appliedAwayBp)); // §8 breed_away_eggs (grant session)
     const v5 = offlineGrantV5(this.b, appliedAwayBp);
     if (r.eggs > 0 || v5.away_bp !== undefined) {
       if (r.eggs > 0) this.offline = { eggs: r.eggs, awayS: r.awayS };
@@ -381,8 +389,11 @@ export class Game {
     const at = this.now(); this.telemetry.onPageHidden(at); // pagehide freezes fgMs (idempotent after a visibilitychange hide)
     const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
     this.goldenEnd('reload'); // v5 #1 R10c (Saves-confirmed order): expired{reload} + fresh gap, in the same flush, before session_end/save
+    // ---- M5.1 breeds session_end (HoE/breeds-telemetry-emitters, drift row 34; gen/breeds-telemetry). Flag off: {} (absent). ----
+    { const ev: SimEvent[] = []; this.state = flushBreedsTel(this.state, this.b, ev); this.emit(ev); } // open breed_slotted windows close before endSession
+    // ---- end M5.1 breeds flush (fields + resetBreedsTel live on registerSessionEnd('breeds')) ----
     // R3: a hide >= session_hidden_end_s that never came back ends as the back-dated session_end{hidden}; otherwise {unload}.
-    // session_end fields come from registered contributors (pause #119, then present_*); do not track('session_end') here.
+    // session_end fields come from registered contributors (pause #119, then present_*, then breeds); do not track('session_end') here.
     const hAt = this.telemetry.clock.hiddenAt;
     if (hAt !== null && hAt < at && !this.readOnly && this.telemetry.rotateDue(at)) {
       this.splitCoopFull(hAt);

@@ -15,7 +15,8 @@ export function installId(kv: KV, rnd: () => string = () => (globalThis.crypto?.
 export const isPinned = (type: string) => type === 'session_start' || type === 'session_end' || type === 'upgrade' || type.startsWith('onboarding_')
   || type === 'worker_hire' || type.startsWith('worker_manage') || type === 'save_reset'
   || type === 'milestone_reached' || type === 'balanced_tier'
-  || type === 'save_migrated' || type === 'save_migration_aborted'; // M4A-34 (only emitted with the M4 flag on); m4-design §3c migration events
+  || type === 'save_migrated' || type === 'save_migration_aborted' // M4A-34 (only emitted with the M4 flag on); m4-design §3c migration events
+  || type === 'hatch_started' || type === 'flock_complete'; // M5.1 breeds §8 L692/L695 (pinned; only emitted with m4.flags.breeds on)
 /** TEL-AC1 envelope (telemetry-spec v0.6.2 L17-20): every emitted event carries type, ts (wall ms), sid (6-char base36) and fgMs
  *  (foreground ms of that sid, hidden time excluded, non-decreasing per sid). No sessionMs (T-AC1). Stored legacy events may lack sid/fgMs. */
 export interface TEvent { type: string; ts: number; sid?: string; fgMs?: number; [k: string]: unknown; }
