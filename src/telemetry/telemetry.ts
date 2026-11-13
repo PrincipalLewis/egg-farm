@@ -15,7 +15,9 @@ export function installId(kv: KV, rnd: () => string = () => (globalThis.crypto?.
 export const isPinned = (type: string) => type === 'session_start' || type === 'session_end' || type === 'upgrade' || type.startsWith('onboarding_')
   || type === 'worker_hire' || type.startsWith('worker_manage') || type === 'save_reset'
   || type === 'milestone_reached' || type === 'balanced_tier'
-  || type === 'save_migrated' || type === 'save_migration_aborted'; // M4A-34 (only emitted with the M4 flag on); m4-design §3c migration events
+  || type === 'save_migrated' || type === 'save_migration_aborted' // M4A-34 (only emitted with the M4 flag on); m4-design §3c migration events
+  || type === 'hatch_started' || type === 'flock_complete' // M5.1 breeds §8 L692/L695 (pinned; only emitted with m4.flags.breeds on)
+  || type === 'zero_gain_purchase' || type === 'dead_zone'; // BBv2 errata v5 rev 12 #21/#22 (pinned; emitted only with bestBuyV2 = 1); #19/#20 stay ring
 /** TEL-AC1 envelope (telemetry-spec v0.6.2 L17-20): every emitted event carries type, ts (wall ms), sid (6-char base36) and fgMs
  *  (foreground ms of that sid, hidden time excluded, non-decreasing per sid). No sessionMs (T-AC1). Stored legacy events may lack sid/fgMs. */
 export interface TEvent { type: string; ts: number; sid?: string; fgMs?: number; [k: string]: unknown; }
@@ -31,7 +33,8 @@ type Env = { sid: string; fgMs: number };
 type TapWin = { start: number; env: Env; count: number; eggs: number; credit?: { credited: number; empty_credited: number; bonus_cents: number } };
 /** The tap fields of one window: {count, eggs} plus, with the credit system on, {credited, empty_credited, bonus_cents}. */
 const tapFields = (w: TapWin) => ({ count: w.count, eggs: w.eggs, ...(w.credit ?? {}) });
-export interface TelemetryConfig { ring_size: number; flush_interval_s: number; tap_batch_ms: number; worker_summary_s?: number; session_hidden_end_s?: number; }
+export interface TelemetryConfig { ring_size: number; flush_interval_s: number; tap_batch_ms: number; worker_summary_s?: number; session_hidden_end_s?: number;
+  bbv2?: { shown_min_gap_s: number; zero_gain_eta_max_s: number; dead_zone_min_s: number; zero_gain_purchase_cap: number }; }
 /** v5-tel-envelope §3 (clock-api.md): one session_end contributor. Stable contract for stacked PRs:
  *  fields(src) is merged into session_end in registration order. `src` is the GameState to read
  *  (the hide snapshot for a back-dated session_end{hidden}; otherwise the live state). Game always

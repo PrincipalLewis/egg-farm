@@ -30,13 +30,25 @@
 import type { GameState } from './state';
 import { resetPausedSession } from './pause';
 import { resetPresentSession } from './breeds-traits';
+import { resetBreedsTel } from './breeds';
+import { resetGoldenSession } from './golden';
 import { resetRefillSession } from './refill';
 
 export function resetSessionFields(s: GameState): void {
   resetPausedSession(s); // #138 CCR MAJOR-1: zeros pausedForS sumS/allS only; do not add a second pausedForS reset
   resetPresentSession(s);
+  // M5.1 breeds §8: breedsTel is session-only (state-held). Apply in place so the hide snapshot is zeroed too (MAJOR-1 analogue).
+  // Idempotent: contributor reset() also calls resetBreedsTel; a second pass is a no-op or equal-value rewrite.
+  const nextBreeds = resetBreedsTel(s);
+  if (nextBreeds !== s) {
+    for (const k of Object.keys(s)) if (!(k in nextBreeds)) delete (s as unknown as Record<string, unknown>)[k];
+    Object.assign(s, nextBreeds);
+  }
+  // GE-AC45: goldenSession is session-only and lives on the hide snapshot too (#138 does not clear it).
+  // Idempotent: contributor reset() also calls resetGoldenSession.
+  resetGoldenSession(s);
   // G0 M2 / #133: resetRefillSession is immutable (returns a new object, drops refillSession + refillAgoMs).
-  // Copy deletions onto `s` so the hide snapshot Game holds is updated in place (documented pattern above).
+  // Copy deletions onto `s` so the hide snapshot Game holds is updated in place (documented pattern above). After existing resets.
   const next = resetRefillSession(s);
   if (next !== s) {
     for (const k of Object.keys(s)) if (!(k in next)) delete (s as unknown as Record<string, unknown>)[k];
