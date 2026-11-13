@@ -8,7 +8,8 @@ import type { Balance } from '../src/config/balance';
 import { Game } from '../src/game';
 import * as session from '../src/sim/session';
 import { M5_SESSION_FIELDS } from '../src/sim/m5-state';
-import { pauseWorker, resumeWorker, pauseSessionEnd, resetPausedSession } from '../src/sim/pause';
+import { pauseWorker, resumeWorker, pauseSessionEnd, resetPausedSession, pausedDurationS } from '../src/sim/pause';
+import type { SimEvent } from '../src/sim/events';
 import { sessionEndPresentFields, resetPresentSession } from '../src/sim/breeds-traits';
 import { mem } from './helpers';
 
@@ -42,18 +43,20 @@ describe('resetSessionFields (session rotation hook)', () => {
       expect(M5_SESSION_FIELDS).toContain(k);
   });
 
-  it('resetSessionFields zeros pausedForS and present totals and leaves page-lifetime fields', () => {
+  it('resetSessionFields zeros session pause aggregates and present totals; keeps per-worker duration and page-lifetime fields', () => {
     const { g } = setup();
     const before = { ...g.state, irefRingCents: [1, 2], streakS: 3.5,
       pausedForS: { hawker: 1_000, sumS: 5_000, allS: 2_000 },
       breedsCalm: { focusMs: 9, stamps: [1], pendingCount: 2, activeMs: 8_000, lostCount: 4, open: false } };
     session.resetSessionFields(before);
-    expect(before.pausedForS).toBeUndefined();
+    expect(before.pausedForS).toEqual({ hawker: 1_000 });
     expect(before.breedsCalm).toEqual({ focusMs: 9, stamps: [1], pendingCount: 2, activeMs: 0, lostCount: 0, open: false });
     expect(before.streakS).toBe(3.5);
     expect(before.irefRingCents).toEqual([1, 2]);
-    session.resetSessionFields(before); // idempotent
-    expect(before.pausedForS).toBeUndefined();
+    const ref = before.pausedForS;
+    session.resetSessionFields(before); // idempotent: no second subtract, same per-worker object
+    expect(before.pausedForS).toBe(ref);
+    expect(before.pausedForS).toEqual({ hawker: 1_000 });
     expect(before.breedsCalm).toEqual({ focusMs: 9, stamps: [1], pendingCount: 2, activeMs: 0, lostCount: 0, open: false });
   });
 
@@ -64,6 +67,15 @@ describe('resetSessionFields (session rotation hook)', () => {
     resetPausedSession(s);
     resetPresentSession(s);
     expect(s).toEqual(snap);
+  });
+
+  it('resetPausedSession drops pausedForS when only sumS/allS remain', () => {
+    const { g } = setup();
+    const s = { ...g.state, pausedForS: { sumS: 5_000, allS: 2_000 } };
+    resetPausedSession(s);
+    expect(s.pausedForS).toBeUndefined();
+    resetPausedSession(s);
+    expect(s.pausedForS).toBeUndefined();
   });
 
   it('rotation (hide >= 60 s then shown): called twice on distinct objects, after session_end and session_summary, before session_start{resume}', () => {
@@ -189,9 +201,13 @@ describe('resetSessionFields (session rotation hook)', () => {
 
     hide(g, clock, 61_000); g.onShown(clock.t);
 
-    // The restored hide snapshot must have been zeroed (the red-without-fix proof).
+    // Session aggregates are zeroed; per-worker pause durations are kept (MAJOR-2).
     expect(pauseSessionEnd(g.state, bb)).toEqual({ paused_worker_s: 0, all_paused_s: 0 });
-    expect(g.state.pausedForS).toBeUndefined();
+    expect(g.state.pausedForS?.sumS).toBeUndefined();
+    expect(g.state.pausedForS?.allS).toBeUndefined();
+    expect(pausedDurationS(g.state, 'hawker')).toBe(100);
+    expect(pausedDurationS(g.state, 'grader')).toBe(100);
+    expect(pausedDurationS(g.state, 'coop_hand')).toBe(100);
     expect(sessionEndPresentFields(g.state, bb)).toEqual({ present_active_s: 0, present_lost_count: 0 });
     expect(g.state.breedsCalm?.activeMs ?? 0).toBe(0);
     expect(g.state.breedsCalm?.lostCount ?? 0).toBe(0);
@@ -217,7 +233,6 @@ describe('resetSessionFields (session rotation hook)', () => {
     expect(pauseSessionEnd(g.state, bb)).toEqual({ paused_worker_s: 7, all_paused_s: 0 });
     expect(sessionEndPresentFields(g.state, bb)).toEqual({ present_active_s: 1, present_lost_count: 1 });
     for (let i = 0; i < 2; i++) g.dispatch({ type: 'collect' });
-    const ses2 = { ...(g.telemetry as unknown as { ses: Record<string, number> }).ses };
     clock.t += 4_000;
     g.endSession();
 
@@ -235,10 +250,13 @@ describe('resetSessionFields (session rotation hook)', () => {
       all_paused_s: 0,
       present_active_s: 1,
       present_lost_count: 1,
+      credited_taps: 1,
+      tap_bonus_cents: 5,
+      empty_credited: 0,
       fg_ms: 4_000,
       fgMs: 4_000,
     });
-    // Cover every emitted session_end field, not just taps_total. Counters must equal session 2 only.
+    // Cover every emitted session_end field, not just taps_total. Counters (incl. credited_*) are constants, not a live ses snapshot (NIT-2).
     const counters: Record<string, unknown> = {
       taps_total: 2,
       taps_moved_eggs: 2,
@@ -248,21 +266,54 @@ describe('resetSessionFields (session rotation hook)', () => {
       all_paused_s: 0,
       present_active_s: 1,
       present_lost_count: 1,
+      credited_taps: 1,
+      tap_bonus_cents: 5,
+      empty_credited: 0,
       fg_ms: 4_000,
       reason: 'unload',
     };
     for (const k of Object.keys(e2)) {
       if (k === 'type' || k === 'ts' || k === 'sid' || k === 'fgMs') continue;
-      if (k === 'credited_taps' || k === 'tap_bonus_cents' || k === 'empty_credited') {
-        expect(e2[k], k).toEqual(ses2[k]);
-        continue;
-      }
       expect(k in counters, `unexpected session_end field ${k}`).toBe(true);
       expect(e2[k], k).toEqual(counters[k]);
     }
-    expect(e2.credited_taps).toEqual(ses2.credited_taps);
-    expect(e2.tap_bonus_cents).toEqual(ses2.tap_bonus_cents);
-    expect(e2.empty_credited).toBe(0);
-    expect((e2.credited_taps as number)).toBeLessThanOrEqual(2);
+  });
+
+  it('rotation: a pause that spans the rotate reports the full paused_duration_s; session 2 pause fields count only session 2', () => {
+    // Rule (cited): paused_duration_s is the per-pause duration, not a session counter
+    // (src/sim/events.ts worker_resumed; pausedDurationS at src/sim/pause.ts:44, emit at :89). It is
+    // floorMsToS(pausedForS[id]) of integer sim ms. tickPausedFor (pause.ts:53-62) increments each
+    // still-paused worker's entry and, separately, the session aggregates sumS / allS. Hidden gaps
+    // >= offlineMinSeconds are not sim time: settleHiddenPeriod restores the hide snapshot
+    // (src/game.ts:497) and grants offline (src/game.ts:500), so tickPausedFor does not run on the
+    // kept state for that gap (pause.ts: "offline time and hidden gaps >= 60 s are not counted
+    // (sim time only)"; AC-P13). Therefore a pause of A s before a hide >= 60 s and B s after
+    // show has paused_duration_s == A + B, and session 2's paused_worker_s / all_paused_s == B only.
+    const A = 100, B = 7;
+    const bb = withFlags({ pause: 1, rc2Refill: 0 });
+    const kv = mem(); let t = T0; const clock = { get t() { return t; }, set t(v) { t = v; } };
+    const g = new Game(bb, kv, () => t, 7);
+    g.state = { ...g.state, farmLevel: 15, workers: { hawker: W() } };
+    g.state = pauseWorker(g.state, 'hawker', bb);
+    g.debugAdvance(A * 1000);
+    expect(pauseSessionEnd(g.state, bb)).toEqual({ paused_worker_s: A, all_paused_s: A });
+    expect(pausedDurationS(g.state, 'hawker')).toBe(A);
+
+    hide(g, clock, 61_000); g.onShown(clock.t);
+
+    expect(pauseSessionEnd(g.state, bb)).toEqual({ paused_worker_s: 0, all_paused_s: 0 });
+    expect(pausedDurationS(g.state, 'hawker')).toBe(A);
+
+    g.debugAdvance(B * 1000);
+    expect(pauseSessionEnd(g.state, bb)).toEqual({ paused_worker_s: B, all_paused_s: B });
+    expect(pausedDurationS(g.state, 'hawker')).toBe(A + B);
+
+    const ev: SimEvent[] = [];
+    g.state = resumeWorker(g.state, 'hawker', bb, ev);
+    expect(ev).toEqual([expect.objectContaining({ type: 'worker_resumed', worker: 'hawker', cause: 'manual', paused_duration_s: A + B })]);
+
+    g.endSession();
+    const e2 = evs(g).filter(e => e.type === 'session_end').at(-1)!;
+    expect(e2).toMatchObject({ paused_worker_s: B, all_paused_s: B });
   });
 });

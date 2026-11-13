@@ -38,8 +38,9 @@ export function pauseWorker(s: GameState, id: WorkerId, b: Balance, ev?: Sink): 
 /** paused_duration_s (D-PMW-2026-11-10-02, QA-D-1110-PAUDUR; Architect G2 ruling (b), G0-API.md rev 11 §14b): integer
  *  floor of ms/1000 at emit, from the never-saved pausedForS tracker (integer milliseconds internally). Always a
  *  number (never null, NaN or negative); a missing entry (reload, or a pause set without pauseWorker) reads 0, i.e.
- *  the count starts at load time. Known limits: a reload or a session rotation (resetPausedSession) resets the
- *  count to 0; offline time and hidden gaps >= 60 s are not counted (sim time only). The one tracker for
+ *  the count starts at load time. Known limits: a reload resets the count to 0 (pausedForS is never saved); a
+ *  session rotation (resetPausedSession) zeros only the session aggregates sumS / allS and keeps each worker's
+ *  per-pause duration. Offline time and hidden gaps >= 60 s are not counted (sim time only). The one tracker for
  *  worker_resumed / rest_toggled{on:false}.paused_duration_s and session_end paused_worker_s / all_paused_s. */
 export function pausedDurationS(s: GameState, id: WorkerId): number { return floorMsToS(s.pausedForS?.[id]); }
 /** Integer floor of ms/1000 >= 0; anything not a finite positive number reads 0 (QA-D-1110-PAUDUR). Sanitiser shape unchanged. */
@@ -67,10 +68,18 @@ export function pauseSessionEnd(s: GameState, b: Balance): { paused_worker_s?: n
   if (!flagOn(b, 'pause') || flagOn(b, 'rc2Refill')) return {};
   return { paused_worker_s: floorMsToS(s.pausedForS?.sumS), all_paused_s: floorMsToS(s.pausedForS?.allS) };
 }
-/** Zero the never-saved pause-time tracker on a session rotate (mutates in place). Idempotent; no-op if absent
- *  so a flag-off state stays byte-identical. Covers per-worker ms plus sumS / allS. */
+/** Zero the session_end pause aggregates (sumS / allS) on a session rotate (mutates in place). Keeps each
+ *  worker's per-pause duration so a pause that spans the rotation still reports the full paused_duration_s
+ *  on worker_resumed. sumS / allS are separate accumulators (tickPausedFor), not sums of the per-worker
+ *  entries, so zeroing them does not subtract from duration and a second call is a no-op (already absent).
+ *  Idempotent; no-op if pausedForS is absent (flag-off byte-identical). Drops the field if only aggregates remain. */
 export function resetPausedSession(s: GameState): void {
-  if ('pausedForS' in s) delete s.pausedForS;
+  const t = s.pausedForS;
+  if (!t) return;
+  if (!('sumS' in t) && !('allS' in t)) return;
+  const { sumS: _s, allS: _a, ...rest } = t;
+  if (Object.keys(rest).length) s.pausedForS = rest;
+  else delete s.pausedForS;
 }
 /** Resume. Market Hand (B5) starts callLockoutS at tc_pause_call_lockout_s (45 sim seconds), on a Manage resume too (HoE 00:16).
  *  Other workers get no lockout. THE one worker_resumed emitter (pause §12, rule 8): cause 'manual' (Resume) or 'manage'
