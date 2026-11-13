@@ -17,6 +17,7 @@ import {
   resetUnpaidTrickleSession, shouldRunR9, trickleResumeInS,
 } from '../src/sim/unpaid-trickle';
 import { unpaidResumeAtCents } from '../src/sim/workers';
+import { goldenFrozen } from '../src/sim/golden-frozen';
 import { SAVE_VERSION, serialize, save, load, SAVE_KEY } from '../src/save/save';
 import { isPinned, validateEvent, type TEvent } from '../src/telemetry/schema';
 import {
@@ -97,7 +98,7 @@ describe('unpaid_trickle legal k and load (AC-T12)', () => {
   });
 });
 
-describe('unpaid_trickle identity (AC-T1, AC-T4, AC-T7)', () => {
+describe('unpaid_trickle identity (AC-T1, AC-T3(a), AC-T4)', () => {
   // AC-T1
   it('flag off, and k = 0 with the flag on, are byte-identical to each other and to shipping (no credit, no events, no new fields)', () => {
     const s0 = st({ workers: both, coinsCents: 100, hensLevel: 5, collectionLevel: 3 });
@@ -129,7 +130,7 @@ describe('unpaid_trickle identity (AC-T1, AC-T4, AC-T7)', () => {
     }
   });
 
-  // AC-T7
+  // AC-T3(a)
   it('no new save fields and no SAVE_VERSION bump; session carry is dropped on serialize / reload', () => {
     expect(SAVE_VERSION).toBe(6);
     const b = ON(1);
@@ -158,7 +159,7 @@ describe('unpaid_trickle identity (AC-T1, AC-T4, AC-T7)', () => {
   });
 });
 
-describe('unpaid_trickle live rate, T-R9, both-resume (AC-T2, AC-T8, AC-T9)', () => {
+describe('unpaid_trickle live rate, T-R9, both-resume (AC-T2, AC-T7, AC-T9)', () => {
   const rateBoth = (k: number) => k * (0.25 * F18 + 0.5 * F18) * 100 / 60; // 22.5 k ¢/s
 
   // AC-T2
@@ -190,8 +191,8 @@ describe('unpaid_trickle live rate, T-R9, both-resume (AC-T2, AC-T8, AC-T9)', ()
     }
   });
 
-  // AC-T8
-  it('contributing = hired MH/CH, unpaid, not paused, not Asleep; Unpaid at energy 0 counts; paused and Asleep do not; partial unpaid still trickles', () => {
+  // AC-T7
+  it('paused and Asleep are out of the sum; Unpaid at energy 0 counts; one unpaused Unpaid uses only that hand; both paused rate = 0', () => {
     const b = ON(1);
     const s = st({
       workers: {
@@ -237,6 +238,107 @@ describe('unpaid_trickle live rate, T-R9, both-resume (AC-T2, AC-T8, AC-T9)', ()
     live = step(live, DT, b, evSell);
     expect(live.workers.market_hand!.unpaid).toBe(false);
     expect(live.workers.coop_hand!.unpaid).toBe(false);
+  });
+});
+
+
+describe('unpaid_trickle per-hand sum (AC-T6)', () => {
+  // AC-T6
+  it('one Unpaid unpaused + one paid Working: rate = k × the unpaid hand\'s wage/60 only; paid hand output and wages are unchanged; zero hired: rate = 0', () => {
+    const b1 = ON(1), b05 = ON(0.5);
+    expect(unpaidTrickleRateCentsPerSec({}, F18, b1)).toBe(0);
+    expect(unpaidTrickleRateCentsPerSec({}, F18, b05)).toBe(0);
+    const evZ: SimEvent[] = [];
+    const zero = run(st({ workers: {}, coinsCents: 100 }, b1), 50, b1, evZ);
+    expect(zero.coinsCents).toBe(100);
+    expect(evZ.some(e => e.type.startsWith('unpaid_trickle'))).toBe(false);
+
+    // CH unpaid, MH Working: rate = k × 0.5 × 18 / 60 $/s = k × 15 ¢/s
+    const chUnpaid = { market_hand: { energy: 100, cdS: 0 }, coop_hand: { energy: 80, cdS: 0, unpaid: true } };
+    expect(unpaidTrickleRateCentsPerSec(chUnpaid, F18, b1)).toBe(15);
+    expect(unpaidTrickleRateCentsPerSec(chUnpaid, F18, b05)).toBe(7.5);
+    // MH unpaid, CH Working: rate = k × 0.25 × 18 / 60 $/s = k × 7.5 ¢/s
+    const mhUnpaid = { market_hand: { energy: 80, cdS: 0, unpaid: true }, coop_hand: { energy: 100, cdS: 0 } };
+    expect(unpaidTrickleRateCentsPerSec(mhUnpaid, F18, b1)).toBe(7.5);
+    expect(unpaidTrickleRateCentsPerSec(mhUnpaid, F18, b05)).toBe(3.75);
+
+    // Paid MH output (sells) and wages identical to flag-off; trickle only changes coins.
+    const setupMh = (coins = 200): GameState => st({
+      workers: chUnpaid, coinsCents: coins, basket: 2,
+      customers: [{ id: 1, demand: 2, filled: 0, waitedS: 0 }],
+    });
+    const paidOf = (ev: SimEvent[]) => ({
+      wages: ev.filter(e => e.type === 'wage'),
+      sells: ev.filter(e => e.type === 'sell').map(e => e.type === 'sell' ? { k: e.k, value: e.value, by: e.by, id: e.id } : e),
+      collects: ev.filter(e => e.type === 'worker_collect'),
+    });
+    for (const [k, b] of [[1, b1], [0.5, b05]] as const) {
+      const evOn: SimEvent[] = [], evOff: SimEvent[] = [];
+      const on = run(setupMh(), 50, b, evOn);   // 5 s; T-R9 need 1350, start 400 + trickle 15k×5 < 1350
+      const off = run(setupMh(), 50, OFF, evOff);
+      expect(on.coinsCents).toBeLessThan(1350);
+      expect(off.coinsCents).toBeLessThan(1350);
+      expect(on.workers.coop_hand!.unpaid).toBe(true);
+      expect(off.workers.coop_hand!.unpaid).toBe(true);
+      expect(on.workers.market_hand!.unpaid).toBeFalsy();
+      expect(off.workers.market_hand!.unpaid).toBeFalsy();
+      expect(paidOf(evOn)).toEqual(paidOf(evOff));
+      expect(paidOf(evOn).wages.length).toBeGreaterThan(0);
+      expect(paidOf(evOn).sells.length).toBeGreaterThan(0);
+      expect(on.basket).toBe(off.basket);
+      expect(on.workers.market_hand!.cdS).toBeCloseTo(off.workers.market_hand!.cdS, 9);
+      expect(on.workers.market_hand!.energy).toBeCloseTo(off.workers.market_hand!.energy, 9);
+      const credited = (on.unpaidTrickleSessionCents ?? 0);
+      expect(credited).toBeGreaterThan(0);
+      expect(on.coinsCents - off.coinsCents).toBe(credited);
+      expect(credited).toBe(Math.floor(15 * k * 5 + 1e-9)); // 5 s at k × 15 ¢/s
+    }
+
+    // Paid CH collects and wages identical to flag-off.
+    const setupCh = (): GameState => st({
+      workers: mhUnpaid, coinsCents: 400, coop: 80, basket: 0, hensLevel: 0,
+    });
+    for (const [k, b] of [[1, b1], [0.5, b05]] as const) {
+      const evOn: SimEvent[] = [], evOff: SimEvent[] = [];
+      const on = run(setupCh(), 50, b, evOn);
+      const off = run(setupCh(), 50, OFF, evOff);
+      expect(on.workers.market_hand!.unpaid).toBe(true);
+      expect(paidOf(evOn)).toEqual(paidOf(evOff));
+      expect(paidOf(evOn).wages.some(e => e.type === 'wage' && e.worker === 'coop_hand')).toBe(true);
+      expect(on.coop).toBe(off.coop);
+      expect(on.basket).toBe(off.basket);
+      expect(on.coinsCents - off.coinsCents).toBe(on.unpaidTrickleSessionCents ?? 0);
+      expect(on.unpaidTrickleSessionCents).toBe(Math.floor(7.5 * k * 5 + 1e-9));
+    }
+  });
+});
+
+describe('unpaid_trickle Frenzy (AC-T8)', () => {
+  // AC-T8
+  it('during an active unfrozen Frenzy, trickle credits are ×1, never ×2; same while goldenFrozen() is true', () => {
+    const b = flags({ unpaidTrickle: 1, golden: 1 }, shipped, 1);
+    expect((b.m4 as any).tc.frenzy_price_mult).toBe(2);
+    const base = { workers: both, coinsCents: 0, basket: 0, nextSpawnRemainingS: 1e9, hensLevel: 0, coop: 0 };
+    const evA: SimEvent[] = [], evF: SimEvent[] = [];
+    const plain = run(st(base, b), 40, b, evA); // 4 s, both unpaid, rate 22.5 ¢/s → 90 ¢
+    const frenzy = run(st({ ...base, frenzyRemainingS: 30 }, b), 40, b, evF);
+    expect(frenzy.frenzyRemainingS).toBeGreaterThan(0);
+    expect(plain.unpaidTrickleSessionCents).toBe(90);
+    expect(frenzy.unpaidTrickleSessionCents).toBe(plain.unpaidTrickleSessionCents);
+    expect(frenzy.coinsCents).toBe(plain.coinsCents);
+    expect(frenzy.unpaidTrickleSessionCents).not.toBe(180); // never ×2
+    expect(frenzy.workers.market_hand!.unpaid).toBe(true);
+
+    // goldenFrozen: pause flag on, F >= 10, a non-contributing hired hand paused (hawker), wage hands still contributing
+    const bf = flags({ unpaidTrickle: 1, golden: 1, pause: 1 }, shipped, 1);
+    const frozenWs = { ...both, hawker: { energy: 80, cdS: 0, paused: true } };
+    const evFz: SimEvent[] = [], evN: SimEvent[] = [];
+    const frozen = run(st({ ...base, workers: frozenWs, frenzyRemainingS: 30 }, bf), 40, bf, evFz);
+    const notFrozen = run(st({ ...base, workers: { ...both, hawker: { energy: 80, cdS: 0 } }, frenzyRemainingS: 30 }, b), 40, b, evN);
+    expect(goldenFrozen({ ...st({ ...base, workers: frozenWs }, bf), farmLevel: F18 }, bf)).toBe(true);
+    expect(frozen.unpaidTrickleSessionCents).toBe(notFrozen.unpaidTrickleSessionCents);
+    expect(frozen.unpaidTrickleSessionCents).toBe(90);
+    expect(frozen.coinsCents).toBe(notFrozen.coinsCents);
   });
 });
 
