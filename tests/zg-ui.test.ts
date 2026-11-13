@@ -123,7 +123,7 @@ describe('ZG-AC9 / ZG-AC15 [UI + telemetry] Buy works with confirm 0; upgrade.ze
     const evs: Record<string, unknown[]> = {}; const recs: Record<string, any> = {};
     for (const [name, bal] of [['on', ON], ['off', OFF]] as const) {
       const { g } = await mount(COLL_ZG(), 'collection', bal); evs[name] = []; g.on((e: any) => { if (e.type === 'upgrade') evs[name].push(e); });
-      buyOf('COLL').click(); recs[name] = { ...lastUp(g) }; expect(g.state.collectionLevel).toBe(2);
+      buyOf('COLL').click(); const { sid, ...rec } = lastUp(g); expect(sid).toMatch(/^[0-9a-z]{6}$/); recs[name] = rec; // TEL-AC1: sid is per session (crypto), so two Games differ expect(g.state.collectionLevel).toBe(2);
     }
     expect(evs.on).toEqual(evs.off); expect(evs.on.length).toBe(1);
     expect(recs.off).not.toHaveProperty('zero_gain'); expect(recs.on).toEqual({ ...recs.off, zero_gain: true });

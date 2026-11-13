@@ -113,7 +113,7 @@ describe.each([0, 1])('ZG matrix flag-off cell: zeroGainUi=0, bestBuyV2=%i', (bb
     const recs: any[] = [];
     for (const bal of [REF0, mk(0, confirm, bb)]) {
       t = 5000; const { g } = await mount(COLL_ZG(), 'collection', bal); buyOf('COLL').click();
-      expect(g.state.collectionLevel).toBe(2); expect(zgc(g)).toEqual([]); recs.push({ ...lastUp(g) });
+      expect(g.state.collectionLevel).toBe(2); expect(zgc(g)).toEqual([]); const { sid, ...rec } = lastUp(g)!; expect(sid).toMatch(/^[0-9a-z]{6}$/); recs.push(rec); // TEL-AC1: sid is per session (crypto)
     }
     expect(recs[0]).not.toHaveProperty('zero_gain'); expect(recs[1]).toEqual(recs[0]);
   });
