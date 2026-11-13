@@ -1,3 +1,29 @@
+# HoE/v5-139-reland-142 — #139 gen/golden — HANDOFF (02:24 CET, 2026-11-13)
+
+**State:** re-landed onto rc/v5 `b83ce852` (#142 merged). Only conflict was `tests/v5-telemetry-st-ac19-20.test.ts`. Took #142's version **as-is** (no extra case): pause=1/rc2Refill=0 fields are 0; absent when pause is off or rc2Refill=1; no closed key whitelist. Our prior mergefwd test only asserted presence on pause=1 and absence with pause off, which #142 already covers. No product logic change. Local gates green. PR stays Ready. Architect prior verdict **PASS** at previous head `06ac2996` is carried over.
+
+**PR:** https://github.com/PrincipalLewis/egg-farm/pull/139. Branch `gen/golden`, worktree `/workspace/wt-gen-golden`.
+**Gates tip `a7f107f2`** (tree `ad1fc2f3`, parents `06ac2996` + `b83ce852`). This HANDOFF commit sits on top.
+
+**Resolved hunks:**
+- Prior game.ts keep-both (`{ ...pauseEnd, ...payload }`) unchanged.
+- `tests/v5-telemetry-st-ac19-20.test.ts` **lines 134–141** (took #142 / theirs `b2587b2a`): Before (ours): mergefwd test with `toHaveProperty` on pause=1 and absence with pause off. After: #142 case with exact zeros, pause-off absence, and rc2Refill=1 absence. Extra ST-AC20 case kept: **none**.
+
+## Gates @ a7f107f2 (`/workspace/artifacts/v5-139-reland-a7f107f2/`)
+- tsc 0.
+- Focused golden + F3 + ST-AC20: 8 files / 171 pass. F3-no-literal (`tests/v5-f3-config.test.ts`) 28; freeze 44; spawn 25; rewards 21; game 21; m5persist 7; is-paused 9; ST-AC20 16 (including the #142 paused_* case, by name).
+- Flag-off goldens unchanged: GOLDEN1 `f90d1678c260e1b64c8d1de2afcdaf7608186f37d13ef51970d053b45d349544` / `a54c9cf9d6a4c967ef8fc9d2cb741ba2deab042b8cad5097b38d5c192339fda5`. 2 files / 4 pass.
+- Full npm test: 166 files, 2521 pass / 1 skip, EXIT 0. ST-AC20 file 16/16 pass.
+- Build + check-release-build: ok (`m4.1+a7f107f2`). Re-run tsc+build on the tip that includes this file.
+
+## Hosted runs
+Collected after the plain push of this HANDOFF tip; not waited. See the PR checks / the reland report.
+
+## Parked (UI stage) / open questions
+Unchanged from the previous section below.
+
+---
+
 # HoE/v5-139-mergefwd2 — #139 gen/golden — HANDOFF (00:54 CET, 2026-11-13)
 
 **State:** merged forward onto rc/v5 `5552556b` (#140 / #132 landed, on top of mergefwd `08e5937e` onto `0755a284` / #119). mergefwd2 onto `5552556b` was a **clean auto-merge**. The only conflict was mergefwd1 in `src/game.ts` `endSession`, resolved by keeping both sides: precompute `pauseEnd` and `sessionEndPayload` (present_* + golden fields) and track `{ ...pauseEnd, ...payload }` (T-AC9). No product logic change. Test-only follow-up: the #123 ST-AC20 subset-isolation guard now expects Saves-owned `paused_*` present when pause=1 (from `pauseSessionEnd`) and still absent when pause is off. Local gates green. PR stays Ready.
