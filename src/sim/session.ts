@@ -12,8 +12,10 @@
  * state that survives the rotation. Idempotent; same object → one call. The R6 path has no
  * such restore and stays a single call.
  *
- * This is the single sim-level plug-in point. ClockWage and Refill each add a one-line call
- * here (Hire 2: resetAsleepSession; Saves G0 M2: resetRefillSession). They also add their
+ * This is the single sim-level plug-in point. It zeros the session_end pause and present
+ * accumulators (pausedForS; breedsCalm.activeMs / lostCount) so both this.state and the
+ * restored hide snapshot start the new sid at 0. ClockWage and Refill each add a one-line
+ * call here (Hire 2: resetAsleepSession; Saves G0 M2: resetRefillSession). They also add their
  * never-saved keys to M5_SESSION_FIELDS in m5-state.ts so m5Persist strips them — that list
  * is the strip-on-serialize registry, not a wipe list. Page-lifetime fields already on it
  * (goldenEgg, streakS, streakHoldS, tapCreditCdS, irefRingCents, refWarmS, broodyNestScaled,
@@ -26,8 +28,11 @@
  *   const next = resetAsleepSession(s); if (next !== s) { for (const k of Object.keys(s)) if (!(k in next)) delete (s as Record<string, unknown>)[k]; Object.assign(s, next); }
  */
 import type { GameState } from './state';
+import { resetPausedSession } from './pause';
+import { resetPresentSession } from './breeds-traits';
 
 export function resetSessionFields(s: GameState): void {
+  resetPausedSession(s);
+  resetPresentSession(s);
   // Extension point — clockWage / Refill add their one-line resets above this comment.
-  void s;
 }

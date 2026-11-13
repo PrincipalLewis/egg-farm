@@ -5,7 +5,7 @@ import { coopCap } from './sim/tracks';
 import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
-import { sessionEndPresentFields, awayBp } from './sim/breeds-traits';
+import { sessionEndPresentFields, awayBp, resetPresentSession } from './sim/breeds-traits';
 import * as sessionSim from './sim/session';
 import { offlineGrantV5 } from './telemetry/v5-fields';
 import type { BreedId } from './config/breeds';
@@ -18,7 +18,7 @@ import { streakOn, streakPeak, creditedTapsOn } from './sim/streak';
 import { anyM5FlagOn } from './sim/timers';
 import { incomeRefOn, resetIncomeRef } from './sim/income-ref';
 import { playerSaleCtx, type SaleCtx } from './sim/effects';
-import { pauseSessionEnd } from './sim/pause'; // pause §12 session_end paused_worker_s / all_paused_s (Saves #119)
+import { pauseSessionEnd, resetPausedSession } from './sim/pause'; // pause §12 session_end paused_worker_s / all_paused_s (Saves #119)
 import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY, Telemetry, installId } from './telemetry/telemetry';
@@ -71,9 +71,10 @@ export class Game {
     this.telemetry.sessionEndContext = () => ({ farm_level: this.state.farmLevel, coop_hand: !!this.state.workers.coop_hand, credit: creditedTapsOn(this.b) });
     // Row 32 (HoE/breeds-sim-prB-traits): present_* only. Other breeds session_end fields = gen/breeds-telemetry.
     // #119 pause §12: paused_worker_s / all_paused_s on session_end (pause = 1 and rc2Refill = 0 only). Same emit path as present_*.
-    // Registration order matches { ...pauseSessionEnd(), ...sessionEndPresentFields() }; contributor reset is a no-op (Saves does not reset pausedForS here).
-    this.telemetry.registerSessionEnd('pause', { fields: () => pauseSessionEnd(this.state, this.b), reset() {} });
-    this.telemetry.registerSessionEnd('present', { fields: () => sessionEndPresentFields(this.state, this.b), reset() {} });
+    // Registration order matches { ...pauseSessionEnd(), ...sessionEndPresentFields() }. Contributor reset() zeros
+    // this.state; resetSessionFields also zeros the hide snapshot that settleHiddenPeriod restores (MAJOR-1).
+    this.telemetry.registerSessionEnd('pause', { fields: () => pauseSessionEnd(this.state, this.b), reset: () => resetPausedSession(this.state) });
+    this.telemetry.registerSessionEnd('present', { fields: () => sessionEndPresentFields(this.state, this.b), reset: () => resetPresentSession(this.state) });
     this.installId = installId(kv);
     this.telemetry.startSession('load', this.sessionStartFields());
     // M41-7 (spec v0.3.3, OQ-7): loadSafe is the single owner of the order. With opts.idbBoot (main.ts) the IndexedDB value is a
@@ -374,7 +375,7 @@ export class Game {
   /** v5-tel-envelope R6: pageshow with event.persisted (bfcache restore). The sid ended at pagehide, so it always rotates once. */
   onPageShow(at = this.now()) { this.telemetryShown(at); }
   endSession() {
-    if (this.resetting || this.inactive || this.held()) return;
+    if (this.sessionFrozen()) return; // R7: readOnly / inactive / resetting / held never emit a session_end
     const at = this.now(); this.telemetry.onPageHidden(at); // pagehide freezes fgMs (idempotent after a visibilitychange hide)
     const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
     this.goldenEnd('reload'); // v5 #1 R10c (Saves-confirmed order): expired{reload} + fresh gap, in the same flush, before session_end/save
