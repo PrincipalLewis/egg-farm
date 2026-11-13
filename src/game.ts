@@ -5,32 +5,30 @@ import { coopCap } from './sim/tracks';
 import { advance } from './sim/tick';
 import { apply, Action, isUpgrade } from './sim/actions';
 import { applyOffline } from './sim/offline';
-import { sessionEndPresentFields, awayBp } from './sim/breeds-traits';
+import { sessionEndPresentFields, awayBp, resetPresentSession } from './sim/breeds-traits';
+import * as sessionSim from './sim/session';
 import { offlineGrantV5 } from './telemetry/v5-fields';
 import type { BreedId } from './config/breeds';
 import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
 import type { SimEvent, CollectibleSkin } from './sim/events';
-import { goldenOn, goldenUnload, spawnDue, sessionEndGoldenFields, grantGolden, goldenFrozen } from './sim/golden';
+import { goldenOn, goldenUnload, spawnDue, sessionEndGoldenFields, grantGolden, goldenFrozen, resetGoldenSession } from './sim/golden';
 import type { GoldenReward } from './sim/events';
 import { focusFrameMs } from './sim/clock';
 import { streakOn, streakPeak, creditedTapsOn } from './sim/streak';
 import { anyM5FlagOn } from './sim/timers';
 import { incomeRefOn, resetIncomeRef } from './sim/income-ref';
 import { playerSaleCtx, type SaleCtx } from './sim/effects';
-import { pauseSessionEnd } from './sim/pause'; // pause §12 session_end paused_worker_s / all_paused_s (Saves #119)
+import { pauseSessionEnd, resetPausedSession } from './sim/pause'; // pause §12 session_end paused_worker_s / all_paused_s (Saves #119)
 import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, validSavedAt, newerStoredVersion, NewerSaveError, KV, type Recovery, V6_BACKUP_KEY, encodeBackup, decodeBackup, newMigrationId, TRACKS_MARKER_PATH, isCommittedBackup, probeHeadroom, rankCompare, commitWrite, MIGRATION_ATTEMPTS_KEY, SAVE_KEY, BAK_KEY, HEADROOM_PROBE_KEY, headroomNeed, saveSeqOf } from './save/save';
 import type { IdbBoot } from './save/idb-mirror';
-import { TELEMETRY_KEY } from './telemetry/telemetry';
+import { TELEMETRY_KEY, Telemetry, installId } from './telemetry/telemetry';
 import { migrateStoredTracksV7 } from './sim/migrate-v7';
-import { Telemetry, installId } from './telemetry/telemetry';
 /** v5 #1: collectible_* / frenzy_* events are forwarded with Game's per-session collectible_id (not a sim or save field). */
 export type GameEvent = (SimEvent & { collectible_id?: number }) | { type: 'coop_full'; phase: 'start' | 'end' } | { type: 'offline_grant'; eggs: number; awayS: number };
 /** Glue between sim, storage and telemetry; UI only talks to this. */
 /** The same balance with the M4 flag off: a pending or aborted track migration runs the session as plain v6 (M4-14). */
 export const tracksOff = (b: Balance): Balance => (b.m4 ? markM4BuildOff({ ...b, m4: { ...b.m4, enabled: 0 } }) : b);
-/** T-AC9: one helper, no literal keys. Combines breeds present_* and golden session_end fields. */
-const sessionEndPayload = (s: GameState, b: Balance) => ({ ...sessionEndPresentFields(s, b), ...sessionEndGoldenFields(s, b) });
 export interface GameOpts {
   /** M4-20: outcome of boot's IndexedDB open + read ('unknown' defers the migration; default 'absent' = no IndexedDB). */
   idbBoot?: IdbBoot; idbAbsentReason?: string;
@@ -68,11 +66,21 @@ export class Game {
   mirror: { write(raw: string): unknown; clear(): Promise<void>; newer?: number | null; onNewer?: ((v: number) => void) | null } | null;
   constructor(private b: Balance, private kv: KV, private now = () => Date.now(), seed?: number, public build = 'dev', mirror: Game['mirror'] = null, idbRaw: unknown = null, private opts: GameOpts = {}) {
     this.mirror = mirror;
-    this.telemetry = new Telemetry(kv, b.telemetry, now);
-    // ST-AC20 (streak §8.1): session_end reads Farm level, Coop Hand and the credited-tap flag from the live state at emit.
-    this.telemetry.sessionEndContext = () => ({ farm_level: this.state.farmLevel, coop_hand: !!this.state.workers.coop_hand, credit: creditedTapsOn(this.b) });
+    // v5-tel-envelope R8/B4: the hidden split threshold is telemetry.session_hidden_end_s (== offline.offlineMinSeconds, validateBalance).
+    this.telemetry = new Telemetry(kv, { ...b.telemetry, session_hidden_end_s: b.telemetry.session_hidden_end_s ?? b.offline.offlineMinSeconds }, now);
+    // ST-AC20 (streak §8.1): session_end reads Farm level, Coop Hand and the credited-tap flag from the source state
+    // (the hide snapshot for a back-dated hidden end; otherwise the live state at emit).
+    this.telemetry.sessionEndContext = (src) => { const s = src ?? this.state; return { farm_level: s.farmLevel, coop_hand: !!s.workers.coop_hand, credit: creditedTapsOn(this.b) }; };
+    // Row 32 (HoE/breeds-sim-prB-traits): present_* only. Other breeds session_end fields = gen/breeds-telemetry.
+    // #119 pause §12: paused_worker_s / all_paused_s on session_end (pause = 1 and rc2Refill = 0 only). Same emit path as present_*.
+    // Registration order matches { ...pauseSessionEnd(), ...sessionEndPresentFields() }. Contributor reset() zeros
+    // this.state; resetSessionFields also zeros the hide snapshot that settleHiddenPeriod restores (MAJOR-1).
+    this.telemetry.registerSessionEnd('pause', { fields: (src) => pauseSessionEnd(src ?? this.state, this.b), reset: () => resetPausedSession(this.state) });
+    this.telemetry.registerSessionEnd('present', { fields: (src) => sessionEndPresentFields(src ?? this.state, this.b), reset: () => resetPresentSession(this.state) });
+    // GE-AC45: golden_* / frenzy_extra_cents only (present_* already registered). fields(src) reads the hide snapshot on a long-hide rotate (QA F1).
+    this.telemetry.registerSessionEnd('golden', { fields: (src) => ({ ...sessionEndGoldenFields(src ?? this.state, this.b) }), reset: () => resetGoldenSession(this.state) });
     this.installId = installId(kv);
-    this.telemetry.track('session_start', { install_id: this.installId, build });
+    this.telemetry.startSession('load', this.sessionStartFields());
     // M41-7 (spec v0.3.3, OQ-7): loadSafe is the single owner of the order. With opts.idbBoot (main.ts) the IndexedDB value is a
     // tier (CSR-2/3/13, CSR-AC-IDB1) and the stale-LS reconcile runs inside it; without it (tests, refused-newer) the legacy
     // raw is only used for the newer-build check.
@@ -340,15 +348,53 @@ export class Game {
     this.telemetry.track('save_newer_version', { version: v, build: this.build, live: true });
     this.onNewerSave?.(v);
   }
+  /** session_start payload beyond {reason, session_id, prev_hidden_ms} (TEL-AC2 base fields are T8, pending HoE/PMC). */
+  private sessionStartFields(): Record<string, unknown> { return { install_id: this.installId, build: this.build }; }
+  /** R7: a read-only / inactive / resetting / held tab never rotates and never emits a session_end. */
+  private sessionFrozen() { return this.resetting || this.readOnly || this.inactive || this.held(); }
+  /** A2/R4: close an open coop_full episode at the split (ts = the hide), so session_end reads its final duration. Telemetry only:
+   *  the UI keeps its coop_full state; reopenCoopFull re-opens the episode in the new sid when the coop is still full. */
+  private splitCoopFull(at: number): boolean {
+    if (this.coopFullSince === null) return false;
+    const durationMs = Math.max(0, at - this.coopFullSince);
+    this.telemetry.track('coop_full', { phase: 'end', durationMs, exit_reason: 'hidden' }, at);
+    this.coopFullSince = null; return true;
+  }
+  /** v5-tel-envelope R2/R6: the page is visible again (visibilitychange or bfcache pageshow). A hide >= session_hidden_end_s
+   *  (or a sid already ended by pagehide) rotates: back-dated session_end{hidden} (unless already ended), then
+   *  session_start{resume, prev_hidden_ms} in the new sid. Runs before the offline grant, so offline_grant is in the new sid. */
+  private telemetryShown(at: number) {
+    const T = this.telemetry, hAt = T.clock.hiddenAt; if (hAt === null) return;
+    if (this.sessionFrozen() || !T.rotateDue(at)) { T.onPageShown(at, false); return; }
+    const src = this.hidden?.state ?? this.state; // hide snapshot: discarded provisional this.state must not leak into session_end (QA F1)
+    const reopen = this.splitCoopFull(hAt);
+    T.endSession('hidden', hAt, src); // no-op when pagehide already ended this sid (one session_end per sid)
+    // A1: session_end, then session_summary, then every reset() — this sim hook is the last reset, once per rotation.
+    sessionSim.resetSessionFields(this.state);
+    // A hide >= offlineMinSeconds later restores the hide snapshot (settleHiddenPeriod: this.state = h.state) and drops the
+    // provisional sim, so reset the snapshot too; it is the state that survives the rotation. Idempotent; same object → once.
+    const hs = this.hidden?.state; if (hs && hs !== this.state) sessionSim.resetSessionFields(hs);
+    const sp = T.onPageShown(at); T.startSession('resume', this.sessionStartFields(), sp?.prevHiddenMs);
+    if (reopen && this.state.coop >= coopCap(this.state, this.b)) { this.coopFullSince = at; this.telemetry.track('coop_full', { phase: 'start' }); }
+  }
+  /** v5-tel-envelope R6: pageshow with event.persisted (bfcache restore). The sid ended at pagehide, so it always rotates once. */
+  onPageShow(at = this.now()) { this.telemetryShown(at); }
   endSession() {
-    if (this.resetting || this.inactive || this.held()) return;
+    if (this.sessionFrozen()) return; // R7: readOnly / inactive / resetting / held never emit a session_end
+    const at = this.now(); this.telemetry.onPageHidden(at); // pagehide freezes fgMs (idempotent after a visibilitychange hide)
     const p = streakOn(this.b) ? streakPeak(this.state, 'reload', this.b) : null; if (p) this.emit([p]); // #2 R11: pagehide flush
     this.goldenEnd('reload'); // v5 #1 R10c (Saves-confirmed order): expired{reload} + fresh gap, in the same flush, before session_end/save
-    // Row 32 (HoE/breeds-sim-prB-traits): present_* only. Other breeds session_end fields = gen/breeds-telemetry.
-    // T-AC9: no comma-bearing calls inside the session_end literal — helpers return the fields objects (precomputed, then spread).
-    const pauseEnd = pauseSessionEnd(this.state, this.b); // pause §12 L299: paused_worker_s / all_paused_s; pause = 1 and rc2Refill = 0 only (Saves #119)
-    const payload = sessionEndPayload(this.state, this.b); // present_* + golden session_end fields
-    this.telemetry.track('session_end', { ...pauseEnd, ...payload }); this.save(); this.telemetry.flush(true); }
+    // R3: a hide >= session_hidden_end_s that never came back ends as the back-dated session_end{hidden}; otherwise {unload}.
+    // session_end fields come from registered contributors (pause #119, then present_*, then golden_* only); do not track('session_end') here.
+    const hAt = this.telemetry.clock.hiddenAt;
+    if (hAt !== null && hAt < at && !this.readOnly && this.telemetry.rotateDue(at)) {
+      this.splitCoopFull(hAt);
+      this.telemetry.endSession('hidden', hAt, this.hidden?.state ?? this.state);
+    } else {
+      this.splitCoopFull(at); // A2/R4: close coop_full before session_end{unload}, even when hAt === at (MINOR-2)
+      this.telemetry.endSession('unload', at, this.state); // Game always passes src (live state on unload/pagehide)
+    }
+    this.save(); this.telemetry.flush(true); }
   /** "Reset save" (Settings confirm, debug panel): stop saving, close the golden egg / Frenzy (A24-1: silent), log save_reset, flush. */
   beginReset() {
     this.resetting = true; this.goldenEnd('reset');
@@ -450,6 +496,7 @@ export class Game {
   /** Page hidden (platform/visibility). Frames keep coming at the throttled rate but simulate at most
    *  offline.hiddenSimMaxSeconds in TOTAL, then the sim freezes until onShown. */
   onHidden(at = this.now()) {
+    this.telemetry.onPageHidden(at); // TEL-AC1: fgMs frozen while hidden (idempotent)
     if (this.hidden) return;
     this.frame(); // bring the sim up to the hide
     this.focusAccMs = 0; // hidden frames never pass focus (leftover acc is simulated unfocused)
@@ -461,6 +508,7 @@ export class Game {
    *  keep the <= 60 s of online sim (M1: also credit uncovered gap with no frames, up to the 60 s budget).
    *  Returns the eggs granted (caller shows the welcome popup). */
   onShown(at = this.now()): number {
+    this.telemetryShown(at); // R2: rotate (end{hidden} + start{resume}) BEFORE the offline grant
     const h = this.hidden; if (!h) return 0;
     return accountHiddenPeriod(this, { startAt: h.at, endAt: at })?.eggsGranted ?? 0;
   }
