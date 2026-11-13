@@ -47,6 +47,9 @@ export interface GameState extends M5Fields {
   /** v5 #5 Broody (session only, outside F1a M5Fields like goldenPending): sub-cent nest, ms remainder, sticky ready, slot/check and
    *  telemetry counters (sim/broody.ts). Stripped by m5Persist SESSION_ONLY_KEYS. */
   broodyRun?: import('./broody').BroodyRun;
+  /** Session-only (v1.3.3 GE-AC45 / §8): session_end counters + QA forceReward. Stripped by m5Persist. */
+  goldenSession?: import('./golden').GoldenSession;
+  goldenForceReward?: import('./events').GoldenReward;
 }
 export const initialState = (b: Balance, seed = 1): GameState => ({
   coinsCents: 0, coop: 0, basket: 0, collectionLevel: 0, farmLevel: 0,

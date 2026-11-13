@@ -1,4 +1,4 @@
-import { m4On } from './config/formulas';
+import { m4On, tcNum } from './config/formulas';
 import type { Balance } from './config/balance';
 import { GameState, initialState } from './sim/state';
 import { coopCap } from './sim/tracks';
@@ -12,7 +12,8 @@ import type { BreedId } from './config/breeds';
 import { accountHiddenPeriod, type HiddenSettlement } from './save/hidden-time';
 import { m5Load, m5Offline, m5ShortGap } from './save/m5-fields';
 import type { SimEvent, CollectibleSkin } from './sim/events';
-import { goldenOn, goldenUnload, spawnDue } from './sim/golden';
+import { goldenOn, goldenUnload, spawnDue, sessionEndGoldenFields, grantGolden, goldenFrozen, resetGoldenSession } from './sim/golden';
+import type { GoldenReward } from './sim/events';
 import { broodyOn, broodyCheckDue, broodyReset, broodyView, type BroodyView } from './sim/broody';
 import { focusFrameMs } from './sim/clock';
 import { streakOn, streakPeak, creditedTapsOn } from './sim/streak';
@@ -92,6 +93,8 @@ export class Game {
     this.telemetry.registerSessionEnd('broody', { fields: () => this.broodyEnd(), reset: () => { this.broodyCents = 0; this.broodyCollects = 0; } });
     // BBv2: dropped/zgCount live on Bbv2Tel, not GameState — src is ignored. resetSession() is idempotent (Architect 008969da).
     this.telemetry.registerSessionEnd('bbv2', { fields: () => this.bbTel ? this.bbTel.sessionEndFields() : {}, reset: () => { this.bbTel?.resetSession(); } });
+    // GE-AC45: golden_* / frenzy_extra_cents only (present_* already registered). fields(src) reads the hide snapshot on a long-hide rotate (QA F1).
+    this.telemetry.registerSessionEnd('golden', { fields: (src) => sessionEndGoldenFields(src ?? this.state, this.b), reset: () => resetGoldenSession(this.state) });
     this.installId = installId(kv);
     this.telemetry.startSession('load', this.sessionStartFields());
     if (bbv2TelOn(b)) this.bbTel = new Bbv2Tel((t, d) => this.telemetry.track(t, d), b);
@@ -408,7 +411,7 @@ export class Game {
     // ---- end M5.1 breeds flush (fields + resetBreedsTel live on registerSessionEnd('breeds')) ----
     if (this.bbTel) this.bbTel.flushOpen(Math.floor(this.bbSimMs / 1000));
     // R3: a hide >= session_hidden_end_s that never came back ends as the back-dated session_end{hidden}; otherwise {unload}.
-    // session_end fields come from registered contributors (pause #119, then present_*, then breeds, then broody, then bbv2); do not track('session_end') here.
+    // session_end fields come from registered contributors (pause #119, then present_*, then breeds, then broody, then bbv2, then golden); do not track('session_end') here.
     // broody counter zeroing moved into registerSessionEnd('broody').reset().
     const hAt = this.telemetry.clock.hiddenAt;
     if (hAt !== null && hAt < at && !this.readOnly && this.telemetry.rotateDue(at)) {
@@ -445,6 +448,42 @@ export class Game {
   layoutChanged() { this.driveGolden(true); }
   /** The egg's tap handler (R25b stopPropagation is the UI's): only while the player can act (R6 menus freeze; R20 one grant in the sim). */
   tapGolden() { if (goldenOn(this.b) && !this.inactive && !this.held() && this.attendedNow()) this.dispatch({ type: 'tapGolden' }); }
+  /** Dev/QA (eggfarmQa): force a spawn. A given slotId skips the evRng slot draw. Identity when golden is off or an egg is up. */
+  qaSpawnNow(slotId?: string) {
+    if (!goldenOn(this.b) || this.state.goldenEgg) return;
+    if (typeof slotId === 'string' && slotId) {
+      const p = this.state.goldenPending ?? { intervalS: this.state.nextSpawnRemainingS ?? 0, deferS: 0, recheckS: 0 };
+      const ev: SimEvent[] = [{ type: 'collectible_spawned', skin: 'golden_egg', farm_level: this.state.farmLevel, collection_level: this.state.collectionLevel, slot_id: slotId, interval_s: p.intervalS, deferred_ms: Math.round(p.deferS * 1000) }];
+      const { goldenPending: _p, nextSpawnRemainingS: _n, ...o } = this.state;
+      const se = o.goldenSession ?? { spawned: 0, collected: 0, cents: 0, frenzyExtraCents: 0, frozenS: 0 };
+      this.state = { ...(o as GameState), goldenEgg: { ageS: 0, slotId, intervalS: p.intervalS }, goldenSession: { ...se, spawned: se.spawned + 1 } };
+      this.emit(ev); return;
+    }
+    this.state = { ...this.state, nextSpawnRemainingS: 0, goldenPending: { intervalS: this.state.goldenPending?.intervalS ?? 0, deferS: this.state.goldenPending?.deferS ?? 0, recheckS: 0 } };
+    this.dispatch({ type: 'spawnGolden', spots: this.spotProbe(), layout: true });
+  }
+  qaFrenzyStart() { if (goldenOn(this.b)) this.state = grantGolden(this.state, 'frenzy', this.b); }
+  qaSetAge(ageS: number) {
+    if (!goldenOn(this.b) || !this.state.goldenEgg || !Number.isFinite(ageS) || ageS < 0) return;
+    this.state = { ...this.state, goldenEgg: { ...this.state.goldenEgg, ageS } };
+  }
+  qaSeed(u32: number) {
+    if (!goldenOn(this.b) || !Number.isInteger(u32) || u32 <= 0 || u32 > 0xffffffff) return;
+    this.state = { ...this.state, evRngState: u32 };
+  }
+  qaForceReward(type: GoldenReward) {
+    if (!goldenOn(this.b)) return;
+    if (type !== 'cash' && type !== 'frenzy' && type !== 'eggs' && type !== 'eggs_cash') return;
+    this.state = { ...this.state, goldenForceReward: type };
+  }
+  qaGoldenState() {
+    const off = { phase: 'off' as const, ageS: undefined as number | undefined, nextSpawnRemainingS: undefined as number | undefined, frenzyRemainingS: undefined as number | undefined, evRngState: this.state.evRngState, slotId: undefined as string | undefined, frozen: false };
+    if (!goldenOn(this.b)) return off;
+    const g = this.state.goldenEgg, frozen = goldenFrozen(this.state, this.b);
+    const phase = !g ? (this.state.nextSpawnRemainingS === undefined && this.state.farmLevel < tcNum(this.b, 'egg_unlock_farm') ? 'locked' : 'waiting')
+      : (g.ageS >= tcNum(this.b, 'egg_despawn_s') ? 'fade' : g.ageS >= tcNum(this.b, 'urgent_at_s') ? 'urgent' : g.ageS >= tcNum(this.b, 'warn_at_s') ? 'warning' : 'idle');
+    return { phase, ageS: g?.ageS, nextSpawnRemainingS: this.state.nextSpawnRemainingS, frenzyRemainingS: this.state.frenzyRemainingS, evRngState: this.state.evRngState, slotId: g?.slotId, frozen };
+  }
   /** Spawn driver: when the sim says due (countdown 0, no egg, R15 500 ms retry over) on an attended frame, measure and dispatch. */
   private driveGolden(layout: boolean) {
     if (!goldenOn(this.b) || this.inactive || this.held() || this.hidden || !this.attendedNow() || !spawnDue(this.state, this.b, layout)) return;

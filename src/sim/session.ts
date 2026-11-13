@@ -31,6 +31,7 @@ import type { GameState } from './state';
 import { resetPausedSession } from './pause';
 import { resetPresentSession } from './breeds-traits';
 import { resetBreedsTel } from './breeds';
+import { resetGoldenSession } from './golden';
 
 export function resetSessionFields(s: GameState): void {
   resetPausedSession(s);
@@ -42,5 +43,8 @@ export function resetSessionFields(s: GameState): void {
     for (const k of Object.keys(s)) if (!(k in nextBreeds)) delete (s as unknown as Record<string, unknown>)[k];
     Object.assign(s, nextBreeds);
   }
+  // GE-AC45: goldenSession is session-only and lives on the hide snapshot too (#138 does not clear it).
+  // Idempotent: contributor reset() also calls resetGoldenSession.
+  resetGoldenSession(s);
   // Extension point — clockWage / Refill add their one-line resets above this comment.
 }
