@@ -24,6 +24,7 @@ import { save, serialize, flagOffShape, m4SaveSeq, markM4BuildOff, loadSafe, val
 import type { IdbBoot } from './save/idb-mirror';
 import { TELEMETRY_KEY, Telemetry, installId } from './telemetry/telemetry';
 import { migrateStoredTracksV7 } from './sim/migrate-v7';
+import { Bbv2Tel, bbv2TelOn, buyKeyOf, type BuyCtx } from './telemetry/bbv2';
 import { flushBreedsTel, resetBreedsTel, noteTraitEggs } from './sim/breeds'; // M5.1 breeds §8 (drift row 34)
 import { sessionEndBreedsFields, awayBonusEggs } from './telemetry/breeds-session'; // M5.1 breeds §8 (drift row 34)
 /** v5 #1: collectible_* / frenzy_* events are forwarded with Game's per-session collectible_id (not a sim or save field). */
@@ -60,6 +61,10 @@ export class Game {
   /** QA case 2: after a fresh start, `.bak` rotation waits for a valid save + progress (1 purchase or 60 s played). */
   private bakAllowed = true; private playedMs = 0;
   installId = ''; telemetry: Telemetry; private coopFullSince: number | null = null;
+  /** BBv2 §8 telemetry (rows #19–22): null unless m4.flags.bestBuyV2 = 1 and m4.enabled, so flag 0 runs no BBv2 code path. */
+  bbTel: Bbv2Tel | null = null; private bbSimMs = 0;
+  /** UI context at a purchase (picker clock, rendered ★, its switch time, live income); set by the app. */
+  bbCtx: () => BuyCtx = () => ({ t: this.now(), mark: null, markSinceT: this.now(), rateCentsPerS: 0 });
   private listeners: ((e: GameEvent) => void)[] = [];
   /** Subscribe to sim/game events (UI feedback, sfx). Returns unsubscribe. */
   on(fn: (e: GameEvent) => void) { this.listeners.push(fn); return () => { this.listeners = this.listeners.filter(f => f !== fn); }; }
@@ -85,8 +90,11 @@ export class Game {
     this.telemetry.registerSessionEnd('breeds', { fields: (src) => ({ ...sessionEndBreedsFields(src ?? this.state, this.b) }), reset: () => { this.state = resetBreedsTel(this.state); } });
     // v5 #5 §8 / HoE F4: broody_cents / broody_collects live on Game, not GameState — src is ignored.
     this.telemetry.registerSessionEnd('broody', { fields: () => this.broodyEnd(), reset: () => { this.broodyCents = 0; this.broodyCollects = 0; } });
+    // BBv2: dropped/zgCount live on Bbv2Tel, not GameState — src is ignored. resetSession() is idempotent (Architect 008969da).
+    this.telemetry.registerSessionEnd('bbv2', { fields: () => this.bbTel ? this.bbTel.sessionEndFields() : {}, reset: () => { this.bbTel?.resetSession(); } });
     this.installId = installId(kv);
     this.telemetry.startSession('load', this.sessionStartFields());
+    if (bbv2TelOn(b)) this.bbTel = new Bbv2Tel((t, d) => this.telemetry.track(t, d), b);
     // M41-7 (spec v0.3.3, OQ-7): loadSafe is the single owner of the order. With opts.idbBoot (main.ts) the IndexedDB value is a
     // tier (CSR-2/3/13, CSR-AC-IDB1) and the stale-LS reconcile runs inside it; without it (tests, refused-newer) the legacy
     // raw is only used for the newer-build check.
@@ -398,8 +406,9 @@ export class Game {
     // ---- M5.1 breeds session_end (HoE/breeds-telemetry-emitters, drift row 34; gen/breeds-telemetry). Flag off: {} (absent). ----
     { const ev: SimEvent[] = []; this.state = flushBreedsTel(this.state, this.b, ev); this.emit(ev); } // open breed_slotted windows close before endSession
     // ---- end M5.1 breeds flush (fields + resetBreedsTel live on registerSessionEnd('breeds')) ----
+    if (this.bbTel) this.bbTel.flushOpen(Math.floor(this.bbSimMs / 1000));
     // R3: a hide >= session_hidden_end_s that never came back ends as the back-dated session_end{hidden}; otherwise {unload}.
-    // session_end fields come from registered contributors (pause #119, then present_*, then breeds, then broody); do not track('session_end') here.
+    // session_end fields come from registered contributors (pause #119, then present_*, then breeds, then broody, then bbv2); do not track('session_end') here.
     // broody counter zeroing moved into registerSessionEnd('broody').reset().
     const hAt = this.telemetry.clock.hiddenAt;
     if (hAt !== null && hAt < at && !this.readOnly && this.telemetry.rotateDue(at)) {
@@ -458,7 +467,9 @@ export class Game {
   }
   dispatch(a: Action) {
     if (this.inactive || this.held()) return;
+    const before = this.state, bbKey = this.bbTel ? buyKeyOf(a) : null;
     const ev: SimEvent[] = []; this.state = apply(this.state, a, this.b, ev, this.attendedNow()); this.emit(ev); this.checkCoopFull(); // Q-F1c-1 (D-HOP-2026-10-29-06)
+    if (bbKey && ev.some(e => e.type === 'upgrade' || e.type === 'worker_hire' || e.type === 'grader_tier')) this.bbTel!.purchase(before, bbKey, this.bbCtx());
     if (!this.bakAllowed && ev.some(e => e.type === 'upgrade' || e.type === 'worker_hire' || e.type === 'grader_tier')) this.allowBackup();
     if (isUpgrade(a) || a.type === 'collectOffline' || a.type === 'dismissOffline' || a.type === 'markCelebrated') this.save();
   }
@@ -498,6 +509,7 @@ export class Game {
     if (this.hidden) return;
     this.frame(); // bring the sim up to the hide
     this.focusAccMs = 0; // hidden frames never pass focus (leftover acc is simulated unfocused)
+    this.bbTel?.flushOpen(Math.floor(this.bbSimMs / 1000)); // V-2d (a): background flush, fresh sampling on resume
     this.hidden = { at, periodId: this.nextHiddenPeriodId++, state: this.state, accMs: this.accMs, simMs: 0, ev: [] };
   }
   /** Page shown again after `span`. Hidden >= offlineMinSeconds: drop the provisional hidden sim and pay the whole
@@ -587,6 +599,7 @@ export class Game {
       this.accMs = gap >= maxMs ? 0 : r.accMs;
       this.focusAccMs = gap >= maxMs ? 0 : r.focusAccMs;
       this.emit(ev);
+      if (this.bbTel) { this.bbSimMs += Math.min(gap, maxMs); this.bbTel.sample(Math.floor(this.bbSimMs / 1000), this.state); } // V-2d: integer sim seconds
       this.driveGolden(false); // v5 #1: identity unless golden is on and a spawn is due on an attended frame
       this.driveBroody(false); // v5 #5: identity unless broody is on and an R4 check is due on an attended frame
     }
