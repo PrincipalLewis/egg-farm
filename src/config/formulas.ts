@@ -156,8 +156,7 @@ export const M5_TC_KEYS: Record<string, readonly string[]> = {
   golden: ['egg_gap_min_s', 'egg_gap_max_s', 'frenzy_s', 'frenzy_price_mult', 'egg_cash_s', 'egg_eggs_s', 'egg_eggs_as_cash_from_farm', 'egg_w_cash', 'egg_w_frenzy', 'egg_w_eggs',
     'first_spawn_s', 'egg_unlock_farm', 'egg_despawn_s', 'spawn_grace_ms', 'warn_at_s', 'frenzy_all_sales'], // #1 slice 2 readers + R22 scope
   abilities: ['ability_s', 'ability_cd_s'],
-  streak: ['streak_unlock_farm', 'streak_per_tap', 'tap_credit_min_s', 'streak_hold_s', 'streak_decay_per_s', 'streak_cap', 'streak_tier_count',
-    'streak_cool_cue_min_tier'], // #143 (D-HOP-2026-11-13-01): ui/streak-view.ts cool cue (QA-D-1113-STAC18-8)
+  streak: ['streak_unlock_farm', 'streak_per_tap', 'tap_credit_min_s', 'streak_hold_s', 'streak_decay_per_s', 'streak_cap', 'streak_tier_count'],
   tapCoins: ['streak_unlock_farm', 'tap_credit_min_s', 'tap_income_share', 'tap_bonus_income_window_s'], // #3: R1 unlock, R2 window, A1 share, I_ref window
 };
 /** A tc_* tunable; throws when missing or non-finite (never a silent 0; F3's flags.ts helpers replace this on merge). */

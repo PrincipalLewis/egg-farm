@@ -57,7 +57,8 @@ export function tierAria(k: number, b: Balance): string {
 }
 export const COOLING_ARIA = 'Streak cooling';
 /** The tier from which a cooling start plays sfx-streak-cool-01 and announces (combo-tiers §1 tier 2 row, §6): m4.tc
- *  streak_cool_cue_min_tier (economy.csv tc_streak_cool_cue_min_tier = 2, #143 / D-HOP-2026-11-13-01; QA-D-1113-STAC18-8). */
+ *  streak_cool_cue_min_tier (economy.csv tc_streak_cool_cue_min_tier = 2, #143 / D-HOP-2026-11-13-01). The ST-AC18 8th key
+ *  (M5_TC_KEYS.streak, pinned list, validateBalance) is Saves' PR (D-CEO-20261114-06). */
 export const coolCueMinTier = (b: Balance): number => tcNum(b, 'streak_cool_cue_min_tier');
 
 /**

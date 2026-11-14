@@ -4,8 +4,7 @@
 import { describe, it, expect } from 'vitest';
 import { balance, type Balance } from '../src/config/balance';
 import { tcNum } from '../src/config/formulas';
-import { streakTier } from '../src/sim/streak';
-import { streakParams, tierThresholds, pctFloor, meterView, pillCopy, tierAria, StreakTiers, LiveThrottle, streakUiOn, tapCoinUiOn, coolCueMinTier } from '../src/ui/streak-view';
+import { streakParams, tierThresholds, pctFloor, meterView, pillCopy, tierAria, StreakTiers, LiveThrottle, streakUiOn, tapCoinUiOn } from '../src/ui/streak-view';
 
 const withTc = (tc: Record<string, number>, flags: Record<string, number> = {}, enabled = 1): Balance =>
   ({ ...balance, m4: { ...balance.m4!, enabled, flags: { ...balance.m4!.flags, ...flags }, tc: { ...balance.m4!.tc, ...tc } } }) as Balance;
@@ -110,16 +109,6 @@ describe('tier-up hysteresis (§3.3, ST-AC9/10, CT-AC5/11)', () => {
     const b = new StreakTiers(); for (let i = 1; i <= 15; i++) b.update(i / 100, false, B27);
     expect(b.update(0.15, true, B27).coolStart).toBe(true); expect(b.update(0.14, true, B27).coolStart).toBeUndefined();
     b.update(0.15, false, B27); expect(b.update(0.15, true, B27).coolStart).toBe(true); // a tap re-heated it, then a new cooling start
-  });
-  it("config [QA-D-1113-STAC18-8]: the cool-cue tier is tcNum(b,'streak_cool_cue_min_tier') (#143 = 2), not a constant; missing throws", () => {
-    expect(tcNum(BCFG, 'streak_cool_cue_min_tier')).toBe(2); expect(coolCueMinTier(BCFG)).toBe(2); expect(coolCueMinTier(B27)).toBe(2);
-    const B3 = withTc({ streak_cap: 0.27, streak_cool_cue_min_tier: 3 });
-    const two = new StreakTiers(); for (let i = 1; i <= 15; i++) two.update(i / 100, false, B3);
-    expect(streakTier(0.15, B3)).toBe(2); expect(two.update(0.15, true, B3).coolStart).toBeUndefined(); // tier 2 no longer enough at 3
-    const three = new StreakTiers(); for (let i = 1; i <= 22; i++) three.update(i / 100, false, B3);
-    expect(streakTier(0.22, B3)).toBe(3); expect(three.update(0.22, true, B3).coolStart).toBe(true);
-    const tc: any = { ...BCFG.m4!.tc }; delete tc.streak_cool_cue_min_tier; const miss = { ...BCFG, m4: { ...BCFG.m4!, tc } } as Balance;
-    expect(() => coolCueMinTier(miss)).toThrow(/tc_streak_cool_cue_min_tier/);
   });
 });
 
