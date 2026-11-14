@@ -11,10 +11,12 @@ import { tickFocusS, type StepClock } from './clock';
 import { ensureEvRng } from './rng';
 import { streakTick } from './streak';
 import { incomeRefTick } from './income-ref';
-import { frenzyTick } from './golden';
-import { ensureBreeds } from './breeds';
+import { frenzyTick, goldenTick } from './golden';
+import { ensureBreeds, noteTraitEggs } from './breeds';
 import { breedsTick } from './breeds-hatch';
+import { breedsPresentTick } from './breeds-traits';
 import { abilitiesTick } from './abilities';
+import { broodyTick } from './broody';
 /** dt = sim seconds of this tick; focusS = focus seconds of this tick (dt or 0). */
 export type TimerSystem = (s: GameState, dt: number, focusS: number, b: Balance, clock: StepClock | undefined, ev?: Sink) => GameState;
 /** Seeds evRngState once on the first tick golden or broody is on (D-C2, Q4 ruling). Never touches state.rng.
@@ -26,15 +28,23 @@ const seedEvRng: TimerSystem = (s, _dt, _f, b) => (evRngFlagOn(b) ? ensureEvRng(
 const streak: TimerSystem = (s, dt, f, b, _c, ev) => streakTick(s, dt, f, b, ev);
 /** M5.1 breeds (tick-semantics note point 1): settle -> incubator/reveal -> sinceUnlockMs on sim dt (breedsTick), then Q2
  *  creates `breeds` at the end of the first flag-on tick (so the creating tick counts nothing). Identity unless m4.flags.breeds. */
-const breeds: TimerSystem = (s, dt, _f, b, c) => ensureBreeds(breedsTick(s, dt, b, c?.slotsFarm), b);
+const breeds: TimerSystem = (s, dt, f, b, c, ev) => {
+  const pre = ensureBreeds(breedsTick(s, dt, b, c?.slotsFarm, ev), b), out = breedsPresentTick(pre, dt, f, b, c?.focusFtMs);
+  return out === pre ? out : noteTraitEggs(out, 'presentEggs', out.coop - pre.coop); // §8 breed_present_eggs = coop eggs BR-R12 added (post-cap)
+};
 /** #3 I_ref (§4.1/§4.1a): the 1 s sim-time ring rolls and refWarmS advances on sim dt (hidden ticks too). Identity unless m4.flags.tapCoins. */
 const incomeRef: TimerSystem = (s, dt, _f, b) => incomeRefTick(s, dt, b);
 /** #1 golden R23: frenzyRemainingS counts down on focus seconds (frozen under menus / hidden). Identity unless m4.flags.golden. */
-const frenzy: TimerSystem = (s, _dt, f, b) => frenzyTick(s, f, b);
+const frenzy: TimerSystem = (s, _dt, f, b, _c, ev) => frenzyTick(s, f, b, ev);
+/** #1 golden R1-R3/R15/R18: first-spawn and gap countdown, deferral, on-screen lifetime + timeout, all on focus seconds. */
+const golden: TimerSystem = (s, _dt, f, b, _c, ev) => goldenTick(s, f, b, ev);
 /** #4 abilities (rules 6, 10): early end, then focus countdown / expiry of running calls. Identity unless m4.flags.abilities. */
 const abilities: TimerSystem = (s, _dt, f, b, _c, ev) => abilitiesTick(s, f, b, ev);
-export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak, breeds, incomeRef, frenzy, abilities];
-export const anyM5FlagOn = (b: Balance) => M5_FLAGS.some(f => flagOn(b, f));
+/** #5 Broody R7: nest accrual on this tick's integer focus ms (fT, Σ fT = frame focus), after I_ref. Identity unless m4.flags.broody. */
+const broody: TimerSystem = (s, _dt, f, b, c, ev) => broodyTick(s, f, f > 0 ? c?.focusFtMs ?? Math.round(f * 1000) : 0, b, ev);
+export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak, breeds, incomeRef, broody, frenzy, golden, abilities];
+/** unpaidTrickle has its own path in tick.ts and must not open the M5 live/stepTimers/fx branch (AC-T1: k=0 with the flag on is byte-identical to flag off). */
+export const anyM5FlagOn = (b: Balance) => M5_FLAGS.some(f => f !== 'unpaidTrickle' && flagOn(b, f));
 export function stepTimers(s: GameState, dt: number, b: Balance, clock?: StepClock, ev?: Sink, systems: readonly TimerSystem[] = TIMER_SYSTEMS): GameState {
   const f = tickFocusS(dt, clock);
   for (const sys of systems) s = sys(s, dt, f, b, clock, ev);

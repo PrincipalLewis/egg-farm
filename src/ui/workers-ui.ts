@@ -7,6 +7,9 @@ import { WARN_SVG, MOON_SVG } from './icons';
 export { WARN_SVG, MOON_SVG }; // m5: card state-word icons (one copy, src/ui/icons.ts)
 import { WORKERS, WorkerId, Worker, canManageWorker, mood, isYawning, showManageAll, hireCostCents, unlockFarm, graderTierCostCents, resumeNeedCents } from '../sim/workers';
 import { abilitiesUiOn, activateAllEligibility, activateAllState, activateAllHtml, callButtonState, callButtonHtml, callProgressPct } from './abilities-ui';
+import { isContributing, trickleResumeInS, unpaidTrickleOn } from '../sim/unpaid-trickle';
+import { stillPaidCaption, stillPaidDescription } from './clock-wage-ui';
+import { wagePerMinCents } from '../sim/clock-wage';
 export const WORKER_NAMES: Record<WorkerId, string> = { market_hand: 'Market Hand', coop_hand: 'Coop Hand', hawker: 'Hawker', grader: 'Egg Grader' };
 const WHAT: Record<WorkerId, string> = { market_hand: 'Serves customers for you', coop_hand: 'Collects eggs for you', hawker: 'Customers buy more', grader: 'Eggs sell for more' };
 const ASSET = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
@@ -115,6 +118,11 @@ export const workerBannerHtml = (wb: WorkerBanner | null) => !wb ? '' :
   `<div class="wk-banner ${wb.kind}" role="status"><img class="wb-ico" src="${ASSET(wb.icon)}" width="14" height="14" alt="" aria-hidden="true"><span class="bt" aria-hidden="true" data-full="${wb.text}" data-short="${wb.short}">${wb.text}</span><span class="sr">${wb.aria}</span></div>`;
 /** 360 rule: if the full banner doesn't fit on one line, drop the role name (never wrap or ellipsise). Call after layout. */
 export function fitBanners(root: ParentNode) {
+  root.querySelectorAll<HTMLElement>('.wk-trickle .wk-trickle-t').forEach(t => {
+    const full = t.dataset.full ?? '', short = t.dataset.short ?? '';
+    if (t.textContent !== full) t.textContent = full;
+    if (t.clientWidth && t.scrollWidth > t.clientWidth + 0.5) t.textContent = short; // E5: static "Trickle on" if the countdown does not fit
+  });
   root.querySelectorAll<HTMLElement>('.wk-banner .bt').forEach(t => {
     const full = t.dataset.full ?? '', short = t.dataset.short ?? '';
     if (t.textContent !== full) t.textContent = full;
@@ -149,9 +157,10 @@ export function workersHtml(s: GameState, b: Balance, nowMs = Date.now()): strin
     // B5: enabled only <= threshold. P2b (AC-R10/R11/U2): never for an Unpaid worker (Refill doesn't fix Unpaid), whatever the energy/cooldown.
     const x = resumeAtCents(s, b, id), unpaid = x !== null;
     const e = Math.ceil(w.energy), cd = Math.ceil(s.manageCdS), canManage = cd === 0 && needsPrompt(w, b) && !w.unpaid;
-    const cap = manageCaption(w, cd, b, x);
+    // v5 clockWage (failure-cost v0.3.24 AC-FC8/FC-N2): Unpaid > Asleep "Still paid $X/min" > rc1 captions; null with the flag off.
+    const paid = stillPaidCaption(s, id, b), cap = paid ?? manageCaption(w, cd, b, x);
     // Unpaid: the button's name stays "Refill {Role}" (WCAG 2.5.3); the full resume sentence is its description (never aria-label).
-    const desc = unpaid ? `capd-${id}` : cap ? `cap-${id}` : '';
+    const desc = unpaid ? `capd-${id}` : paid ? `capw-${id}` : cap ? `cap-${id}` : '';
     const off = m === 'asleep' || m === 'unpaid';
     const label = m === 'working' ? 'Working' : m === 'tired' ? 'Tired' : m === 'unpaid' ? 'Unpaid' : 'Asleep'; // m5: no emoji / text pictograph; the icon is the inline SVG after the word
     const banner = workerBannerHtml(workerBanner(id, m, b));
@@ -163,14 +172,15 @@ export function workersHtml(s: GameState, b: Balance, nowMs = Date.now()): strin
         ? F < tiers[i].farm ? `<div class="hint">Next grade ×${tiers[i].mult} at Farm L${tiers[i].farm}</div>`
           : `<button class="btn buy ${s.coinsCents >= graderTierCostCents(i, b) ? 'affordable' : ''}" data-act="tier" aria-disabled="${s.coinsCents < graderTierCostCents(i, b)}">Grade ×${tiers[i].mult} ${fmtMoney(graderTierCostCents(i, b))}</button>` : '');
     }
+    const trickle = trickleSublineHtml(s, b, id);
     const body = `<h3>${WORKER_NAMES[id]} · <span class="st">${label}${m === 'unpaid' ? WARN_SVG : m === 'asleep' ? MOON_SVG : ''}</span></h3>
       <div class="ebar" role="meter" aria-valuenow="${e}" aria-valuemin="0" aria-valuemax="100" aria-label="Energy"><i style="width:${e}%"></i></div>
-      <div class="meta">Energy ${e}%</div>${extra}`;
+      <div class="meta">Energy ${e}%${trickle}</div>${extra}`;
     // Manage button + optional caption/sr. When a call sits beside Manage, wrap them in
     // .wk-manage (column) so the nowrap .wk-cap cannot inflate the action-row min-content
     // width (QA-D-1106-PR116-OVF / Art §6: side-by-side Manage|call at 360 ≈ 124+8+124).
     const manageBtn = `<button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" aria-label="Refill ${WORKER_NAMES[id]}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${desc ? ` aria-describedby="${desc}"` : ''}>${manageIcon(s, b, 'icon-manage-all.svg', 28)}<span>Refill</span></button>`;
-    const capHtml = `${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}${unpaid ? `<span class="sr" id="capd-${id}">${unpaidDescription(id, x!)}</span>` : ''}`;
+    const capHtml = `${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}${unpaid ? `<span class="sr" id="capd-${id}">${unpaidDescription(id, x!)}</span>` : ''}${paid ? `<span class="sr" id="capw-${id}">${stillPaidDescription(WORKER_NAMES[id], wagePerMinCents(id as 'market_hand' | 'coop_hand', F, b))}</span>` : ''}`;
     const cst = callButtonState(s, id, b, nowMs);
     const call = cst ? callButtonHtml(cst, id) : '';
     const refill = call
@@ -196,6 +206,28 @@ export const navRefillState = (s: GameState, b: Balance, docked: boolean, prev: 
 export const REFILL_COOLDOWN_ARIA = 'Refill, cooling down';
 /** D-HOP-2026-10-30-02: m:ss for the cooldown countdown (manage_cooldown_s is 30 today, so "0:30" … "0:01"). */
 export const fmtCooldown = (cd: number) => `${Math.floor(cd / 60)}:${String(cd % 60).padStart(2, '0')}`;
+/** unpaid_trickle §5 E2 (spec v1.0.2 9e2acfe9, Art E1–E6 f87c5ecd): ~m:ss below 1 h (minutes unpadded), ~h:mm:ss from 1 h; ceil; never ~0:00. */
+export function fmtTrickleEta(seconds: number): string {
+  const s = Math.max(1, Math.ceil(seconds - 1e-9)); // E2: last frame is ~0:01
+  const p = (n: number) => String(n).padStart(2, '0');
+  if (s >= 3600) { const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60); return `~${h}:${p(m)}:${p(s % 60)}`; }
+  return `~${Math.floor(s / 60)}:${p(s % 60)}`;
+}
+/** E1 visible string: "Trickle · resumes in ~m:ss" with NBSP (U+00A0) on both sides of the middle dot. */
+export const TRICKLE_NBSP_DOT = ' · ';
+export const trickleLine = (eta: string) => `Trickle${TRICKLE_NBSP_DOT}resumes in ${eta}`;
+export const TRICKLE_FALLBACK = 'Trickle on'; // E5 static fallback
+/** E4 aria; `time` is the E2 clock without the leading tilde (e.g. "1:00", "1:05:00"). Not aria-live. */
+export const trickleAria = (role: string, time: string) => `${role}: wage trickle on, resumes in about ${time}`;
+/** AC-T11: flag on, k > 0, this hand in the sum — one sub-line; otherwise no DOM nodes (E6). */
+export function trickleSublineHtml(s: GameState, b: Balance, id: WorkerId): string {
+  if (!unpaidTrickleOn(b) || !isContributing(s.workers[id], b)) return '';
+  const rem = trickleResumeInS(s, b, id);
+  if (rem === null) return '';
+  const eta = fmtTrickleEta(rem), time = eta.replace(/^~/, ''), role = WORKER_NAMES[id];
+  const full = trickleLine(eta), aria = trickleAria(role, time);
+  return `<span class="wk-trickle" data-trickle="1"><img class="wk-trickle-ico" src="${ASSET('icon-coin.svg')}" width="12" height="12" alt="" aria-hidden="true"><span class="wk-trickle-t" data-full="${full}" data-short="${TRICKLE_FALLBACK}">${full}</span><span class="sr">${aria}</span></span>`;
+}
 export function navManageView(n: number, cdS: number, docked: boolean, prev: NavAria, nowMs: number): { label: string; countdown: string; badge: string; aria: NavAria } {
   const cd = Math.ceil(cdS - 1e-9);
   if (cd > 0) {
