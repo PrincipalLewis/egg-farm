@@ -677,7 +677,7 @@ nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);marg
 .collectbar.ss-on{position:relative}
 .stall-chip{position:absolute;z-index:1;display:block;min-height:var(--goal-hit);margin:0;padding:2px 0;background:transparent;border:0;border-radius:var(--r-pill);box-sizing:border-box;cursor:pointer;
   opacity:0;transition:opacity 150ms ease}
-.stall-chip[hidden]{display:none}
+.stall-chip[hidden]{display:none!important}
 .stall-chip.ss-in{opacity:1}
 .stall-chip.ss-in.ss-pop .ss-pill{animation:sspop 150ms var(--ease-pop)}@keyframes sspop{from{transform:scale(1.05)}}
 .stall-chip.ss-hiding{opacity:0;pointer-events:none}
@@ -703,7 +703,7 @@ nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);marg
 .farm.fb-host{position:relative}
 .farm-banner{position:absolute;z-index:3;left:8px;right:8px;top:calc(var(--fb-top,0px) + 8px);max-height:52px;display:flex;align-items:center;gap:6px;min-height:44px;padding:0 4px 0 10px;box-sizing:border-box;background:var(--c-danger);color:#fff;
   font:700 12px/16px var(--f-body);border-radius:12px;border:2px solid var(--c-outline);white-space:nowrap;min-width:0}
-.farm-banner[hidden]{display:none}
+.farm-banner[hidden]{display:none!important}
 .farm-banner .wb-ico{flex:none;width:14px;height:14px}
 .farm-banner .fb-msg{flex:1 1 auto;min-width:0;display:flex}.farm-banner .bt{min-width:0;overflow:hidden;text-overflow:clip}
 .farm-banner .fb-more{flex:none}
