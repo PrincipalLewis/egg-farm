@@ -15,7 +15,7 @@ export interface StreakRun { peak: number; durationS: number; creditedTaps: numb
 const EPS = 1e-9, r12 = (x: number) => Math.round(x * 1e12) / 1e12, r2 = (x: number) => Math.round(x * 100) / 100;
 export const streakOn = (b: Balance) => m4On(b) && b.m4?.flags?.streak === 1;
 /** R13a: credited-tap detection runs while the streak OR tap coins (#3 A1) is on; the 1.0 s window is shared. */
-const creditedTapsOn = (b: Balance) => streakOn(b) || (m4On(b) && b.m4?.flags?.tapCoins === 1);
+export const creditedTapsOn = (b: Balance) => streakOn(b) || (m4On(b) && b.m4?.flags?.tapCoins === 1);
 /** Streak hold, then decay, over `dtFocus` focus seconds in ONE step (spec §6 formula; dt < 0 counts as 0). */
 export function streakAfter(sv: number, holdS: number, dtFocus: number, b: Balance): { s: number; holdS: number } {
   const dt = Math.max(0, dtFocus); if (dt <= holdS) return { s: sv, holdS: holdS - dt };

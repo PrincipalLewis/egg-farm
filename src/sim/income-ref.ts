@@ -22,8 +22,8 @@ const CENTS_PER_DOLLAR = 100;
 /** Sim-time grid for refWarmS (ticks are 0.1 s; keeps the 1 s bucket boundaries exact after float sums). */
 const TIME_GRID = 1e6, EPS = 1e-9;
 const grid = (x: number) => Math.round(x * TIME_GRID) / TIME_GRID;
-/** I_ref is live while a reader is on: #3 tap coins (the Broody PR extends this). */
-export const incomeRefOn = (b: Balance) => m4On(b) && b.m4?.flags?.tapCoins === 1;
+/** I_ref is live while a reader is on: #3 tap coins, #5 Broody nest (R7). */
+export const incomeRefOn = (b: Balance) => m4On(b) && (b.m4?.flags?.tapCoins === 1 || b.m4?.flags?.broody === 1);
 /** W = tc_tap_bonus_income_window_s, whole seconds (validateBalance: integer >= 1). */
 export const incomeWindowS = (b: Balance) => tcNum(b, 'tap_bonus_income_window_s');
 /** I_ss in $/s (§4.1a): RC1's steady-state model with default options, gross of wages, never below 0. No M5 uplift is in it. */

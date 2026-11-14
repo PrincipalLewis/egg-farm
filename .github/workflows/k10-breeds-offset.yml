@@ -34,6 +34,8 @@ jobs:
       - name: K10 trigger + 200-seed offset test when triggered (npm run test:k10)
         env:
           K10_BASE: ${{ github.event.pull_request.base.sha || inputs.base || 'origin/rc/v5' }}
+          K10_CSV: tests/fixtures/k10/economy.combined-K002.csv
+          K10_REF_CSV: tests/fixtures/k10/economy.no-breeds-reference.csv
           K10_OUT: k10-out/k10-result.json
         run: mkdir -p k10-out && node scripts/k10-trigger.mjs --base "$K10_BASE" --head HEAD --exec
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

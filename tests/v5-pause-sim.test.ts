@@ -1,5 +1,5 @@
 // HoE/pause-sim (manifest row 31): Pause/Resume sim behind m4.flags.pause.
-// Spec citations in tree: product/workers/m5-worker-pause-spec.md v1.3.15 (sha1 4c081f64; audit N3 / D1 fold-in) rule 1, rule 3 / §6, rule 7 (B5), E2/E9/E12.
+// Spec citations in tree: product/workers/m5-worker-pause-spec.md v1.3.16 (sha1 471fb534; audit N3 / D1 fold-in) rule 1, rule 3 / §6, rule 7 (B5), E2/E9/E12.
 // D-HOP-2026-11-06-01 (a): Pause v1.3.15 — offline egg grant ignores pause and hire. Wages, recovery, and call lockout still freeze.
 // lockout tc_pause_call_lockout_s = 45 sim seconds (Market Hand). UI and the G5-P driver are out of scope.
 // AC-P1 flag-off has no behavioural effect. AC-P2 / rule 1: below tc_pause_unlock_farm the toggle does nothing.
