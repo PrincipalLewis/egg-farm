@@ -39,6 +39,7 @@ import { trackToastSafe } from './toast-safe';
 import { clockWageOn, clockWageWindowView } from '../sim/clock-wage';
 import { asleepToast, FallAsleepToasts, clockWageTipNow, CLOCK_WAGE_TIP, welcomeBackWageHtml } from './clock-wage-ui';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, upgradesNavName, type NavAria } from './workers-ui';
+import { mountBreeds, type FlockUiFlags } from './breeds-mount';
 import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
 import { WARN_SVG } from './icons'; // m6: the HUD rate's warning sign is the static inline SVG, shown by .warn
 import { asleepOrUnpaidCount } from '../econ/income'; // AC-R1 / AC-R5 asleep count badge
@@ -46,7 +47,7 @@ import { asleepOrUnpaidCount } from '../econ/income'; // AC-R1 / AC-R5 asleep co
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
 export const UI_KEY = 'eggfarm.ui';
-interface UiFlags { onbStep?: number; sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean; sessions?: number; iosHomeShown?: boolean }
+interface UiFlags { onbStep?: number; sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean; sessions?: number; iosHomeShown?: boolean; flockOpened?: boolean; flockHighlightArmed?: boolean; flockHighlightSession?: number }
 const h = (html: string) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild as HTMLElement; };
 const setText = (el: Element, v: string) => { if (el.textContent !== v) el.textContent = v; };
 /** OC-A11Y-2 (D-HOP-2026-11-09-01): order-chip accessible name; starts with the visible `.tag .num` text (WCAG 2.5.3).
@@ -210,6 +211,20 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const navFarm = nav.querySelector('[data-nav=farm]')!, upHeader = panelLayer.querySelector('#p-upgrades header')!;
   const placeFarmMA = () => { if (docked.matches) upHeader.insertBefore(farmMA, upHeader.querySelector('.close')); else nav.insertBefore(farmMA, navFarm); };
   placeFarmMA(); docked.addEventListener?.('change', placeFarmMA);
+  // M5.1 Breeds PR-A: single mount; PR-B registers via registerBreedsExt (no further app.ts)
+  const flock = mountBreeds({
+    g, b, upHeader: upHeader as HTMLElement, panelLayer, docked,
+    closeOtherPanels: () => { if (!docked.matches) openPanel(null); },
+    openUpgrades: () => { if (!docked.matches) openPanel('upgrades'); },
+    sfx: (k) => sfx(k as any),
+    rm,
+    saveFlags,
+    getFlags: () => flags as FlockUiFlags,
+    dirty: () => { dirty = true; },
+    // BB-5 / time-to-afford rolling window — PR-B strip countdown must match.
+    rollingIncomeRate: () => income.centsPerSec(now()),
+  });
+  flock?.syncEntry(g.state, flags as FlockUiFlags, flags.sessions ?? 0);
   let farmMAShown = false, maAria: NavAria = { text: '', at: -Infinity }, rateAt = -Infinity; const rateEl = $('#rate'), rateTri = $('#rate .tri'), rateTxt = $('#rate .rt'); // m6: ▼ in an aria-hidden .tri, money in .rt
   for (const fb of farmMAs) fb.addEventListener('click', e => { e.stopPropagation(); if (!act({ type: 'manageAll' })) return cantAfford(fb); sfx('upgrade'); dirty = true; });
   nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n) openPanel(n === 'farm' ? null : n as any); });
@@ -359,7 +374,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const grantWelcome = (withFlyers: boolean) => {
     const eggs = g.state.pendingOfflineEggs; const btn = $('#wbCollect');
     if (withFlyers && btn && !rm()) for (let i = 0; i < Math.min(eggs, b.feel.max_flying_eggs); i++) fly(A('icon-egg.svg'), btn, basketEl.parentElement!, i, 24);
-    g.dispatch({ type: withFlyers ? 'collectOffline' : 'dismissOffline' }); closeModal(); dirty = true; render(); /* S2-10 */ pulse(basketEl.parentElement!); sfx('collect');
+    g.dispatch({ type: withFlyers ? 'collectOffline' : 'dismissOffline' }); closeModal(); dirty = true; render(); /* S2-10 */ pulse(basketEl.parentElement!); sfx('collect'); flock?.onWelcomeClosed();
   };
   const settingsIosLine = () => iosKind === 'standalone' ? `<div class="settings-ios ok">Installed on Home Screen ✔</div>`
     : iosKind ? `<div class="settings-ios">${SHARE_SVG} ${TIP_TITLE} ${howTo(iosKind, '')}</div>`.replace(' ,', ',').replace('  ', ' ') : '';
@@ -391,7 +406,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   $('#settings').addEventListener('click', showSettings);
   // PL-1: Escape only closes the modal/panel, never activates; a held Enter or Space can't auto-repeat buys (one press = one level).
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { e.preventDefault(); if (modalKind === 'welcome') grantWelcome(false); else if (modalKind) closeModal(); else openPanel(null); }
+    if (e.key === 'Escape') { e.preventDefault(); if (modalKind === 'welcome') grantWelcome(false); else if (modalKind) closeModal(); else if (flock?.onEsc()) { dirty = true; render(); } else openPanel(null); }
     else if ((e.key === 'Enter' || e.key === ' ') && e.repeat && (e.target as Element | null)?.closest?.('button')) e.preventDefault();
   });
 
@@ -771,6 +786,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     }
     // M41-8: the shared pick is refreshed first so the row outline, the UX-M4 chip and the strip ★ use the same frame's pick.
     renderGoal();
+    flock?.syncEntry(s, flags as FlockUiFlags, flags.sessions ?? 0);
+    if (flock?.isOpen) flock.render();
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
       const html = tab === 'workers' ? workersHtml(s, b) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
@@ -923,7 +940,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   /** SG-12 `qaPicker()` (v: 1, fields exactly as SG-12; v5 sources per BBv2 spec v1.0.4 §6): read-only, fresh JSON-safe object, no state,
    *  DOM, picker or telemetry change. hintRaw = picker.hint.shown (after the ZG filter and Part A, before the highlight merge). */
   const qaPick = (p: SharedPick | null) => p && { key: p.key, affordable: p.affordable, costCents: p.costCents, payback: p.payback === Infinity ? 'Infinity' : p.payback };
-  return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; }, dispose: () => zgAC.abort(),
+  return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; }, dispose: () => { flock?.dispose(); zgAC.abort(); },
     ...(IOS_FLAG_ENABLED ? { qaPicker: () => { const t = now(); return { v: 1, t, m4: m4On(b), hint: qaPick(hintPick), hintRaw: qaPick(picker.hint.shown), highlight: qaPick(rowPick),
       mark: hintMark, suppressed: hintPick !== null && hintMark === null, heldMs: hintPick ? t - qaKeySinceT : 0, evals: picker.hint.evals, changes: picker.hint.changes,
       history: qaHist.map(h => ({ ...h })) }; } } : {}) };
