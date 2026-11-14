@@ -15,7 +15,9 @@ import { RenderPump } from './ui/render-pump';
 import { BUILD_ID } from './build-id';
 const VERSION = BUILD_ID;
 const ASSETS = ['icon-coin', 'icon-egg', 'icon-settings', 'icon-nest', 'icon-coop', 'icon-market', 'icon-upgrade', 'icon-customer', 'icon-close',
-  'icon-offline-earnings', 'nest-eggs', 'char-chicken', 'coop-l1', 'coop-l5', 'coop-l10', 'coop-l20', 'icon-manage', 'icon-manage-all', 'ring-cooldown', 'overlay-yawn'].map(n => `${import.meta.env.BASE_URL}assets/${n}.svg`);
+  'icon-offline-earnings', 'nest-eggs', 'char-chicken', 'coop-l1', 'coop-l5', 'coop-l10', 'coop-l20', 'icon-manage', 'icon-manage-all', 'ring-cooldown', 'overlay-yawn',
+  // A-F1: ability icons are preloaded only when shipped m4.flags.abilities is on (flag 0: same boot requests as base).
+  ...(balance.m4?.enabled && balance.m4.flags?.abilities === 1 ? ['icon-bolt', 'ico_ability_rush', 'ico_ability_sweep', 'ico_ability_shout', 'ico_ability_inspect', 'ico_boost_combo'] : [])].map(n => `${import.meta.env.BASE_URL}assets/${n}.svg`);
 const root = document.getElementById('app')!;
 // F-META (ccd7bf9): build id via meta + data attribute only (no window global); static in built html, kept in sync at runtime.
 root.dataset.buildId = BUILD_ID;

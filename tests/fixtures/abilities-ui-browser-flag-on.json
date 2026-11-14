@@ -1,0 +1,4 @@
+{
+  "_comment": "TEST-ONLY runtime overlay for scripts/abilities-ui-browser.mjs (#116 QA-D-1106-PR116-CI). Applied in-page onto window.eggfarm.balance on the QA build. NEVER copy into src/config/balance.json (shipped abilities stays 0).",
+  "m4": { "flags": { "abilities": 1 } }
+}

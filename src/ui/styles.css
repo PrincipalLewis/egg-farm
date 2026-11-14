@@ -673,6 +673,37 @@ nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);marg
 .zg-confirm[hidden]{display:none}
 .rm .zg-confirm{animation:none}@media (prefers-reduced-motion:reduce){.zg-confirm{animation:none}}
 
+/* --- v5 abilities UI (#4b / Art Q8 AB-UI-7 / AC-M5A-8..10) --- */
+.lbl{white-space:nowrap}
+.sr-in{font-size:0;line-height:0;color:transparent}
+[data-cd]::after{content:attr(data-cd);white-space:pre}
+.btn.activate-all{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:48px;min-height:48px;padding:0 8px;border:2px solid var(--c-ink,#3b2a1a);border-radius:24px;background:var(--c-yolk,#f5c542);color:var(--c-ink,#3b2a1a);font-weight:600;box-sizing:border-box;flex:0 0 auto}
+.btn.activate-all[hidden]{display:none!important} /* A-F2 belt: author display must never beat [hidden] */
+.btn.activate-all .act-bolt{flex:0 0 20px;width:20px;height:20px}
+.btn.activate-all[aria-disabled=true]{opacity:.5;background:color-mix(in srgb, var(--c-yolk,#f5c542) 50%, #fff)}
+.btn.activate-all.is-compact{min-width:0;width:auto;padding:0 8px}
+.sheet header .btn.activate-all{margin-left:8px}
+.act-all-bar{display:flex;align-items:stretch;gap:8px;margin:0 12px 6px;position:sticky;top:0;z-index:2}
+.act-all-bar .refill-wrap{margin:0;flex:1 1 0;min-width:0}
+.act-all-bar .refill-wrap .btn.manage-all{width:100%;margin:0}
+.act-all-bar .btn.activate-all{flex:1 1 0;min-width:0;width:auto}
+.act-all-bar .slot-spacer{flex:1 1 0;min-width:0;visibility:hidden;height:48px;pointer-events:none}
+/* #116 OVF: card must never expand past the sheet at 360 — cap under Manage, equal Manage|call share (Art §6). */
+.wk,.wk-body,.wk-refill,#uRow{min-width:0;max-width:100%;box-sizing:border-box}
+.wk .ebar{max-width:100%;box-sizing:border-box}
+.wk-actions{display:flex;align-items:flex-start;gap:8px;width:100%;min-width:0;max-width:100%;flex-wrap:nowrap;box-sizing:border-box}
+.wk-actions .wk-manage{display:flex;flex-direction:column;align-items:stretch;gap:2px;flex:1 1 0;min-width:0}
+.wk-actions .wk-manage .btn.manage{flex:none;width:100%;min-width:0} /* keep >=44 tall via .wk .btn.manage; width shares with call */
+.wk-actions .wk-manage .wk-cap{max-width:100%;overflow:hidden;text-overflow:ellipsis} /* stay under Manage; never inflate the row */
+.wk-actions .wk-call{display:flex;flex:1 1 0;min-width:0;align-items:stretch}
+.wk-actions .btn.call-btn{flex:1 1 0;width:100%;min-width:0}
+.btn.call-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;height:44px;min-height:44px;flex:1 1 0;min-width:0;padding:0 8px;border:2px solid var(--c-ink,#3b2a1a);border-radius:22px;background:var(--c-yolk,#f5c542);color:var(--c-ink,#3b2a1a);font-weight:600;box-sizing:border-box;overflow:hidden}
+.btn.call-btn .act-bolt,.btn.call-btn .act-ico{flex:0 0 20px;width:20px;height:20px}
+.btn.call-btn .lbl{min-width:0;overflow:hidden;text-overflow:ellipsis} /* Active countdown stays one line inside the shared slot */
+.btn.call-btn[aria-disabled=true]{opacity:.55}
+.btn.call-btn.call-active{background:linear-gradient(90deg,var(--c-yolk,#f5c542) var(--call-prog,0%),#fff var(--call-prog,0%));box-shadow:inset 0 -4px 0 var(--c-ink,#3b2a1a)}
+.btn.call-btn.call-asleep,.btn.call-btn.call-unpaid,.btn.call-btn.call-paused{background:#eee;border-color:#999}
+
 /* ---- M5.1 Breeds PR-A: Flock entry + sheet (Art v0.2.7) ---- */
 .breeds-entry { height: 44px; min-height: 44px; padding: 0 16px 0 12px; gap: 8px; margin-right: 8px; display: inline-flex; align-items: center; flex: none; }
 .breeds-entry.icon-only { width: 44px; padding: 0; margin-right: 0; justify-content: center; }

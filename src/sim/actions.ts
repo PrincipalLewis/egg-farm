@@ -15,6 +15,7 @@ import { spawnGolden, tapGolden, frenzySale } from './golden';
 import { broodySlots, tapBroody } from './broody';
 import { stallObserve } from '../econ/stall';
 import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
+import { fireAbility, activateAll } from './abilities';
 import { rc2RefillOn } from './refill';
 import { isPaused, resumeWorker } from './pause';
 export type Action =
@@ -24,7 +25,9 @@ export type Action =
   | { type: 'hire'; worker: WorkerId } | { type: 'manage'; worker: WorkerId } | { type: 'manageAll' } | { type: 'buyGraderTier' }
   | { type: 'buyTrack'; track: Track } | { type: 'markMilestones'; ids: string[] }
   | { type: 'spawnGolden'; spots: readonly string[]; layout?: boolean } | { type: 'tapGolden' } // v5 #1 golden (no-op unless m4.flags.golden)
-  | { type: 'broodySlots'; slots: readonly number[] } | { type: 'tapBroody'; slots: readonly number[] }; // v5 #5 Broody (no-op unless m4.flags.broody)
+  | { type: 'broodySlots'; slots: readonly number[] } | { type: 'tapBroody'; slots: readonly number[] } // v5 #5 Broody (no-op unless m4.flags.broody)
+  | { type: 'fireAbility'; worker: WorkerId; inSheet: boolean; nowMs: number; refillAgoSimMs?: number }
+  | { type: 'activateAll'; inSheet: boolean; nowMs: number };
 /** Sell all preview lives in sim/payout.ts (the one payout fn, #25; M4 sale price via salePriceCents); re-exported for #28 callers. */
 export { sellAllPreview } from './payout';
 export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm' || a.type === 'buyTrack';
@@ -133,6 +136,16 @@ function apply0(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true)
       for (const id of need) workers[id] = { ...workers[id]!, energy: 100 };
       ev?.push({ type: 'worker_manage_all', workers: need, energyBefore: need.map(id => Math.round(s.workers[id]!.energy)) });
       return { ...s, workers, manageCdS: b.workers.energy.manage_cooldown_s };
+    }
+    case 'fireAbility': {
+      const r = fireAbility(s, a.worker, b, { inSheet: a.inSheet, viaAll: false, nowMs: a.nowMs, refillAgoSimMs: a.refillAgoSimMs });
+      if (ev) for (const e of r.events) ev.push(e);
+      return r.state;
+    }
+    case 'activateAll': {
+      const r = activateAll(s, b, { inSheet: a.inSheet, nowMs: a.nowMs });
+      if (ev) for (const e of r.events) ev.push(e);
+      return r.state;
     }
     case 'hatch': return startHatch(s, b, ev); // §8 hatch_started (drift row 34)
     case 'placeBreed': return placeBreed(s, b, a.slot, a.id); // §8 breed_slotted: opens a 1,000 ms window; the tick sink emits it on close

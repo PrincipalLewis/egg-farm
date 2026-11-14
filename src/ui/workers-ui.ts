@@ -6,6 +6,7 @@ import { fmtMoney } from './format';
 import { WARN_SVG, MOON_SVG } from './icons';
 export { WARN_SVG, MOON_SVG }; // m5: card state-word icons (one copy, src/ui/icons.ts)
 import { WORKERS, WorkerId, Worker, canManageWorker, mood, isYawning, showManageAll, hireCostCents, unlockFarm, graderTierCostCents, resumeNeedCents } from '../sim/workers';
+import { abilitiesUiOn, activateAllEligibility, activateAllState, activateAllHtml, callButtonState, callButtonHtml, callProgressPct } from './abilities-ui';
 import { isContributing, trickleResumeInS, unpaidTrickleOn } from '../sim/unpaid-trickle';
 import { stillPaidCaption, stillPaidDescription } from './clock-wage-ui';
 import { wagePerMinCents } from '../sim/clock-wage';
@@ -128,8 +129,25 @@ export function fitBanners(root: ParentNode) {
     if (t.clientWidth && t.scrollWidth > t.clientWidth + 0.5) t.textContent = short;
   });
 }
-export function workersHtml(s: GameState, b: Balance): string {
-  return manageAllHtml(s, b) + WORKERS.map(id => {
+/** Sticky Workers-tab bar: Refill (left) + Activate-all (right) when abilities on (AC-M5A-8/9). */
+export function workersActionBarHtml(s: GameState, b: Balance, nowMs: number): string {
+  const refill = manageAllHtml(s, b);
+  if (!abilitiesUiOn(s, b)) return refill;
+  const elig = activateAllEligibility(s, b, nowMs);
+  const st = activateAllState({
+    readyCount: elig.ready,
+    nextCdS: elig.nextCdS,
+    docked: false, // Workers tab sheet bar always uses full labels; docked header owns compact
+    refillVisible: false,
+  });
+  const act = activateAllHtml(st);
+  if (refill) return `<div class="act-all-bar">${refill}${act}</div>`;
+  // rc2Refill=1 / N=0: keep left spacer so Activate-all does not move (AC-M5A-9)
+  return `<div class="act-all-bar"><div class="slot-spacer" aria-hidden="true"></div>${act}</div>`;
+}
+
+export function workersHtml(s: GameState, b: Balance, nowMs = Date.now()): string {
+  return workersActionBarHtml(s, b, nowMs) + WORKERS.map(id => {
     const w = s.workers[id], m = mood(w, b), F = s.farmLevel;
     if (!w) {
       const locked = F < unlockFarm(id, b), cost = hireCostCents(id, b), can = !locked && s.coinsCents >= cost;
@@ -158,8 +176,19 @@ export function workersHtml(s: GameState, b: Balance): string {
     const body = `<h3>${WORKER_NAMES[id]} · <span class="st">${label}${m === 'unpaid' ? WARN_SVG : m === 'asleep' ? MOON_SVG : ''}</span></h3>
       <div class="ebar" role="meter" aria-valuenow="${e}" aria-valuemin="0" aria-valuemax="100" aria-label="Energy"><i style="width:${e}%"></i></div>
       <div class="meta">Energy ${e}%${trickle}</div>${extra}`;
-    const refill = `<button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" aria-label="Refill ${WORKER_NAMES[id]}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${desc ? ` aria-describedby="${desc}"` : ''}>${manageIcon(s, b, 'icon-manage-all.svg', 28)}<span>Refill</span></button>${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}${unpaid ? `<span class="sr" id="capd-${id}">${unpaidDescription(id, x!)}</span>` : ''}${paid ? `<span class="sr" id="capw-${id}">${stillPaidDescription(WORKER_NAMES[id], wagePerMinCents(id as 'market_hand' | 'coop_hand', F, b))}</span>` : ''}`;
-    return `<div class="wk ${m}${yawn ? ' yawn' : ''}${off ? ' is-off' : ''}" data-w="${id}">${banner}${yawn ? `<img class="yawn-ov" src="${ASSET('overlay-yawn.svg')}" width="28" height="28" alt="">` : ''}<div class="wk-body">${body}</div><div class="wk-refill">${refill}</div></div>`;
+    // Manage button + optional caption/sr. When a call sits beside Manage, wrap them in
+    // .wk-manage (column) so the nowrap .wk-cap cannot inflate the action-row min-content
+    // width (QA-D-1106-PR116-OVF / Art §6: side-by-side Manage|call at 360 ≈ 124+8+124).
+    const manageBtn = `<button class="btn secondary manage${cd > 0 ? ' is-cooldown' : ''}" aria-label="Refill ${WORKER_NAMES[id]}" data-act="manage" data-w="${id}" aria-disabled="${!canManage}"${desc ? ` aria-describedby="${desc}"` : ''}>${manageIcon(s, b, 'icon-manage-all.svg', 28)}<span>Refill</span></button>`;
+    const capHtml = `${cap ? `<div class="wk-cap num" id="cap-${id}">${cap}</div>` : ''}${unpaid ? `<span class="sr" id="capd-${id}">${unpaidDescription(id, x!)}</span>` : ''}${paid ? `<span class="sr" id="capw-${id}">${stillPaidDescription(WORKER_NAMES[id], wagePerMinCents(id as 'market_hand' | 'coop_hand', F, b))}</span>` : ''}`;
+    const cst = callButtonState(s, id, b, nowMs);
+    const call = cst ? callButtonHtml(cst, id) : '';
+    const refill = call
+      ? `<div class="wk-actions"><div class="wk-manage">${manageBtn}${capHtml}</div><div class="wk-call">${call}</div></div>`
+      : `${manageBtn}${capHtml}`;
+    const prog = cst?.kind === 'active' ? callProgressPct(s, id, b) : 0;
+    const progAttr = cst?.kind === 'active' ? ` style="--call-prog:${prog}%"` : '';
+    return `<div class="wk ${m}${yawn ? ' yawn' : ''}${off ? ' is-off' : ''}${cst ? ' has-call' : ''}" data-w="${id}"${progAttr}>${banner}${yawn ? `<img class="yawn-ov" src="${ASSET('overlay-yawn.svg')}" width="28" height="28" alt="">` : ''}<div class="wk-body">${body}</div><div class="wk-refill">${refill}</div></div>`;
   }).join('');
 }
 /** Coop Hand tip: coop full for >= tip_full_s, Farm >= min_farm, no Coop Hand. Once per session (page load). */

@@ -1,4 +1,4 @@
-import { makeDialogOpen, wireAttended } from './overlay';
+import { makeDialogOpen, wireAttended, registerSheet } from './overlay';
 import { IOS_FLAG_ENABLED } from './ios-tip';
 import { showTracksExplainer, explainerOpen, EXP_CLOSED } from './tracks-explainer';
 /**
@@ -18,7 +18,7 @@ import { visibleOrders, stripSplit, stripSplitAt, slotPreview, slotAdded, sellAl
 const waiting = new Coalesce(2000); // F5: one coalesced queue length for the strip "+N" and Market "+N waiting"
 import { OrderList } from './order-list';
 import { saleValueCents, sellAllPreview } from '../sim/payout';
-import { graderMult } from '../sim/workers';
+import { graderMult, type WorkerId } from '../sim/workers';
 import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hensMilestone, gradeMult } from '../config/formulas';
 import { salePriceCents, coopCap, trackLevel, trackCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
 import { DualPicker, ROW_OF_KEY, defaultScorer, allScorer, type SharedPick } from './pick-hysteresis';
@@ -39,6 +39,7 @@ import { trackToastSafe } from './toast-safe';
 import { clockWageOn, clockWageWindowView } from '../sim/clock-wage';
 import { asleepToast, FallAsleepToasts, clockWageTipNow, CLOCK_WAGE_TIP, welcomeBackWageHtml } from './clock-wage-ui';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, upgradesNavName, type NavAria } from './workers-ui';
+import { abilitiesUiOn, activateAllEligibility, activateAllState, activateAllHtml, ACTIVATE_ALL_TESTID } from './abilities-ui';
 import { mountBreeds, type FlockUiFlags } from './breeds-mount';
 import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
 import { WARN_SVG } from './icons'; // m6: the HUD rate's warning sign is the static inline SVG, shown by .warn
@@ -195,7 +196,21 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   let open: 'market' | 'upgrades' | null = null; let tab: 'collection' | 'farm' | 'workers' = 'collection'; let coopTipShown = false;
   // Slim v5: one attended source; Market remains a play surface. Shift owns its registered lifecycle.
   wireAttended(g, makeDialogOpen({ sheet: () => open, docked: () => docked.matches }));
+  /** AB-14 / AC-M5A-22: Upgrades sheet freeze handle; closeComplete only after real close (or harness step). */
+  const upgradesSheet = registerSheet('upgrades');
+  let upgradesClosePending = false;
+  let upgradesCloseOnEnd: ((e: TransitionEvent) => void) | null = null;
+  const sheetCloseComplete = () => {
+    if (!upgradesClosePending) { upgradesSheet.closeComplete(); return; }
+    upgradesClosePending = false;
+    const sheetEl = $('#p-upgrades');
+    if (upgradesCloseOnEnd) { sheetEl.removeEventListener('transitionend', upgradesCloseOnEnd); upgradesCloseOnEnd = null; }
+    if (!sheetEl.hidden) sheetEl.hidden = true;
+    upgradesSheet.closeComplete();
+  };
   const openPanel = (p: typeof open) => {
+    // O2: cancel pending close (listener + handle) before any reopen/navigation — including reopen Upgrades.
+    if (upgradesClosePending) sheetCloseComplete();
     if (docked.matches) { if (p === 'upgrades') tab = tab; open = null; return; }
     if (p === open) return; if (p) sfx('uiOpen'); else if (open) sfx('uiClose');
     if (open === 'market' && p !== 'market') ordersExpanded = false;
@@ -211,6 +226,22 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const navFarm = nav.querySelector('[data-nav=farm]')!, upHeader = panelLayer.querySelector('#p-upgrades header')!;
   const placeFarmMA = () => { if (docked.matches) upHeader.insertBefore(farmMA, upHeader.querySelector('.close')); else nav.insertBefore(farmMA, navFarm); };
   placeFarmMA(); docked.addEventListener?.('change', placeFarmMA);
+  // Activate-all (abilities #4b): docked header sits 8px right of Refill when visible (AB-UI-7 / AC-M5A-9b).
+  const actAllBtn = h(`<button type="button" class="btn activate-all" data-testid="${ACTIVATE_ALL_TESTID}" data-act="activateAll" hidden></button>`);
+  // A-F2: mount only while shown (abilitiesUiOn && docked); with abilities=0 it never enters the DOM (flags-0 DOM = base).
+  const placeActAll = () => {
+    if (docked.matches && !actAllBtn.hidden) {
+      if (farmMA.parentElement !== upHeader) placeFarmMA();
+      if (actAllBtn.parentElement !== upHeader) upHeader.insertBefore(actAllBtn, upHeader.querySelector('.close'));
+      if (farmMA.nextElementSibling !== actAllBtn && !farmMA.hidden) upHeader.insertBefore(actAllBtn, farmMA.nextSibling);
+    } else if (actAllBtn.parentElement) {
+      if (actAllBtn.nextElementSibling?.id === 'actAllDesc') actAllBtn.nextElementSibling.remove();
+      actAllBtn.remove();
+    }
+  };
+  placeActAll(); docked.addEventListener?.('change', placeActAll);
+  // O1: docked CSS nullifies .sheet transform — complete pending close so attendance cannot freeze forever.
+  docked.addEventListener?.('change', () => { if (upgradesClosePending) sheetCloseComplete(); });
   // M5.1 Breeds PR-A: single mount; PR-B registers via registerBreedsExt (no further app.ts)
   const flock = mountBreeds({
     g, b, upHeader: upHeader as HTMLElement, panelLayer, docked,
@@ -235,6 +266,51 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   /** S2-10: every player action redraws synchronously, so the screen never waits for the next frame/timer to show it. */
   const act = (a: Parameters<typeof g.dispatch>[0]): boolean => { const ok: boolean = tryDispatch(g, a, b); if (ok) { dirty = true; render(); } return ok; };
   const cantAfford = (el: HTMLElement) => { retrigger(el, 'shake'); sfx('cantAfford'); };
+  /** Portrait/sheet Upgrades counts as in_sheet; docked header/card does not (AC-M5A-22). */
+  const abilityInSheet = () => !docked.matches && open === 'upgrades';
+  /** Close portrait Upgrades after a successful in-sheet fire/activateAll; attendance stays frozen until sheetCloseComplete. */
+  const closeUpgradesAfterAbility = () => {
+    if (!abilityInSheet()) return;
+    upgradesSheet.opened();
+    upgradesClosePending = true;
+    sfx('uiClose');
+    if (ZGC) zgHidden();
+    open = null;
+    panelLayer.classList.toggle('open', false);
+    $('#p-market').hidden = true;
+    // Keep #p-upgrades visible so transform close can run; hidden + closeComplete on sheetCloseComplete.
+    nav.querySelectorAll('button').forEach(bt => bt.classList.toggle('on', bt.dataset.nav === 'farm'));
+    dirty = true;
+    const sheetEl = $('#p-upgrades');
+    if (upgradesCloseOnEnd) { sheetEl.removeEventListener('transitionend', upgradesCloseOnEnd); upgradesCloseOnEnd = null; }
+    if (rm()) { sheetCloseComplete(); return; }
+    upgradesCloseOnEnd = (e: TransitionEvent) => {
+      if (e.target !== sheetEl || e.propertyName !== 'transform') return;
+      sheetCloseComplete();
+    };
+    sheetEl.addEventListener('transitionend', upgradesCloseOnEnd);
+    // Do not auto-complete on 0-duration rAF: harness steps sheetCloseComplete (AC-M5A-22). transitionend / rm() cover production.
+  };
+  const afterAbilityFire = (ok: boolean, el: HTMLElement, closeSheet: boolean) => {
+    if (!ok) { cantAfford(el); return; }
+    sfx('upgrade'); dirty = true;
+    if (closeSheet && abilityInSheet()) closeUpgradesAfterAbility();
+    render();
+  };
+  /** Always dispatch so blocked taps emit ability_blocked (tryDispatch would skip same-state). Do not gate on aria-disabled. */
+  const onFireAbility = (el: HTMLElement, wid: WorkerId) => {
+    const before = g.state;
+    const inSheet = abilityInSheet();
+    g.dispatch({ type: 'fireAbility', worker: wid, inSheet, nowMs: now() });
+    afterAbilityFire(g.state !== before, el, inSheet);
+  };
+  const onActivateAll = (el: HTMLElement) => {
+    const before = g.state;
+    const inSheet = abilityInSheet();
+    g.dispatch({ type: 'activateAll', inSheet, nowMs: now() });
+    afterAbilityFire(g.state !== before, el, inSheet);
+  };
+  actAllBtn.addEventListener('click', e => { e.stopPropagation(); onActivateAll(actAllBtn); });
   const collect = () => {
     const before = g.state.coop; g.dispatch({ type: 'collect' });
     const k = Math.floor(before) - Math.floor(g.state.coop) + (g.state.basket ? 0 : 0);
@@ -275,6 +351,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const kind = bt.dataset.act, wid = bt.dataset.w as any;
     // P2b (AC-R11 / TP1-U2): a Refill tap on an Unpaid worker dispatches nothing (no worker_manage); the refused-tap feedback still plays.
     if (kind === 'manage' && g.state.workers[wid as keyof typeof g.state.workers]?.unpaid) return cantAfford(bt);
+    if (kind === 'fireAbility') { onFireAbility(bt, wid as WorkerId); return; }
+    if (kind === 'activateAll') { onActivateAll(bt); return; }
     if (kind) { if (!act(kind === 'hire' ? { type: 'hire', worker: wid } : kind === 'manage' ? { type: 'manage', worker: wid } : kind === 'manageAll' ? { type: 'manageAll' } : { type: 'buyGraderTier' })) return cantAfford(bt); dirty = true; return; }
     lastBuyBtn = bt; const bk = bt.dataset.kind;
     buyRow(bk, bt);
@@ -771,6 +849,28 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         maAria = v.aria; if (fb.getAttribute('aria-label') !== v.aria.text) fb.setAttribute('aria-label', v.aria.text); }
     }
     if (yawnSfx.pick(s, b, now())) sfx('workerYawn');
+    // Docked Activate-all (compact when Refill visible) — AC-M5A-8/9b/10, AB-UI-7
+    {
+      const on = abilitiesUiOn(s, b) && docked.matches;
+      setHidden(actAllBtn, !on);
+      placeActAll();
+      if (on) {
+        const elig = activateAllEligibility(s, b, now());
+        const st = activateAllState({ readyCount: elig.ready, nextCdS: elig.nextCdS, docked: true, refillVisible: farmMAShown && !farmMA.hidden });
+        const next = activateAllHtml(st, A('icon-bolt.svg'));
+        const tmp = h(`<div>${next}</div>`);
+        const btn = tmp.querySelector('button')!;
+        const desc = tmp.querySelector('#actAllDesc');
+        actAllBtn.className = btn.className;
+        actAllBtn.innerHTML = btn.innerHTML;
+        for (const a of ['aria-disabled', 'aria-describedby', 'data-act', 'data-testid'] as const) {
+          const v = btn.getAttribute(a); if (v === null) actAllBtn.removeAttribute(a); else actAllBtn.setAttribute(a, v);
+        }
+        const prev = actAllBtn.nextElementSibling;
+        if (prev?.id === 'actAllDesc') prev.remove();
+        if (desc) actAllBtn.after(desc);
+      }
+    }
     if (clockWageTipNow(s, b) && g.markClockWageTip()) showCwTip(); // AC-FC11 (false with clockWage off: no DOM change)
     // market panel
     if (open === 'market' || docked.matches) {
@@ -790,11 +890,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (flock?.isOpen) flock.render();
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-      const html = tab === 'workers' ? workersHtml(s, b) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
+      const html = tab === 'workers' ? workersHtml(s, b, now()) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
       if (html !== lastUp || refillDirty) { const changed = html !== lastUp; refillDirty = false; if (changed) { lastUp = html; const zf = ZGC ? zgFocusKey() : null; uRow.innerHTML = html; if (ZGC) zgApply(zf); }
         // WCAG 2.4.11 (ported from rc1 7380b86 review #7): --refill-bar-h = the measured sticky Refill bar + 8px (0 with no bar), re-measured
         // on resize / dock change; #uRow controls use it as scroll-margin-top, so keyboard focus never lands under the bar.
-        { const rb = uRow.querySelector<HTMLElement>(':scope > .refill-wrap'); let sc = uRow.parentElement; while (sc && !/(auto|scroll)/.test(getComputedStyle(sc).overflowY)) sc = sc.parentElement;
+        { const rb = uRow.querySelector<HTMLElement>(':scope > .act-all-bar, :scope > .refill-wrap'); let sc = uRow.parentElement; while (sc && !/(auto|scroll)/.test(getComputedStyle(sc).overflowY)) sc = sc.parentElement;
           const pad = sc ? parseFloat(getComputedStyle(sc).paddingTop) || 0 : 0; // sticky top:0 sits at the scroller's content edge, scroll-margin at its padding edge (p2 browser sweep)
           const hv = rb ? `${Math.ceil(rb.getBoundingClientRect().height + pad) + 8}px` : '0px'; if (uRow.style.getPropertyValue('--refill-bar-h') !== hv) uRow.style.setProperty('--refill-bar-h', hv); }
         fitBanners(uRow); /* AC-R1 §6: one-line banners, role dropped when it doesn't fit */ if (changed && hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (changed && pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
@@ -940,7 +1040,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   /** SG-12 `qaPicker()` (v: 1, fields exactly as SG-12; v5 sources per BBv2 spec v1.0.4 §6): read-only, fresh JSON-safe object, no state,
    *  DOM, picker or telemetry change. hintRaw = picker.hint.shown (after the ZG filter and Part A, before the highlight merge). */
   const qaPick = (p: SharedPick | null) => p && { key: p.key, affordable: p.affordable, costCents: p.costCents, payback: p.payback === Infinity ? 'Infinity' : p.payback };
-  return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; }, dispose: () => { flock?.dispose(); zgAC.abort(); },
+  return { render: renderAll, showWelcome, openPanel, sheetCloseComplete, rates, get recoveryOpen() { return recoveryOpen; }, dispose: () => { flock?.dispose(); zgAC.abort(); },
     ...(IOS_FLAG_ENABLED ? { qaPicker: () => { const t = now(); return { v: 1, t, m4: m4On(b), hint: qaPick(hintPick), hintRaw: qaPick(picker.hint.shown), highlight: qaPick(rowPick),
       mark: hintMark, suppressed: hintPick !== null && hintMark === null, heldMs: hintPick ? t - qaKeySinceT : 0, evals: picker.hint.evals, changes: picker.hint.changes,
       history: qaHist.map(h => ({ ...h })) }; } } : {}) };
