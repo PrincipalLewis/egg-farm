@@ -16,7 +16,7 @@ import { broodySlots, tapBroody } from './broody';
 import { stallObserve } from '../econ/stall';
 import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
 import { rc2RefillOn } from './refill';
-import { isPaused, resumeWorker } from './pause';
+import { isPaused, pauseWorker, resumeWorker } from './pause';
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
   | { type: 'buyCollection' } | { type: 'buyFarm' } | { type: 'collectOffline' } | { type: 'dismissOffline' } | { type: 'markCelebrated'; tier: number }
@@ -24,7 +24,8 @@ export type Action =
   | { type: 'hire'; worker: WorkerId } | { type: 'manage'; worker: WorkerId } | { type: 'manageAll' } | { type: 'buyGraderTier' }
   | { type: 'buyTrack'; track: Track } | { type: 'markMilestones'; ids: string[] }
   | { type: 'spawnGolden'; spots: readonly string[]; layout?: boolean } | { type: 'tapGolden' } // v5 #1 golden (no-op unless m4.flags.golden)
-  | { type: 'broodySlots'; slots: readonly number[] } | { type: 'tapBroody'; slots: readonly number[] }; // v5 #5 Broody (no-op unless m4.flags.broody)
+  | { type: 'broodySlots'; slots: readonly number[] } | { type: 'tapBroody'; slots: readonly number[] } // v5 #5 Broody (no-op unless m4.flags.broody)
+  | { type: 'pause'; worker: WorkerId } | { type: 'resume'; worker: WorkerId }; // v5 pause toggle (no-op unless m4.flags.pause; rule 1)
 /** Sell all preview lives in sim/payout.ts (the one payout fn, #25; M4 sale price via salePriceCents); re-exported for #28 callers. */
 export { sellAllPreview } from './payout';
 export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm' || a.type === 'buyTrack';
@@ -134,6 +135,10 @@ function apply0(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true)
       ev?.push({ type: 'worker_manage_all', workers: need, energyBefore: need.map(id => Math.round(s.workers[id]!.energy)) });
       return { ...s, workers, manageCdS: b.workers.energy.manage_cooldown_s };
     }
+    // v5 pause (spec v1.3.17 rule 2: applies in the same tick). The sim functions own every guard (flag, unlock, hired, already paused).
+    // Telemetry is sim-owned (UI emits nothing): worker_paused from #132 pauseWorker(ev), worker_resumed from #119 resumeWorker(ev, 'manual').
+    case 'pause': return pauseWorker(s, a.worker, b, ev); // #132: THE worker_paused emitter (rc2Refill = 0 only)
+    case 'resume': return resumeWorker(s, a.worker, b, ev, 'manual'); // #119: THE worker_resumed emitter, cause 'manual' (card Resume); B5 lockout inside
     case 'hatch': return startHatch(s, b, ev); // §8 hatch_started (drift row 34)
     case 'placeBreed': return placeBreed(s, b, a.slot, a.id); // §8 breed_slotted: opens a 1,000 ms window; the tick sink emits it on close
     case 'markCelebrated': return { ...s, celebratedTier: Math.max(s.celebratedTier, a.tier) };
