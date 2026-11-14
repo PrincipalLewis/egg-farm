@@ -182,9 +182,9 @@
       "rc2Refill": 0,
       "autoRefill": 0,
       "clockWage": 0,
-      "breeds": 0,
-      "zeroGainUi": 0,
-      "bestBuyV2": 0,
+      "breeds": 1,
+      "zeroGainUi": 1,
+      "bestBuyV2": 1,
       "unpaidTrickle": 0
     },
     "zeroGain": {
