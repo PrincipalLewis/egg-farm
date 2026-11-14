@@ -738,6 +738,9 @@ nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);marg
   #panel-layer.breeds-open { position: relative; }
   #panel-layer.breeds-open #breeds-sheet { inset: 0 0 0 calc(-1 * var(--bw)); border-top: 0; } /* Close at 1228,62 (Art §2) */
   #breeds-sheet .breeds-close { display: grid; }
+  /* HoQA N1: the M1 docked `.sheet[hidden]{display:flex!important}` keeps Market + Upgrades side by side; it must not
+     un-hide the closed Flock sheet (section#breeds-sheet.sheet). Higher-specificity !important, Flock only. */
+  #breeds-sheet[hidden] { display: none !important; }
   #p-upgrades header .breeds-entry.icon-only { margin-left: auto; }
   .breeds-body .breeds-album { grid-template-columns: repeat(4, 86px); }
 }
