@@ -1,11 +1,13 @@
 import raw from './balance.json';
-import { validateCostGrowthSegments, validateCostTable, type EconomyParams } from './formulas';
+import { validateCostGrowthSegments, validateCostTable, M5_TC_KEYS, m4On, tcNum, type EconomyParams } from './formulas';
+import { validateM5 } from './m5-rules';
+import { isLegalUnpaidTrickle } from './flags';
 /** TEST-ONLY scenario hooks (m2-proposal §8 item 17, AC-W1 casual). Never in balance.json; rejected in production builds. */
 export interface SimTestHooks { poisson_arrivals?: boolean; demand_scale?: number; }
 export type Balance = typeof raw & EconomyParams & { sim_test?: SimTestHooks };
 function check(o: any, path: string) {
   for (const [k, v] of Object.entries(o)) {
-    if (k.startsWith('_') || (path === '' && k === 'sim_test') || (path === '.farm' && (k === 'costGrowthSegments' || k === 'costTable'))) continue;
+    if (k.startsWith('_') || (path === '' && k === 'sim_test') || (path === '.farm' && (k === 'costGrowthSegments' || k === 'costTable')) || (path === '.collection' && k === 'costTable')) continue;
     if (v && typeof v === 'object') check(v, `${path}.${k}`);
     else if (v === undefined || typeof v !== 'number' || !isFinite(v) || v < 0) throw new Error(`balance${path}.${k} invalid`);
   }
@@ -14,16 +16,32 @@ const pos = (b: any, path: string) => { const v = path.split('.').reduce((o, k) 
 const int = (b: any, path: string) => { const v = pos(b, path); if (!Number.isInteger(v)) throw new Error(`balance.${path} must be an integer`); };
 export function validateBalance(b: Balance, prod = !!import.meta.env?.PROD): Balance {
   if (b.sim_test && prod) throw new Error('balance.sim_test hooks are test-only and not allowed in production builds');
+  // D-HOE-20261030-31/-32: BBv2 thresholds live here, never as constants. The full block is required when it
+  // is present or when m4.flags.bestBuyV2 === 1. Absent and the flag off/absent skips these checks so
+  // sha-pinned rc/v5 fixtures stay valid. A partial block still fails. Before the generic leaf check so a
+  // value <= 0 keeps the "must be > 0" error (a negative leaf would otherwise fail as "invalid" first).
+  const bbv2 = (b.telemetry as { bbv2?: unknown } | undefined)?.bbv2;
+  const bestBuyV2 = (b.m4?.flags as { bestBuyV2?: number } | undefined)?.bestBuyV2;
+  if (bbv2 !== undefined || bestBuyV2 === 1) {
+    for (const p of ['telemetry.bbv2.shown_min_gap_s', 'telemetry.bbv2.zero_gain_eta_max_s', 'telemetry.bbv2.dead_zone_min_s']) pos(b, p);
+    int(b, 'telemetry.bbv2.zero_gain_purchase_cap');
+  }
   check(b, '');
   if (b.sim_test?.demand_scale !== undefined && !(b.sim_test.demand_scale > 0)) throw new Error('balance.sim_test.demand_scale must be > 0');
   for (const p of ['tickHz', 'maxLevel', 'feel.max_flying_eggs', 'telemetry.ring_size']) int(b, p);
+  if (1000 % b.tickHz !== 0) throw new Error('balance.tickHz must divide 1000 (BR-R8 / D5)'); // breeds incubation dtMs
   for (const p of ['feel.tap_combine_window_ms', 'feel.queue_full_cue_min_gap_ms', 'feel.egg_flight_ms', 'feel.served_dwell_ms', 'save.autosaveIntervalS', 'offline.offlineCapSeconds', 'telemetry.flush_interval_s', 'telemetry.tap_batch_ms', 'customers.first_customer_s']) pos(b, p);
+  // v5-tel-envelope B4 (telemetry-spec L173): the hidden session split equals the offline threshold. Absent = offlineMinSeconds
+  // (sha-pinned older fixtures); present and different fails.
+  { const h = (b.telemetry as { session_hidden_end_s?: unknown }).session_hidden_end_s;
+    if (h !== undefined && h !== b.offline.offlineMinSeconds) throw new Error('balance.telemetry.session_hidden_end_s must equal offline.offlineMinSeconds'); }
   if (b.offline.offlineRateMultiplier > 1) throw new Error('balance.offline.offlineRateMultiplier must be <= 1');
   if (b.save.autosaveIntervalS > 5) throw new Error('balance.save.autosaveIntervalS must be <= 5 (AC8)');
   for (const p of ['collection.baseCost', 'farm.baseCost', 'farm.eggsPerHenPerSec', 'farm.customerIntervalMinS', 'farm.customerIntervalBaseS', 'customers.customer_patience_s']) pos(b, p);
   for (const p of ['customers.queue_max_base', 'customers.queue_max_cap', 'customers.queue_max_step_levels']) int(b, p);
   validateCostGrowthSegments((b.farm as any).costGrowthSegments);
   validateCostTable((b.farm as any).costTable, b.maxLevel);
+  validateCostTable((b.collection as any).costTable, b.maxLevel, 'collection.costTable');
   for (const [i, t] of b.workers.grader.tiers.entries()) if ((t as any).cost !== undefined && !(Number.isSafeInteger((t as any).cost) && (t as any).cost > 0)) throw new Error(`balance.workers.grader.tiers[${i}].cost must be a positive integer`);
   if (b.collection.costGrowth < 1 || b.farm.costGrowth < 1) throw new Error('balance cost growth must be >= 1');
   if (!(b.farm.customerIntervalDecay > 0 && b.farm.customerIntervalDecay <= 1)) throw new Error('balance.farm.customerIntervalDecay must be in (0,1]');
@@ -36,10 +54,16 @@ export function validateBalance(b: Balance, prod = !!import.meta.env?.PROD): Bal
     'workers.market_hand.hire_cost', 'workers.coop_hand.hire_cost', 'workers.hawker.hire_cost', 'workers.grader.tier_cost_share_of_farm_cost', 'workers.tips.coop_hand_tip_full_s']) pos(b, p);
   const W = b.workers;
   if (W.energy.tired_below_pct > 100 || W.energy.start_pct > 100) throw new Error('balance.workers.energy pct must be <= 100');
+  // D-HOP-2026-11-14-10 Q2: legal set {0} ∪ [0.5, 1.0]. 0 is the shipping value (not in pos(), which requires > 0). (0, 0.5) and >1.0 are rejected.
+  if (W.energy.unpaid_trickle !== undefined && !isLegalUnpaidTrickle(W.energy.unpaid_trickle))
+    throw new Error('balance.workers.energy.unpaid_trickle must be in {0} ∪ [0.5, 1.0] (D-HOP-2026-11-14-10 Q2; values >1.0 and values in (0, 0.5) are rejected; 0 is the shipping value)');
   if (W.hawker.demand_mult < W.hawker.tired_demand_mult || W.hawker.tired_demand_mult < 1) throw new Error('balance.workers.hawker: 1 <= tired_demand_mult <= demand_mult');
   if (!W.grader.tiers.length || W.grader.tiers.some((t, i, a) => t.mult <= 1 || (i > 0 && (t.farm <= a[i - 1].farm || t.mult <= a[i - 1].mult))))
     throw new Error('balance.workers.grader.tiers: farm and mult must increase, mult > 1');
   for (const k of ['tired_bonus_share', 'asleep_bonus_share'] as const) if (W.grader[k] > 1) throw new Error(`balance.workers.grader.${k} must be <= 1`);
+  validateM5(b.m4, W); // v5 F3: m4.flags (0/1, known names) + M5 tunable rules
+  // v5: every tc_* key an ON m4.flags item reads must exist (tcNum throws with the column name)
+  if (m4On(b)) for (const [f, ks] of Object.entries(M5_TC_KEYS)) if ((b.m4?.flags as any)?.[f] === 1) ks.forEach(k => tcNum(b, k));
   return b;
 }
 export const balance: Balance = validateBalance(raw as Balance);

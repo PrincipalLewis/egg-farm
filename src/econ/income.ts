@@ -9,11 +9,17 @@ import type { Balance } from '../config/balance';
 import type { GameState } from '../sim/state';
 import { eggsPerTap, demandRange, customerIntervalS } from '../sim/state';
 import { prodEggsPerSec, salePriceCents } from '../sim/tracks';
-import { mood, isOff, graderMult, hawkerDemandMult, type Workers } from '../sim/workers';
+import { mood, isOff, graderMult, hawkerDemandMult, WORKERS, type WorkerId, type Workers } from '../sim/workers';
+import { isPaused } from '../sim/pause';
+import { bestBuyV2On } from '../config/flags';
+import { unpaidTrickleDollarsPerSec } from '../sim/unpaid-trickle';
 
 export type IncomeOpts = {
   /** When true, treat every hired worker as Working (Economy best() scoring). */
   assumeWorking?: boolean;
+  /** When true with assumeWorking, skip BBv2 Q-E2 (keep pre-Q-E2 collect = tap × 1.5). Hatch/sim BR-R5 planRef only
+   *  (D-ECON-20261105-M1-QE2-HATCH (a); HoP). Default false: planner/best-buy paths still apply Q-E2 when bestBuyV2 on. */
+  ignoreQE2?: boolean;
 };
 
 /** Egg sale price in dollars (Python-compatible round to 2 dp × grader mult). */
@@ -28,9 +34,12 @@ export function collectPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): 
   const tap = eggsPerTap(s.collectionLevel, b);
   const w = s.workers.coop_hand;
   if (!w) return tap;
-  if (opts.assumeWorking) return tap * 1.5;
+  // BBv2 Q-E2 (spec v1.0.3 §2.5, Econ 14:05): planner path only, flag on, Coop Hand hired -> 0 player taps,
+  // collect = eggs_per_tap[C] / coop_hand.every_s. The live path (no assumeWorking) below is unchanged.
+  // ignoreQE2 (BR-R5 hatch): keep tap × 1.5 so hatchCostCents is bestBuyV2-invariant (D-ECON-20261105-M1-QE2-HATCH).
+  if (opts.assumeWorking) return bestBuyV2On(b) && !opts.ignoreQE2 ? tap / b.workers.coop_hand.every_s : tap * 1.5;
   const m = mood(w, b);
-  if (!m || isOff(m)) return tap; // asleep / unpaid / paused → no auto collect
+  if (!m || isOff(m) || isPaused(w, b)) return tap; // asleep / unpaid / paused → no auto collect
   if (m === 'working') return tap * 1.5;
   const { every_s, tired_every_s } = b.workers.coop_hand;
   return tap * (1 + (every_s / tired_every_s) * 0.5);
@@ -38,11 +47,11 @@ export function collectPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): 
 
 /** sales-stopped-spec §4.2 (D-HOP-2026-10-24-13/-14): live mode only. A hired Market Hand that is Asleep or Unpaid sells
  *  nothing, so the eggs-sold term is 0. Unchanged: not hired, Working, Tired, or Paused (the player chose to sell by hand;
- *  `paused` is the m5-worker-pause flag and reads false until that build ships). The planner path (`assumeWorking`:
+ *  `paused` is read only through isPaused(), which is false while m4.flags.pause is 0). The planner path (`assumeWorking`:
  *  best-buy, goal-label %, ★ pick, bot) never reaches this branch. */
 export function marketHandStalled(s: GameState, b: Balance): boolean {
-  const w = s.workers.market_hand as (Workers['market_hand'] & { paused?: boolean }) | undefined;
-  return !!w && w.paused !== true && isOff(mood(w, b));
+  const w = s.workers.market_hand;
+  return !!w && !isPaused(w, b) && isOff(mood(w, b));
 }
 
 export function demandPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): number {
@@ -61,23 +70,34 @@ export function wagesPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): nu
     if (!worker) continue;
     if (!opts.assumeWorking) {
       const m = mood(worker, b);
-      if (!m || isOff(m)) continue;
+      if (!m || isOff(m) || isPaused(worker, b)) continue;
     }
     w += b.workers[id].wage_per_farm_per_min * s.farmLevel / 60;
   }
   return w;
 }
 
-/** Gross eggs sold/s × price − wages. Live moods unless assumeWorking. */
+/** Gross eggs sold/s × price − wages. Live moods unless assumeWorking.
+ *  Sim input (D-HOP-2026-11-14-15): does NOT include unpaid trickle. I_ss (issDollars), grossSalesPerSec and
+ *  fatigueShare all read this. Flag off: unchanged. The HUD income/s display is incomePerSecDisplay. */
 export function incomePerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): number {
   const eggs = Math.min(prodEggsPerSec(s, b), demandPerSec(s, b, opts), collectPerSec(s, b, opts));
   return eggs * priceDollars(s, b, opts) - wagesPerSec(s, b, opts);
 }
 
-/** Gross sales per second ($), before wages. */
+/** HUD income/s DISPLAY only (Q3, D-HOP-2026-11-14-15). Live path adds the unpaid trickle when the flag is on and rate > 0.
+ *  The planner path (assumeWorking) and every sim input (incomePerSec) do not. Flag off or k = 0: equals incomePerSec. */
+export function incomePerSecDisplay(s: GameState, b: Balance, opts: IncomeOpts = {}): number {
+  const base = incomePerSec(s, b, opts);
+  if (opts.assumeWorking) return base;
+  return base + unpaidTrickleDollarsPerSec(s, b);
+}
+
+/** TEST-ONLY (CCR #70 n1): no src/ caller. Gross sales per second ($), before wages. */
 export const grossSalesPerSec = (s: GameState, b: Balance) => incomePerSec(s, b) + wagesPerSec(s, b);
-/** PM Workers ruling (a), one shared threshold (review 23a3798 #3): production is "stopped" only when gross sales round to $0.00/s.
- *  A negative net rate (wages > sales) is not "stopped": production is running. Used by the header aria and the worker banners. */
+/** TEST-ONLY (CCR #70 n1): no src/ caller; tests use it as the "gross sales round to $0.00/s" oracle. A negative net rate
+ *  (wages > sales) is not "stopped". The HUD aria uses marketHandStalled() (HoE ruling, Oct 24) and the worker banners use only
+ *  their own role and state (workerBanner); neither reads this. */
 export const salesStopped = (s: GameState, b: Balance) => Math.round(grossSalesPerSec(s, b) * 100) <= 0;
 /** True when any hired worker is asleep/unpaid (Critic #3 / AC-R2). */
 export function productionStopped(s: GameState, b: Balance): boolean {
@@ -136,3 +156,41 @@ export class EtaHold {
     return raw;
   }
 }
+
+/** sales-stopped-spec §4.8: $/s lost while this hired Tired/Asleep worker is not Working at 100%.
+ *  Excludes Unpaid and paused (Pause flag); never negative (HoE ruling 2026-11-10 03:25). Manage-target ties use WORKERS order market_hand > coop_hand > hawker > grader. */
+export function workerAtRisk(id: WorkerId, s: GameState, b: Balance): number {
+  const w = s.workers[id];
+  if (!w || w.unpaid || isPaused(w, b)) return 0;
+  const m = mood(w, b);
+  if (m !== 'tired' && m !== 'asleep') return 0;
+  const healed: GameState = { ...s, workers: { ...s.workers, [id]: { ...w, energy: 100, unpaid: false } } };
+  return Math.max(0, incomePerSec(healed, b) - incomePerSec(s, b)); // HoE ruling 03:25: clamped at 0 (a heal that costs more wage than it earns is no loss)
+}
+
+/** Per-worker $/s at risk for every role (0 when not Tired/Asleep). */
+export function workersAtRisk(s: GameState, b: Balance): Record<WorkerId, number> {
+  const out = {} as Record<WorkerId, number>;
+  for (const id of WORKERS) out[id] = workerAtRisk(id, s, b);
+  return out;
+}
+
+/** Costliest Tired/Asleep worker by workerAtRisk; ties keep WORKERS code-id order. */
+export function costliestAtRisk(s: GameState, b: Balance): WorkerId | null {
+  let best: WorkerId | null = null, bestV = -Infinity;
+  for (const id of WORKERS) {
+    const v = workerAtRisk(id, s, b);
+    if (v > bestV) { bestV = v; best = id; }
+  }
+  return bestV > 0 ? best : null;
+}
+
+/** SIM-API (FC-AC3, FC-AC6): Rule 2 share = fatigueLoss / (incomePerSec + fatigueLoss), 0..1, base rates only (no Frenzy,
+ *  streak or call multipliers: incomePerSec reads no timed effect). Paused and Unpaid workers are not in the loss. */
+export function fatigueShare(s: GameState, b: Balance): number {
+  return fatigueShareOf(fatigueLossPerSec(s, b), incomePerSec(s, b));
+}
+import { fatigueShareOf, fatigueLossPerSec } from './stall';
+/** SIM-API: the stall + cue read shape, UI notifications and exported types live in econ/stall.ts; re-exported here. */
+export { stallView, fatigueCueView, resetStallTimers, setUiGates, noteStallChipTap, noteFatigueCueShown, noteFatigueCueTap } from './stall';
+export type { StallCause, StallResolvedBy, StallView, FatigueCueView, FatigueSurface, UiGates } from './stall';

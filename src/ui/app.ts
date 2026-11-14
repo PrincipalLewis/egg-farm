@@ -1,3 +1,4 @@
+import { makeDialogOpen, wireAttended } from './overlay';
 import { IOS_FLAG_ENABLED } from './ios-tip';
 import { showTracksExplainer, explainerOpen, EXP_CLOSED } from './tracks-explainer';
 /**
@@ -20,7 +21,10 @@ import { saleValueCents, sellAllPreview } from '../sim/payout';
 import { graderMult } from '../sim/workers';
 import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hensMilestone, gradeMult } from '../config/formulas';
 import { salePriceCents, coopCap, trackLevel, trackCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
-import { DualPicker, ROW_OF_KEY, type SharedPick } from './pick-hysteresis';
+import { DualPicker, ROW_OF_KEY, defaultScorer, allScorer, type SharedPick } from './pick-hysteresis';
+import { isZeroGain, zeroGainUiOn, zgFiltered, ZG_KEY_OF, ZG_DESC, ZG_CHIP } from './zero-gain'; // v5 zeroGainUi (m4.flags.zeroGainUi)
+import { zeroGainConfirmOn, bestBuyV2On } from '../config/flags';
+import { bbv2Mark, type BuyKey } from '../econ/best-buy';
 import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, trackUnlockFarm, TRACK_FARM_MAX_TEXT, trackFarmMaxAria, hensMilestoneEffect, gradeEffect } from './tracks-ui';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
@@ -28,25 +32,34 @@ import { OnboardingFlow, mountOnboarding, collectLabel, dialogOpen } from './onb
 import { mountRotatePrompt } from './rotate-prompt';
 import { selectGoal, GoalHold, goalAria, type Goal } from './next-goal';
 import { bestBuyMark, goalLabelHtml } from './goal-label';
-import { tryDispatch } from './tap-guard';
+import { tryDispatch, wouldApply } from './tap-guard';
 import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
 import { trackToastSafe } from './toast-safe';
-import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, type NavAria } from './workers-ui';
+import { clockWageOn, clockWageWindowView } from '../sim/clock-wage';
+import { asleepToast, FallAsleepToasts, clockWageTipNow, CLOCK_WAGE_TIP, welcomeBackWageHtml } from './clock-wage-ui';
+import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, upgradesNavName, type NavAria } from './workers-ui';
+import { mountBreeds, type FlockUiFlags } from './breeds-mount';
 import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
+import { WARN_SVG } from './icons'; // m6: the HUD rate's warning sign is the static inline SVG, shown by .warn
 import { asleepOrUnpaidCount } from '../econ/income'; // AC-R1 / AC-R5 asleep count badge
 
 const A = (f: string) => `${import.meta.env.BASE_URL}assets/${f}`;
 const COOP_SPRITES = ['coop-l1.svg', 'coop-l5.svg', 'coop-l10.svg', 'coop-l20.svg'];
 export const UI_KEY = 'eggfarm.ui';
-interface UiFlags { onbStep?: number; sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean; sessions?: number; iosHomeShown?: boolean }
+interface UiFlags { onbStep?: number; sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean; sessions?: number; iosHomeShown?: boolean; flockOpened?: boolean; flockHighlightArmed?: boolean; flockHighlightSession?: number }
 const h = (html: string) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild as HTMLElement; };
 const setText = (el: Element, v: string) => { if (el.textContent !== v) el.textContent = v; };
+/** OC-A11Y-2 (D-HOP-2026-11-09-01): order-chip accessible name; starts with the visible `.tag .num` text (WCAG 2.5.3).
+ *  Plural from the RAW count, never the formatted string. Copy final per Art; swap wording here only. */
+export const orderChipLabel = (visible: string, raw: number) => `${visible} ${raw === 1 ? 'egg' : 'eggs'} wanted by customer`;
 const setDisabled = (el: HTMLElement, d: boolean) => { const v = d ? 'true' : 'false'; if (el.getAttribute('aria-disabled') !== v) el.setAttribute('aria-disabled', v); };
 const retrigger = (el: Element, cls: string) => { el.classList.remove(cls); void (el as HTMLElement).offsetWidth; el.classList.add(cls); };
 
 export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, version: string, opts: { newGame: boolean; recovery?: Recovery | null; storageBlocked?: () => boolean } = { newGame: false }) {
   let stored: any = {}; try { stored = JSON.parse(localStorage.getItem(UI_KEY) ?? '{}') ?? {}; } catch { /* bad flags: defaults */ }
+  // v5 zeroGainUi (spec m5.1-zero-gain-purchase-ui v0.3.7 f86de04e §5.4): read ONCE at boot; a change needs a reload. Confirm strip = m4.zeroGain.confirm (ships 0).
+  const ZG = zeroGainUiOn(b), ZGC = ZG && zeroGainConfirmOn(b);
   // PT1-4: a fresh-start fallback (AC14b F/Q) is a new farm: drop FTUE / Workers-tip progress flags, keep prefs.
   if (opts.recovery && !opts.recovery.restored_from_backup && opts.newGame) stored = keepPrefsOnly(stored);
   const flags: UiFlags = { sfx: true, reducedMotion: false, seenSlots: S.queueMax(g.state.farmLevel, b), onboardingDone: false, ...stored };
@@ -69,7 +82,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   root.innerHTML = '';
   // ---------- HUD ----------
   const hud = h(`<header class="hud"><h1 class="sr">Egg Farm</h1>
-    <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="coins-col"><span class="num" id="coins"></span><span class="rate num" id="rate" role="status" aria-label="Net income zero per second">$0/s</span></span></div>
+    <div class="pill coins" aria-label="Coins"><img src="${A('icon-coin.svg')}" alt=""><span class="coins-col"><span class="num" id="coins"></span><span class="rate num" id="rate" role="status" aria-label="Net income zero per second">${WARN_SVG}<span class="tri" aria-hidden="true"></span><span class="rt">$0/s</span></span></span></div>
     <div class="pill basket" aria-label="Eggs in basket"><img src="${A('icon-egg.svg')}" alt=""><span class="num" id="basket"></span></div>
     <div class="spacer"></div>
     <button class="icon-btn" id="settings" aria-label="Settings"><img src="${A('icon-settings.svg')}" alt=""></button>
@@ -79,7 +92,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     <div class="queue" id="queue" role="group" aria-label="Customer queue"></div>
     <div class="scene" id="scene" aria-hidden="true">
       <img class="coop" id="coop" alt=""><span class="nest"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" id="nestEggs" src="${A('nest-eggs.svg')}" alt="" hidden></span>
-      <div class="fullbadge" id="full" hidden>Full!</div><div class="yard" id="yard"></div><div class="henpill" id="henpill" hidden></div>
+      <div class="fullbadge" id="full" hidden>Full!</div><div class="yard" id="yard"></div><div class="henpill" id="henpill" data-testid="hens-pill" hidden></div>
     </div>
     <div class="collectbar">
       <div class="meter" id="meter"><i id="meterFill"></i><span class="num" id="meterText"></span></div>
@@ -87,18 +100,20 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       <div class="sr" aria-live="polite" id="goalLive"></div><div class="sr" id="goalDesc" aria-hidden="true"></div>
       <button class="btn xl" id="collect"></button>
     </div></main>`);
+  // AC-R17 (m-P1-1, WCAG 2.5.3): the plain spaces between the badge and label spans are not rendered (flex items) but separate the
+  // visible words, so the visible text reads "N Upgrades" / "Refill N" and each accessible name starts with it.
   // S2-5 (art-ux/reviews/session2-ui-triage.md (b)) + AC-R1/R5: every nav button = icon + visible label + aria-label; the Upgrades
   // icon carries the asleep count badge (.nav-ic, top-right -6/-6); the Refill button shows "Refill" + N (AC-R9 aria). Ported from rc1 7380b86.
   const nav = h(`<nav class="actions" aria-label="Main">
     <button data-nav="market" aria-label="Market"><span class="nav-ic"><img src="${A('icon-market.svg')}" alt=""></span><span class="nav-lbl">Market</span><span class="badge" hidden></span></button>
-    <button data-nav="upgrades" aria-label="Upgrades"><span class="nav-ic"><img src="${A('icon-upgrade.svg')}" alt=""><span class="badge" hidden></span></span><span class="nav-lbl">Upgrades</span></button>
-    <button class="manage nav-manage farm-manage-all desk-manage-all" type="button" data-act="manageAll" hidden aria-label="Refill tired workers"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span><span class="nav-lbl num">Refill</span><span class="count-badge num" hidden></span></button>
+    <button data-nav="upgrades" aria-label="Upgrades"><span class="nav-ic"><img src="${A('icon-upgrade.svg')}" alt=""><span class="badge" hidden></span></span> <span class="nav-lbl">Upgrades</span></button>
+    <button class="manage nav-manage farm-manage-all desk-manage-all" type="button" data-act="manageAll" hidden aria-label="Refill tired workers"><span class="manage-ico"><img src="${A('icon-manage-all.svg')}" width="28" height="28" alt=""><span class="ring-slot"></span></span><span class="nav-lbl num"><span class="nav-txt">Refill</span><span class="nav-cd" aria-hidden="true"></span></span> <span class="count-badge num" hidden></span></button>
     <button data-nav="farm" aria-label="Farm"><img src="${A('icon-coop.svg')}" alt=""><span class="nav-lbl">Farm</span></button></nav>`);
   // ---------- Panels ----------
-  const panelLayer = h(`<div id="panel-layer"><div class="scrim"></div>
+  const panelLayer = h(`<div id="panel-layer" data-testid="docked-panel"><div class="scrim"></div>
     <section class="sheet" id="p-market" hidden aria-label="Market"><header><h2>Market</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
       <div class="body order-list" id="mRows"></div><p class="sr" aria-live="polite" id="ordersLive"></p><div class="foot"><button class="btn" id="sellAll"></button></div></section>
-    <section class="sheet" id="p-upgrades" hidden aria-label="Upgrades"><header><h2>Upgrades</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
+    <section class="sheet" id="p-upgrades" data-testid="upgrades-panel" hidden aria-label="Upgrades"><header><h2>Upgrades</h2><button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button></header>
       <div class="body"><div class="tabs" role="tablist">
         <button role="tab" aria-label="Collection" data-tab="collection" class="active"><span class="tab-pill"><span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>Collection</span></button>
         <button role="tab" aria-label="Farm" data-tab="farm"><span class="tab-pill"><img src="${A('icon-coop.svg')}" alt="">Farm</span></button>
@@ -106,7 +121,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         <div id="uRow"></div></div></section></div>`);
   const modal = h(`<div id="modal-layer"></div>`);
   const fxLayer = h(`<div id="fx-layer" aria-hidden="true"></div>`);
-  const toast = h(`<div class="toast" role="status"></div>`);
+  const toast = h(`<div class="toast${clockWageOn(b) ? ' cw-b1' : ''}" role="status"></div>`); // clockWage B-1 wrap rule, flag-on only (flag-off markup unchanged)
   root.append(hud, farm, nav, panelLayer); document.body.append(modal, fxLayer, toast);
   const $ = <T extends HTMLElement = HTMLElement>(sel: string, el: ParentNode = document) => el.querySelector(sel) as T;
   const coinsEl = $('#coins'), basketEl = $('#basket'), queueEl = $('#queue'), scene = $('#scene'), coopImg = $<HTMLImageElement>('#coop');
@@ -116,6 +131,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const orderList = new OrderList(mRows, $('#ordersLive'), A('icon-customer.svg'), `<img src="${A('icon-customer.svg')}" alt=""><p>Next customer soon… <span class="num" id="nextIn"></span></p>`);
   if (IOS_FLAG_ENABLED) (window as any).eggfarmOrderList = orderList; // QA §7.17 node identity / write counts; compiled out of release
   const docked = matchMedia('(min-width:960px) and (orientation:landscape)');
+  let refillDirty = false; { const mark = () => { refillDirty = true; }; addEventListener('resize', mark); docked.addEventListener?.('change', mark); } // WCAG 2.4.11: --refill-bar-h follows wraps from resize/rotation/dock (7380b86 review 56513e7 #3)
 
   // ---------- FX budget (≤30 live elements, oldest recycled) ----------
   const live: HTMLElement[] = [];
@@ -157,6 +173,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     el.addEventListener('click', () => { g.telemetry.track('coop_hand_tip', { phase: 'tap' }); tab = 'workers'; dirty = true; openPanel('upgrades'); el.remove(); });
     window.setTimeout(() => el.remove(), 8000);
   };
+  // v5 clockWage AC-FC11: the one-time yawn tip (same .cooptip box, B-3 font); tap dismisses. Shown once per save (Game marks it).
+  const showCwTip = () => {
+    const el = h(`<button class="cooptip cw-tip" role="status">${CLOCK_WAGE_TIP}</button>`); document.body.append(el);
+    el.addEventListener('click', () => el.remove()); window.setTimeout(() => el.remove(), 8000);
+  };
   let toastTimer = 0;
   /** WebKit perf: patience ring in 1/120-turn steps (3 deg); a write only when the step changes, so the conic ring repaints ~4x/s, not every frame. */
   const setP = (el: HTMLElement, p: number) => { const v = (Math.round(Math.min(1, Math.max(0, p)) * 120) / 120).toFixed(4); if (el.style.getPropertyValue('--p') !== v) el.style.setProperty('--p', v); };
@@ -172,10 +193,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
 
   // ---------- Panels ----------
   let open: 'market' | 'upgrades' | null = null; let tab: 'collection' | 'farm' | 'workers' = 'collection'; let coopTipShown = false;
+  // Slim v5: one attended source; Market remains a play surface. Shift owns its registered lifecycle.
+  wireAttended(g, makeDialogOpen({ sheet: () => open, docked: () => docked.matches }));
   const openPanel = (p: typeof open) => {
     if (docked.matches) { if (p === 'upgrades') tab = tab; open = null; return; }
     if (p === open) return; if (p) sfx('uiOpen'); else if (open) sfx('uiClose');
     if (open === 'market' && p !== 'market') ordersExpanded = false;
+    if (open === 'upgrades' && ZGC) zgHidden(); // D-COL-29: hiding the Upgrades panel closes an open strip with one cancel
     open = p; panelLayer.classList.toggle('open', !!p);
     $('#p-market').hidden = p !== 'market'; $('#p-upgrades').hidden = p !== 'upgrades';
     nav.querySelectorAll('button').forEach(bt => bt.classList.toggle('on', bt.dataset.nav === (p ?? 'farm')));
@@ -187,7 +211,21 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const navFarm = nav.querySelector('[data-nav=farm]')!, upHeader = panelLayer.querySelector('#p-upgrades header')!;
   const placeFarmMA = () => { if (docked.matches) upHeader.insertBefore(farmMA, upHeader.querySelector('.close')); else nav.insertBefore(farmMA, navFarm); };
   placeFarmMA(); docked.addEventListener?.('change', placeFarmMA);
-  let farmMAShown = false, maAria: NavAria = { text: '', at: -Infinity }, rateAt = -Infinity; const rateEl = $('#rate');
+  // M5.1 Breeds PR-A: single mount; PR-B registers via registerBreedsExt (no further app.ts)
+  const flock = mountBreeds({
+    g, b, upHeader: upHeader as HTMLElement, panelLayer, docked,
+    closeOtherPanels: () => { if (!docked.matches) openPanel(null); },
+    openUpgrades: () => { if (!docked.matches) openPanel('upgrades'); },
+    sfx: (k) => sfx(k as any),
+    rm,
+    saveFlags,
+    getFlags: () => flags as FlockUiFlags,
+    dirty: () => { dirty = true; },
+    // BB-5 / time-to-afford rolling window — PR-B strip countdown must match.
+    rollingIncomeRate: () => income.centsPerSec(now()),
+  });
+  flock?.syncEntry(g.state, flags as FlockUiFlags, flags.sessions ?? 0);
+  let farmMAShown = false, maAria: NavAria = { text: '', at: -Infinity }, rateAt = -Infinity; const rateEl = $('#rate'), rateTri = $('#rate .tri'), rateTxt = $('#rate .rt'); // m6: ▼ in an aria-hidden .tri, money in .rt
   for (const fb of farmMAs) fb.addEventListener('click', e => { e.stopPropagation(); if (!act({ type: 'manageAll' })) return cantAfford(fb); sfx('upgrade'); dirty = true; });
   nav.addEventListener('click', e => { const n = (e.target as HTMLElement).closest('button')?.dataset.nav; if (n) openPanel(n === 'farm' ? null : n as any); });
   panelLayer.addEventListener('click', e => { const t = e.target as HTMLElement; if (t.classList.contains('scrim') || t.closest('.close')) openPanel(null); });
@@ -232,14 +270,91 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const t = e.target as HTMLElement;
     if (t.closest('.link')) { tab = 'farm'; dirty = true; render(); const fb = $('#uRow .btn'); if (fb) retrigger(fb, 'pulse2'); return; }
     const bt = t.closest('button.btn') as HTMLElement | null; if (!bt) return;
+    if (ZGC && zgClick(bt)) return; // v5 zeroGainUi confirm strip (m4.zeroGain.confirm = 1 only)
     // S2-4a: decide from the live state, not the button's aria-disabled (which can be a frame or more stale).
     const kind = bt.dataset.act, wid = bt.dataset.w as any;
+    // P2b (AC-R11 / TP1-U2): a Refill tap on an Unpaid worker dispatches nothing (no worker_manage); the refused-tap feedback still plays.
+    if (kind === 'manage' && g.state.workers[wid as keyof typeof g.state.workers]?.unpaid) return cantAfford(bt);
     if (kind) { if (!act(kind === 'hire' ? { type: 'hire', worker: wid } : kind === 'manage' ? { type: 'manage', worker: wid } : kind === 'manageAll' ? { type: 'manageAll' } : { type: 'buyGraderTier' })) return cantAfford(bt); dirty = true; return; }
     lastBuyBtn = bt; const bk = bt.dataset.kind;
-    if (!act(bk === 'hens' || bk === 'eggValue' ? { type: 'buyTrack', track: bk } : { type: bk === 'farm' ? 'buyFarm' : 'buyCollection' })) return cantAfford(bt);
+    buyRow(bk, bt);
     // F5: one tap = one dispatch; act() has already redrawn the sheet with the new level/price (S2-10).
   });
   let lastBuyBtn: HTMLElement | null = null;
+  /** The row buy (unchanged dispatch). ZG-AC9/AC15: with the flag on, the `upgrade` telemetry record of a collection/hens/eggValue
+   *  buy gets `zero_gain` = isZeroGain on the PRE-buy state, set here after the dispatch returns (sim events unchanged). */
+  function buyAction(bk: string | undefined): Parameters<typeof g.dispatch>[0] {
+    return bk === 'hens' || bk === 'eggValue' ? { type: 'buyTrack', track: bk } : { type: bk === 'farm' ? 'buyFarm' : 'buyCollection' };
+  }
+  function buyRow(bk: string | undefined, bt: HTMLElement): boolean {
+    const zk = ZG && bk && bk in ZG_KEY_OF ? ZG_KEY_OF[bk as keyof typeof ZG_KEY_OF] : null, zgPre = zk ? isZeroGain(g.state, b, zk) : null;
+    if (!act(buyAction(bk))) { cantAfford(bt); return false; }
+    if (zgPre !== null) g.telemetry.annotateLast('upgrade', { zero_gain: zgPre });
+    return true;
+  }
+  // ---------- v5 zeroGainUi confirm strip (UI doc v1.4 §5, UI-ZG-11/13–16/18; ZG-AC10). Only with m4.zeroGain.confirm = 1. ----------
+  const ZG_GUARD_MS = 350; let zgOpen: { kind: string; at: number } | null = null, zgRevealT = 0;
+  const zgEls = (kind: string) => { const st = uRow.querySelector<HTMLElement>(`.zg-confirm[data-zg-kind="${kind}"]`);
+    return st ? { st, buy: uRow.querySelector<HTMLElement>(`button.btn[data-kind="${kind}"]`) } : null; };
+  /** Which uRow control had focus before a re-render swaps the markup (Architect review 546de85 Minor 2): a strip button
+   *  (`zg:<confirm|cancel>`) or a row Buy (`kind:<kind>`); null when focus was outside the upgrades rows. */
+  const zgFocusKey = (): string | null => { const a = document.activeElement as HTMLElement | null; if (!a || !uRow.contains(a)) return null;
+    return a.dataset.zg ? `zg:${a.dataset.zg}` : a.dataset.kind ? `kind:${a.dataset.kind}` : null; };
+  /** Re-apply the open strip after any tab re-render (markup always renders it closed). D-COL-2026-10-30-29: a re-render that no
+   *  longer has the strip (tab switch, row no longer ZG / MAX) closes it with exactly one cancel, no buy, focus left alone.
+   *  Minor 2: focus goes back to the SAME control it was on before the swap (never moved to "Buy anyway"); only zgOpenStrip focuses
+   *  "Buy anyway", and the 350 ms guard (zgOpen.at) stays the opening time, so it is correct for the control that had focus. */
+  const zgApply = (focusKey: string | null = null) => { if (!zgOpen) return; const e = zgEls(zgOpen.kind); if (!e) { const k = zgOpen.kind; zgOpen = null; clearTimeout(zgRevealT); zgLog(k, 'cancel'); return; }
+    if (e.st.hidden) { e.st.hidden = false; if (e.buy?.hasAttribute('aria-controls')) e.buy.setAttribute('aria-expanded', 'true'); }
+    const f = focusKey?.startsWith('zg:') ? e.st.querySelector<HTMLElement>(`[data-zg="${focusKey.slice(3)}"]`)
+      : focusKey?.startsWith('kind:') ? uRow.querySelector<HTMLElement>(`button.btn[data-kind="${focusKey.slice(5)}"]`) : null;
+    if (f && document.activeElement !== f) f.focus({ preventScroll: true }); };
+  const zgLog = (kind: string, outcome: 'confirm' | 'cancel') => g.telemetry.track('zero_gain_confirm', { upgrade_id: kind, outcome });
+  const zgClose = (outcome: 'cancel' | null, focusBuy = true) => {
+    const o = zgOpen; if (!o) return; zgOpen = null; clearTimeout(zgRevealT);
+    const e = zgEls(o.kind); if (e) { e.st.hidden = true; e.buy?.setAttribute('aria-expanded', 'false'); if (focusBuy) e.buy?.focus({ preventScroll: true }); }
+    if (outcome) zgLog(o.kind, outcome);
+  };
+  const zgOpenStrip = (kind: string) => {
+    if (zgOpen) zgClose('cancel', false); // one strip at a time
+    const e = zgEls(kind); if (!e) return; zgOpen = { kind, at: now() };
+    e.st.hidden = false; e.buy?.setAttribute('aria-expanded', 'true');
+    e.st.querySelector<HTMLElement>('[data-zg=confirm]')?.focus({ preventScroll: true });
+    zgRevealT = window.setTimeout(() => { if (zgOpen?.kind === kind) zgEls(kind)?.st.scrollIntoView({ block: 'nearest' }); }, ZG_GUARD_MS);
+  };
+  function zgHidden() { zgClose('cancel', false); }
+  /** Click routing for the strip and for a ZG row's Buy (a disclosure while the strip is on). True = handled. */
+  function zgClick(bt: HTMLElement): boolean {
+    const z = bt.dataset.zg;
+    if (z) { // Buy anyway / Cancel: ignore every activation for 350 ms after opening (pointer, Enter, Space alike: the guard is on click)
+      const o = zgOpen; if (!o || now() - o.at < ZG_GUARD_MS) return true;
+      if (z === 'cancel') { zgClose('cancel'); return true; }
+      zgLog(o.kind, 'confirm'); zgOpen = null; clearTimeout(zgRevealT);
+      const e = zgEls(o.kind); if (e) { e.st.hidden = true; e.buy?.setAttribute('aria-expanded', 'false'); }
+      const buy = e?.buy; if (buy) { lastBuyBtn = buy; buyRow(o.kind, buy); }
+      uRow.querySelector<HTMLElement>(`button.btn[data-kind="${o.kind}"]`)?.focus({ preventScroll: true }); // UI-ZG-15: focus on the row Buy
+      return true;
+    }
+    const k = bt.dataset.kind; if (!k) return false;
+    if (zgOpen?.kind === k) { zgClose('cancel'); return true; } // A3: re-tap closes, focus stays on Buy
+    // Not a ZG row Buy -> normal buy. D-COL-2026-10-30-29 (b) / spec L212, E11: an unaffordable ZG Buy (live state, as S2-4a) stays the
+    // existing disabled Buy: no strip, no event (the normal path refuses it).
+    if (!bt.hasAttribute('aria-describedby') || !(k in ZG_KEY_OF) || !wouldApply(g.state, buyAction(k), b)) return false;
+    zgOpenStrip(k); return true;
+  }
+  /** N2 (review 546de85): the strip's listeners live as long as this mount; `ui.dispose()` removes them (tests that remount). */
+  const zgAC = new AbortController();
+  if (ZGC) {
+    // Esc inside the strip closes it (not the panel). Held Enter/Space on the strip buttons: ignored (UI-ZG-18, a local copy of PL-1);
+    // no stopPropagation for those keys, so the document PL-1 guard still sees them.
+    uRow.addEventListener('keydown', e => {
+      const inStrip = !!(e.target as Element | null)?.closest?.('.zg-confirm');
+      if (inStrip && e.repeat && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); return; }
+      if (inStrip && e.key === 'Escape' && zgOpen) { e.preventDefault(); e.stopPropagation(); zgClose('cancel'); }
+    }, { signal: zgAC.signal });
+    document.addEventListener('pointerdown', e => { if (!zgOpen) return; const t = e.target as Element | null, el = zgEls(zgOpen.kind);
+      if (el && t && (el.st.contains(t) || el.buy?.contains(t))) return; zgClose('cancel'); }, { capture: true, signal: zgAC.signal });
+  }
 
   // ---------- Modals ----------
   const closeModal = () => { modal.classList.remove('open'); modal.innerHTML = ''; modalKind = null; };
@@ -247,10 +362,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const showWelcome = () => {
     const eggs = g.state.pendingOfflineEggs; if (eggs <= 0) return;
     modalKind = 'welcome';
+    const cwLines = welcomeBackWageHtml(clockWageWindowView(g.state), b); // AC-FC12 ('' flag-off: markup unchanged); the window resets at close (collect/dismissOffline)
     modal.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-labelledby="wbT">
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button>
       <img src="${A('icon-offline-earnings.svg')}" width="64" height="64" alt="">
-      <h2 id="wbT">Welcome back!</h2><div>You were away ${fmtAway(g.offline.awayS, b.offline.offlineCapSeconds)}</div>
+      <h2 id="wbT">Welcome back!</h2><div>You were away ${fmtAway(g.offline.awayS, b.offline.offlineCapSeconds)}</div>${cwLines}
       <div class="big num"><img src="${A('icon-egg.svg')}" alt="">+${fmtCount(eggs)}\u00a0eggs</div>
       <button class="btn" id="wbCollect">Collect</button></div>`;
     modal.classList.add('open'); sfx('welcomeBack');
@@ -258,7 +374,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const grantWelcome = (withFlyers: boolean) => {
     const eggs = g.state.pendingOfflineEggs; const btn = $('#wbCollect');
     if (withFlyers && btn && !rm()) for (let i = 0; i < Math.min(eggs, b.feel.max_flying_eggs); i++) fly(A('icon-egg.svg'), btn, basketEl.parentElement!, i, 24);
-    g.dispatch({ type: withFlyers ? 'collectOffline' : 'dismissOffline' }); closeModal(); dirty = true; render(); /* S2-10 */ pulse(basketEl.parentElement!); sfx('collect');
+    g.dispatch({ type: withFlyers ? 'collectOffline' : 'dismissOffline' }); closeModal(); dirty = true; render(); /* S2-10 */ pulse(basketEl.parentElement!); sfx('collect'); flock?.onWelcomeClosed();
   };
   const settingsIosLine = () => iosKind === 'standalone' ? `<div class="settings-ios ok">Installed on Home Screen ✔</div>`
     : iosKind ? `<div class="settings-ios">${SHARE_SVG} ${TIP_TITLE} ${howTo(iosKind, '')}</div>`.replace(' ,', ',').replace('  ', ' ') : '';
@@ -279,7 +395,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (t.id === 'sOldSave') { const raw = oldSaveForSession(); if (raw) void exportOldSave(raw, exportName(new Date())).then(ok => { $('#sOldMsg').textContent = ok ? OK_MSG : FAIL_MSG; }); return; }
     if (t.id === 'sExport') { void exportLog(g.telemetry.exportJSON(), `eggfarm-log-${g.installId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.json`).then(m => { const el = $('#sExportMsg'); if (el) el.textContent = m; }); return; }
     if (t.id === 'sReset') { modalKind = 'confirm'; modal.innerHTML = `<div class="card" role="alertdialog" aria-modal="true"><h2>Reset all progress?</h2><button class="btn secondary" id="cCancel">Cancel</button><button class="btn danger" id="cReset">Reset</button></div>`; return; }
-    if (t.id === 'cReset') { g.resetting = true; g.telemetry.track('save_reset'); g.telemetry.flush(true); resetProgress(localStorage); void g.clearMirror().then(() => location.reload()); }
+    if (t.id === 'cReset') { g.beginReset(); resetProgress(localStorage); void g.clearMirror().then(() => location.reload()); }
   });
   modal.addEventListener('change', e => {
     const t = e.target as HTMLInputElement;
@@ -290,7 +406,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   $('#settings').addEventListener('click', showSettings);
   // PL-1: Escape only closes the modal/panel, never activates; a held Enter or Space can't auto-repeat buys (one press = one level).
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { e.preventDefault(); if (modalKind === 'welcome') grantWelcome(false); else if (modalKind) closeModal(); else openPanel(null); }
+    if (e.key === 'Escape') { e.preventDefault(); if (modalKind === 'welcome') grantWelcome(false); else if (modalKind) closeModal(); else if (flock?.onEsc()) { dirty = true; render(); } else openPanel(null); }
     else if ((e.key === 'Enter' || e.key === ' ') && e.repeat && (e.target as Element | null)?.closest?.('button')) e.preventDefault();
   });
 
@@ -319,8 +435,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const kids: HTMLElement[] = [];
     for (const c of s.customers.slice(0, split.shown)) {
       let el = chips.get(c.id);
-      if (!el) { el = h(`<button class="chip arrive" aria-label="Customer"><img class="cust" src="${A('icon-customer.svg')}" alt=""><span class="tag"><img src="${A('icon-egg.svg')}" alt=""><span class="num"></span></span></button>`); chips.set(c.id, el); }
-      setText(el.querySelector('.tag .num')!, fmtCount(c.demand - c.filled));
+      if (!el) { el = h(`<button class="chip arrive"><img class="cust" src="${A('icon-customer.svg')}" alt=""><span class="tag"><img src="${A('icon-egg.svg')}" alt=""><span class="num"></span></span></button>`); chips.set(c.id, el); }
+      const left = c.demand - c.filled, n = fmtCount(left); // OC-A11Y-1..3: name + visible digit from one value, same render
+      setText(el.querySelector('.tag .num')!, n);
+      const al = orderChipLabel(n, left); if (el.getAttribute('aria-label') !== al) el.setAttribute('aria-label', al);
       setP(el, c.waitedS / patience);
       kids.push(el);
     }
@@ -382,6 +500,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   };
 
   // ---------- Game events ----------
+  const fallAsleep = new FallAsleepToasts(); if (clockWageOn(b)) fallAsleep.observe(g.state, b);
   g.on((e: GameEvent) => {
     switch (e.type) {
       case 'sell': {
@@ -406,6 +525,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         pendingLvPop = true; goalNow = true; break;
       }
       case 'worker_hire': case 'grader_tier': goalNow = true; break;
+      case 'worker_state': if (clockWageOn(b) && fallAsleep.onState(e.worker, e.state)) queueToasts([asleepToast(e.worker, b)]); break; // v5 clockWage AC-FC9: Working/Tired -> Asleep only, queued (Architect M1)
       case 'coop_full': if (e.phase === 'start') sfx('coopFull'); break;
     }
     dirty = true;
@@ -415,17 +535,32 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const goalBtn = $<HTMLButtonElement>('#goal'), goalLbl = $('.goal-label', goalBtn), goalSt = $('.goal-status', goalBtn), goalLive = $('#goalLive'), goalDesc = $('#goalDesc');
   let hlSel = '', hlUntil = 0, goalLiveT = 0;
   // M4A-18 v1.4 / M4A-41: one shared picker for the highlight and the hint (replaces the holdTicks = 2 hold).
-  const picker = new DualPicker(); let rowPick: SharedPick | null = null, hintPick: SharedPick | null = null; let rowHl: RowKey | null = null;
+  // v5 zeroGainUi §5.6: with the flag on, ZG rows are dropped from both scorers BEFORE the pick (flag off: the stock DualPicker).
+  const picker = ZG ? new DualPicker(zgFiltered(defaultScorer), zgFiltered(allScorer)) : new DualPicker(); let rowPick: SharedPick | null = null, hintPick: SharedPick | null = null; let rowHl: RowKey | null = null;
+  // BBv2 (spec v1.0.4 §6, PMFU BB12): `hintMark` is THE ★ key the chip and the strip render from (flag read once at boot):
+  // bestBuyV2 = 1 -> the Part A ★ (affordable AND meaningful, else null = the inert mark-null net); 0 -> today's single-arg bestBuyMark.
+  const BB2 = bestBuyV2On(b); let hintMark: BuyKey | null = null;
+  let bbMarkSinceT = 0; if (g.bbTel) g.bbCtx = () => { const t = now(); return { t, mark: hintMark, markSinceT: bbMarkSinceT, rateCentsPerS: income.centsPerSec(t) }; };
+  // SG-12 qaPicker history (stopgap v1.2.6 fdc1c199 SG-12; QA/dev builds only, compiled out of release with IOS_FLAG_ENABLED).
+  const qaHist: { t: number; key: string | null; affordable: boolean | null; mark: string | null }[] = []; let qaKeySinceT = 0, qaLast: string | null = null;
   const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
   const renderGoal = () => {
     const t = now();
-    const M4 = m4On(b), prevKey = hintPick?.key, prevMark = bestBuyMark(hintPick);
+    const M4 = m4On(b), prevKey = hintPick?.key, prevMark = hintMark;
     if (M4) { const r = picker.tick(g.state, b, t); rowPick = r.highlight; hintPick = r.hint; rowHl = rowPick ? ROW_OF_KEY[rowPick.key] ?? null : null; } // every state change + 5 s re-check
+    hintMark = BB2 ? bbv2Mark(hintPick, g.state, b) : bestBuyMark(hintPick);
+    if (IOS_FLAG_ENABLED) { // SG-12: one entry when key, affordable or mark changed since the last frame; load counts as a change
+      const k = hintPick?.key ?? null, sig = `${k}|${hintPick?.affordable ?? null}|${hintMark}`;
+      if (sig !== qaLast) { if (qaLast === null || k !== (qaHist[qaHist.length - 1]?.key ?? null)) qaKeySinceT = t; qaLast = sig;
+        qaHist.push({ t, key: k, affordable: hintPick?.affordable ?? null, mark: hintMark }); if (qaHist.length > 32) qaHist.shift(); }
+    }
+    // BBv2 §8 (errata rev 12 #19/#20): ms_since_shown runs on this picker clock from the last ★ switch; g.bbTel is null at flag 0.
+    if (g.bbTel) { if (hintMark !== null && hintMark !== prevMark) bbMarkSinceT = t; g.bbTel.shown(t, g.state, hintPick, income.centsPerSec(t)); }
     // 1 Hz text tick; purchases, pick changes and best-buy (affordability) flips bypass it, so the strip ★ and the row chip
     // (rebuilt from this frame's hintPick) always agree in the same frame (F4-13; CCR #62 m1).
-    if (!goalNow && t - goalTickAt < 1000 && !(M4 && (hintPick?.key !== prevKey || bestBuyMark(hintPick) !== prevMark))) return;
+    if (!goalNow && t - goalTickAt < 1000 && !(M4 && (hintPick?.key !== prevKey || hintMark !== prevMark))) return;
     const imm = goalNow || M4; goalNow = false; goalTickAt = t;
-    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t), M4 ? hintPick?.key : undefined, M4 ? bestBuyMark(hintPick) : null), imm); goalShown = gl;
+    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t), M4 ? hintPick?.key : undefined, M4 ? hintMark : null), imm); goalShown = gl;
     if (gl.parts) { const html = goalLabelHtml(gl.parts); if (goalLbl.dataset.html !== html) { goalLbl.dataset.html = html; goalLbl.innerHTML = html; } goalLbl.classList.add('ng'); }
     else { if (goalLbl.dataset.html) { delete goalLbl.dataset.html; goalLbl.textContent = ''; } goalLbl.classList.remove('ng'); setText(goalLbl, gl.label); } setText(goalSt, gl.status);
     goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
@@ -464,7 +599,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const arrow = (a: string, z: string) => max ? `${a}` : `${a} <span class="arrow">→</span> ${z}`;
     const price = (f: number, c: number) => fmtMoney(S.eggPriceCents(f, c, b));
     const slotLines = isF && !max ? slotPreview(S.queueMax(F, b), S.queueMax(F + 1, b), S.demandRange(F, b) as [number, number], S.demandRange(F + 1, b) as [number, number], A('icon-customer.svg')) : null;
-    const M4 = m4On(b);
+    const M4 = m4On(b), zg = ZG && !isF && !max && isZeroGain(s, b, 'COLL'); // ZG-AC4: FARM is exempt
     const fx = isF ? [
       ...(M4 ? [`Hens & Egg value up to L${hensCap(F, b)} ${max ? '' : `<span class="arrow">→</span> L${hensCap(F + 1, b)}`}`]
         : [`Hens ${arrow(fmtCount(S.hens(F, b)), fmtCount(S.hens(F + 1, b)))}`]),
@@ -488,22 +623,34 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // 4.6c Limited by coop (Collection row): next tap > 50% of current coop cap. Advisory only.
     if (!isF && !max && S.eggsPerTap(C + 1, b) > 0.5 * coopCap(s, b))
       hint += `<div class="hint limit"><img src="${A('icon-coop.svg')}" alt="">Limited by coop · <button class="link">Upgrade Farm →</button></div>`;
-    return `<div class="up"${max ? ` role="group" aria-label="${isF ? 'Farm level' : 'Collect per tap'}, level ${L}, max."` : ''}>
+    return `<div class="up${zg ? ' zg" data-zero-gain="COLL' : ''}"${max ? ` role="group" aria-label="${isF ? 'Farm level' : 'Collect per tap'}, level ${L}, max."` : ''}>
       <div class="ic">${isF ? `<img src="${A('icon-coop.svg')}" alt="">` : `<span class="nest-icon"><img src="${A('icon-nest.svg')}" alt=""><img class="nest-eggs" src="${A('nest-eggs.svg')}" alt=""></span>`}<span class="lv">L${L}</span></div>
       <div class="col"><h3>${isF ? 'Farm level' : 'Collect per tap'}</h3>
       ${isF && nextTier ? `<div class="tier"><img src="${A('icon-coop.svg')}" alt="">Coop upgrade at L${nextTier}</div>` : ''}
-      <ul class="fx">${slotLines ?? ''}${fx.map(l => `<li>${l}</li>`).join('')}</ul>${max ? '' : bestChip(isF ? 'FARM' : 'COLL')}
+      <ul class="fx">${slotLines ?? ''}${fxLines(fx, zg)}</ul>${max ? '' : bestChip(isF ? 'FARM' : 'COLL')}
       <div class="meta">Level ${L} / ${b.maxLevel}</div>
       ${max ? `<span class="maxed" aria-hidden="true">MAX</span>` :
-        `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${kind}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`}
-      <div>${hint}</div></div></div>`;
+        `<button class="btn buy ${glowCls(can, zg)}" data-kind="${kind}" aria-disabled="${!can}"${zgBuyAttrs(zg, kind, can)}><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`}
+      <div>${hint}</div>${zgDesc(zg, kind)}</div></div>${zgStrip(zg, kind)}`;
   };
+  // ---------- v5 zeroGainUi row pieces (UI doc art-ux/m5.1-zero-gain-ui.md v1.4 §1/§2/§5; all '' when the row is not ZG) ----------
+  const ZK = { collection: 'coll', hens: 'hens', eggValue: 'value' } as const; type ZRow = keyof typeof ZK;
+  /** First effect line gets the chip; the others are unchanged. Not ZG -> byte-identical to the flag-off markup. */
+  const fxLines = (fx: string[], zg: boolean) => fx.map((l, i) => zg && i === 0 ? `<li class="zg-line"><span class="fx-t">${l}</span><span class="zg-chip">${ZG_CHIP}</span></li>` : `<li>${l}</li>`).join('');
+  const zgBuyAttrs = (zg: boolean, k: string, can: boolean) => !zg ? '' : ` aria-describedby="zg-desc-${ZK[k as ZRow]}"${ZGC && can ? ` aria-expanded="false" aria-controls="zgc-${ZK[k as ZRow]}"` : ''}`;
+  /** UI-ZG-4: an affordable ZG Buy has no `.affordable` (no glow); its class attribute then equals the unaffordable one. N3 (review
+   *  546de85): a value in the template, not a string replace; not ZG -> exactly `can ? 'affordable' : ''` (flag-off bytes unchanged). */
+  const glowCls = (can: boolean, zg: boolean) => can && !zg ? 'affordable' : '';
+  const zgDesc = (zg: boolean, k: string) => zg ? `<span id="zg-desc-${ZK[k as ZRow]}" hidden>${ZG_DESC}</span>` : '';
+  /** Confirm strip (only m4.zeroGain.confirm = 1): rendered once as the row's next sibling, always hidden in the markup; open state is
+   *  applied on the DOM (zgApply), so toggling never re-renders the tab (UI-ZG-15). */
+  const zgStrip = (zg: boolean, k: string) => !(zg && ZGC) ? '' : `<div class="zg-confirm" role="group" aria-labelledby="zgc-${ZK[k as ZRow]}-t" id="zgc-${ZK[k as ZRow]}" data-zg-kind="${k}" hidden><p id="zgc-${ZK[k as ZRow]}-t">This won't raise income now.</p><div class="acts"><button class="btn buy" type="button" data-zg="confirm">Buy anyway</button><button class="btn secondary" type="button" data-zg="cancel">Cancel</button></div></div>`;
   /** M41-8 F3 = UX-M4 ★ Best buy chip: on the one row bestBuyMark names (same source as the strip ★, F4-13). */
-  const bestChip = (key: string) => m4On(b) && bestBuyMark(hintPick) === key ? `<div class="best-chip" data-best-buy="${key}"><span aria-hidden="true">★</span> Best buy</div>` : '';
+  const bestChip = (key: string) => m4On(b) && hintMark === key ? `<div class="best-chip" data-best-buy="${key}"><span aria-hidden="true">★</span> Best buy</div>` : '';
   /** M4-A Option A: Hens / Egg value rows (art-ux/m4-tracks-copy.md), reusing the .up row component. */
   const trackRowHtml = (t: Track) => {
     const s = g.state, F = s.farmLevel, H = s.hensLevel, V = s.eggValueLevel, L = trackLevel(s, t), lock = trackLock(s, t, b);
-    const cost = trackCost(L, t, b), can = !lock && s.coinsCents >= cost * 100, name = t === 'hens' ? 'Hens' : 'Egg value';
+    const cost = trackCost(L, t, b), can = !lock && s.coinsCents >= cost * 100, name = t === 'hens' ? 'Hens' : 'Egg value', zg = ZG && !lock && isZeroGain(s, b, ZG_KEY_OF[t]);
     const arrow = (a: string, z: string) => lock ? a : `${a} <span class="arrow">→</span> ${z}`;
     const fx = t === 'hens'
       ? [`Eggs/s ${arrow(fmtCount(trackEggsPerSec(H, b)), fmtCount(trackEggsPerSec(H + 1, b)))}`]
@@ -514,13 +661,13 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const right = lock === 'max' ? `<span class="maxed" aria-hidden="true">MAX</span>`
       : farmMaxed ? `<span class="maxed farm-max" aria-hidden="true">${TRACK_FARM_MAX_TEXT}</span>`
       : lock === 'cap' ? `<div class="lock" aria-label="${name}, level ${L}, locked. Needs Farm level ${need}.">${trackLockText(need!)}</div>`
-      : `<button class="btn buy ${can ? 'affordable' : ''}" data-kind="${t}" aria-disabled="${!can}"><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`;
+      : `<button class="btn buy ${glowCls(can, zg)}" data-kind="${t}" aria-disabled="${!can}"${zgBuyAttrs(zg, t, can)}><img src="${A('icon-coin.svg')}" alt=""><span class="num">${fmtMoney(cost * 100)}</span></button>`;
     const best = !lock && rowHl === t ? (rowPick?.affordable ? ' best' : ' best pending') : '';
     const mh = milestoneHint(t, L, F, b), eta = best === ' best pending' ? `<div class="hint eta">${fmtAffordableIn(income.secondsToAfford(now(), (rowPick?.costCents ?? 0) - s.coinsCents))}</div>` : '';
-    return `<div class="up track${best}" data-track="${t}"${lock === 'max' ? ` role="group" aria-label="${name}, level ${L}, max."` : farmMaxed ? ` role="group" aria-label="${trackFarmMaxAria(name, L)}"` : ''}>
+    return `<div class="up track${best}${zg ? ' zg' : ''}" data-track="${t}"${zg ? ` data-zero-gain="${ZG_KEY_OF[t]}"` : ''}${lock === 'max' ? ` role="group" aria-label="${name}, level ${L}, max."` : farmMaxed ? ` role="group" aria-label="${trackFarmMaxAria(name, L)}"` : ''}>
       <div class="ic"><img src="${A(t === 'hens' ? 'char-chicken.svg' : 'icon-egg.svg')}" alt=""><span class="lv">L${L}</span></div>
-      <div class="col"><h3>${name}</h3><ul class="fx">${fx.map(l => `<li>${l}</li>`).join('')}</ul>${lock ? '' : bestChip(t === 'hens' ? 'HENS' : 'VALUE')}${mh ? `<div class="ms-hint">${mh}</div>` : ''}${eta}
-      <div class="meta">Level ${L} / ${b.maxLevel}</div>${right}</div></div>`;
+      <div class="col"><h3>${name}</h3><ul class="fx">${fxLines(fx, zg)}</ul>${lock ? '' : bestChip(t === 'hens' ? 'HENS' : 'VALUE')}${mh ? `<div class="ms-hint">${mh}</div>` : ''}${eta}
+      <div class="meta">Level ${L} / ${b.maxLevel}</div>${right}${zgDesc(zg, t)}</div></div>${zgStrip(zg, t)}`;
   };
   const farmTabHtml = () => {
     const s = g.state, st = balancedStrip(s, b);
@@ -535,7 +682,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     // S2-8 / AC-R2 HUD net rate (<= 1 update/s, real incomePerSec from the live worker moods); first negative tick shakes the line (not under reduced motion)
     if (now() - rateAt >= 1000) { rateAt = now();
       const v = headerRate(s, b); // ruling (a): real rate; aria ', sales stopped' only for a stalled Market Hand (HoE Oct 24)
-      setText(rateEl, headerRateText(v)); rateEl.classList.toggle('neg', v.sign === 'neg');
+      // m6 (option A, art acfe36a7): headerRateText keeps '⚠ ' as the model's warn marker; it is never painted. The icon is the static WARN_SVG
+      // toggled by .warn, ▼ goes in the aria-hidden .tri (Q-M6-2), and the 1 s tick only writes text + classes (no innerHTML).
+      { const t = headerRateText(v), warn = t.startsWith('\u26A0 '), body = warn ? t.slice(2) : t, down = body.startsWith('\u25BC ');
+        setText(rateTri, down ? '\u25BC ' : ''); setText(rateTxt, down ? body.slice(2) : body); rateEl.classList.toggle('warn', warn); }
+      rateEl.classList.toggle('neg', v.sign === 'neg');
       if (rateEl.dataset.sign !== v.sign) { if (v.sign === 'neg' && rateEl.dataset.sign !== 'neg' && !rm()) retrigger(rateEl, 'rshake'); rateEl.dataset.sign = v.sign; }
       if (rateEl.getAttribute('aria-label') !== v.aria) rateEl.setAttribute('aria-label', v.aria); }
     // coop tier + celebration (once per first reach, persisted in save)
@@ -554,9 +705,21 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const hensN = m4On(b) ? S.hens(s.hensLevel, b) : S.hens(F, b);
     const hn = Math.min(hensN, 12);
     if (hn !== henCount) {
+      // m1 (art acfe36a7, UI-M1-1..6): keyed per-slot diff instead of rebuilding all 12 cells. Existing hens are never touched, so their
+      // `bob` keeps its phase; only appearing hens are appended (with .pop after the first render) and only vanishing ones removed.
+      // A new hen's delay list is `0s, <stagger>`: popin plays at the tap, bob keeps its per-slot stagger. Reduced motion is CSS only.
       const order = [2, 3, 1, 4, 0, 5, 8, 9, 7, 10, 6, 11];
-      const slots = Array.from({ length: 12 }, (_, i) => `<span>${order.indexOf(i) < hn ? `<img class="hen ${i % 3 === 2 ? 'flip' : ''} ${henCount >= 0 && order.indexOf(i) >= henCount ? 'pop' : ''}" style="animation-delay:${(i * .15).toFixed(2)}s" src="${A('char-chicken.svg')}" alt="">` : ''}</span>`);
-      yard.innerHTML = slots.join(''); henCount = hn;
+      if (yard.children.length !== 12) yard.innerHTML = '<span></span>'.repeat(12);
+      for (let i = 0; i < 12; i++) {
+        const cell = yard.children[i], img = cell.firstElementChild, want = order.indexOf(i) < hn;
+        if (want && !img) {
+          const pop = henCount >= 0, d = `${(i * .15).toFixed(2)}s`, el = document.createElement('img');
+          el.className = `hen${i % 3 === 2 ? ' flip' : ''}${pop ? ' pop' : ''}`;
+          el.style.animationDelay = pop ? `0s, ${d}` : d;
+          el.src = A('char-chicken.svg'); el.alt = ''; cell.appendChild(el);
+        } else if (!want && img) img.remove();
+      }
+      henCount = hn;
     }
     const hp = $('#henpill'); setHidden(hp, hensN <= 12); setText(hp, `×${fmtCount(hensN)}\u00a0hens`);
     // meter, nest, full badge, collect label
@@ -570,37 +733,45 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     setText(collectBtn, collectLabel(coopWhole, S.eggsPerTap(s.collectionLevel, b), fmtCount));
     setDisabled(collectBtn, coopWhole < 1);
     // nav badges
-    const canUp = (s.collectionLevel < b.maxLevel && s.coinsCents >= S.collectionCost(s.collectionLevel, b) * 100) || (F < b.maxLevel && s.coinsCents >= S.farmCost(F, b) * 100);
+    const canUp = (s.collectionLevel < b.maxLevel && s.coinsCents >= S.collectionCost(s.collectionLevel, b) * 100 && !(ZG && isZeroGain(s, b, 'COLL'))) || (F < b.maxLevel && s.coinsCents >= S.farmCost(F, b) * 100); // §5.7 / ZG-AC21
     setHidden(nav.querySelector('[data-nav=market] .badge') as HTMLElement, !(s.customers.length && s.basket >= 1));
     { const mk = nav.querySelector('[data-nav=market]') as HTMLElement, qf = queueFull(s, b) ? 'true' : 'false'; if (mk.dataset.queueFull !== qf) mk.dataset.queueFull = qf; } // S2-9 badge hook (Art & UX styles it)
     // AC-R1 / AC-R5 (v1.4 §7): asleep/unpaid count badge on the Upgrades nav icon + the Workers tab; replaces the affordable dot while count > 0; one pulse on first show.
     { const n = asleepOrUnpaidCount(s, b);
       setHidden(nav.querySelector('[data-nav=upgrades] .badge') as HTMLElement, n > 0 || !canUp);
-      const ensure = (host: Element | null) => {
+      const ensure = (host: Element | null, ariaHidden = false) => {
         if (!host) return null;
-        let ab = host.querySelector('.asleep-badge') as HTMLElement | null;
-        if (!ab) { ab = document.createElement('span'); ab.className = 'asleep-badge num'; ab.hidden = true; host.append(ab); }
+        let ab = host.querySelector(':scope > .asleep-badge') as HTMLElement | null;
+        if (!ab) { ab = document.createElement('span'); ab.className = 'asleep-badge num'; ab.hidden = true; if (ariaHidden) ab.setAttribute('aria-hidden', 'true'); host.append(' ', ab); } // AC-R17: ' ' = "Workers N" (absolute badge, no layout)
         return ab;
       };
-      for (const ab of [ensure(nav.querySelector('[data-nav=upgrades] .nav-ic')), ensure(document.querySelector('.tabs [data-tab=workers]'))]) {
+      // Art-c1 (HoE 2026-10-30 00:19): the Upgrades count badge sits after the "Upgrades" label in the DOM (visible text "Upgrades N"),
+      // aria-hidden (the name carries the count); CSS keeps it at the icon's top-right (styles.css, same -6/-6 as before). No CSS-generated count.
+      for (const ab of [ensure(nav.querySelector('[data-nav=upgrades]'), true), ensure(document.querySelector('.tabs [data-tab=workers]'))]) {
         if (!ab) continue;
         const was = !ab.hidden; setText(ab, String(n)); setHidden(ab, n < 1);
         if (n > 0 && !was && !rm()) retrigger(ab, 'badge-pulse');
       }
-      const up = nav.querySelector('[data-nav=upgrades]') as HTMLElement;
-      const al = n > 0 ? `Upgrades, ${n} worker${n > 1 ? 's' : ''} asleep or unpaid` : 'Upgrades';
-      if (up.getAttribute('aria-label') !== al) up.setAttribute('aria-label', al); }
+      // AC-R17 (rc1-asleep v1.0.11, WCAG 2.5.3): each name starts with the visible text in DOM order and announces the count:
+      // nav (Art-c1 as ruled by HoE 2026-10-30 00:19/00:20) "Upgrades, N workers need attention" / "Upgrades, 1 worker needs attention",
+      // Workers tab "Workers N, N asleep or unpaid"; N = 0 -> bare label.
+      const up = nav.querySelector('[data-nav=upgrades]') as HTMLElement, wt = document.querySelector('.tabs [data-tab=workers]') as HTMLElement | null;
+      const al = upgradesNavName(n);
+      if (up.getAttribute('aria-label') !== al) up.setAttribute('aria-label', al);
+      const tl = n > 0 ? `Workers ${n}, ${n} asleep or unpaid` : 'Workers';
+      if (wt && wt.getAttribute('aria-label') !== tl) wt.setAttribute('aria-label', tl); }
     // M2 Farm View Manage all (§4.4) + yawn sfx (§4.6)
     farmMAShown = farmManageAllVisible(s, b, farmMAShown);
     for (const fb of farmMAs) {
       setHidden(fb, !farmMAShown);
       if (farmMAShown) { const cd = s.manageCdS > 1e-9; fb.classList.toggle('is-cooldown', cd); setDisabled(fb, cd); const r = ringHtml(s, b), slot = fb.querySelector('.ring-slot')!; if (slot.innerHTML !== r) slot.innerHTML = r;
-        // S2-5 / AC-R9: visible "Refill" (or the aria-hidden "0:NN" countdown) + N badge; aria "Refill N tired workers" / "Refill, cooling down"
+        // S2-5 / AC-R9: visible "Refill" + N badge, or "Refill" + the CSS-drawn countdown (D-HOP-2026-10-30-02); aria "Refill N tired workers" / "Refill, cooling down"
         const v = navRefillState(s, b, docked.matches, maAria, now());
-        { const nl = fb.querySelector('.nav-lbl')!; setText(nl, v.label); const ah = v.hideLabel ? 'true' : 'false'; if (nl.getAttribute('aria-hidden') !== ah) nl.setAttribute('aria-hidden', ah); } const bd = fb.querySelector('.count-badge') as HTMLElement; setText(bd, v.badge); setHidden(bd, !v.badge);
+        { setText(fb.querySelector('.nav-txt')!, v.label); const cdEl = fb.querySelector('.nav-cd') as HTMLElement; if (cdEl.dataset.cd !== v.countdown) cdEl.dataset.cd = v.countdown; } const bd = fb.querySelector('.count-badge') as HTMLElement; setText(bd, v.badge); setHidden(bd, !v.badge);
         maAria = v.aria; if (fb.getAttribute('aria-label') !== v.aria.text) fb.setAttribute('aria-label', v.aria.text); }
     }
     if (yawnSfx.pick(s, b, now())) sfx('workerYawn');
+    if (clockWageTipNow(s, b) && g.markClockWageTip()) showCwTip(); // AC-FC11 (false with clockWage off: no DOM change)
     // market panel
     if (open === 'market' || docked.matches) {
       const basket = Math.floor(s.basket), patience = S.patienceS(F, b);
@@ -615,10 +786,18 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     }
     // M41-8: the shared pick is refreshed first so the row outline, the UX-M4 chip and the strip ★ use the same frame's pick.
     renderGoal();
+    flock?.syncEntry(s, flags as FlockUiFlags, flags.sessions ?? 0);
+    if (flock?.isOpen) flock.render();
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
       const html = tab === 'workers' ? workersHtml(s, b) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
-      if (html !== lastUp) { lastUp = html; uRow.innerHTML = html; fitBanners(uRow); /* AC-R1 §6: one-line banners, role dropped when it doesn't fit */ if (hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
+      if (html !== lastUp || refillDirty) { const changed = html !== lastUp; refillDirty = false; if (changed) { lastUp = html; const zf = ZGC ? zgFocusKey() : null; uRow.innerHTML = html; if (ZGC) zgApply(zf); }
+        // WCAG 2.4.11 (ported from rc1 7380b86 review #7): --refill-bar-h = the measured sticky Refill bar + 8px (0 with no bar), re-measured
+        // on resize / dock change; #uRow controls use it as scroll-margin-top, so keyboard focus never lands under the bar.
+        { const rb = uRow.querySelector<HTMLElement>(':scope > .refill-wrap'); let sc = uRow.parentElement; while (sc && !/(auto|scroll)/.test(getComputedStyle(sc).overflowY)) sc = sc.parentElement;
+          const pad = sc ? parseFloat(getComputedStyle(sc).paddingTop) || 0 : 0; // sticky top:0 sits at the scroller's content edge, scroll-margin at its padding edge (p2 browser sweep)
+          const hv = rb ? `${Math.ceil(rb.getBoundingClientRect().height + pad) + 8}px` : '0px'; if (uRow.style.getPropertyValue('--refill-bar-h') !== hv) uRow.style.setProperty('--refill-bar-h', hv); }
+        fitBanners(uRow); /* AC-R1 §6: one-line banners, role dropped when it doesn't fit */ if (changed && hlSel && now() < hlUntil) uRow.querySelector(hlSel)?.classList.add('goal-hl', 'no-anim'); if (changed && pendingLvPop) { const lv = uRow.querySelector('.lv'); if (lv) retrigger(lv, 'pop'); } }
     }
     pendingLvPop = false;
     if (hlSel && now() >= hlUntil) { uRow.querySelectorAll('.goal-hl').forEach(e => e.classList.remove('goal-hl', 'no-anim')); hlSel = ''; }
@@ -734,17 +913,18 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const gateCtx = () => { const st = g.state; return { coop: st.coop, eggsPerTap: S.eggsPerTap(st.collectionLevel, b), customers: st.customers.length, basket: st.basket, coinsCents: st.coinsCents, costCents: S.collectionCost(st.collectionLevel, b) * 100, nextCustomerInS: st.nextCustomerInS }; };
   // AC-R1 §6: banners refit on resize / dock change (wider or narrower card); QA-only hook for the rc0 bannerFit section, compiled out of release.
   { const refit = () => fitBanners(uRow); addEventListener('resize', refit); docked.addEventListener?.('change', refit); }
+  { const lay = () => g.layoutChanged(); addEventListener('resize', lay); docked.addEventListener?.('change', lay); } // v5 #1 R15: re-check a deferred golden spawn on layout change (no-op unless golden is on)
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaFitBanners = () => fitBanners(uRow);
   // QA-only: open the real save-recovery dialog mid-game (R1 resume check); compiled out of release with eggfarmOnb.
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaRecovery = () => showRecoveryDialog({ case: 'F', reason: 'parse', had_backup: false, restored_from_backup: false, copy_failed: false, raw: '{}' } as any, A, [root, modal, toast]);
-  const renderAll = () => { const t = performance.now(); if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
+  const renderAll = () => { const t = performance.now(); if (clockWageOn(b)) fallAsleep.observe(g.state, b); /* AC-FC9 onset baseline */ if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
     render(); if (onbUpdate && !onbUpdate()) { onbUpdate = null; onbFlow = null; } if (!recoveryOpen) renderWorkersIntro(); renderIosTip(); };
   if (g.recoveryOutcome && opts.recovery) {
     // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.
     renderAll();
     // M41-7 (CSR v0.2.3): M5 = restored + storage blocked; G1 Export takes the CURRENT restored farm via recovery.live().
     const rec = opts.recovery as CsrRecovery, blocked = !!opts.storageBlocked?.(); let noticeId: NoticeId | undefined;
-    if (blocked && rec.case === 'R' && csrCopyActive(rec) && !rec.live) rec.live = () => serialize(g.state, Date.now());
+    if (blocked && rec.case === 'R' && csrCopyActive(rec) && !rec.live) rec.live = () => serialize(g.state, Date.now(), undefined, g.balance);
     void showRecoveryDialog(opts.recovery, A, [root, modal, toast], () => g.telemetry.track('save_recovery_export', { case: opts.recovery!.case }), undefined,
       { storageBlocked: blocked, track: (t, d) => g.telemetry.track(t, d), onNotice: n => { noticeId = n?.id; } }).then(() => {
       if (noticeId === 'M4' && rec.case === 'D') { location.reload(); return; } // CSR-13 defer: "Try again" reloads
@@ -757,5 +937,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       workers: Object.fromEntries(WAGE_WORKERS.map(id => [id, { hired: !!s.workers[id], wageCentsPerSec: wageCentsPerSec(id, s, b), listedWageCentsPerSec: listedWageCentsPerSec(id, s, b) }])) }; };
   g.onTracksCommitted = () => { showTracksExplainer(g, document, opts.storageBlocked); }; // M4-AC-EXP1: shown once, at the in-session commit
   if (g.tracksMigratedWithBackup) showTracksExplainer(g, document, opts.storageBlocked); // D-HOP-2026-10-19-13: reload after commit, before it showed
-  return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; } };
+  /** SG-12 `qaPicker()` (v: 1, fields exactly as SG-12; v5 sources per BBv2 spec v1.0.4 §6): read-only, fresh JSON-safe object, no state,
+   *  DOM, picker or telemetry change. hintRaw = picker.hint.shown (after the ZG filter and Part A, before the highlight merge). */
+  const qaPick = (p: SharedPick | null) => p && { key: p.key, affordable: p.affordable, costCents: p.costCents, payback: p.payback === Infinity ? 'Infinity' : p.payback };
+  return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; }, dispose: () => { flock?.dispose(); zgAC.abort(); },
+    ...(IOS_FLAG_ENABLED ? { qaPicker: () => { const t = now(); return { v: 1, t, m4: m4On(b), hint: qaPick(hintPick), hintRaw: qaPick(picker.hint.shown), highlight: qaPick(rowPick),
+      mark: hintMark, suppressed: hintPick !== null && hintMark === null, heldMs: hintPick ? t - qaKeySinceT : 0, evals: picker.hint.evals, changes: picker.hint.changes,
+      history: qaHist.map(h => ({ ...h })) }; } } : {}) };
 }

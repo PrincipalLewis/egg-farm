@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { balance as b } from '../src/config/balance';
 import { incomePerSec, demandPerSec, wagesPerSec, salesStopped, marketHandStalled, secondsToAffordSteady } from '../src/econ/income';
 import { headerRate, headerRateText } from '../src/ui/s2-economy-ui';
-import { STATES, build, planner, live } from '../scripts/m41-p1-income-states';
+import { STATES, build, planner, live, pauseOn } from '../scripts/m41-p1-income-states';
 const before = JSON.parse(readFileSync(new URL('./fixtures/m41-p1/income-before.json', import.meta.url), 'utf8')) as Record<string, ReturnType<typeof planner> & ReturnType<typeof live>>;
 const stalled = (n: string) => / MH (asleep|unpaid)/.test(n) && !/paused/.test(n);
 
@@ -21,7 +21,8 @@ describe('§4.2 planner path unchanged (best-buy, goal label, assumeWorking inco
 
 describe('§4.2 live path: Market Hand asleep / unpaid -> no sales; everything else unchanged', () => {
   for (const n of Object.keys(STATES)) it(`live: ${n}`, () => {
-    const s = build(STATES[n]), l = live(s);
+    // v5 F3 (HoE manifest row 8): `paused` counts only with m4.flags.pause = 1 (isPaused); the paused states run with it on.
+    const bb = /paused/.test(n) ? pauseOn : b, s = build(STATES[n]), l = live(s, bb);
     if (stalled(n)) {
       expect(marketHandStalled(s, b)).toBe(true);
       expect(l.demand_live).toBe(0);
@@ -31,7 +32,7 @@ describe('§4.2 live path: Market Hand asleep / unpaid -> no sales; everything e
       expect(l.eta_1000).toBeNull(); // secondsToAffordSteady reads "—" (income <= 0)
       expect(before[n].income_live!).toBeGreaterThan(0); // the bug: before the fix the live rate was positive
     } else {
-      expect(marketHandStalled(s, b)).toBe(false);
+      expect(marketHandStalled(s, bb)).toBe(false);
       expect(l).toEqual({ income_live: before[n].income_live, demand_live: before[n].demand_live, eta_1000: before[n].eta_1000 });
     }
   });
@@ -45,8 +46,8 @@ describe('§4.2 live path: Market Hand asleep / unpaid -> no sales; everything e
     // CH awake pays its wage while MH sleeps: a real negative rate
     expect(headerRate(build(STATES['F12 MH asleep + CH/Hawker']), b).text).toMatch(/^⚠ \u2212\$\d+\.\d\d\/s$/);
   });
-  it('Paused Market Hand (m5 pause flag, any energy) is unchanged: player sells by hand', () => {
-    const p = build(STATES['F6 MH paused asleep']);
+  it('Paused Market Hand (m5 pause flag on, any energy) is unchanged: player sells by hand', () => {
+    const p = build(STATES['F6 MH paused asleep']), b = pauseOn; // v5 F3: paused is read only with m4.flags.pause = 1
     expect(marketHandStalled(p, b)).toBe(false);
     expect(incomePerSec(p, b)).toBeCloseTo(before['F6 MH paused asleep'].income_live!, 6);
     expect(incomePerSec(p, b)).toBeGreaterThan(0);
