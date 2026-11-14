@@ -20,11 +20,11 @@ Deadline (D-CEO-20261114-06): Ready to HoQA by Sun 06:00; not GO and merged by 1
 3. Art: S-AC19 Sell value chip (MK-24-1 width); Sell all chip placement.
 
 ## Gate @4366f36 (gate.sh via lane-run)
-All green 18:40-19:00: tsc 0; sync-economy OK; unit 201/201 files, 3000 pass, 1 skip; test:slow 5/5; build + check-release-build; check-globals chromium; build:qa; golden-game-browser; flag-off golden 2/2. Log: gate-4366f36.log (task folder). Streak visual/audio on the trial build (tip + F6 da38e3f + swap): running.
+All green 18:40-19:00: tsc 0; sync-economy OK; unit 201/201 files, 3000 pass, 1 skip; test:slow 5/5; build + check-release-build; check-globals chromium; build:qa; golden-game-browser; flag-off golden 2/2. Log: gate-4366f36.log (task folder). Trial build (tip streak code + F6 da38e3f + swap, flags 1 in /tmp only), 19:07: visual 40/40 chromium/firefox/webkit at 360/390/1280 + RM; audio chromium/firefox PASS, WebKit not assessed (no mp3 decode). Shots: shots-20261114/.
 
 ## Restart / next
 1. F6 merges: merge rc/v5 forward, `git apply -3 f6-swap.diff`, delete streak-f6-stub.ts, re-gate (gate.sh, then streak-browser.mjs / streak-audio.mjs per engine; WebKit audio not assessed, no mp3 decode).
-2. Green: mark #150 Ready, check CI at the tip.
+2. Kept Draft: Ready waits on the F6 call (HoE). Once Ready, check CI at the tip.
 
 ## Hours
 ~3 of work left once F6 lands.
