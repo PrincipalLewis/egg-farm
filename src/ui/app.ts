@@ -25,6 +25,12 @@ import { DualPicker, ROW_OF_KEY, defaultScorer, allScorer, type SharedPick } fro
 import { isZeroGain, zeroGainUiOn, zgFiltered, ZG_KEY_OF, ZG_DESC, ZG_CHIP } from './zero-gain'; // v5 zeroGainUi (m4.flags.zeroGainUi)
 import { zeroGainConfirmOn, bestBuyV2On } from '../config/flags';
 import { bbv2Mark, type BuyKey } from '../econ/best-buy';
+import { rc2RefillOn } from './stall-chip';
+import { StallChip, stallChipOn } from './stall-chip';
+import { FarmBanner } from './stall-banner'; // #5b Rule 3 farm-screen Asleep banner (same flag)
+import { fatigueBubble } from './fatigue-bubble'; // #5b Rule 4 (same flag)
+import { noteFatigueCueShown, noteFatigueCueTap, costliestAtRisk, setUiGates } from './stall-api';
+import { openShiftSheet } from './shift-sheet'; // #5b V51-SS-1 (m4.flags.salesStopped); mounted only with the flag on
 import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, trackUnlockFarm, TRACK_FARM_MAX_TEXT, trackFarmMaxAria, hensMilestoneEffect, gradeEffect } from './tracks-ui';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
@@ -529,6 +535,23 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // SG-12 qaPicker history (stopgap v1.2.6 fdc1c199 SG-12; QA/dev builds only, compiled out of release with IOS_FLAG_ENABLED).
   const qaHist: { t: number; key: string | null; affordable: boolean | null; mark: string | null }[] = []; let qaKeySinceT = 0, qaLast: string | null = null;
   const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
+  // #5b Rule 4 (flag salesStopped only): while the sim's Rule 2 state is shown, the bubble reads `Refill workers · +$X/s` ahead of buy goals.
+  const RULE4 = stallChipOn(b); let fbActive = false;
+  const renderFatigueBubble = (): boolean => {
+    const fb = stallChip?.isShown ? null : fatigueBubble(g.state, b); // §4.7 / SS-26: the stall chip wins, the bubble isn't rendered
+    if (!fb) { if (fbActive) { fbActive = false; goalNow = true; delete goalBtn.dataset.fatigue; } return false; }
+    if (!fbActive) { fbActive = true; delete goalLbl.dataset.html; goalLbl.classList.remove('ng'); goalBtn.dataset.fatigue = '1'; noteFatigueCueShown(g.state, 'bubble');
+      setText(goalLive, fb.desc); clearTimeout(goalLiveT); goalLiveT = window.setTimeout(() => setText(goalLive, ''), 4000); }
+    setText(goalLbl, fb.text); setText(goalSt, ''); goalSt.classList.remove('chip'); setText(goalDesc, fb.desc);
+    if (goalBtn.dataset.state !== 'fatigue') goalBtn.dataset.state = 'fatigue';
+    return true;
+  };
+  const fatigueBubbleTap = () => {
+    noteFatigueCueTap(g.state, 'bubble');
+    const id = costliestAtRisk(g.state, b);
+    if (rc2RefillOn(b)) { if (id) openShiftSheet(id, goalBtn, 'fatigue_bubble'); return; }
+    tab = 'workers'; dirty = true; openPanel('upgrades'); render();
+  };
   const renderGoal = () => {
     const t = now();
     const M4 = m4On(b), prevKey = hintPick?.key, prevMark = hintMark;
@@ -541,6 +564,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     }
     // BBv2 §8 (errata rev 12 #19/#20): ms_since_shown runs on this picker clock from the last ★ switch; g.bbTel is null at flag 0.
     if (g.bbTel) { if (hintMark !== null && hintMark !== prevMark) bbMarkSinceT = t; g.bbTel.shown(t, g.state, hintPick, income.centsPerSec(t)); }
+    if (RULE4 && renderFatigueBubble()) return; // Rule 4 owns the slot (the shared pick still ticks for the Farm-tab highlight)
     // 1 Hz text tick; purchases, pick changes and best-buy (affordability) flips bypass it, so the strip ★ and the row chip
     // (rebuilt from this frame's hintPick) always agree in the same frame (F4-13; CCR #62 m1).
     if (!goalNow && t - goalTickAt < 1000 && !(M4 && (hintPick?.key !== prevKey || hintMark !== prevMark))) return;
@@ -564,6 +588,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   };
   /** Tap never buys: open the target's tab, scroll the row into view, highlight it, focus its Buy (spec §4). */
   const openGoal = () => {
+    if (fbActive) return fatigueBubbleTap();
     const gl = goalShown; if (!gl) return;
     g.telemetry.track('goal_tap', { target: gl.key ?? 'DONE', state: gl.state });
     tab = gl.tab; dirty = true; openPanel('upgrades'); render();
@@ -574,6 +599,9 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     row.querySelector<HTMLElement>('button.btn')?.focus({ preventScroll: true });
   };
   goalBtn.addEventListener('click', e => { e.stopPropagation(); openGoal(); });
+  // #5b sales-stopped chip (spec cfff3817 §4.7): laid over the #goal slot; flag off = never constructed, markup unchanged.
+  const stallChip = stallChipOn(b) ? new StallChip($('.collectbar'), goalBtn, { g, b, A, now, rm, act: a => act(a) }) : null;
+  const farmBanner = stallChipOn(b) ? new FarmBanner(farm, { g, b, A, act: a => act(a), refused: el => cantAfford(el) }) : null;
 
   // ---------- Render ----------
   let dirty = true, henCount = -1, lastTier = S.coopTier(g.state.farmLevel), lastLive = 0;
@@ -771,6 +799,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     }
     // M41-8: the shared pick is refreshed first so the row outline, the UX-M4 chip and the strip ★ use the same frame's pick.
     renderGoal();
+    // #5b: UI gates only (farm view active, FTUE done, no sheet/modal over the farm); the trigger, hold and cause come from stallView().
+    if (stallChip) { const vis = !goalHidden && (open === null || docked.matches) && !modalKind; stallChip.update(vis);
+      // §5: the banner never names the chip's role; Rule 3 shows on the farm view only
+      farmBanner!.update((open === null || docked.matches) && !modalKind, stallChip.isShown ? stallChip.coveredWorker : null); }
     if (open === 'upgrades' || docked.matches) {
       document.querySelectorAll<HTMLElement>('.tabs button').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
       const html = tab === 'workers' ? workersHtml(s, b) : tab === 'farm' && m4On(b) ? farmTabHtml() : upRowHtml(tab);
@@ -900,7 +932,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaFitBanners = () => fitBanners(uRow);
   // QA-only: open the real save-recovery dialog mid-game (R1 resume check); compiled out of release with eggfarmOnb.
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaRecovery = () => showRecoveryDialog({ case: 'F', reason: 'parse', had_backup: false, restored_from_backup: false, copy_failed: false, raw: '{}' } as any, A, [root, modal, toast]);
-  const renderAll = () => { const t = performance.now(); if (clockWageOn(b)) fallAsleep.observe(g.state, b); /* AC-FC9 onset baseline */ if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
+  // SIM-API Changes (HoE 03:25): gates every frame, before render reads stallView. farmScreenActive = the farm is the visible view
+  // (no panel over it, or the docked desktop layout); onboardingDone = onboarding.ts `finished` (no flow running = finished). Flag on only.
+  const uiGates = () => { if (stallChip) setUiGates(g.state, b, { farmScreenActive: open === null || docked.matches, onboardingDone: !onbFlow || onbFlow.finished }); };
+  const renderAll = () => { uiGates(); const t = performance.now(); if (clockWageOn(b)) fallAsleep.observe(g.state, b); /* AC-FC9 onset baseline */ if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
     render(); if (onbUpdate && !onbUpdate()) { onbUpdate = null; onbFlow = null; } if (!recoveryOpen) renderWorkersIntro(); renderIosTip(); };
   if (g.recoveryOutcome && opts.recovery) {
     // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.
