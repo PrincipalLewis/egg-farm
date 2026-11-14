@@ -5,7 +5,7 @@
  * Every export is identity / no-op unless m4.flags.breeds is on and `breeds` exists (§6 code isolation).
  */
 import type { Balance } from '../config/balance';
-import { BP_HALF, BP_ONE, FARM_SOON_HATCH_MULT, BREED_IDS, CENTS_PER_DOLLAR, RARITY_WEIGHT, ROSTER, bc, isBreedId, unlockedSlots, type BreedId, type Rarity } from '../config/breeds';
+import { BP_HALF, BP_ONE, FARM_SOON_HATCH_MULT, BREED_IDS, CENTS_PER_DOLLAR, RARITY_WEIGHT, ROSTER, bc, isBreedId, rosterTraitBp, unlockedSlots, type BreedId, type Rarity } from '../config/breeds';
 import { farmCost } from '../config/formulas';
 import { incomePerSec } from '../econ/income';
 import { nextRand, type GameState } from './state';
@@ -97,7 +97,7 @@ export function placeBreed(s: GameState, b: Balance, slot: number, id: string | 
 /** BR-R4 settle gate + §4.3 star value: a slot's trait bp, 0 while settling or empty. floor(base x (1 + stars x star_bonus)). */
 export function slotTraitBp(x: BreedsSave, slot: number, b: Balance): number {
   const id = x.slots[slot]; if (!isBreedId(id) || x.settleMs[slot] > 0) return 0;
-  return Math.floor(ROSTER[id][2] * (BP_ONE + (x.owned[id]?.stars ?? 0) * bc(b, 'star_bonus_bp')) / BP_ONE);
+  return Math.floor(rosterTraitBp(b, id) * (BP_ONE + (x.owned[id]?.stars ?? 0) * bc(b, 'star_bonus_bp')) / BP_ONE);
 }
 /** BR-R7b estimator (display-only; BR-AC31e): ETA to the next Farm step at default income (the note's basis) and at
  *  assumeWorking income (Farm-first's basis), in float seconds. `inc` = the debug hook's incomes in $/s, each optional. */
