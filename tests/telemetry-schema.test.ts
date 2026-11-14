@@ -321,8 +321,9 @@ describe('[TEL-AC11] isPinned(e) is event-based (§3.2 + errata V-3, D-HOE-19 F-
   const V3 = ['sales_stall', 'fatigue_cue_shown', 'fatigue_cue_tapped', 'shift_sheet_opened', 'refill_used', 'rest_toggled', 'first_worker_hired', 'autorefill_toggled',
     'abilities_unlocked', 'ability_used', 'ability_ended', 'ability_blocked', 'worker_paused', 'worker_resumed', 'hatch_started', 'flock_complete', 'milestone_reached',
     'balanced_tier', 'zero_gain_purchase', 'dead_zone'];
-  it('[TEL-AC11] the always-pinned types are exactly §3.2 + the 20 V-3 types; coop_full and tip_shown pin by predicate', () => {
-    const always = EVENT_TYPES.filter(t => EVENT_SCHEMA[t].pinned === true).sort(); expect(always).toEqual([...BASE, ...V3].sort());
+  const TRICKLE = ['unpaid_trickle_started', 'unpaid_trickle_ended']; // unpaid_trickle §6 (spec v1.0.2 9e2acfe9)
+  it('[TEL-AC11] the always-pinned types are exactly §3.2 + the 20 V-3 types + unpaid_trickle §6; coop_full and tip_shown pin by predicate', () => {
+    const always = EVENT_TYPES.filter(t => EVENT_SCHEMA[t].pinned === true).sort(); expect(always).toEqual([...BASE, ...V3, ...TRICKLE].sort());
     expect(EVENT_TYPES.filter(t => typeof EVENT_SCHEMA[t].pinned === 'function').sort()).toEqual(['coop_full', 'tip_shown']);
   });
   it('[TEL-AC11] coop_full pins end and capped, not start; tip_shown pins {id:clock_wage} only; unknown types are not pinned', () => {
@@ -389,7 +390,7 @@ function worstCaseSession(buySpam: boolean): TEvent[] {
     p('ability_used', { ...ABU }); p('ability_ended', { worker: 'hawker', cause: 'expired', effect_s: 30 });
     p('sales_stall', { ...STALL, stall_id: i + 1 }); p('sales_stall', { ...STALL, stall_id: i + 1, phase: 'resolved', resolved_by: 'chip_refill', time_to_resolve_s: 3.1, chip_tapped: true });
     p('fatigue_cue_shown', { surface: 'hud_chip', loss_per_s: 120, loss_share: 0.333, n_tired: 2, n_asleep: 1, n_paused: 1, suppressed_by_stall: false }); p('fatigue_cue_tapped', { surface: 'hud_chip', loss_per_s: 120, loss_share: 0.333, n_tired: 2, n_asleep: 1, n_paused: 1 }); }
-  for (let i = 0; i < 24; i++) p('hatch_started', { breed_id: BREED_IDS[i % BREED_IDS.length], rarity: 'C', cost: 12_508_785, coinsBefore: 99_999_999, pity_before: 7, free: false, farm_level: 30 });
+  for (let i = 0; i < 24; i++) p('hatch_started', { breed_id: BREED_IDS[i % BREED_IDS.length], rarity: 'Common', cost: 12_508_785, coinsBefore: 99_999_999, pity_before: 7, free: false, farm_level: 30 });
   for (let i = 0; i < 40; i++) p('milestone_reached', { id: `hens_${i}`, track: 'hens', level: 10 * (i + 1), mult: 1.5 });
   for (let i = 0; i < 20; i++) { p('worker_manage', { worker: 'hawker', energyBefore: 20 }); p('autorefill_toggled', { worker: 'grader', on: i % 2 === 0, farm_level: 30 }); }
   p('abilities_unlocked', { farm: 12, hired: [...WORKERS] }); p('first_worker_hired', { worker: 'coop_hand', farm_level: 3, via_nudge: false, t_since_unlock_s: 30 }); p('flock_complete', { hatches: 24, farm_level: 30, elapsed_since_unlock_s: 99_999, backfilled: false });
@@ -402,5 +403,16 @@ describe('[G-8] worst-case pinned size <= 200 KB (D-HOE-19 G-1, D-HOE-31, D-HOE-
     const s = worstCaseSession(spam), errs = s.flatMap(validateEvent); expect(errs).toEqual([]); expect(s.every(isPinned)).toBe(true);
     expect(s.filter(e => e.type === 'dead_zone').length).toBe(120); expect(s.filter(e => e.type === 'zero_gain_purchase').length).toBe(spam ? 50 : 5); expect(s.some(e => e.type === 'zero_gain_purchase' && 'capped' in e)).toBe(false);
     const bytes = JSON.stringify(s).length; console.log(`G-8 pinned bytes (${spam ? 'buy-spam' : 'base'}): ${bytes}`); expect(bytes).toBeLessThanOrEqual(200 * 1024);
+  });
+});
+
+describe('D6 / breeds §8 rarity enum strings', () => {
+  it('[D6 / BR §8] rarity accepts Common|Rare|Epic|Legendary and rejects C/R/E/L', () => {
+    const base = { breed_id: 'leghorn', cost: 1, coinsBefore: 1, pity_before: 0, free: true, farm_level: 10 };
+    expect(ok('hatch_started', { ...base, rarity: 'Common' })).toEqual([]);
+    expect(ok('hatch_started', { ...base, rarity: 'C' }).some(e => e.includes('rarity'))).toBe(true);
+    for (const r of ['Rare', 'Epic', 'Legendary'] as const)
+      expect(ok('breed_revealed', { breed_id: 'brahma', rarity: r, dupe: false, stars_after: 0, offline: false, wait_ms: 0 })).toEqual([]);
+    expect(ok('breed_revealed', { breed_id: 'brahma', rarity: 'R', dupe: false, stars_after: 0, offline: false, wait_ms: 0 }).some(e => e.includes('rarity'))).toBe(true);
   });
 });

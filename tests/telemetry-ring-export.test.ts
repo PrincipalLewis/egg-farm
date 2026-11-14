@@ -13,10 +13,10 @@ const CFG = { ring_size: 50, flush_interval_s: 5, tap_batch_ms: 1000 };
 const OLD = { type: 'goal_tap', ts: 1, sessionMs: 5 };
 
 describe('[G8-12] stored ring {v, events} and export schema_version', () => {
-  it('[G8-12] flush writes {v: TELEMETRY_SCHEMA_VERSION, events}; SAVE_VERSION stays 6; balance.telemetry is unchanged', () => {
+  it('[G8-12] flush writes {v: TELEMETRY_SCHEMA_VERSION, events}; SAVE_VERSION stays 6; balance.telemetry is unchanged (+ B4 session_hidden_end_s)', () => {
     expect(SAVE_VERSION).toBe(6);
     expect(b.telemetry).toEqual({
-      ring_size: 5000, flush_interval_s: 5, tap_batch_ms: 1000, worker_summary_s: 60,
+      ring_size: 5000, flush_interval_s: 5, tap_batch_ms: 1000, worker_summary_s: 60, session_hidden_end_s: 60,
       bbv2: { shown_min_gap_s: 5, zero_gain_eta_max_s: 60, dead_zone_min_s: 30, zero_gain_purchase_cap: 50 },
     });
     const kv = mem(); const t = new Telemetry(kv, CFG, () => 5);
@@ -24,7 +24,7 @@ describe('[G8-12] stored ring {v, events} and export schema_version', () => {
     const stored = JSON.parse(kv.getItem(TELEMETRY_KEY)!);
     expect(stored.v).toBe(TELEMETRY_SCHEMA_VERSION); expect(TELEMETRY_SCHEMA_VERSION).toBe('0.6.2');
     expect(Object.keys(stored).sort()).toEqual(['events', 'v']);
-    expect(stored.events).toEqual([{ type: 'save_reset', ts: 5, sessionMs: 0 }]);
+    expect(stored.events).toEqual([{ type: 'save_reset', ts: 5, sid: expect.stringMatching(/^[0-9a-z]{6}$/), fgMs: 0 }]);
   });
   it('[G8-12] exportJSON and snapshotJSON headers carry schema_version', () => {
     const t = new Telemetry(mem(), CFG, () => 5); t.track('save_reset');
@@ -49,13 +49,13 @@ describe('[G8-13] v-less ring loads as legacy:true; T-AC9 still applies', () => 
     expect(validateEvent(ev[0])).toEqual([]); expect(validateEvent(ev[1])).toEqual([]);
     expect(validateEvent(OLD).length).toBeGreaterThan(0);
     t.track('save_reset');
-    expect(t.events().at(-1)).toEqual({ type: 'save_reset', ts: 10, sessionMs: 0 });
+    expect(t.events().at(-1)).toEqual({ type: 'save_reset', ts: 10, sid: expect.stringMatching(/^[0-9a-z]{6}$/), fgMs: 0 });
     expect('legacy' in t.events().at(-1)!).toBe(false);
     t.flush();
     const stored = JSON.parse(kv.getItem(TELEMETRY_KEY)!);
     expect(stored.v).toBe(TELEMETRY_SCHEMA_VERSION);
     expect(stored.events[0].legacy).toBe(true); expect(stored.events[1].legacy).toBe(true);
-    expect(stored.events[2]).toEqual({ type: 'save_reset', ts: 10, sessionMs: 0 });
+    expect(stored.events[2]).toEqual({ type: 'save_reset', ts: 10, sid: expect.stringMatching(/^[0-9a-z]{6}$/), fgMs: 0 });
     expect('legacy' in stored.events[2]).toBe(false);
   });
   it('[G8-13 / T-AC9] a versioned ring loads events unchanged and does not drop a shape T-AC9 rejects', () => {

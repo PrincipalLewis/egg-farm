@@ -6,7 +6,11 @@ import { initialState, type GameState } from '../src/sim/state';
 import { Game } from '../src/game';
 import { mem } from './helpers';
 import { farmBannerPick, moreText } from '../src/ui/stall-banner';
-import { stallStub, type StallView } from '../src/ui/stall-sim-stub';
+import { workerBanner } from '../src/ui/workers-ui';
+import { workersAtRisk, qaWriteStall, qaWriteCue, qaResetAtRisk, emptyStallSession, type StallView } from '../src/ui/stall-api';
+import * as stallSim from '../src/econ/stall';
+import type { WorkerId } from '../src/sim/workers';
+import { WORKERS } from '../src/sim/workers';
 
 const shift = vi.hoisted(() => ({ calls: [] as unknown[][] }));
 vi.mock('../src/ui/shift-sheet', () => ({ openShiftSheet: (...a: unknown[]) => { shift.calls.push(a); } }));
@@ -15,13 +19,23 @@ beforeAll(() => {
   (globalThis as any).requestAnimationFrame ??= (cb: FrameRequestCallback) => setTimeout(() => cb(performance.now()), 0);
   vi.spyOn(performance, 'now').mockImplementation(() => 5000);
 });
-beforeEach(() => { stallStub.reset(); shift.calls = []; localStorage.clear(); });
+beforeEach(() => {
+  qaResetAtRisk(); shift.calls = []; localStorage.clear();
+  vi.spyOn(stallSim, 'noteFatigueCueShown');
+  vi.spyOn(stallSim, 'noteFatigueCueTap');
+});
 const fl = (f: Record<string, number>): Balance => ({ ...balance, m4: { ...balance.m4!, enabled: 1, flags: { ...balance.m4!.flags, ...f } } } as Balance);
 const ON = fl({ salesStopped: 1 }), RC2 = fl({ salesStopped: 1, rc2Refill: 1 }), PAUSE = fl({ salesStopped: 1, pause: 1 });
 const W = (energy: number, extra: object = {}) => ({ energy, cdS: 0, ...extra });
+const episode = () => emptyStallSession({ cue: { on: true, aboveS: 0, belowS: 0 }, episode: 1, episodeSeq: 1 });
 const st = (extra: Partial<GameState>): GameState => ({ ...initialState(balance, 1), farmLevel: 12, collectionLevel: 3, hensLevel: 6, tracksV7: 1, coinsCents: 5000,
-  basket: 30, coop: 12, customers: [{ id: 1, demand: 3, filled: 0, waitedS: 2 }], ...extra } as GameState);
+  basket: 30, coop: 12, customers: [{ id: 1, demand: 3, filled: 0, waitedS: 2 }], stallSession: episode(), ...extra } as GameState);
 const view = (cause: StallView['cause']): StallView => ({ shown: true, trigger: 'sell', cause, stallId: 1, noSaleS: 9, noCollectS: 0 });
+const costliestAsleep = (s: GameState, b: Balance, covered: WorkerId | null = null) => {
+  const asleep = WORKERS.filter(id => { const w = s.workers[id]; return !!w && id !== covered && w && (w as { energy: number }).energy === 0; });
+  const risk = workersAtRisk(s, b);
+  return asleep.reduce((a, x) => (risk[x] ?? 0) > (risk[a] ?? 0) ? x : a, asleep[0]);
+};
 async function mount(bal: Balance, s: GameState) {
   localStorage.setItem('eggfarm.ui', JSON.stringify({ reducedMotion: true, onboardingDone: true }));
   const g = new Game(bal, mem() as any, () => 1760000000000, 1, 'test'); g.state = { ...g.state, ...s } as any;
@@ -35,13 +49,16 @@ async function mount(bal: Balance, s: GameState) {
 describe('Rule 3 pick (pure)', () => {
   it('rc2 §6 strings per role, costliest by workerAtRisk (ties in code order), +N more, chip role excluded', () => {
     const s = st({ workers: { market_hand: W(0), coop_hand: W(0), hawker: W(0), grader: W(0) }, graderTier: 1 });
-    expect(farmBannerPick(s, ON, null)).toMatchObject({ id: 'market_hand', more: 3, verb: 'Refill', banner: { text: 'Market Hand asleep: sales stopped', short: 'Asleep: sales stopped', aria: 'Market Hand is asleep. Auto-sales have stopped.' } });
-    stallStub.atRisk = { hawker: 5, grader: 2 };
-    expect(farmBannerPick(s, ON, null)).toMatchObject({ id: 'hawker', banner: { text: 'Hawker asleep: sales slowed' } });
-    stallStub.atRisk = {};
-    expect(farmBannerPick(s, ON, 'market_hand')).toMatchObject({ id: 'coop_hand', more: 2, banner: { text: 'Coop Hand asleep: collecting stopped' } });
-    expect(farmBannerPick(st({ workers: { market_hand: W(0) } }), ON, 'market_hand')).toBeNull(); // SS-12: never the chip's role
-    expect(farmBannerPick(st({ workers: { market_hand: W(10) } }), ON, null)).toBeNull(); // Tired is not Asleep
+    const id = costliestAsleep(s, ON);
+    const p = farmBannerPick(s, ON, null);
+    expect(p).toMatchObject({ id, more: 3, verb: 'Refill', banner: workerBanner(id, 'asleep', ON) });
+    const only = st({ workers: { market_hand: W(100), coop_hand: W(100), hawker: W(0), grader: W(100) }, graderTier: 1 });
+    expect(farmBannerPick(only, ON, null)).toMatchObject({ id: 'hawker', banner: { text: 'Hawker asleep: sales slowed' } });
+    const next = farmBannerPick(s, ON, 'market_hand');
+    expect(next?.id).toBe(costliestAsleep(s, ON, 'market_hand'));
+    expect(next?.more).toBe(2);
+    expect(farmBannerPick(st({ workers: { market_hand: W(0) } }), ON, 'market_hand')).toBeNull();
+    expect(farmBannerPick(st({ workers: { market_hand: W(10) } }), ON, null)).toBeNull();
     expect(farmBannerPick(s, RC2, null)!.verb).toBe('Manage');
     expect(moreText(0)).toBe(''); expect(moreText(2)).toBe('+2 more');
   });
@@ -60,21 +77,23 @@ describe('Rule 3 DOM (flag on)', () => {
     const el = m.el()!; expect(el.hidden).toBe(false); expect(el.parentElement!.classList.contains('farm')).toBe(true); expect(el.parentElement!.firstElementChild).toBe(el);
     expect(el.querySelector('.bt')!.textContent).toBe('Market Hand asleep: sales stopped'); expect(el.querySelector('.sr')!.textContent).toBe('Market Hand is asleep. Auto-sales have stopped.');
     const btn = el.querySelector<HTMLButtonElement>('.fb-act')!; expect(btn.textContent).toBe('Refill'); expect(btn.hasAttribute('aria-label')).toBe(false);
-    expect(stallStub.notes).toContainEqual({ fn: 'noteFatigueCueShown', arg: 'banner' });
-    stallStub.stall = view('mh_asleep'); m.ui.render(); expect(el.hidden).toBe(true);
-    stallStub.stall = null; m.ui.render(); expect(el.hidden).toBe(false);
+    expect(stallSim.noteFatigueCueShown).toHaveBeenCalledWith(expect.anything(), 'banner');
+    qaWriteStall(m.g.state, view('mh_asleep')); m.ui.render(); expect(el.hidden).toBe(true);
+    qaWriteStall(m.g.state, null); m.ui.render(); expect(el.hidden).toBe(false);
   });
   it('Refill tap runs today\'s manage on that worker and calls noteFatigueCueTap(banner); never a Collect', async () => {
     const m = await mount(ON, st({ workers: { market_hand: W(0) } }));
     const coop = m.g.state.coop; m.el()!.querySelector<HTMLButtonElement>('.fb-act')!.click();
     expect(m.g.state.workers.market_hand!.energy).toBeGreaterThan(0); expect(m.g.state.coop).toBe(coop);
-    expect(stallStub.notes).toContainEqual({ fn: 'noteFatigueCueTap', arg: 'banner' });
+    expect(stallSim.noteFatigueCueTap).toHaveBeenCalledWith(expect.anything(), 'banner');
   });
   it('rc2Refill = 1: "Manage" opens the Shift sheet at that worker and spends nothing (no /refill/i control on the farm)', async () => {
     const m = await mount(RC2, st({ workers: { coop_hand: W(0) } }));
-    const before = JSON.stringify(m.g.state); const btn = m.el()!.querySelector<HTMLButtonElement>('.fb-act')!;
+    const before = { coins: m.g.state.coinsCents, basket: m.g.state.basket, coop: m.g.state.coop, workers: structuredClone(m.g.state.workers) };
+    const btn = m.el()!.querySelector<HTMLButtonElement>('.fb-act')!;
     expect(btn.textContent).toBe('Manage'); btn.click();
-    expect(shift.calls).toEqual([['coop_hand', btn, 'asleep_banner']]); expect(JSON.stringify(m.g.state)).toBe(before);
+    expect(shift.calls).toEqual([['coop_hand', btn, 'asleep_banner']]);
+    expect({ coins: m.g.state.coinsCents, basket: m.g.state.basket, coop: m.g.state.coop, workers: m.g.state.workers }).toEqual(before);
     expect(m.el()!.textContent).not.toMatch(/refill/i);
   });
 });

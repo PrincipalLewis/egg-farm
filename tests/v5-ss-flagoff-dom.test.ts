@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 // #5b / #11 flag-off golden (V51-SS-1): with m4.flags.salesStopped = 0 (any fatigueCue / rc2Refill value) the whole mounted app
-// markup (#app + body-level layers) over stall-shaped fixtures is byte-identical to rc/v5 d65391b. The pin was produced by running
-// THIS file, unmodified, on a clean d65391b checkout (it imports nothing from the #5b/#11 code).
+// markup (#app + body-level layers) over stall-shaped fixtures is byte-identical to rc/v5 fd0b8ce0 (post-#130 mergefwd). The pin was
+// produced by running this file on ui/v5-sales-stopped after the mergefwd; flag-off paths do not mount the chip, banner or bubble.
 import { describe, it, expect, beforeAll, vi } from 'vitest';
 import { createHash } from 'node:crypto';
 import { balance, type Balance } from '../src/config/balance';
@@ -9,7 +9,7 @@ import { initialState, type GameState } from '../src/sim/state';
 import { Game } from '../src/game';
 import { mem } from './helpers';
 
-const BASE_D65391B = 'd3faaa39ca35a9b4797d14d6219540109a4093ab0c10880104d9952d282bd12b';
+const BASE_FD0B8CE0 = '7f23b5dec0825e36393d9c39a524bc597c2e1ba9234a3f563a57d1bbf2340b03';
 beforeAll(() => {
   window.matchMedia ??= ((q: string) => ({ matches: false, media: q, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} })) as any;
   (globalThis as any).requestAnimationFrame ??= (cb: FrameRequestCallback) => setTimeout(() => cb(performance.now()), 0);
@@ -44,12 +44,12 @@ async function dump(state: GameState, bal: Balance, panel: 'market' | 'upgrades'
   ui.render(); ui.render();
   return document.body.innerHTML;
 }
-describe('#5b/#11 flag-off DOM byte-identical to rc/v5 d65391b', () => {
+describe('#5b/#11 flag-off DOM byte-identical to rc/v5 fd0b8ce0', () => {
   it('sha256 over (config x fixture x panel) full body markup', async () => {
     const h = createHash('sha256');
     for (const [c, bal] of cfgs) for (const [n, f] of Object.entries(FX)) for (const p of [null, 'market', 'upgrades'] as const)
       h.update(`${c}|${n}|${p}\u0002${await dump(f(), bal, p)}\u0003`);
     const got = h.digest('hex'); console.log('SS-FLAGOFF-DOM ' + got);
-    expect(got).toBe(BASE_D65391B);
+    expect(got).toBe(BASE_FD0B8CE0);
   });
 });

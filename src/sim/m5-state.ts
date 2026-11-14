@@ -26,6 +26,9 @@ export interface GoldenEggOnScreen {
   intervalS: number;
 }
 
+/** Pause tracker (never saved, session-only): per-worker current-pause integer milliseconds + session totals sumS / allS
+ *  (no WorkerId collision). Values are integer ms (Architect G2 ruling (b), G0-API.md rev 11 §14b); emit floors ms/1000. */
+export type PauseTracker = Partial<Record<WorkerId, number>> & { sumS?: number; allS?: number };
 export interface M5Fields {
   // ---- #1 golden egg (saved, R10a) ----
   /** evRng position (uint32, non-zero). Seeded once per D-C2 (sim/rng.ts deriveEvRngState); never re-reads state.rng. */
@@ -57,16 +60,59 @@ export interface M5Fields {
   broodyNestScaled?: number;
   /** brRng position (D-C4): derived from evRngState, never saved, only Broody draws from it. */
   brRngState?: number;
+  // ---- M5 Pause (session only, never saved; pause v1.3.16 471fb534, D-PMW-2026-11-10-02, QA-D-1110-PAUDUR) ----
+  /** Integer milliseconds each currently paused worker has been paused (sim/pause.ts tickPausedFor / pausedDurationS).
+   *  Known limits: (1) never saved, so a reload restarts the count at load time; (2) only simulated time counts, so offline time
+   *  and hidden gaps >= 60 s (the provisional hidden sim is discarded) are not counted. Sanitiser and save shape unchanged.
+   *  Architect G2 ruling (b), G0-API.md rev 11 §14b. */
+  /** + whole-session totals for session_end (pause §12 L299; HoE/saves-119-session-end): `sumS` = paused ms summed over workers
+   *  (emitted as paused_worker_s = floor(ms/1000)), `allS` = ms while every hired worker was paused (all_paused_s). Same
+   *  never-saved key, same limits. */
+  pausedForS?: PauseTracker;
   // ---- #4 abilities (saved, abilities spec rule 1/3, E2) ----
   abilities?: Partial<Record<WorkerId, AbilityState>>;
   abilitiesUnlocked?: boolean;
   abilitiesCoachSeen?: boolean;
   // ---- M5.1 breeds (saved, breeds spec §6; sim/breeds.ts) ----
   breeds?: import('./breeds').BreedsSave;
+  // ---- v5 clockWage (saved, failure-cost v0.3.24 AC-FC11; S5, Saves-approved): the one-time yawn tip was shown in this save. Absent = not shown.
+  clockWageTipShown?: boolean;
+  /** AC-FC12 welcome-back window (saved; Architect ruling 2, Saves owns key + sanitiser): per wage role, Asleep (mood asleep, not
+   *  paused) live-sim ms and asleep wage cents since the last welcome-back close. Integers. Absent when empty. */
+  clockWageWindow?: Partial<Record<'market_hand' | 'coop_hand', { asleepMs: number; cents: number }>>;
+  // ---- v5 asleep clock (session only, never saved; Architect ruling 4): this session's totals for session_end. ----
+  /** MH + CH Asleep worker-ms (integer), written only by tickAsleepClock. -> session_end.asleep_s. */
+  asleepSessionMs?: number;
+  /** Cents charged to Asleep workers this session (clockWageAsleepStep). -> session_end.wage_paid_asleep_cents. */
+  asleepPaidCents?: number;
+  // ---- rc2 Refill (saved, G0 §1; optional, no SAVE_VERSION bump) ----
+  /** Integer charges in [0, charge_cap]. Absent = start_charges (lazy, m3). */
+  refillCharges?: number;
+  /** Integer sim ms until the next charge. Absent at the cap (F-4). */
+  chargeNextMs?: number;
+  // ---- rc2 Refill (session only, never saved) ----
+  /** Sim ms since that worker's last manual refill (G-11). Absent = no combo. */
+  refillAgoMs?: Partial<Record<WorkerId, number>>;
+  /** Per-session shift-sheet totals and the auto-refill toast queue (G0 §1). */
+  refillSession?: RefillSession;
+  // ---- #5b/#11 sales-stopped + Rule 2 (session only, never saved; sales-stopped-spec §7.5, SS-43; Saves risk-helpers) ----
+  /** Stall timers, chip pair, Rule 2 hysteresis and queued note* telemetry (econ/stall.ts). Absent while salesStopped is off. */
+  stallSession?: import('../econ/stall').StallSession;
+}
+
+/** Per-session refill totals (G0 §1). Never saved; zeros on a new session / rotate (M2). */
+export interface RefillSession {
+  sheetSeq: number;
+  refillsManual: number;
+  refillsAuto: number;
+  chargeStarvedS: number;
+  shortageS: number;
+  chargesCappedS: number;
+  autoToastQueue: WorkerId[];
 }
 
 /** Fields F2 persists (optional, absent = default). */
-export const M5_SAVED_FIELDS = ['evRngState', 'nextSpawnRemainingS', 'frenzyRemainingS', 'broodyNestCents', 'broodyHenIdx', 'abilities', 'abilitiesUnlocked', 'abilitiesCoachSeen', 'breeds'] as const satisfies readonly (keyof M5Fields)[];
+export const M5_SAVED_FIELDS = ['evRngState', 'nextSpawnRemainingS', 'frenzyRemainingS', 'broodyNestCents', 'broodyHenIdx', 'abilities', 'abilitiesUnlocked', 'abilitiesCoachSeen', 'breeds', 'refillCharges', 'chargeNextMs', 'clockWageTipShown', 'clockWageWindow'] as const satisfies readonly (keyof M5Fields)[];
 /** Fields that live only for a page session: F2 strips them before serialize (specs: never saved). */
-export const M5_SESSION_FIELDS = ['goldenEgg', 'streakS', 'streakHoldS', 'tapCreditCdS', 'irefRingCents', 'refWarmS', 'broodyNestScaled', 'brRngState'] as const satisfies readonly (keyof M5Fields)[];
+export const M5_SESSION_FIELDS = ['goldenEgg', 'streakS', 'streakHoldS', 'tapCreditCdS', 'irefRingCents', 'refWarmS', 'broodyNestScaled', 'brRngState', 'asleepSessionMs', 'asleepPaidCents', 'pausedForS', 'stallSession', 'refillAgoMs', 'refillSession'] as const satisfies readonly (keyof M5Fields)[];
 export const M5_FIELDS: readonly (keyof M5Fields)[] = [...M5_SAVED_FIELDS, ...M5_SESSION_FIELDS];

@@ -20,11 +20,3 @@ describe('Art icons ship verbatim (sha1 pins)', () => {
     expect(createHash('sha1').update(readFileSync(`public/assets/${n}.svg`)).digest('hex').slice(0, 8)).toBe(sha);
   });
 });
-describe('stub mirrors SIM-API rev 3 (sha256 38bfc0d1)', () => {
-  it('workerAtRisk is clamped at 0', async () => {
-    const { stallStub } = await import('../src/ui/stall-sim-stub'); const api = await import('../src/ui/stall-api');
-    stallStub.reset(); stallStub.atRisk = { market_hand: -3, coop_hand: 2 };
-    expect(api.workerAtRisk('market_hand', {} as any, {} as any)).toBe(0); expect(api.workerAtRisk('coop_hand', {} as any, {} as any)).toBe(2);
-    expect(api.costliestAtRisk({} as any, {} as any)).toBe('coop_hand'); stallStub.reset();
-  });
-});
