@@ -9,9 +9,10 @@
  */
 import type { Balance } from '../config/balance';
 import { flagOn, type M5Flag } from '../config/flags';
+import { tcNum } from '../config/formulas';
 import type { GameState } from './state';
 import { abilityActive } from './abilities';
-import { tcNum } from '../config/formulas';
+import { goldenFrozen } from './golden-frozen';
 /** Who made the sale (SimEvent sell.by). Rush keys on 'market_hand'. */
 export type SaleBy = 'player' | 'market_hand';
 /** suspended = this sale/tick has no focus time: every timed effect counts as 1 (D-C3, R23). */
@@ -21,8 +22,12 @@ export interface SaleEffect { id: string; flag: M5Flag; factor(s: GameState, b: 
 export interface LayEffect { id: string; flag: M5Flag; factor(s: GameState, b: Balance): number; }
 /** Feature PRs append their entry IN THIS FILE (one line each). Order is documentation only: factors multiply (golden X7).
  *  Typed readonly (CCR nit #80): src cannot mutate them; only tests cast to push a fixture entry and clear it in afterEach. */
+/** #1 golden R22: x tc_frenzy_price_mult on every sale (player, workers, Basket stock) while a Frenzy runs (frenzyRemainingS > 0). */
+/** R22/R23 + v1.3.3 R5g c: ×2 only while a Frenzy is live AND not goldenFrozen (streak is a separate factor). */
+export const frenzyFactor = (s: GameState, b: Balance) => ((s.frenzyRemainingS ?? 0) > 0 && !goldenFrozen(s, b) ? tcNum(b, 'frenzy_price_mult') : 1);
 export const SALE_EFFECTS: readonly SaleEffect[] = [
   { id: 'streak', flag: 'streak', factor: s => 1 + (s.streakS ?? 0) }, // #2 Collect Streak R8: (1 + s) on every sale while live
+  { id: 'frenzy', flag: 'golden', factor: frenzyFactor }, // #1 golden R22/R23 (suspended sales pay 1x via saleEffectFactors)
   { id: 'rush', flag: 'abilities', factor: (s, b, c) => (c.by === 'market_hand' && abilityActive(s, b, 'market_hand') ? tcNum(b, 'ability_w1_price_mult') : 1) }, // #4 Rush: Market Hand sales only
   { id: 'shout', flag: 'abilities', factor: (s, b) => (abilityActive(s, b, 'hawker') ? tcNum(b, 'ability_w3_price_mult') : 1) }, // #4 Shout: all sales
 ];

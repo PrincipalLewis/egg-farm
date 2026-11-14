@@ -20,6 +20,8 @@ else:
   PRESET = 'F1 (P1Q + farm_cost/w4_tier_cost tables from data/economy.csv)'
   e = S.Eco(dict(S.P1Q, name=PRESET, farm_cost_table={int(r['level']): int(float(r['farm_cost'])) for r in ROWS},
                  w4_cost_table={int(r['level']): int(float(r['w4_tier_cost'])) for r in ROWS}))
+import collection_cost_table as cct  # noqa: E402  M4.1 D-HOP-23: balance.collection.costTable when present (flag on); no-op otherwise
+cct.apply(e, *cct.read_table())
 W = S.spec_from_csv(CSV)
 # F1 merge: manage threshold from the CSV (run_m2 manage_at, default = tired_below)
 W['manage_at'] = round(float(ROWS[0]['manage_prompt_threshold']) * 100); W['manage_all_low_only'] = True; W['wage_carry'] = True

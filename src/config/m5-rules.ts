@@ -11,6 +11,7 @@ const has = (tc: TC, ...k: string[]) => k.every(x => typeof tc[x] === 'number');
 /** tc keys that must exist while their flag is on (feature PRs append; empty until a reader lands). */
 export const M5_REQUIRED_TC: Partial<Record<(typeof M5_FLAGS)[number], readonly string[]>> = {
   pause: ['pause_unlock_farm', 'pause_call_lockout_s', 'rest_recovery_mult'], // rule 1 / B5 (m5Load) + rule 3 recovery (sim/pause.ts)
+  rc2Refill: ['charge_regen_s', 'charge_cap', 'refill_threshold_pct', 'start_charges'], // G0 M1; autorefill keys wait on the Econ CSV
 };
 export function validateM5(m4: any, workers: any): void {
   if (!m4) return;
@@ -35,6 +36,8 @@ export function validateM5(m4: any, workers: any): void {
   if (has(tc, 'warn_at_s', 'urgent_at_s', 'egg_despawn_s') && !(tc.warn_at_s < tc.urgent_at_s && tc.urgent_at_s < tc.egg_despawn_s)) fail('tc: warn_at_s < urgent_at_s < egg_despawn_s');
   for (const k of ['egg_despawn_s', 'frenzy_s', 'first_spawn_s']) if (has(tc, k) && !(tc[k] > 0)) fail(`tc.${k} must be > 0`);
   if (has(tc, 'frenzy_price_mult') && !(tc.frenzy_price_mult >= 1)) fail('tc.frenzy_price_mult must be >= 1');
+  // D-HOP-2026-11-05-11: R22 all-sales scope is fixed in v5; 1 is the only valid value (0 has no defined semantics, no alternate branch)
+  if (has(tc, 'frenzy_all_sales') && tc.frenzy_all_sales !== 1) fail('tc.frenzy_all_sales must be 1 (R22 all-sales scope, D-HOP-2026-11-05-11)');
   // #2 streak / #3 tap coins (streak spec §5: 0 < cap <= 1, tier_count >= 1, window >= 1)
   if (has(tc, 'streak_cap') && !(tc.streak_cap > 0 && tc.streak_cap <= 1)) fail('tc.streak_cap must be in (0, 1]');
   if (has(tc, 'streak_tier_count') && !(Number.isInteger(tc.streak_tier_count) && tc.streak_tier_count >= 1)) fail('tc.streak_tier_count must be an integer >= 1');
@@ -55,4 +58,9 @@ export function validateM5(m4: any, workers: any): void {
   // D-HOE-20261030-02: [0, 0.35]; 0 is valid (pause spec §6, AC-P17). Non-finite is refused here too, not only by the leaf check.
   if (has(tc, 'rest_recovery_mult') && !(Number.isFinite(tc.rest_recovery_mult) && tc.rest_recovery_mult >= 0)) fail('tc.rest_recovery_mult must be a finite number >= 0 (pause spec §6; 0 is valid, AC-P17)');
   if (has(tc, 'rest_recovery_mult') && !(tc.rest_recovery_mult <= 0.35)) fail('tc.rest_recovery_mult must be <= 0.35 (pause spec §6, decisions.md:9)');
+  // rc2 Refill (G0 M1): cap int ≥ 1, start int 0..cap, regen > 0, threshold int 1..100. Run whenever the keys exist.
+  if (has(tc, 'charge_cap') && !(Number.isInteger(tc.charge_cap) && tc.charge_cap >= 1)) fail('tc.charge_cap must be an integer >= 1');
+  if (has(tc, 'start_charges', 'charge_cap') && !(Number.isInteger(tc.start_charges) && tc.start_charges >= 0 && tc.start_charges <= tc.charge_cap)) fail('tc.start_charges must be an integer in [0, charge_cap]');
+  if (has(tc, 'charge_regen_s') && !(tc.charge_regen_s > 0)) fail('tc.charge_regen_s must be > 0');
+  if (has(tc, 'refill_threshold_pct') && !(Number.isInteger(tc.refill_threshold_pct) && tc.refill_threshold_pct >= 1 && tc.refill_threshold_pct <= 100)) fail('tc.refill_threshold_pct must be an integer in [1, 100]');
 }

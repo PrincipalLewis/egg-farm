@@ -23,7 +23,8 @@ import { m4On, trackEggsPerSec, trackPriceCents, trackCoopCapacity, hensCap, hen
 import { salePriceCents, coopCap, trackLevel, trackCost, trackLock, pendingMilestones, balancedStrip, type Track } from '../sim/tracks';
 import { DualPicker, ROW_OF_KEY, defaultScorer, allScorer, type SharedPick } from './pick-hysteresis';
 import { isZeroGain, zeroGainUiOn, zgFiltered, ZG_KEY_OF, ZG_DESC, ZG_CHIP } from './zero-gain'; // v5 zeroGainUi (m4.flags.zeroGainUi)
-import { zeroGainConfirmOn } from '../config/flags';
+import { zeroGainConfirmOn, bestBuyV2On } from '../config/flags';
+import { bbv2Mark, type BuyKey } from '../econ/best-buy';
 import { milestoneHint, type RowKey, balancedStripText, balancedSegments, milestoneToast, trackLockText, trackUnlockFarm, TRACK_FARM_MAX_TEXT, trackFarmMaxAria, hensMilestoneEffect, gradeEffect } from './tracks-ui';
 import { resolveIos, shouldShowIosTip, TIP_TITLE, howTo, SHARE_SVG } from './ios-tip';
 import type { Recovery } from '../save/save';
@@ -35,6 +36,8 @@ import { tryDispatch, wouldApply } from './tap-guard';
 import { ServedDwell } from './served-dwell';
 import { queueFull, queueTapOpens, netCentsPerSec, totalWageCentsPerSec, wageCentsPerSec, listedWageCentsPerSec, WAGE_WORKERS } from './rates';
 import { trackToastSafe } from './toast-safe';
+import { clockWageOn, clockWageWindowView } from '../sim/clock-wage';
+import { asleepToast, FallAsleepToasts, clockWageTipNow, CLOCK_WAGE_TIP, welcomeBackWageHtml } from './clock-wage-ui';
 import { workersHtml, shouldShowCoopTip, COOP_TIP_TEXT, YawnSfx, farmManageAllVisible, ringHtml, navRefillState, fitBanners, upgradesNavName, type NavAria } from './workers-ui';
 import { headerRate, headerRateText } from './s2-economy-ui'; // M4.1 patch 1 (S2 asleep signal): AC-R2 HUD rate
 import { WARN_SVG } from './icons'; // m6: the HUD rate's warning sign is the static inline SVG, shown by .warn
@@ -46,6 +49,9 @@ export const UI_KEY = 'eggfarm.ui';
 interface UiFlags { onbStep?: number; sfx: boolean; reducedMotion: boolean; seenSlots: number; onboardingDone: boolean; replayOnboarding?: boolean; workersIntroA?: boolean; workersIntroB?: boolean; sessions?: number; iosHomeShown?: boolean }
 const h = (html: string) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild as HTMLElement; };
 const setText = (el: Element, v: string) => { if (el.textContent !== v) el.textContent = v; };
+/** OC-A11Y-2 (D-HOP-2026-11-09-01): order-chip accessible name; starts with the visible `.tag .num` text (WCAG 2.5.3).
+ *  Plural from the RAW count, never the formatted string. Copy final per Art; swap wording here only. */
+export const orderChipLabel = (visible: string, raw: number) => `${visible} ${raw === 1 ? 'egg' : 'eggs'} wanted by customer`;
 const setDisabled = (el: HTMLElement, d: boolean) => { const v = d ? 'true' : 'false'; if (el.getAttribute('aria-disabled') !== v) el.setAttribute('aria-disabled', v); };
 const retrigger = (el: Element, cls: string) => { el.classList.remove(cls); void (el as HTMLElement).offsetWidth; el.classList.add(cls); };
 
@@ -114,7 +120,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         <div id="uRow"></div></div></section></div>`);
   const modal = h(`<div id="modal-layer"></div>`);
   const fxLayer = h(`<div id="fx-layer" aria-hidden="true"></div>`);
-  const toast = h(`<div class="toast" role="status"></div>`);
+  const toast = h(`<div class="toast${clockWageOn(b) ? ' cw-b1' : ''}" role="status"></div>`); // clockWage B-1 wrap rule, flag-on only (flag-off markup unchanged)
   root.append(hud, farm, nav, panelLayer); document.body.append(modal, fxLayer, toast);
   const $ = <T extends HTMLElement = HTMLElement>(sel: string, el: ParentNode = document) => el.querySelector(sel) as T;
   const coinsEl = $('#coins'), basketEl = $('#basket'), queueEl = $('#queue'), scene = $('#scene'), coopImg = $<HTMLImageElement>('#coop');
@@ -165,6 +171,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const el = h(`<button class="cooptip" role="status">${COOP_TIP_TEXT}</button>`); document.body.append(el);
     el.addEventListener('click', () => { g.telemetry.track('coop_hand_tip', { phase: 'tap' }); tab = 'workers'; dirty = true; openPanel('upgrades'); el.remove(); });
     window.setTimeout(() => el.remove(), 8000);
+  };
+  // v5 clockWage AC-FC11: the one-time yawn tip (same .cooptip box, B-3 font); tap dismisses. Shown once per save (Game marks it).
+  const showCwTip = () => {
+    const el = h(`<button class="cooptip cw-tip" role="status">${CLOCK_WAGE_TIP}</button>`); document.body.append(el);
+    el.addEventListener('click', () => el.remove()); window.setTimeout(() => el.remove(), 8000);
   };
   let toastTimer = 0;
   /** WebKit perf: patience ring in 1/120-turn steps (3 deg); a write only when the step changes, so the conic ring repaints ~4x/s, not every frame. */
@@ -336,10 +347,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const showWelcome = () => {
     const eggs = g.state.pendingOfflineEggs; if (eggs <= 0) return;
     modalKind = 'welcome';
+    const cwLines = welcomeBackWageHtml(clockWageWindowView(g.state), b); // AC-FC12 ('' flag-off: markup unchanged); the window resets at close (collect/dismissOffline)
     modal.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-labelledby="wbT">
       <button class="icon-btn close" aria-label="Close"><img src="${A('icon-close.svg')}" alt=""></button>
       <img src="${A('icon-offline-earnings.svg')}" width="64" height="64" alt="">
-      <h2 id="wbT">Welcome back!</h2><div>You were away ${fmtAway(g.offline.awayS, b.offline.offlineCapSeconds)}</div>
+      <h2 id="wbT">Welcome back!</h2><div>You were away ${fmtAway(g.offline.awayS, b.offline.offlineCapSeconds)}</div>${cwLines}
       <div class="big num"><img src="${A('icon-egg.svg')}" alt="">+${fmtCount(eggs)}\u00a0eggs</div>
       <button class="btn" id="wbCollect">Collect</button></div>`;
     modal.classList.add('open'); sfx('welcomeBack');
@@ -368,7 +380,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     if (t.id === 'sOldSave') { const raw = oldSaveForSession(); if (raw) void exportOldSave(raw, exportName(new Date())).then(ok => { $('#sOldMsg').textContent = ok ? OK_MSG : FAIL_MSG; }); return; }
     if (t.id === 'sExport') { void exportLog(g.telemetry.exportJSON(), `eggfarm-log-${g.installId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.json`).then(m => { const el = $('#sExportMsg'); if (el) el.textContent = m; }); return; }
     if (t.id === 'sReset') { modalKind = 'confirm'; modal.innerHTML = `<div class="card" role="alertdialog" aria-modal="true"><h2>Reset all progress?</h2><button class="btn secondary" id="cCancel">Cancel</button><button class="btn danger" id="cReset">Reset</button></div>`; return; }
-    if (t.id === 'cReset') { g.resetting = true; g.telemetry.track('save_reset'); g.telemetry.flush(true); resetProgress(localStorage); void g.clearMirror().then(() => location.reload()); }
+    if (t.id === 'cReset') { g.beginReset(); resetProgress(localStorage); void g.clearMirror().then(() => location.reload()); }
   });
   modal.addEventListener('change', e => {
     const t = e.target as HTMLInputElement;
@@ -408,8 +420,10 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     const kids: HTMLElement[] = [];
     for (const c of s.customers.slice(0, split.shown)) {
       let el = chips.get(c.id);
-      if (!el) { el = h(`<button class="chip arrive" aria-label="Customer"><img class="cust" src="${A('icon-customer.svg')}" alt=""><span class="tag"><img src="${A('icon-egg.svg')}" alt=""><span class="num"></span></span></button>`); chips.set(c.id, el); }
-      setText(el.querySelector('.tag .num')!, fmtCount(c.demand - c.filled));
+      if (!el) { el = h(`<button class="chip arrive"><img class="cust" src="${A('icon-customer.svg')}" alt=""><span class="tag"><img src="${A('icon-egg.svg')}" alt=""><span class="num"></span></span></button>`); chips.set(c.id, el); }
+      const left = c.demand - c.filled, n = fmtCount(left); // OC-A11Y-1..3: name + visible digit from one value, same render
+      setText(el.querySelector('.tag .num')!, n);
+      const al = orderChipLabel(n, left); if (el.getAttribute('aria-label') !== al) el.setAttribute('aria-label', al);
       setP(el, c.waitedS / patience);
       kids.push(el);
     }
@@ -471,6 +485,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   };
 
   // ---------- Game events ----------
+  const fallAsleep = new FallAsleepToasts(); if (clockWageOn(b)) fallAsleep.observe(g.state, b);
   g.on((e: GameEvent) => {
     switch (e.type) {
       case 'sell': {
@@ -495,6 +510,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         pendingLvPop = true; goalNow = true; break;
       }
       case 'worker_hire': case 'grader_tier': goalNow = true; break;
+      case 'worker_state': if (clockWageOn(b) && fallAsleep.onState(e.worker, e.state)) queueToasts([asleepToast(e.worker, b)]); break; // v5 clockWage AC-FC9: Working/Tired -> Asleep only, queued (Architect M1)
       case 'coop_full': if (e.phase === 'start') sfx('coopFull'); break;
     }
     dirty = true;
@@ -506,16 +522,30 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   // M4A-18 v1.4 / M4A-41: one shared picker for the highlight and the hint (replaces the holdTicks = 2 hold).
   // v5 zeroGainUi §5.6: with the flag on, ZG rows are dropped from both scorers BEFORE the pick (flag off: the stock DualPicker).
   const picker = ZG ? new DualPicker(zgFiltered(defaultScorer), zgFiltered(allScorer)) : new DualPicker(); let rowPick: SharedPick | null = null, hintPick: SharedPick | null = null; let rowHl: RowKey | null = null;
+  // BBv2 (spec v1.0.4 §6, PMFU BB12): `hintMark` is THE ★ key the chip and the strip render from (flag read once at boot):
+  // bestBuyV2 = 1 -> the Part A ★ (affordable AND meaningful, else null = the inert mark-null net); 0 -> today's single-arg bestBuyMark.
+  const BB2 = bestBuyV2On(b); let hintMark: BuyKey | null = null;
+  let bbMarkSinceT = 0; if (g.bbTel) g.bbCtx = () => { const t = now(); return { t, mark: hintMark, markSinceT: bbMarkSinceT, rateCentsPerS: income.centsPerSec(t) }; };
+  // SG-12 qaPicker history (stopgap v1.2.6 fdc1c199 SG-12; QA/dev builds only, compiled out of release with IOS_FLAG_ENABLED).
+  const qaHist: { t: number; key: string | null; affordable: boolean | null; mark: string | null }[] = []; let qaKeySinceT = 0, qaLast: string | null = null;
   const goalHold = new GoalHold(2); let goalNow = true, goalTickAt = -Infinity, goalShown: Goal | null = null, goalHidden = false;
   const renderGoal = () => {
     const t = now();
-    const M4 = m4On(b), prevKey = hintPick?.key, prevMark = bestBuyMark(hintPick);
+    const M4 = m4On(b), prevKey = hintPick?.key, prevMark = hintMark;
     if (M4) { const r = picker.tick(g.state, b, t); rowPick = r.highlight; hintPick = r.hint; rowHl = rowPick ? ROW_OF_KEY[rowPick.key] ?? null : null; } // every state change + 5 s re-check
+    hintMark = BB2 ? bbv2Mark(hintPick, g.state, b) : bestBuyMark(hintPick);
+    if (IOS_FLAG_ENABLED) { // SG-12: one entry when key, affordable or mark changed since the last frame; load counts as a change
+      const k = hintPick?.key ?? null, sig = `${k}|${hintPick?.affordable ?? null}|${hintMark}`;
+      if (sig !== qaLast) { if (qaLast === null || k !== (qaHist[qaHist.length - 1]?.key ?? null)) qaKeySinceT = t; qaLast = sig;
+        qaHist.push({ t, key: k, affordable: hintPick?.affordable ?? null, mark: hintMark }); if (qaHist.length > 32) qaHist.shift(); }
+    }
+    // BBv2 §8 (errata rev 12 #19/#20): ms_since_shown runs on this picker clock from the last ★ switch; g.bbTel is null at flag 0.
+    if (g.bbTel) { if (hintMark !== null && hintMark !== prevMark) bbMarkSinceT = t; g.bbTel.shown(t, g.state, hintPick, income.centsPerSec(t)); }
     // 1 Hz text tick; purchases, pick changes and best-buy (affordability) flips bypass it, so the strip ★ and the row chip
     // (rebuilt from this frame's hintPick) always agree in the same frame (F4-13; CCR #62 m1).
-    if (!goalNow && t - goalTickAt < 1000 && !(M4 && (hintPick?.key !== prevKey || bestBuyMark(hintPick) !== prevMark))) return;
+    if (!goalNow && t - goalTickAt < 1000 && !(M4 && (hintPick?.key !== prevKey || hintMark !== prevMark))) return;
     const imm = goalNow || M4; goalNow = false; goalTickAt = t;
-    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t), M4 ? hintPick?.key : undefined, M4 ? bestBuyMark(hintPick) : null), imm); goalShown = gl;
+    const prev = goalShown, gl = goalHold.tick(selectGoal(g.state, b, income.centsPerSec(t), M4 ? hintPick?.key : undefined, M4 ? hintMark : null), imm); goalShown = gl;
     if (gl.parts) { const html = goalLabelHtml(gl.parts); if (goalLbl.dataset.html !== html) { goalLbl.dataset.html = html; goalLbl.innerHTML = html; } goalLbl.classList.add('ng'); }
     else { if (goalLbl.dataset.html) { delete goalLbl.dataset.html; goalLbl.textContent = ''; } goalLbl.classList.remove('ng'); setText(goalLbl, gl.label); } setText(goalSt, gl.status);
     goalBtn.dataset.state = gl.state; goalSt.classList.toggle('chip', gl.state === 'ready');
@@ -601,7 +631,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
    *  applied on the DOM (zgApply), so toggling never re-renders the tab (UI-ZG-15). */
   const zgStrip = (zg: boolean, k: string) => !(zg && ZGC) ? '' : `<div class="zg-confirm" role="group" aria-labelledby="zgc-${ZK[k as ZRow]}-t" id="zgc-${ZK[k as ZRow]}" data-zg-kind="${k}" hidden><p id="zgc-${ZK[k as ZRow]}-t">This won't raise income now.</p><div class="acts"><button class="btn buy" type="button" data-zg="confirm">Buy anyway</button><button class="btn secondary" type="button" data-zg="cancel">Cancel</button></div></div>`;
   /** M41-8 F3 = UX-M4 ★ Best buy chip: on the one row bestBuyMark names (same source as the strip ★, F4-13). */
-  const bestChip = (key: string) => m4On(b) && bestBuyMark(hintPick) === key ? `<div class="best-chip" data-best-buy="${key}"><span aria-hidden="true">★</span> Best buy</div>` : '';
+  const bestChip = (key: string) => m4On(b) && hintMark === key ? `<div class="best-chip" data-best-buy="${key}"><span aria-hidden="true">★</span> Best buy</div>` : '';
   /** M4-A Option A: Hens / Egg value rows (art-ux/m4-tracks-copy.md), reusing the .up row component. */
   const trackRowHtml = (t: Track) => {
     const s = g.state, F = s.farmLevel, H = s.hensLevel, V = s.eggValueLevel, L = trackLevel(s, t), lock = trackLock(s, t, b);
@@ -726,6 +756,7 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
         maAria = v.aria; if (fb.getAttribute('aria-label') !== v.aria.text) fb.setAttribute('aria-label', v.aria.text); }
     }
     if (yawnSfx.pick(s, b, now())) sfx('workerYawn');
+    if (clockWageTipNow(s, b) && g.markClockWageTip()) showCwTip(); // AC-FC11 (false with clockWage off: no DOM change)
     // market panel
     if (open === 'market' || docked.matches) {
       const basket = Math.floor(s.basket), patience = S.patienceS(F, b);
@@ -865,17 +896,18 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   const gateCtx = () => { const st = g.state; return { coop: st.coop, eggsPerTap: S.eggsPerTap(st.collectionLevel, b), customers: st.customers.length, basket: st.basket, coinsCents: st.coinsCents, costCents: S.collectionCost(st.collectionLevel, b) * 100, nextCustomerInS: st.nextCustomerInS }; };
   // AC-R1 §6: banners refit on resize / dock change (wider or narrower card); QA-only hook for the rc0 bannerFit section, compiled out of release.
   { const refit = () => fitBanners(uRow); addEventListener('resize', refit); docked.addEventListener?.('change', refit); }
+  { const lay = () => g.layoutChanged(); addEventListener('resize', lay); docked.addEventListener?.('change', lay); } // v5 #1 R15: re-check a deferred golden spawn on layout change (no-op unless golden is on)
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaFitBanners = () => fitBanners(uRow);
   // QA-only: open the real save-recovery dialog mid-game (R1 resume check); compiled out of release with eggfarmOnb.
   if (IOS_FLAG_ENABLED) (window as any).eggfarmQaRecovery = () => showRecoveryDialog({ case: 'F', reason: 'parse', had_backup: false, restored_from_backup: false, copy_failed: false, raw: '{}' } as any, A, [root, modal, toast]);
-  const renderAll = () => { const t = performance.now(); if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
+  const renderAll = () => { const t = performance.now(); if (clockWageOn(b)) fallAsleep.observe(g.state, b); /* AC-FC9 onset baseline */ if (onbFlow) onbFlow.tick(gateCtx(), gateT ? Math.min(1, (t - gateT) / 1000) : 0, !!modalKind || dialogOpen()); gateT = t; if (IOS_FLAG_ENABLED) (window as any).eggfarmOnb = onbFlow; // QA-only debug handle, compiled out of release (__IOS_FLAG__)
     render(); if (onbUpdate && !onbUpdate()) { onbUpdate = null; onbFlow = null; } if (!recoveryOpen) renderWorkersIntro(); renderIosTip(); };
   if (g.recoveryOutcome && opts.recovery) {
     // AC14b: shown before the game is interactive; onboarding / welcome-back wait until it closes.
     renderAll();
     // M41-7 (CSR v0.2.3): M5 = restored + storage blocked; G1 Export takes the CURRENT restored farm via recovery.live().
     const rec = opts.recovery as CsrRecovery, blocked = !!opts.storageBlocked?.(); let noticeId: NoticeId | undefined;
-    if (blocked && rec.case === 'R' && csrCopyActive(rec) && !rec.live) rec.live = () => serialize(g.state, Date.now());
+    if (blocked && rec.case === 'R' && csrCopyActive(rec) && !rec.live) rec.live = () => serialize(g.state, Date.now(), undefined, g.balance);
     void showRecoveryDialog(opts.recovery, A, [root, modal, toast], () => g.telemetry.track('save_recovery_export', { case: opts.recovery!.case }), undefined,
       { storageBlocked: blocked, track: (t, d) => g.telemetry.track(t, d), onNotice: n => { noticeId = n?.id; } }).then(() => {
       if (noticeId === 'M4' && rec.case === 'D') { location.reload(); return; } // CSR-13 defer: "Try again" reloads
@@ -888,5 +920,11 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
       workers: Object.fromEntries(WAGE_WORKERS.map(id => [id, { hired: !!s.workers[id], wageCentsPerSec: wageCentsPerSec(id, s, b), listedWageCentsPerSec: listedWageCentsPerSec(id, s, b) }])) }; };
   g.onTracksCommitted = () => { showTracksExplainer(g, document, opts.storageBlocked); }; // M4-AC-EXP1: shown once, at the in-session commit
   if (g.tracksMigratedWithBackup) showTracksExplainer(g, document, opts.storageBlocked); // D-HOP-2026-10-19-13: reload after commit, before it showed
-  return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; }, dispose: () => zgAC.abort() };
+  /** SG-12 `qaPicker()` (v: 1, fields exactly as SG-12; v5 sources per BBv2 spec v1.0.4 §6): read-only, fresh JSON-safe object, no state,
+   *  DOM, picker or telemetry change. hintRaw = picker.hint.shown (after the ZG filter and Part A, before the highlight merge). */
+  const qaPick = (p: SharedPick | null) => p && { key: p.key, affordable: p.affordable, costCents: p.costCents, payback: p.payback === Infinity ? 'Infinity' : p.payback };
+  return { render: renderAll, showWelcome, openPanel, rates, get recoveryOpen() { return recoveryOpen; }, dispose: () => zgAC.abort(),
+    ...(IOS_FLAG_ENABLED ? { qaPicker: () => { const t = now(); return { v: 1, t, m4: m4On(b), hint: qaPick(hintPick), hintRaw: qaPick(picker.hint.shown), highlight: qaPick(rowPick),
+      mark: hintMark, suppressed: hintPick !== null && hintMark === null, heldMs: hintPick ? t - qaKeySinceT : 0, evals: picker.hint.evals, changes: picker.hint.changes,
+      history: qaHist.map(h => ({ ...h })) }; } } : {}) };
 }

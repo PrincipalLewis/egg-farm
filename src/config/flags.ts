@@ -7,7 +7,7 @@
 import type { EconomyParams } from './formulas';
 export const M5_FLAGS = [
   'golden', 'streak', 'tapCoins', 'abilities', 'broody', 'salesStopped', 'fatigueCue', 'pause', // M5.0 (fatigueCue: Rule 2 chip's own cut flag, D-HOP-2026-10-29-05)
-  'rc2Refill', 'autoRefill', 'clockWage', 'breeds', 'zeroGainUi', 'bestBuyV2', // M5.1
+  'rc2Refill', 'autoRefill', 'clockWage', 'breeds', 'zeroGainUi', 'bestBuyV2', 'unpaidTrickle', // M5.1 (unpaid_trickle, D-HOP-2026-11-14-07)
 ] as const;
 export type M5Flag = typeof M5_FLAGS[number];
 export type M5Flags = Partial<Record<M5Flag, number>>;
@@ -15,5 +15,13 @@ export type M5Flags = Partial<Record<M5Flag, number>>;
 export const flagOn = (p: EconomyParams, f: M5Flag): boolean => !!p.m4?.enabled && p.m4.flags?.[f] === 1;
 /** Any M5 flag that reads the event RNG is on (golden or broody: golden spec R10a, HoE Q4 ruling). */
 export const evRngFlagOn = (p: EconomyParams) => flagOn(p, 'golden') || flagOn(p, 'broody');
+/** Best buy v2 (spec m5.1-bestbuy-rebaseline-proposal v1.0.3 27e753d8 Part I, "m5.flags.bestBuyV2", here m4.flags.bestBuyV2). */
+export const bestBuyV2On = (p: EconomyParams): boolean => flagOn(p, 'bestBuyV2');
+/** Zero-gain UI strip (spec m5.flags.zeroGainUi, here m4.flags.zeroGainUi). Named helper so callers avoid raw flagOn (F3-no-literal M5 scan). */
+export const zeroGainUiOn = (p: EconomyParams): boolean => flagOn(p, 'zeroGainUi');
 /** Zero-gain confirm strip (spec "m5.zeroGain.confirm", here m4.zeroGain.confirm): only with zeroGainUi on AND confirm === 1. Off in M5.1. */
 export const zeroGainConfirmOn = (p: EconomyParams): boolean => flagOn(p, 'zeroGainUi') && p.m4?.zeroGain?.confirm === 1;
+/** Closed-interval lower bound of legal unpaid_trickle (spec v1.0.2 Q2, D-HOP-2026-11-14-10). Not a CSV column; k itself is workers.energy.unpaid_trickle. */
+export const UNPAID_TRICKLE_K_MIN = 0.5;
+/** D-HOP-2026-11-14-10 Q2: legal unpaid_trickle is {0} ∪ [UNPAID_TRICKLE_K_MIN, 1.0]. Values in (0, K_MIN) and > 1.0 are rejected. 0 is the shipping value. */
+export const isLegalUnpaidTrickle = (v: number): boolean => v === 0 || (Number.isFinite(v) && v >= UNPAID_TRICKLE_K_MIN && v <= 1);
