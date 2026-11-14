@@ -715,7 +715,7 @@ nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);marg
 .fslot{height:28px;display:flex;align-items:center;min-width:0}
 .fsub{position:relative;display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 10px;margin:0;box-sizing:border-box;border-radius:var(--r-pill);
   background:var(--c-cream);border:2px solid var(--c-outline);color:var(--c-wood-text);font:700 13px var(--f-display);white-space:nowrap;cursor:pointer}
-.fsub[hidden]{display:none}
+.fsub[hidden]{display:none!important}
 .fsub::after{content:"";position:absolute;inset:-9px -2px}   /* 26 px pill, >= 44 px hit area */
 .fsub[data-tone=asleep],.fpop[data-tone=asleep] .fpop-t{color:var(--c-danger)}
 .fc-warn{flex:none;width:16px;height:16px}
@@ -723,14 +723,14 @@ nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);marg
 .fchip{flex:none;width:44px;height:44px;display:grid;place-items:center;margin:0;padding:0;border:0;background:transparent;cursor:pointer}
 /* HoAUX: HUD at 360 width — settings and the chip never shrink below 44px; .spacer (flex:1) absorbs the ~43 px. */
 #settings,.hud .fchip{flex-shrink:0;min-width:44px}
-.fchip[hidden]{display:none}
+.fchip[hidden]{display:none!important}
 .fchip-pill{display:grid;place-items:center;width:36px;height:26px;box-sizing:border-box;border-radius:var(--r-pill);background:var(--c-cream);border:2px solid var(--c-outline);color:var(--c-wood-text)}
 .fchip[data-tone=asleep] .fchip-pill{color:var(--c-danger)}
 .fc-ic{width:20px;height:20px}
 .fchip:focus-visible,.fsub:focus-visible,.fpop-m:focus-visible{outline:3px solid var(--c-focus);outline-offset:2px}
 .fpop{position:fixed;z-index:9;display:flex;align-items:center;gap:8px;min-height:44px;max-height:52px;padding:4px 4px 4px 10px;box-sizing:border-box;border-radius:12px;
   background:var(--c-cream);border:2px solid var(--c-outline);box-shadow:var(--shadow);animation:fpopIn 150ms ease}
-.fpop[hidden]{display:none}
+.fpop[hidden]{display:none!important}
 .fpop-t{display:flex;align-items:center;gap:4px;color:var(--c-wood-text);font:700 13px var(--f-display);white-space:nowrap}
 .fpop-m{min-width:44px;min-height:44px;padding:0 14px;border-radius:var(--r-pill);border:2px solid var(--c-outline);background:var(--c-yolk);font:700 14px var(--f-display);color:var(--c-text);cursor:pointer}
 @keyframes fpopIn{from{opacity:0;transform:scale(.96)}}
