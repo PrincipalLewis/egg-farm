@@ -25,7 +25,8 @@ import { priceDollars } from '../econ/income';
 import { frenzyFactor, type SaleCtx } from './effects';
 import { ensureEvRng, evDraw, pickIndex } from './rng';
 import { saleValueCents } from './payout';
-export { frenzyFactor };
+import { goldenFrozen, pauseOn } from './golden-frozen';
+export { frenzyFactor, goldenFrozen };
 export const goldenOn = (b: Balance) => m4On(b) && b.m4?.flags?.golden === 1;
 /** Units of §4 #2 (bp = seconds x 10^4; baseScaled in 10^-4 $ -> cents / 10^6), not tunables. */
 const SEC_BP = 10_000, DENOM = 1_000_000, HALF = DENOM / 2, DENOM_N = BigInt(DENOM), HALF_N = BigInt(HALF);
@@ -65,11 +66,13 @@ const newRun = (): FrenzyRun => ({ extraCents: 0, eggsSold: 0, byPlayer: 0, byWo
 /** R23: counts down on focus seconds only; at 0 the field is removed and frenzy_ended{timeout} carries the run. */
 export function frenzyTick(s: GameState, focusS: number, b: Balance, ev?: Sink): GameState {
   const f = s.frenzyRemainingS; if (!goldenOn(b) || f === undefined || !(focusS > 0)) return s;
+  if (goldenFrozen(s, b)) return s; // R5g c: frozen time is accumulated in goldenTick; no frenzy_ended
   const left = r12(f - focusS);
   if (left > EPS) return { ...s, frenzyRemainingS: left };
   const { frenzyRemainingS: _x, frenzyRun: run, ...o } = s, r = run ?? newRun();
   ev?.push({ type: 'frenzy_ended', extra_coins: r.extraCents, eggs_sold: r.eggsSold, sold_by_player: r.byPlayer, sold_by_workers: r.byWorkers, reason: 'timeout' });
-  return o as GameState;
+  const se = sess(o as GameState);
+  return { ...(o as GameState), goldenSession: { ...se, frenzyExtraCents: se.frenzyExtraCents + r.extraCents } };
 }
 /** sellTo hook: a sale that paid the Frenzy factor (live, not suspended) adds its extra cents and eggs to the run. */
 export function frenzySale(o: GameState, before: GameState, k: number, value: number, ctx: SaleCtx, b: Balance): GameState {
@@ -84,7 +87,31 @@ export const GOLDEN_RECHECK_S = 0.5;
 /** The countdown that led to the next spawn (session only): intervalS = drawn gap or tc_first_spawn_s (telemetry interval_s,
  *  excludes deferral), deferS = focus seconds since the countdown hit 0 (deferred_ms), recheckS = focus seconds to the next R15 retry. */
 export interface GoldenPending { intervalS: number; deferS: number; recheckS: number; }
+/** Session-only GE-AC45 counters. Never saved. frenzyExtraCents is completed runs; a live run is added at emit. */
+export interface GoldenSession { spawned: number; collected: number; cents: number; frenzyExtraCents: number; frozenS: number; }
+const emptySess = (): GoldenSession => ({ spawned: 0, collected: 0, cents: 0, frenzyExtraCents: 0, frozenS: 0 });
+const sess = (s: GameState): GoldenSession => s.goldenSession ?? emptySess();
 const pending = (intervalS: number): GoldenPending => ({ intervalS, deferS: 0, recheckS: 0 });
+
+/** session_end golden fields (T-AC9 helper: returns the fields object; Game spreads it outside the literal).
+ *  Flag-off: {}. golden_frozen_s only when pause is also on (TEL-14), rounded to 0.1 s. */
+export function sessionEndGoldenFields(s: GameState, b: Balance): {
+  golden_spawned?: number; golden_collected?: number; golden_cents?: number; frenzy_extra_cents?: number; golden_frozen_s?: number;
+} {
+  if (!goldenOn(b)) return {};
+  const g = sess(s), extra = g.frenzyExtraCents + (s.frenzyRun?.extraCents ?? 0);
+  const out = { golden_spawned: g.spawned, golden_collected: g.collected, golden_cents: g.cents, frenzy_extra_cents: extra };
+  if (!pauseOn(b)) return out;
+  return { ...out, golden_frozen_s: Math.round(g.frozenS * 10) / 10 };
+}
+/** Fields for worker_paused (GE-AC45). The emitter is Saves-owned; this is the shared snapshot. */
+/** Zero GE-AC45 session_end counters after emit (contributor reset + resetSessionFields hide snapshot). */
+export function resetGoldenSession(s: GameState): void {
+  if (s.goldenSession) delete s.goldenSession;
+}
+export const goldenWorkerPausedFields = (s: GameState): { golden_on_screen: boolean; frenzy_active: boolean } => ({
+  golden_on_screen: s.goldenEgg != null, frenzy_active: (s.frenzyRemainingS ?? 0) > 0,
+});
 /** R3: a fresh gap U[tc_egg_gap_min_s, tc_egg_gap_max_s) from ONE evRng draw (never state.rng). */
 export function drawGap(s: GameState, b: Balance): GameState {
   const [e, u] = evDraw(ensureEvRng(s)), lo = tcNum(b, 'egg_gap_min_s'), hi = tcNum(b, 'egg_gap_max_s');
@@ -93,10 +120,27 @@ export function drawGap(s: GameState, b: Balance): GameState {
 /** An egg resolved (tap, timeout, offline, reload, takeover): the next gap is drawn now (draw order: gap at resolve). */
 const resolve = (s: GameState, b: Balance): GameState => { const o = drawGap(s, b); return { ...o, goldenPending: pending(o.nextSpawnRemainingS!) }; };
 /** The countdown is at 0, no egg is on screen and the R15 retry wait is over: Game measures the valid spots and dispatches spawnGolden. */
-export const spawnDue = (s: GameState, b: Balance, layout = false) => goldenOn(b) && !s.goldenEgg && s.nextSpawnRemainingS === 0 && (layout || !((s.goldenPending?.recheckS ?? 0) > EPS)); // R15: a layout change re-checks at once
+export const spawnDue = (s: GameState, b: Balance, layout = false) => goldenOn(b) && !goldenFrozen(s, b) && !s.goldenEgg && s.nextSpawnRemainingS === 0 && (layout || !((s.goldenPending?.recheckS ?? 0) > EPS)); // R15: a layout change re-checks at once; v1.3.3: not while frozen
 /** One tick on focus seconds f (TimerSystem). R1/R2 start, countdown, R15 deferral, R18 lifetime + timeout expiry. */
 export function goldenTick(s: GameState, f: number, b: Balance, ev?: Sink): GameState {
   if (!goldenOn(b)) return s;
+  // R2: first-spawn countdown starts on unlock even while frozen; it then holds (R5g a).
+  // The starting tick sets the countdown and does not decrement (GE-AC2: remaining is tc_first_spawn_s after 1 tick).
+  if (!s.goldenEgg && s.nextSpawnRemainingS === undefined) {
+    if (s.farmLevel < tcNum(b, 'egg_unlock_farm')) return s;
+    const first = tcNum(b, 'first_spawn_s');
+    s = { ...s, nextSpawnRemainingS: first, goldenPending: pending(first) };
+    if (goldenFrozen(s, b) && f > 0) {
+      const se = sess(s);
+      s = { ...s, goldenSession: { ...se, frozenS: r12(se.frozenS + f) } };
+    }
+    return s;
+  }
+  if (goldenFrozen(s, b)) {
+    if (!(f > 0)) return s;
+    const se = sess(s);
+    return { ...s, goldenSession: { ...se, frozenS: r12(se.frozenS + f) } };
+  }
   const g = s.goldenEgg;
   if (g) {
     if (!(f > 0)) return s;
@@ -105,11 +149,7 @@ export function goldenTick(s: GameState, f: number, b: Balance, ev?: Sink): Game
     const { goldenEgg: _g, ...o } = s; ev?.push({ type: 'collectible_expired', skin: 'golden_egg', reason: 'timeout', farm_level: s.farmLevel });
     return resolve(o as GameState, b);
   }
-  const n = s.nextSpawnRemainingS;
-  if (n === undefined) { // R2: first spawn after unlock (or a first M5 load at F >= 8); R1: never re-locks once started
-    if (s.farmLevel < tcNum(b, 'egg_unlock_farm')) return s;
-    const first = tcNum(b, 'first_spawn_s'); return { ...s, nextSpawnRemainingS: first, goldenPending: pending(first) };
-  }
+  const n = s.nextSpawnRemainingS!;
   const p = s.goldenPending ?? pending(n); // after a reload the drawn gap is unknown: interval_s = the restored countdown
   if (!(f > 0)) return s.goldenPending ? s : { ...s, goldenPending: p };
   if (n > EPS) {
@@ -125,19 +165,23 @@ export function spawnGolden(s: GameState, spots: readonly string[], b: Balance, 
   if (!spots.length) return { ...s, goldenPending: { ...p, recheckS: GOLDEN_RECHECK_S } };
   const [e, u] = evDraw(ensureEvRng(s)), slotId = spots[pickIndex(u, spots.length)];
   ev?.push({ type: 'collectible_spawned', skin: 'golden_egg', farm_level: s.farmLevel, collection_level: s.collectionLevel, slot_id: slotId, interval_s: p.intervalS, deferred_ms: Math.round(p.deferS * 1000) });
-  const { goldenPending: _p, ...o } = e; return { ...(o as GameState), goldenEgg: { ageS: 0, slotId, intervalS: p.intervalS } };
+  const { goldenPending: _p, ...o } = e; const se = sess(o as GameState);
+  return { ...(o as GameState), goldenEgg: { ageS: 0, slotId, intervalS: p.intervalS }, goldenSession: { ...se, spawned: se.spawned + 1 } };
 }
 /** tapGolden: R19 grace (focus age >= tc_spawn_grace_ms), R20 one grant, then resolve. Not a credited tap (R25b). */
 export function tapGolden(s: GameState, b: Balance, ev?: Sink): GameState {
   const g = s.goldenEgg; if (!goldenOn(b) || !g) return s;
+  if (goldenFrozen(s, b)) return s; // R5g b: no collect, no evRng, no event (UI on-hold bubble is parked)
   if (g.ageS < tcNum(b, 'spawn_grace_ms') / 1000 - EPS || g.ageS >= tcNum(b, 'egg_despawn_s') - EPS) return s;
-  const [e, u] = evDraw(ensureEvRng(s)), r = rollReward(u, s.farmLevel, b), { goldenEgg: _g, ...base } = e, o = grantGolden(base as GameState, r, b);
+  const [e, u] = evDraw(ensureEvRng(s)), forced = e.goldenForceReward, r = forced ?? rollReward(u, s.farmLevel, b);
+  const { goldenEgg: _g, goldenForceReward: _f, ...base } = e, o = grantGolden(base as GameState, r, b);
   const mult = tcNum(b, 'frenzy_price_mult'), dur = tcNum(b, 'frenzy_s');
   const value = r === 'frenzy' ? mult : r === 'eggs' ? o.basket - base.basket : o.coinsCents - base.coinsCents;
   ev?.push({ type: 'collectible_collected', skin: 'golden_egg', reaction_ms: Math.round(g.ageS * 1000), in_warning: g.ageS >= tcNum(b, 'warn_at_s') - EPS,
     reward_type: r, reward_value: value, reward_duration_s: r === 'frenzy' ? dur : 0, farm_level: s.farmLevel });
   if (r === 'frenzy') ev?.push({ type: 'frenzy_started', mult, duration_s: dur, farm_level: s.farmLevel, grader_tier: s.graderTier });
-  return resolve(o, b);
+  const resolved = resolve(o, b), se = sess(resolved), cents = (r === 'cash' || r === 'eggs_cash') ? (o.coinsCents - base.coinsCents) : 0;
+  return { ...resolved, goldenSession: { ...se, collected: se.collected + 1, cents: se.cents + cents } };
 }
 /** R8/R10b/R10c, Architect persist A (2026-11-05 21:29): remove an on-screen egg with no reward and make exactly ONE live drawGap.
  *  Idempotent: no egg (or golden off) -> the same object, no event, no draw. The ONE helper for offline (m5Offline), reload

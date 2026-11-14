@@ -37,8 +37,13 @@ describe('[F3][D-C1] F3 flags block (m4.flags.*, HoE D-C1)', () => {
 });
 
 describe('[F3][§9.5-1] F3 CSV wiring', () => {
-  it('[§9.5-1] M5_MAPPED_COLS is exactly the two ruled non-tc_ mappings (no vacuous loop below)', () => {
-    expect([...M5_MAPPED_COLS]).toEqual(['leave_attended_window_s', 'rest_recovery_mult']);
+  it('[§9.5-1] M5_MAPPED_COLS is the ruled non-tc_ mappings (leave/rest + rc2 Refill; no vacuous loop below)', () => {
+    expect([...M5_MAPPED_COLS]).toEqual(['leave_attended_window_s', 'rest_recovery_mult', 'charge_regen_s', 'charge_cap', 'refill_threshold_pct', 'start_charges']);
+  });
+  it('[R1][M1] rc2 Refill columns land in m4.tc under their own names, values verbatim from the CSV (no combo alias)', () => {
+    const tc = balance.m4!.tc as Record<string, number>;
+    expect([tc.charge_regen_s, tc.charge_cap, tc.refill_threshold_pct, tc.start_charges]).toEqual([150, 2, 50, 2]);
+    expect('combo_window_s' in tc || 'combo_boost_s' in tc).toBe(false);
   });
   it('every tc_* column lands in m4.tc (auto), plus the explicit non-tc_ mappings, values verbatim from the CSV', () => {
     const tc = balance.m4!.tc as Record<string, number>;
@@ -97,8 +102,10 @@ const files = (d: string): string[] => readdirSync(d).flatMap(f => { const p = j
 const strip = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '').replace(/(['"`])(?:\\.|(?!\1).)*\1/g, '""');
 /** Named code constants that are not CSV columns, by ruling: FOCUS_DT_MAX_S (HoP, sizing §13 GE-15), the RNG salts (D-C2, D-C4),
  *  the uint32 bound of the xorshift state (D-C5 sanitising), and ENERGY_FULL (worker energy is a percent, 0..100, not a CSV column).
- *  tc_broody_max_on_screen = 1 is "fixed by design" (§12.2). */
-const NAMED_OK = /^export const (FOCUS_DT_MAX_S|EV_RNG_SALT|BR_RNG_SALT|ENERGY_FULL) = [0-9.xa-fA-F]+;$/;
+ *  tc_broody_max_on_screen = 1 is "fixed by design" (§12.2).
+ *  STALL_TENTHS (0.1 s telemetry rounding) and CENTS_PER_DOLLAR (§8 loss_per_s integer cents) in econ/stall.ts are the same
+ *  class: unit-scale factors, not economy tunables (F3-no-literal, #128 ci 42744963797). */
+const NAMED_OK = /^export const (FOCUS_DT_MAX_S|EV_RNG_SALT|BR_RNG_SALT|ENERGY_FULL|STALL_TENTHS|CENTS_PER_DOLLAR|UNPAID_TRICKLE_K_MIN|SECONDS_PER_MINUTE) = [0-9.xa-fA-F]+;$/; // UNPAID_TRICKLE_K_MIN: spec v1.0.2 Q2 bound (not a CSV column); SECONDS_PER_MINUTE: unit scale (wage_per_min → /s)
 /** Named save-schema constants (D-HOE-20261030-01): BROODY_NEST_MAX_CENTS and BROODY_SLOTS in src/save/m5-fields.ts are the
  *  save-schema bounds from F2 #81 (sanitiser clamp / slot range), not economy tunables, so they are not CSV columns. Allowed only
  *  in that file, only as whole `export const NAME = <number>;` declarations. */

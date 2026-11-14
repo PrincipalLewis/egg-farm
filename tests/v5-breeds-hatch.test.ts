@@ -71,7 +71,7 @@ describe('hatch action (BR-R5..R7; BR-AC5, BR-AC7, E4/E5)', () => {
     expect(s.breeds!.rng).toBe(nextRand(nextRand(0x9e3779b9)[0])[0]);
   });
   it('[BR-AC6 basis] cost = max(min, min(planRef x 45, house-round(farm_cost x 10000 bp))) on planner income', () => {
-    for (const F of [10, 16, 26, 30]) { const s = st({ freeHatchUsed: 1 }, F), planRef = Math.round(incomePerSec(s, BR, { assumeWorking: true }) * 100);
+    for (const F of [10, 16, 26, 30]) { const s = st({ freeHatchUsed: 1 }, F), planRef = Math.round(incomePerSec(s, BR, { assumeWorking: true, ignoreQE2: true }) * 100);
       expect(hatchCostCents(s, BR)).toBe(Math.max(50_000, Math.min(planRef * 45, farmCost(F, BR) * 100))); }
   });
   it('[BR-AC7 / E4 / E5] busy incubator, flock complete, below F10, and all Commons 2★ below F14: nothing starts, no draw', () => {
@@ -216,7 +216,7 @@ describe('#96 Architect review d7df1f9: BR-R17 guard, BR-R5 literals, E10 shadow
     expect(hatchCostFrom(277_971, 62_431_600, BR)).toBe(12_508_695);
     expect(hatchCostFrom(1, 136_800, BR)).toBe(50_000); // bc_hatch_min_cents floor
     for (const F of [10, 14, 20, 28, 30]) { const s = st({ freeHatchUsed: 1 }, F);
-      expect(hatchCostCents(s, BR)).toBe(hatchCostFrom(Math.round(incomePerSec(s, BR, { assumeWorking: true }) * 100), farmCost(F, BR) * 100, BR)); }
+      expect(hatchCostCents(s, BR)).toBe(hatchCostFrom(Math.round(incomePerSec(s, BR, { assumeWorking: true, ignoreQE2: true }) * 100), farmCost(F, BR) * 100, BR)); }
   });
   it('[BR-AC26 E10 / PMC Q5] an auto-slot over a raw-id slot drops the shadow; moving that breed on does not resurrect the raw id', () => {
     const s0 = { ...st({ owned: { leghorn: { stars: 0 } }, slots: ['leghorn', null, null], incubator: { breed: 'brahma', remainingMs: 100, costCents: 0 } }, 20),

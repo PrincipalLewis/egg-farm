@@ -1,3 +1,5 @@
+import { b4Evidence, type PremiumRow } from './k10-b4-evidence';
+import { mulberry32 as rng } from './mulberry32';
 // K10 breeds offset harness (engineering/decisions.md 2026-10-25 03:52 item (6); D-HOP-2026-10-24-47 B4 offset test).
 // Port of Economy's B4 harness of record (scratch/m51-econ, record b4-record.md sha1 0bf46920): ac22/tap/g1csv.ts (sha256 45e403e6...)
 // -> g1tap.ts (f7a1138b...) -> m5tap.ts (b7ee9c81...) + h/breeds.ts (76c07ecf...). Breeds do not exist in src on rc/v5, so the breeds
@@ -114,7 +116,7 @@ export class Breeds {
 export interface Stack { on: boolean; streakCap: number; tapShare: number; broody: boolean; golden: { gapMin: number; gapMax: number } | null; abil: boolean; sweep: 'A' | 'B'; sweepMult: number; pause: boolean; pat?: 'none' | 'yawn' | 'long' | 'fullcoop' | 'wages' | 'stock' | 'bench' | 'grader'; lockoutS?: number; hold?: boolean; ssZero?: boolean; warm?: boolean; breeds?: BCfg; roster?: Roster; }
 export interface Prof { tap: 'idle' | 'ac7' | 'burst' | number; checkBase: number; catchP: number; }
 export const PROFS: Record<string, Prof> = { slow: { tap: 0.25, checkBase: 60, catchP: 0.4 }, idle: { tap: 'idle', checkBase: 15, catchP: 0 }, optimal: { tap: 3, checkBase: 5, catchP: 1 }, seller15: { tap: 'ac7', checkBase: 15, catchP: 0.75 }, casual: { tap: 0.5, checkBase: 30, catchP: 0.6 }, burst: { tap: 'burst', checkBase: 5, catchP: 1 } };
-const rng = (seed: number) => { let a = (seed * 2654435761 + 99) >>> 0; return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
+// rng: shared mulberry32 helper (tests/mulberry32.ts); was inlined here at L118 on 518de304.
 const WIDS: WorkerId[] = ['market_hand', 'coop_hand', 'hawker', 'grader'];
 export function run(bal: B, seed: number, P: Prof, K: Stack, T: number, opt: { start?: GameState; bstart?: BS; noBuy?: boolean; snapAt?: number[]; snapEveryS?: number } = {}, E: RunEnv = {}) {
   assertNoDoubleModel(bal, K);
@@ -285,7 +287,7 @@ export function b4Stack(arm: B4Arm, streakCap: number, cb: CsvBreeds, forcedSett
   const bv: BCfg | undefined = arm === 'nob' ? undefined : { policy: 'forced', loadout: arm === 'presF' ? 'present' : 'g1max', bc: cb.bc, ...(forcedSettle ? { forcedSettle: true } : {}) };
   return { ...B4_BASE, streakCap, hold: true, breeds: bv, roster: cb.roster };
 }
-export interface B4Opts { seeds: number; s0: number; T: number; step: number; prof: string; targets: PacingTargets }
+export interface B4Opts { seeds: number; s0: number; T: number; step: number; prof: string; targets: PacingTargets; capturePremium?: (row: PremiumRow) => void }
 /** One g1tap.ts config x profile. Output object and key order are g1tap's (o), so JSON.stringify matches its stderr line byte for byte. */
 export function b4Gate(b: B, K: Stack, cfgName: string, g: B4Opts, env: RunEnv): any {
   const NS = g.seeds, S0 = g.s0, T = g.T, STEP = g.step, tg = g.targets, pf = g.prof, ck = cfgName, P = PROFS[pf]; if (!P) throw new Error('k10: unknown profile ' + pf);
@@ -299,7 +301,7 @@ export function b4Gate(b: B, K: Stack, cfgName: string, g: B4Opts, env: RunEnv):
       const ca = a.final.coinsCents - st.coinsCents, cz = z.final.coinsCents - st.coinsCents; if (!(cz > 0)) continue; const x = ca / cz; all.push(x); m = Math.max(m, x);
       byBand[F < 18 ? 'F10-17' : F < 24 ? 'F18-23' : F < 30 ? 'F24-29' : 'F30+'].push(x); }
     seedMax.push(m);
-    if (K.on) for (const bd of Object.keys(prem)) { const keys = Object.keys(r.src).filter(k => k.startsWith(bd + ':')); const mech = keys.reduce((a, k) => a + r.src[k], 0); let base = 0; for (const [F, v] of r.baseF) if ((bd === 'F10-19' && F >= 10 && F < 20) || (bd === 'F20-29' && F >= 20 && F < 30) || (bd === 'F30+' && F >= 30)) base += v; if (base > 0) prem[bd].push(mech / base); }
+    if (K.on) for (const bd of Object.keys(prem)) { const keys = Object.keys(r.src).filter(k => k.startsWith(bd + ':')); const mech = keys.reduce((a, k) => a + r.src[k], 0); let base = 0; for (const [F, v] of r.baseF) if ((bd === 'F10-19' && F >= 10 && F < 20) || (bd === 'F20-29' && F >= 20 && F < 30) || (bd === 'F30+' && F >= 30)) base += v; if (base > 0) { prem[bd].push(mech / base); if (bd === 'F20-29') g.capturePremium?.({seed,premiumPp:100*mech/base}); } }
   }
   const hs = rs.map(x => x.bs.hatches), tc = rs.map(x => x.bs.tComplete ?? NaN);
   const o: any = { cfg: ck, prof: pf, windows: all.length, hatchesMed: q(hs, .5), flockCompleteMedMin: +(q(tc, .5) / 60).toFixed(1), flockCompleteN: tc.filter(Number.isFinite).length, stepL30: [+q(step, .95).toFixed(3), +mx(step).toFixed(3)] };
@@ -308,12 +310,30 @@ export function b4Gate(b: B, K: Stack, cfgName: string, g: B4Opts, env: RunEnv):
     o.premium = Object.fromEntries(Object.entries(prem).map(([k, v]) => [k, [+(100 * q(v, .5)).toFixed(2), +(100 * q(v, .95)).toFixed(2)]])); }
   return o;
 }
-export interface K10Result { csvSha256: string; bcSource: 'csv' | 'defaults'; seeds: [number, number]; g1max: any; noBreeds: any; presentOnly: any; premium: { g1max: number; noBreeds: number; presentOnly: number }; pass: boolean }
-/** The K10 / B4 offset test (D-HOP-2026-10-24-47): F20-29 median active premium, optimal, g1max at streak 0.27 must be <= the
- *  no-breeds AND the calm-gated Present-only premiums at streak 0.28. */
-export function k10(b: B, csv: string, csvSha256: string, g: Omit<B4Opts, 'prof'>, opts: { g1Streak?: number; refStreak?: number; forcedSettle?: boolean } = {}): K10Result {
-  const cb = hasBreedsCols(csv) ? bcFromCsv(csv) : bcDefaults(), G = { ...g, prof: 'optimal' }, s1 = opts.g1Streak ?? 0.27, s2 = opts.refStreak ?? 0.28, fs = !!opts.forcedSettle;
-  const g1max = b4Gate(b, b4Stack('g1F', s1, cb, fs), 'AssZhold_g1F', G, cb.env), noBreeds = b4Gate(b, b4Stack('nob', s2, cb), 'AssZhold_nob', G, cb.env), presentOnly = b4Gate(b, b4Stack('presF', s2, cb, fs), 'AssZhold_presF', G, cb.env);
-  const premium = { g1max: g1max.premium['F20-29'][0], noBreeds: noBreeds.premium['F20-29'][0], presentOnly: presentOnly.premium['F20-29'][0] };
-  return { csvSha256, bcSource: hasBreedsCols(csv) ? 'csv' : 'defaults', seeds: [g.s0, g.s0 + g.seeds - 1], g1max, noBreeds, presentOnly, premium, pass: premium.g1max <= premium.noBreeds && premium.g1max <= premium.presentOnly };
+/** CSV cap is authoritative in both candidate and independently supplied reference CSV. */
+export function csvStreakCap(csv:string):number {
+ const rows=csv.trim().split(/\r?\n/).map(l=>l.split(',')), i=rows[0].indexOf('tc_streak_cap');
+ if(i<0 || rows.length<2) throw new Error('K10 missing CSV tc_streak_cap');
+ const raw=rows[1][i], v=+raw;
+ if(!Number.isFinite(v)||v<0||rows.slice(1).some(r=>r[i]!==raw))throw new Error('K10 CSV tc_streak_cap must be finite and constant');
+ return v;
+}
+export interface K10Result { csvSha256:string; referenceCsvSha256:string; bcSource:'csv'; seeds:[number,number]; g1max:any; noBreeds:any; presentOnly:any; premium:{g1max:number;noBreeds:number;presentOnly:number}; evidence:ReturnType<typeof b4Evidence>; perSeed:{g1max:PremiumRow[];noBreeds:PremiumRow[]}; pass:boolean }
+/** D-HOP-52: hard pass = margin > median paired-path noise AND margin > one paired-bootstrap SD (+ Present-only).
+ *  >=2x noise is a recorded TARGET only (verdict may be 'PASS (below 2x target)'); decisionTargetPp=0.58 is recorded beside computed 2x.
+ *  Canonical bootstrap = shared mulberry32 helper (hashed seed). Reference equals candidate except CSV cap 0.28 vs 0.27. */
+export function k10(b:B,csv:string,csvSha256:string,g:Omit<B4Opts,'prof'>,opts:{referenceCsv:string;referenceCsvSha256:string}):K10Result {
+ if(g.seeds!==200||g.s0!==1||g.T!==12000)throw new Error('K10 cut evidence requires seeds 1-200, T=12000');
+ const s1=csvStreakCap(csv),s2=csvStreakCap(opts.referenceCsv);
+ if(s1!==0.27||s2!==0.28)throw new Error('K10 requires candidate/reference CSV caps 0.27/0.28');
+ const normalize=(text:string)=>text.trim().split(/\r?\n/).map((l,r,all)=>{const c=l.split(',');if(r)c[all[0].split(',').indexOf('tc_streak_cap')]='CAP';return c.join(',');}).join('\n');
+ if(normalize(csv)!==normalize(opts.referenceCsv))throw new Error('K10 reference differs beyond tc_streak_cap');
+ if(!hasBreedsCols(csv))throw new Error('K10 requires final bc_* columns, no defaults');
+ const cb=bcFromCsv(csv),G={...g,prof:'optimal'},a:PremiumRow[]=[],z:PremiumRow[]=[];
+ const g1max=b4Gate(b,b4Stack('g1F',s1,cb),'AssZhold_g1F',{...G,capturePremium:r=>a.push(r)},cb.env);
+ const noBreeds=b4Gate(b,b4Stack('nob',s2,cb),'AssZhold_nob',{...G,capturePremium:r=>z.push(r)},cb.env);
+ const presentOnly=b4Gate(b,b4Stack('presF',s2,cb),'AssZhold_presF',G,cb.env);
+ if(a.length!==200||z.length!==200)throw new Error('K10 incomplete F20-29 paired-seed evidence');
+ const evidence=b4Evidence(a,z),premium={g1max:g1max.premium['F20-29'][0],noBreeds:noBreeds.premium['F20-29'][0],presentOnly:presentOnly.premium['F20-29'][0]};
+ return {csvSha256,referenceCsvSha256:opts.referenceCsvSha256,bcSource:'csv',seeds:[g.s0,g.s0+g.seeds-1],g1max,noBreeds,presentOnly,premium,evidence,perSeed:{g1max:a,noBreeds:z},pass:evidence.pass&&premium.g1max<=premium.presentOnly};
 }
