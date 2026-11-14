@@ -709,3 +709,109 @@ nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);marg
 .farm-banner .fb-more{flex:none}
 .farm-banner .fb-act{flex:none;min-height:44px;min-width:44px;padding:0 12px;border:0;background:transparent;color:#fff;font:700 13px var(--f-display);text-decoration:underline;cursor:pointer}
 .farm-banner .fb-act:focus-visible{outline:3px solid #fff;outline-offset:-3px}
+
+/* ---- M5.1 Breeds PR-A: Flock entry + sheet (Art v0.2.7) ---- */
+.breeds-entry { height: 44px; min-height: 44px; padding: 0 16px 0 12px; gap: 8px; margin-right: 8px; display: inline-flex; align-items: center; flex: none; }
+.breeds-entry.icon-only { width: 44px; padding: 0; margin-right: 0; justify-content: center; }
+.breeds-entry.breeds-dot::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c-yolk, #F5C542); margin-left: 4px; }
+.breeds-entry.icon-only.breeds-dot::after { position: absolute; top: 6px; right: 6px; margin: 0; }
+.breeds-entry.breeds-glow { animation: breedsGlow 0.6s ease-in-out 2; }
+@keyframes breedsGlow { 50% { box-shadow: 0 0 0 3px rgba(245, 197, 66, 0.55); } }
+#panel-layer.breeds-open #p-upgrades { visibility: hidden; } /* phone: flock replaces upgrades visually */
+#panel-layer.breeds-open #breeds-sheet { display: flex; }
+#breeds-sheet { display: none; flex-direction: column; }
+#breeds-sheet:not([hidden]) { display: flex; }
+@media (min-width: 960px) and (orientation: landscape) {
+  #panel-layer.breeds-open #p-upgrades { visibility: visible; } /* docked: upgrades stay under overlay */
+  #panel-layer.breeds-open #breeds-sheet {
+    position: absolute; inset: 0; z-index: 5; background: var(--c-cream, #F3EDE4);
+  }
+  #panel-layer.breeds-open #p-market { visibility: hidden; }
+}
+.breeds-body { padding: 12px; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
+/* PR-A pre-bar fixes (HoQA breeds-pra-bd5b068a). Higher-specificity overrides kept here, not appended, so PR-B's tail
+   additions merge cleanly. BR-UI-06: Flock replaces Upgrades in place, but openPanel(null) drops #panel-layer.open, which
+   left the sheet at translateY(100%) (y = viewport height). breeds-open now carries the same open state for the layer. */
+#panel-layer.breeds-open { pointer-events: auto; }
+#panel-layer.breeds-open .scrim { opacity: 1; }
+#panel-layer.breeds-open #breeds-sheet { transform: none; }
+/* BR-UI-02: right-aligned in the header (8px before Close on phone, 16px inset docked); Art 100×44 = Fredoka 16, no .btn min-width. */
+#p-upgrades header .breeds-entry { margin-left: auto; min-width: 0; padding: 0 14px 0 12px; /* 99.95 wide with --bw 2 borders (Art rect 100; Art padding-right 16 measured 101.95 here) */ font: 700 var(--fs-base) var(--f-display); box-shadow: 0 3px 0 rgb(62 44 35 / .25); }
+#p-upgrades header .breeds-entry img { width: 22px; height: 22px; }
+/* UI-BR-2 dot: absolute 12px --c-barn top-right with a 2px white keyline, so it never widens the 100×44 button (BR-UI-02 rect). */
+#p-upgrades header .breeds-entry { position: relative; }
+#p-upgrades header .breeds-entry.breeds-dot::after { position: absolute; top: -4px; right: -4px; width: 12px; height: 12px; margin: 0; box-sizing: border-box; border: 2px solid var(--c-white, #fff); background: var(--c-barn); }
+/* BR-UI-03 / DB-1: locked placeholder = 2px dashed --c-slot-outline, plain text. */
+.breeds-slots .slot.locked { border: 2px dashed var(--c-slot-outline); background: transparent; text-align: center; font: 700 12px/16px var(--f-body); }
+.breeds-slots .slot.locked .slot-lock-ico { display: block; }
+/* BR-UI-17/34: the filled-slot control is .slot-main (button = visible text); Remove is a 44px sibling (§7). */
+.breeds-slots .slot.filled { display: flex; flex-direction: column; gap: 4px; }
+.breeds-slots .slot-main { display: block; width: 100%; min-height: 44px; margin: 0; padding: 0; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; border-radius: 8px; }
+.breeds-slots .slot-main:focus-visible { outline: 3px solid var(--c-focus); outline-offset: 2px; }
+.breeds-slots .slot-name, .breeds-slots .slot-meta { display: block; }
+.breeds-slots .slot .slot-remove { min-height: 44px; min-width: 44px; margin-top: auto; padding: 0 12px; font: 700 12px/16px var(--f-body); border: var(--bw) solid var(--c-outline); border-radius: var(--r-pill); background: var(--c-white); color: var(--c-text); }
+/* BR-UI-06: Active totals line (Art §2: 14px muted, applied values). */
+.breeds-body .breeds-totals { margin: 0; font: 400 14px/20px var(--f-body); color: var(--c-muted); }
+/* BR-UI-19: album 4 × 76px (phone) / 86px (docked), min height 100, 48px sprites. */
+.breeds-body .breeds-album { grid-template-columns: repeat(4, 76px); justify-content: start; }
+.breeds-album .album-cell { min-height: 100px; box-sizing: border-box; }
+.breeds-album .album-cell .breed-sil, .breeds-album .album-cell .breed-spr { width: 48px; height: 48px; }
+.breeds-album .album-cell.locked { border: 2px dashed var(--c-slot-outline); }
+/* BR-UI-13 (b): Flock complete = yolk label pill (.maxed), full card width. */
+.incu-card .hatch-complete { grid-column: 1 / -1; width: 100%; height: 48px; box-sizing: border-box; white-space: nowrap; }
+/* BR-UI-21: reveal = scrim + 320px card (Art §4), card colours/typography. */
+.breeds-reveal .reveal-card { width: 320px; max-width: calc(100vw - 40px); min-height: min(371px, calc(100vh - 40px)); box-sizing: border-box; padding: 20px; border-radius: var(--r-lg); border: var(--bw) solid var(--c-outline); background: var(--c-white); display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.breeds-reveal .reveal-card p { margin: 0; }
+.breeds-reveal .reveal-card .reveal-kicker, .breeds-reveal .reveal-card .reveal-place { font: 400 14px/20px var(--f-body); color: var(--c-muted); }
+.breeds-reveal .reveal-card .reveal-stage { width: 120px; height: 104px; display: grid; place-items: center; }
+.breeds-reveal .reveal-card .reveal-name { color: var(--c-text); font: 700 24px/1.2 var(--f-display); }
+.breeds-reveal .reveal-card .reveal-meta { font: 400 14px/20px var(--f-body); color: var(--c-text); }
+.breeds-reveal .reveal-card .reveal-stars { font-size: 20px; line-height: 24px; color: var(--c-muted); }
+.breeds-reveal .reveal-card .reveal-stars .on { color: var(--c-gold); }
+.breeds-reveal .reveal-card .reveal-trait { font: 700 14px/20px var(--f-body); color: var(--c-text); }
+.breeds-reveal .reveal-card .reveal-ok { width: 100%; min-width: 0; height: 48px; margin-top: 8px; }
+@media (min-width: 960px) and (orientation: landscape) {
+  /* BR-UI-07: overlay = the docked column (Art 880,56 400×744), not the viewport: #panel-layer is static docked. */
+  #panel-layer.breeds-open { position: relative; }
+  #panel-layer.breeds-open #breeds-sheet { inset: 0 0 0 calc(-1 * var(--bw)); border-top: 0; } /* Close at 1228,62 (Art §2) */
+  #breeds-sheet .breeds-close { display: grid; }
+  #p-upgrades header .breeds-entry.icon-only { margin-left: auto; }
+  .breeds-body .breeds-album { grid-template-columns: repeat(4, 86px); }
+}
+.incu-card { background: var(--c-white, #fff); border-radius: var(--r-md, 12px); padding: 12px; display: grid; grid-template-columns: 56px 1fr; gap: 8px 12px; align-items: center; }
+.incu-disc { width: 56px; height: 56px; border-radius: 50%; background: #F7F1E8; display: grid; place-items: center; position: relative; grid-row: span 2; }
+.incu-disc img { width: 40px; height: 40px; }
+.incu-meter { position: absolute; left: 6px; right: 6px; bottom: 6px; height: 12px; background: #CFC6BA; border-radius: 6px; overflow: hidden; }
+.incu-meter > i { display: block; height: 100%; background: var(--c-yolk, #F5C542); }
+.incu-title { font: 700 18px/1.2 Fredoka, system-ui, sans-serif; }
+.incu-status { font: 400 14px/1.3 Nunito, system-ui, sans-serif; color: var(--c-muted, #6B5D52); }
+.hatch-btn { grid-column: 1 / -1; height: 48px; width: 100%; white-space: nowrap; font: 700 18px/1 Fredoka, system-ui, sans-serif; }
+.hatch-btn[aria-disabled="true"] { opacity: 0.55; }
+.hatch-sub, .breeds-farmsoon { grid-column: 1 / -1; margin: 0; font: 700 12px/16px Nunito, system-ui, sans-serif; color: var(--c-wood-text, #3E2C23); }
+.breeds-farmsoon { color: var(--c-wood-text, #3E2C23); }
+.breeds-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.slot { min-height: 88px; border-radius: 12px; border: 1px solid var(--c-outline, #3E2C23); background: var(--c-white, #fff); padding: 8px; text-align: left; position: relative; }
+.slot.empty, .slot.locked { display: grid; place-items: center; color: var(--c-muted, #6B5D52); }
+.slot .breed-spr { width: 40px; height: 40px; }
+.settle-ring { position: absolute; right: 8px; top: 8px; width: 28px; height: 28px; border-radius: 50%; border: 3px solid #CFC6BA; border-top-color: #6BBF59; /* static — no infinite animation */ }
+.settle-lab { display: block; font: 700 12px/1.2 Nunito, system-ui, sans-serif; margin-top: 4px; }
+.breeds-album { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.album-cell { border-radius: 10px; border: 1px solid var(--c-outline, #3E2C23); background: var(--c-white, #fff); padding: 8px 4px; text-align: center; min-height: 72px; }
+.album-cell.locked { opacity: 0.9; }
+.album-cell .breed-sil, .album-cell .breed-spr { width: 36px; height: 36px; }
+.album-cell.picked { outline: 3px solid var(--c-focus, #4C8BF5); }
+.album-name { display: block; font: 700 11px/1.2 Nunito, system-ui, sans-serif; }
+.album-stars .star { opacity: 0.25; } .album-stars .star.on { opacity: 1; color: var(--c-yolk, #F5C542); }
+.breeds-reveal { position: fixed; inset: 0; z-index: 80; display: grid; place-content: center; gap: 12px; background: rgba(62, 44, 35, 0.45); animation: breedsReveal 400ms ease; }
+.breeds-reveal.rm { animation: breedsRevealRm 200ms ease; }
+@media (prefers-reduced-motion: reduce) {
+  .breeds-reveal:not(.rm) { animation: breedsRevealRm 200ms ease; }
+  .breeds-entry.breeds-glow { animation: none; outline: 4px solid var(--c-yolk-dark, #C9A227); } /* UI-BR-2 RM */
+}
+.breeds-reveal .reveal-spr { width: 96px; height: 96px; margin: 0 auto; }
+.breeds-reveal .reveal-name { text-align: center; font: 700 24px/1.2 Fredoka, system-ui, sans-serif; color: #fff; }
+@keyframes breedsReveal { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } } /* ≤400ms; crack→settled */
+@keyframes breedsRevealRm { from { opacity: 0; } to { opacity: 1; } } /* E16 / BR-AC32: opacity crossfade only, no transform */
+
+.slot-remove { margin-top: 4px; font: 700 11px/14px Nunito, system-ui, sans-serif; padding: 4px 8px; min-height: 28px; }
+.album-cell.picked { outline: 2px solid var(--c-yolk, #F5C542); outline-offset: 2px; }
