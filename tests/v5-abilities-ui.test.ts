@@ -162,8 +162,8 @@ function balAbilities(): Balance {
   return B({ abilities: 1 });
 }
 
-async function mountAbilitiesUi(over: Partial<GameState> = {}) {
-  let docked = false;
+async function mountAbilitiesUi(over: Partial<GameState> = {}, opts: { b?: Balance; docked?: boolean } = {}) {
+  let docked = opts.docked ?? false;
   const listeners: Array<() => void> = [];
   window.matchMedia = ((q: string) => ({
     get matches() { return q.includes('min-width:960px') && docked; },
@@ -175,7 +175,7 @@ async function mountAbilitiesUi(over: Partial<GameState> = {}) {
   vi.spyOn(document, 'hasFocus').mockReturnValue(true);
   // Keep rAF async-ish so sheetCloseComplete is not auto-stepped mid-assert.
   globalThis.requestAnimationFrame = ((cb: FrameRequestCallback) => setTimeout(() => cb(performance.now()), 0) as unknown as number) as any;
-  const b = balAbilities();
+  const b = opts.b ?? balAbilities();
   const kv = mem() as any; kv.removeItem = (k: string) => kv.m.delete(k);
   const base = {
     ...initialState(b),
@@ -297,5 +297,26 @@ describe('sheet close cancel edges [Architect O1/O2]', () => {
     expect(document.getElementById('p-upgrades')?.hidden).toBe(false);
     expect(document.getElementById('panel-layer')?.classList.contains('open')).toBe(true);
     expect(probe()).toBe(false); // open upgrades still freezes attendance
+  });
+});
+
+describe('A-F2 flags-0 release DOM: no Activate-all element [HoQA pr116-b4d5c09b]', () => {
+  const q = () => document.querySelectorAll(`[data-testid="${ACTIVATE_ALL_TESTID}"], .activate-all, [data-act="activateAll"], #actAllDesc`).length;
+  it('abilities=0 (shipped balance) docked desktop: never mounted, also across dock changes', async () => {
+    expect(balance.m4?.flags?.abilities).toBe(0);
+    const { ui, setDocked } = await mountAbilitiesUi({}, { b: balance, docked: true });
+    ui.render();
+    expect(q()).toBe(0);
+    setDocked(false); ui.render(); expect(q()).toBe(0);
+    setDocked(true); ui.render(); expect(q()).toBe(0);
+  });
+  it('abilities=1 docked: mounted visible in the Upgrades header; undocking removes it', async () => {
+    const { ui, setDocked } = await mountAbilitiesUi({}, { docked: true });
+    ui.render();
+    const btn = document.querySelector(`#p-upgrades header [data-testid="${ACTIVATE_ALL_TESTID}"]`) as HTMLButtonElement | null;
+    expect(btn).toBeTruthy();
+    expect(btn!.hidden).toBe(false);
+    setDocked(false); ui.render();
+    expect(document.querySelector(`#p-upgrades header [data-testid="${ACTIVATE_ALL_TESTID}"]`)).toBeNull();
   });
 });

@@ -228,12 +228,16 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
   placeFarmMA(); docked.addEventListener?.('change', placeFarmMA);
   // Activate-all (abilities #4b): docked header sits 8px right of Refill when visible (AB-UI-7 / AC-M5A-9b).
   const actAllBtn = h(`<button type="button" class="btn activate-all" data-testid="${ACTIVATE_ALL_TESTID}" data-act="activateAll" hidden></button>`);
+  // A-F2: mount only while shown (abilitiesUiOn && docked); with abilities=0 it never enters the DOM (flags-0 DOM = base).
   const placeActAll = () => {
-    if (docked.matches) {
+    if (docked.matches && !actAllBtn.hidden) {
       if (farmMA.parentElement !== upHeader) placeFarmMA();
       if (actAllBtn.parentElement !== upHeader) upHeader.insertBefore(actAllBtn, upHeader.querySelector('.close'));
       if (farmMA.nextElementSibling !== actAllBtn && !farmMA.hidden) upHeader.insertBefore(actAllBtn, farmMA.nextSibling);
-    } else if (actAllBtn.parentElement === upHeader) actAllBtn.remove();
+    } else if (actAllBtn.parentElement) {
+      if (actAllBtn.nextElementSibling?.id === 'actAllDesc') actAllBtn.nextElementSibling.remove();
+      actAllBtn.remove();
+    }
   };
   placeActAll(); docked.addEventListener?.('change', placeActAll);
   // O1: docked CSS nullifies .sheet transform — complete pending close so attendance cannot freeze forever.
@@ -849,8 +853,8 @@ export function mountApp(root: HTMLElement, g: Game, b: Balance, audio: Audio, v
     {
       const on = abilitiesUiOn(s, b) && docked.matches;
       setHidden(actAllBtn, !on);
+      placeActAll();
       if (on) {
-        placeActAll();
         const elig = activateAllEligibility(s, b, now());
         const st = activateAllState({ readyCount: elig.ready, nextCdS: elig.nextCdS, docked: true, refillVisible: farmMAShown && !farmMA.hidden });
         const next = activateAllHtml(st, A('icon-bolt.svg'));
