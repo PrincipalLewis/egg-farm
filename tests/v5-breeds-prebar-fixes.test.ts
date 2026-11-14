@@ -197,6 +197,13 @@ describe('BR-UI-06 Active totals row (body order Incubator → Slots → Active 
     const clamp = (f: string) => f === 'away' ? { rawBp: 5000, clampedBp: 3000, atCap: true } : undefined;
     expect(activeTotalsText(s, b, br as any, clamp as any)).toBe('Active: Lay +0% · Away +30% (max) · Nest +0%');
   });
+  it('clamp-bind: default clamp is the real sim view (F17 Present 975 raw → 700 "(max)"; F18 → 975, no max)', () => {
+    const b = breedsOn();
+    const br = { ...emptyBr(), owned: { ayam_cemani: { stars: 2 }, rhode_island_red: { stars: 2 } }, slots: ['ayam_cemani', 'rhode_island_red', null], settleMs: [0, 0, 0] };
+    const at = (F: number) => ({ ...initialState(b), farmLevel: F, breeds: br }) as any;
+    expect(activeTotalsText(at(17), b, br as any)).toBe('Active: Lay +7% (max) · Away +0% · Nest +0%');
+    expect(activeTotalsText(at(18), b, br as any)).toBe('Active: Lay +9.75% · Away +0% · Nest +0%');
+  });
 });
 
 describe('BR-UI-21 reveal card: kicker, placement, Esc/scrim close the card first, focus kept inside', () => {

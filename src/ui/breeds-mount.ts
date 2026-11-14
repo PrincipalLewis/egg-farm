@@ -235,7 +235,7 @@ export function mountFlock(opts: {
     const disc = br.incubator
       ? `${silhouetteImg('incu-sil')}<div class="incu-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.max(0, Math.min(100, Math.round(100 * (1 - br.incubator.remainingMs / (bc(b, 'hatch_time_s') * 1000)))))}"><i style="width:${Math.max(0, Math.min(100, 100 * (1 - br.incubator.remainingMs / (bc(b, 'hatch_time_s') * 1000))))}%"></i></div>`
       : `${silhouetteImg('incu-sil')}`;
-    const slots = [0, 1, 2].map(i => slotCardHtml(br, b, i, openN)).join('');
+    const slots = [0, 1, 2].map(i => slotCardHtml(s, br, b, i, openN)).join('');
     const album = BREED_IDS.map(id => albumCellHtml(br, id)).join('');
     const html = `
       <div class="incu-card">

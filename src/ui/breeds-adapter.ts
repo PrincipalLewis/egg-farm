@@ -13,6 +13,7 @@ import {
   eligible, hatchCostCents, hatchEstimate, slotTraitBp, type HatchEstimate,
 } from '../sim/breeds-hatch';
 import { isFlockComplete, on as breedsFlagAndKey, type BreedsSave } from '../sim/breeds';
+import { familyClamp as simFamilyClamp } from '../sim/breeds-family';
 import type { GameState } from '../sim/state';
 import { incomePerSec } from '../econ/income';
 
@@ -85,19 +86,16 @@ export const fmtRemainMs = (ms: number) => {
 /**
  * E8 Flock-sheet clamp view for a family (UI-facing).
  * Named `familyClampState` so it does not clash with Saves' sim `familyClamp(s,b,family)`.
- * HoE stub (2026-11-10): **undefined ⇒ no "max" label**.
- * Clamp-bind follow-up (`v5/breeds-ui-a-clamp-bind`) delegates to sim and returns
- * `{rawBp, clampedBp, atCap}`. UI shows "max" iff `rawBp > clampedBp`. PR-B uses this name.
+ * Delegates to sim (#126 / Saves c0). UI shows "max" iff rawBp > clampedBp. presentGateOpen stays stubbed.
  */
 export type FamilyClampState = { rawBp: number; clampedBp: number; atCap: boolean };
 
 export function familyClampState(
-  _family: Family,
-  _br?: BreedsSave,
-  _b?: Balance,
-  _farmLevel?: number,
+  family: Family,
+  s: GameState,
+  b: Balance,
 ): FamilyClampState | undefined {
-  return undefined;
+  return simFamilyClamp(s, b, family);
 }
 
 
