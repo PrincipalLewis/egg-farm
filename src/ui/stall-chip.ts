@@ -15,6 +15,8 @@ import { openShiftSheet } from './shift-sheet';
 /** The #5b release flag (m4.flags.salesStopped); app.ts mounts the chip only when this is true. */
 export const stallChipOn = (b: Balance) => flagOn(b, 'salesStopped');
 export const rc2RefillOn = (b: Balance) => flagOn(b, 'rc2Refill');
+/** #11 Rule 2 HUD cue: m4.flags.fatigueCue, which ships only paired with salesStopped (spec §6 release flags). */
+export const fatigueCueOn = (b: Balance) => flagOn(b, 'salesStopped') && flagOn(b, 'fatigueCue');
 export type ChipAction = 'refill' | 'sell_all' | 'collect' | 'manage';
 export type ChipIcon = 'zzz' | 'warning' | 'pause' | 'nest';
 export interface ChipCopy { text: string; verb: string; action: ChipAction; icon: ChipIcon; tone: 'tired' | 'danger'; desc: string; worker: WorkerId | null }

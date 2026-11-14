@@ -97,6 +97,11 @@ export function qaWriteCue(s: GameState, v: Pick<FatigueCueView, 'shown' | 'epis
 }
 
 export function qaResetAtRisk(): void { qaAtRisk = null; qaStall = null; qaCue = null; }
+/** QA/test-only overlay for workersAtRisk (compiled out of release). */
+export function qaSetAtRisk(v: Partial<Record<WorkerId, number>> | null): void {
+  qaAtRisk = v && Object.keys(v).length ? { ...v } : null;
+}
+
 
 type QaStallHandle = {
   reset(): void;

@@ -128,8 +128,9 @@ export function fitBanners(root: ParentNode) {
     if (t.clientWidth && t.scrollWidth > t.clientWidth + 0.5) t.textContent = short;
   });
 }
-export function workersHtml(s: GameState, b: Balance): string {
-  return manageAllHtml(s, b) + WORKERS.map(id => {
+/** `order`: #11 sub-line tap opens Workers sorted by costliest (fatigue-ux §1 L50); default = code order (flag off unchanged). */
+export function workersHtml(s: GameState, b: Balance, order: readonly WorkerId[] = WORKERS): string {
+  return manageAllHtml(s, b) + order.map(id => {
     const w = s.workers[id], m = mood(w, b), F = s.farmLevel;
     if (!w) {
       const locked = F < unlockFarm(id, b), cost = hireCostCents(id, b), can = !locked && s.coinsCents >= cost;
