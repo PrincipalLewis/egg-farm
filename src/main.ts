@@ -104,7 +104,16 @@ async function boot() {
     let preNewer3: number | null = null; try { preNewer3 = newerStoredVersion(localStorage, idbRaw); } catch { /* blocked */ }
     if (preNewer3 !== null) { lease.release(); lease.stop(); refuseNewer(preNewer3, idbRaw); return; }
   }
-  const g = new Game(balance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, idbCopy === 'failed' ? null : mirror, idbValue, { idbBoot, idbAbsentReason: idbReason, idbCopy });
+  // HoQA: ?qaBreeds=1 (QA/dev only, __IOS_FLAG__) boots with m4.flags.breeds=1 without changing committed balance.json.
+  // Marker get("qaBreeds") is rejected in release by scripts/check-release-build.mjs (same family as ?debug/?perf/?ios).
+  let bootBalance: typeof balance = balance;
+  if (IOS_FLAG_ENABLED) {
+    if (new URLSearchParams(location.search).get('qaBreeds') === '1') {
+      bootBalance = JSON.parse(JSON.stringify(balance));
+      bootBalance.m4 = { ...bootBalance.m4!, flags: { ...bootBalance.m4!.flags!, breeds: 1 } };
+    }
+  }
+  const g = new Game(bootBalance, localStorage, () => Date.now(), seedParam !== null ? (Number(seedParam) >>> 0) || 1 : undefined, VERSION, idbCopy === 'failed' ? null : mirror, idbValue, { idbBoot, idbAbsentReason: idbReason, idbCopy });
   if (g.newerSave !== null) { // race: a newer build saved during the hand-over. Refuse; Game is read-only and never wrote.
     lease.release(); lease.stop(); showNewerSaveDialog(asset, g.newerSave, () => location.reload()); return;
   }
