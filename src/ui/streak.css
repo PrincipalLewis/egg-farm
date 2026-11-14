@@ -1,0 +1,83 @@
+/* v5 streak meter, A2 tier pill, tapCoins +$ pop. art-ux/m5-combo-tiers.md v0.3 ed4ded1d §0-§5; product v1.3.3 b315dea1 §3.5,
+   R16, ST-AC26/26b (layout-spec v1.5 §3.3a "How the 24px is found"). Everything is scoped: .m5-streak is set on #app only while
+   m4.flags.streak is on, and the other selectors only match nodes that ui/streak-meter.ts adds, so flag off renders as before.
+   Existing tokens only. No looping animation anywhere (CT-AC3). */
+
+/* ST-AC26b: Collect 64 -> 48 px (Fredoka 18/700), the 24 px band = 4 px gap + 20 px row under it. */
+.m5-streak #collect.btn.xl{min-height:48px;height:48px;font-size:18px}
+.m5-streak .farm{padding-bottom:4px}
+@media (max-width:390px){.m5-streak .farm{padding-bottom:0}}
+
+/* §0 row: always reserved (visibility:hidden at s = 0, box kept), bar flex + 8 px gap + 80 px right-aligned label column. */
+.streak-row{display:flex;align-items:center;gap:8px;height:20px;margin-top:-4px;pointer-events:none;visibility:hidden;opacity:0;
+  transition:opacity 200ms cubic-bezier(.55,0,1,.45),visibility 0s linear 200ms}
+.streak-row.on{visibility:visible;opacity:1;transition:opacity 150ms cubic-bezier(.22,1,.36,1),visibility 0s}
+.streak-row.instant{transition:none}
+.streak-bar{position:relative;flex:1 1 auto;min-width:0;height:12px;box-sizing:border-box;border:2px solid var(--c-outline);border-radius:var(--r-pill);background:var(--c-cream)}
+.streak-fill{position:absolute;inset:0;transform-origin:left center;transform:scaleX(0);background:var(--c-meadow);border-radius:var(--r-pill);overflow:hidden;
+  transition:transform 120ms cubic-bezier(.22,1,.36,1)}
+.streak-row.cooling .streak-fill,.streak-row.rm .streak-fill{transition:none} /* draining tracks s every frame; RM: 1% steps */
+.streak-fill>i{position:absolute;inset:0;opacity:0}
+.streak-gold{background:var(--c-gold);transition:opacity 160ms cubic-bezier(.22,1,.36,1)}
+.streak-row.max .streak-gold{opacity:1}
+.streak-stripes{background:repeating-linear-gradient(45deg,var(--c-muted) 0 4px,var(--c-cream) 4px 8px);transition:opacity 200ms cubic-bezier(.22,1,.36,1)}
+.streak-row.cooling .streak-stripes{opacity:1}
+.streak-row.cooling .streak-gold{opacity:0;transition-duration:200ms}
+.streak-sheen{background:var(--c-cream)}
+.streak-sheen.go{animation:streakSheen 200ms cubic-bezier(.22,1,.36,1)}
+@keyframes streakSheen{50%{opacity:.5}to{opacity:0}}
+/* 2 px --c-text leading edge (the >= 3:1 boundary, §0) */
+.streak-edge{position:absolute;top:0;bottom:0;left:-2px;width:2px;background:var(--c-text)}
+.streak-row:not(.on) .streak-edge{display:none}
+/* Ticks at k/n of the track. Unlit: 2x8 --c-muted line. Lit: 4x16 --c-text tab, 1 px cream keyline, 2 px past the outer edge. */
+.streak-tick{position:absolute;top:50%;width:2px;height:8px;background:var(--c-muted);transform:translate(-100%,-50%)}
+.streak-tick.lit{width:4px;height:16px;background:var(--c-text);box-shadow:0 0 0 1px var(--c-cream);border-radius:1px}
+.streak-tick.lit.streak-up{animation:streakTab 240ms cubic-bezier(.34,1.56,.64,1)}
+@keyframes streakTab{0%{transform:translate(-100%,-50%) scaleY(.4)}60%{transform:translate(-100%,-50%) scaleY(1.25)}to{transform:translate(-100%,-50%) scaleY(1)}}
+.streak-label{flex:0 0 80px;width:80px;text-align:right;white-space:nowrap;font:700 14px var(--f-body);font-variant-numeric:tabular-nums;color:var(--c-text)}
+.streak-label.pop{animation:streakNum 120ms cubic-bezier(.34,1.56,.64,1)}
+@keyframes streakNum{50%{transform:scale(1.1)}}
+
+/* §2 tier pill: Fredoka 18/700, 4x12 padding, 2 px outline, pips 4 x 8 px, white (tiers 1-3) or gold (MAX). Motion <= 400 ms,
+   still 200-600 ms, opacity exit done at 900 ms. */
+.streak-pill{position:absolute;display:flex;align-items:center;gap:8px;padding:4px 12px;border:2px solid var(--c-outline);border-radius:var(--r-pill);
+  background:var(--c-white);color:var(--c-text);font:700 18px var(--f-display);white-space:nowrap;pointer-events:none;
+  animation:streakPill 900ms linear forwards}
+.streak-pill.max{background:var(--c-gold)}
+.streak-pill .pips{display:flex;gap:4px}
+.streak-pill .pips i{width:8px;height:8px;box-sizing:border-box;border-radius:50%;border:1.5px solid var(--c-muted)}
+.streak-pill .pips i.on{background:var(--c-text);border-color:var(--c-text)}
+@keyframes streakPill{
+  0%{transform:translateY(8px) scale(.6);opacity:1;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+  13.33%{transform:translateY(3px) scale(1);opacity:1;animation-timing-function:cubic-bezier(.22,1,.36,1)}
+  22.22%{transform:none;opacity:1}
+  66.67%{transform:none;opacity:1;animation-timing-function:cubic-bezier(.55,0,1,.45)}
+  to{transform:none;opacity:0}}
+.streak-pill.rm{animation-name:streakPillRm}
+@keyframes streakPillRm{0%{opacity:0}16.67%{opacity:1}77.78%{opacity:1}to{opacity:0}}
+.streak-spark{position:absolute;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:var(--c-gold);animation:streakSpark 260ms cubic-bezier(.22,1,.36,1) forwards}
+@keyframes streakSpark{53.8%{opacity:1}to{transform:translate(var(--dx),var(--dy));opacity:0}}
+
+/* R16 coin pop: Fredoka 700 18 px tabular, 2 px #3E2C23 stroke, Coin Gold fill, 16 px icon-coin left. Scale .6 -> 1.1 -> 1 over
+   0-120 ms, hold to 500 ms, fade 500-800 ms, rise 32 px. Same size/glow at every tier (ST-AC17 Tiers). */
+.coin-pop{position:absolute;display:flex;align-items:center;gap:4px;font:700 18px var(--f-display);font-variant-numeric:tabular-nums;
+  color:var(--c-gold);-webkit-text-stroke:2px var(--c-text);paint-order:stroke fill;white-space:nowrap;pointer-events:none;
+  animation:coinPop 800ms linear forwards}
+.coin-pop img{width:16px;height:16px}
+@keyframes coinPop{
+  0%{transform:translateY(0) scale(.6);animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+  15%{transform:translateY(-5px) scale(1)}
+  62.5%{transform:translateY(-20px) scale(1);opacity:1}
+  to{transform:translateY(-32px) scale(1);opacity:0}}
+.coin-pop.rm{animation-name:coinPopRm}
+@keyframes coinPopRm{62.5%{opacity:1}to{opacity:0}}
+
+/* Reduced motion (OS or in-game toggle): opacity only (§5). */
+@media (prefers-reduced-motion:reduce){
+  .streak-tick.lit.streak-up,.streak-label.pop,.streak-sheen.go{animation:none}.streak-fill{transition:none}
+  .streak-pill{animation-name:streakPillRm}.coin-pop{animation-name:coinPopRm}.streak-spark{display:none}}
+.reduced-motion .streak-tick.lit.streak-up,.reduced-motion .streak-label.pop,.reduced-motion .streak-sheen.go{animation:none}
+.reduced-motion .streak-fill{transition:none}.reduced-motion .streak-spark{display:none}
+.streak-row.rm .streak-tick.lit.streak-up{animation:streakFadeIn 150ms linear}
+@keyframes streakFadeIn{from{opacity:0}}
+
