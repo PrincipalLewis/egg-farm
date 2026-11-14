@@ -8,7 +8,7 @@ import { WORKERS } from '../sim/workers';
 import type { StallSession } from '../econ/stall';
 import {
   stallView as realStallView,
-  fatigueCueView,
+  fatigueCueView as realFatigueCueView,
   setUiGates,
   resetStallTimers,
   noteStallChipTap,
@@ -20,13 +20,16 @@ import {
   fatigueShare,
 } from '../econ/income';
 import type { StallView, FatigueCueView } from '../econ/income';
+import { flagOn } from '../config/flags';
 import { IOS_FLAG_ENABLED } from './ios-tip';
 
 export type { StallCause, StallResolvedBy, StallView, FatigueCueView, FatigueSurface, UiGates } from '../econ/income';
-export { fatigueCueView, setUiGates, resetStallTimers, noteStallChipTap, noteFatigueCueShown, noteFatigueCueTap, fatigueShare };
+export { setUiGates, resetStallTimers, noteStallChipTap, noteFatigueCueShown, noteFatigueCueTap, fatigueShare };
 
-/** QA-only at-risk override (compiled out of release with __IOS_FLAG__). Used by 3-engine shots for worst-case $999.9K/s strings. */
+/** QA-only overlays (compiled out of release with __IOS_FLAG__). Shots plant views here so a live stallTick cannot clear them. */
 let qaAtRisk: Partial<Record<WorkerId, number>> | null = null;
+let qaStall: StallView | null = null;
+let qaCue: FatigueCueView | null = null;
 
 export function workerAtRisk(id: WorkerId, s: GameState, b: Balance): number {
   if (IOS_FLAG_ENABLED && qaAtRisk && qaAtRisk[id] != null) return Math.max(0, qaAtRisk[id]!);
@@ -48,7 +51,16 @@ export function costliestAtRisk(s: GameState, b: Balance): WorkerId | null {
   }
   return realCostliestAtRisk(s, b);
 }
-export function stallView(s: GameState, b: Balance): Readonly<StallView> { return realStallView(s, b); }
+export function stallView(s: GameState, b: Balance): Readonly<StallView> {
+  if (IOS_FLAG_ENABLED && qaStall && flagOn(b, 'salesStopped')) return qaStall;
+  return realStallView(s, b);
+}
+export function fatigueCueView(s: GameState, b: Balance): Readonly<FatigueCueView> {
+  if (IOS_FLAG_ENABLED && qaCue && flagOn(b, 'salesStopped')) {
+    return { ...qaCue, suppressedByStall: qaCue.suppressedByStall || stallView(s, b).shown };
+  }
+  return realFatigueCueView(s, b);
+}
 
 /** Fixture/QA: a never-saved StallSession with safe defaults, then `p` on top. */
 export function emptyStallSession(p: Partial<StallSession> = {}): StallSession {
@@ -84,7 +96,7 @@ export function qaWriteCue(s: GameState, v: Pick<FatigueCueView, 'shown' | 'epis
     snap: { ...ss.snap, loss_share: v.share } };
 }
 
-export function qaResetAtRisk(): void { qaAtRisk = null; }
+export function qaResetAtRisk(): void { qaAtRisk = null; qaStall = null; qaCue = null; }
 
 type QaStallHandle = {
   reset(): void;
@@ -96,12 +108,12 @@ type QaStallHandle = {
 if (IOS_FLAG_ENABLED && typeof window !== 'undefined') {
   const state = (): GameState | undefined => (window as unknown as { eggfarm?: { state: GameState } }).eggfarm?.state;
   (window as unknown as { eggfarmQaStall: QaStallHandle }).eggfarmQaStall = {
-    reset() { qaAtRisk = null; const s = state(); if (s) s.stallSession = emptyStallSession(); },
+    reset() { qaAtRisk = null; qaStall = null; qaCue = null; const s = state(); if (s) s.stallSession = emptyStallSession(); },
     get atRisk() { return qaAtRisk ?? {}; },
     set atRisk(v) { qaAtRisk = { ...(v ?? {}) }; },
     get stall() { const s = state(); return s ? { ...emptyStallSession(s.stallSession ?? {}), shown: !!s.stallSession?.shown } as StallView : null; },
-    set stall(v) { const s = state(); if (s) qaWriteStall(s, v); },
+    set stall(v) { qaStall = v && v.shown ? v : null; const s = state(); if (s) qaWriteStall(s, v); },
     get cue() { const s = state(); return s ? fatigueCueView(s, (window as unknown as { eggfarm?: { balance: Balance } }).eggfarm?.balance as Balance) : null; },
-    set cue(v) { const s = state(); if (s) qaWriteCue(s, v); },
+    set cue(v) { qaCue = v && v.shown ? { ...v, suppressedByStall: v.suppressedByStall ?? false } : null; const s = state(); if (s) qaWriteCue(s, v); },
   };
 }
