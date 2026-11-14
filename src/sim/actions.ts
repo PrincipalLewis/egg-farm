@@ -1,28 +1,49 @@
+import { resetClockWageWindow } from './clock-wage';
 import type { Balance } from '../config/balance';
+import { startHatch, placeBreed } from './breeds-hatch';
 import { GameState, eggsPerTap, collectionCost, farmCost } from './state';
 import { m4On } from '../config/formulas';
 import { Track, salePriceCents, trackLock, trackCost, trackLevel, reachedMilestones } from './tracks';
 import type { Sink } from './events';
 import { saleValueCents } from './payout';
+import { creditTap, streakSaleFactor, addStreakExtra } from './streak';
+import { breedsNoteCreditedTap } from './breeds-traits';
+import { playerSaleCtx } from './effects';
+import { incomeRefOn, recordSale } from './income-ref';
+import { tapCoinsOn, tapCoinsFor } from './tap-coins';
+import { spawnGolden, tapGolden, frenzySale } from './golden';
+import { broodySlots, tapBroody } from './broody';
+import { stallObserve } from '../econ/stall';
 import { WorkerId, hireCostCents, unlockFarm, graderTierCostCents, showManageAll, needManage, canManageWorker } from './workers';
+import { rc2RefillOn } from './refill';
+import { isPaused, resumeWorker } from './pause';
 export type Action =
   | { type: 'collect' } | { type: 'sell'; customerId: number } | { type: 'sellAll' }
   | { type: 'buyCollection' } | { type: 'buyFarm' } | { type: 'collectOffline' } | { type: 'dismissOffline' } | { type: 'markCelebrated'; tier: number }
+  | { type: 'hatch' } | { type: 'placeBreed'; slot: number; id: string | null } // M5.1 breeds (no-op unless m4.flags.breeds)
   | { type: 'hire'; worker: WorkerId } | { type: 'manage'; worker: WorkerId } | { type: 'manageAll' } | { type: 'buyGraderTier' }
-  | { type: 'buyTrack'; track: Track } | { type: 'markMilestones'; ids: string[] };
+  | { type: 'buyTrack'; track: Track } | { type: 'markMilestones'; ids: string[] }
+  | { type: 'spawnGolden'; spots: readonly string[]; layout?: boolean } | { type: 'tapGolden' } // v5 #1 golden (no-op unless m4.flags.golden)
+  | { type: 'broodySlots'; slots: readonly number[] } | { type: 'tapBroody'; slots: readonly number[] }; // v5 #5 Broody (no-op unless m4.flags.broody)
 /** Sell all preview lives in sim/payout.ts (the one payout fn, #25; M4 sale price via salePriceCents); re-exported for #28 callers. */
 export { sellAllPreview } from './payout';
 export const isUpgrade = (a: Action) => a.type === 'buyCollection' || a.type === 'buyFarm' || a.type === 'buyTrack';
 /** Sells k=min(basket, remaining) at the price at sale time (current Farm + Collection level). Removed only when filled. Unknown id => no-op (MK-11). */
-export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'player' | 'market_hand' = 'player'): GameState {
+/** v5 F1c: `suspended` = the sale happens on a tick without focus (worker sales under a menu/hide): timed effects count as 1. */
+export function sellTo(s: GameState, id: number, b: Balance, ev?: Sink, by: 'player' | 'market_hand' = 'player', suspended = false): GameState {
   const c = s.customers.find(c => c.id === id); if (!c) return s;
   const k = Math.min(Math.floor(s.basket), c.demand - c.filled); if (k <= 0) return s;
   // One payout function (sim/payout.ts) for credit and every UI preview.
-  const price = salePriceCents(s, b), value = saleValueCents(s, k, b), filled = c.filled + k, done = filled >= c.demand;
+  const ctx = by === 'player' ? playerSaleCtx(!suspended) : suspended ? { by, suspended } : { by };
+  const price = salePriceCents(s, b), value = saleValueCents(s, k, b, ctx), filled = c.filled + k, done = filled >= c.demand;
   ev?.push({ type: 'sell', id, k, N: c.demand, price, value, by });
   if (done) ev?.push({ type: 'customer_served', id, N: c.demand, partial: c.filled > 0 });
   const customers = done ? s.customers.filter(x => x.id !== id) : s.customers.map(x => x.id === id ? { ...x, filled } : x);
-  return { ...s, basket: s.basket - k, coinsCents: s.coinsCents + value, customers };
+  const o0 = { ...s, basket: s.basket - k, coinsCents: s.coinsCents + value, customers };
+  // #3 I_ref (§4.1): the BASE value (price chain x Grader, every timed effect suspended) enters the ring; identity when off.
+  const o1 = incomeRefOn(b) ? recordSale(o0, saleValueCents(s, k, b, { by, suspended: true }), b) : o0;
+  const o = frenzySale(o1, s, k, value, ctx, b); // #1 frenzy_ended stats (identity unless golden and a live Frenzy)
+  return streakSaleFactor(s, b, suspended) === 1 ? o : addStreakExtra(o, value - saleValueCents({ ...s, streakS: 0 }, k, b, ctx)); // #2 extra_coins
 }
 function buy(s: GameState, kind: 'collection' | 'farm', b: Balance, ev?: Sink): GameState {
   const L = kind === 'collection' ? s.collectionLevel : s.farmLevel; if (L >= b.maxLevel) return s;
@@ -50,14 +71,36 @@ function withMilestones(before: GameState, after: GameState, b: Balance, ev?: Si
   }
   return after;
 }
-export function apply(s: GameState, a: Action, b: Balance, ev?: Sink): GameState {
+/** v5 F1c, Q-F1c-1 ruled D-HOP-2026-10-29-06: the Market sheet is a play surface. A player sale is suspended (no Frenzy/streak)
+ *  ONLY when the tick's attended probe is false; Game.dispatch passes `attended` from the same probe frame() uses. The UI never
+ *  passes suspended for the sheet. Default true keeps every existing caller (tests, bots, verify) unchanged. */
+/** Risk-helpers: apply() lets the stall machine see this action's sells / collects (econ/stall.ts stallObserve). Identity
+ *  while there is no stall session (salesStopped off), so flag-off is byte-identical. */
+export function apply(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true): GameState {
+  const ev0 = ev ? ev.length : 0, r = apply0(s, a, b, ev, attended);
+  return r.stallSession ? stallObserve(r, ev, ev0) : r;
+}
+function apply0(s: GameState, a: Action, b: Balance, ev?: Sink, attended = true): GameState {
   switch (a.type) {
-    case 'collect': { const n = Math.min(Math.floor(s.coop), eggsPerTap(s.collectionLevel, b)); ev?.push({ type: 'collect', eggs: n }); return { ...s, coop: s.coop - n, basket: s.basket + n }; }
-    case 'sell': return sellTo(s, a.customerId, b, ev);
-    case 'sellAll': { let r = s; for (const c of s.customers) { if (r.basket < 1) break; r = sellTo(r, c.id, b, ev); } return r; }
+    case 'collect': { // v5 #2/#3: the only credited-tap source (R3); `credited` only while streak or tapCoins is on
+      const n = Math.min(Math.floor(s.coop), eggsPerTap(s.collectionLevel, b)), c = creditTap(s, b);
+      // #3 A1 (R14/R15): a credited tap under tapCoins pays floor((refCents x tapBp + 5000) / 10000) to coins (0 allowed, R15)
+      const bonus = c.credited && tapCoinsOn(b) ? tapCoinsFor(s, b) : undefined;
+      ev?.push(c.credited === undefined ? { type: 'collect', eggs: n } : bonus === undefined ? { type: 'collect', eggs: n, credited: c.credited }
+        : { type: 'collect', eggs: n, credited: c.credited, bonus_cents: bonus });
+      if (c.started) ev?.push({ type: 'streak_started', farm_level: s.farmLevel, collection_level: s.collectionLevel });
+      const afterTap = breedsNoteCreditedTap(c.s, b, c.credited);
+      return { ...afterTap, coop: s.coop - n, basket: s.basket + n, ...(bonus ? { coinsCents: afterTap.coinsCents + bonus } : {}) };
+    }
+    case 'sell': return sellTo(s, a.customerId, b, ev, 'player', !attended);
+    case 'sellAll': { let r = s; for (const c of s.customers) { if (r.basket < 1) break; r = sellTo(r, c.id, b, ev, 'player', !attended); } return r; }
     case 'buyCollection': return buy(s, 'collection', b, ev);
     case 'buyFarm': return withMilestones(s, buy(s, 'farm', b, ev), b, ev);
     case 'buyTrack': return withMilestones(s, buyTrack(s, a.track, b, ev), b, ev);
+    case 'spawnGolden': return spawnGolden(s, a.spots, b, ev, a.layout === true); // #1 R14/R15: the UI's live valid spot ids
+    case 'tapGolden': return tapGolden(s, b, ev); // #1 R19/R20 (not a credited tap, R25b)
+    case 'broodySlots': return broodySlots(s, a.slots, b, ev); // #5 R4-R6: the UI's eligible drawn yard slots
+    case 'tapBroody': return tapBroody(s, a.slots, b, ev, attended); // #5 R12/R13 (not a credited tap; refused unattended)
     case 'markMilestones': { const add = a.ids.filter(id => !s.celebratedMilestones.includes(id)); return add.length ? { ...s, celebratedMilestones: [...s.celebratedMilestones, ...add] } : s; }
     case 'hire': {
       const id = a.worker; if (s.workers[id] || s.farmLevel < unlockFarm(id, b)) return s;
@@ -73,11 +116,17 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink): GameState
       return { ...s, coinsCents: s.coinsCents - cost, graderTier: i + 1 }; // energy unchanged (PM Q6)
     }
     case 'manage': {
+      if (rc2RefillOn(b)) return s; // G0 OPEN-6 / AC-RF10: no-op at rc2Refill=1 (one entry point)
       const w = s.workers[a.worker]; if (!w || s.manageCdS > 1e-9 || !canManageWorker(w, b)) return s; // P4: only at <= 40%
       ev?.push({ type: 'worker_manage', worker: a.worker, energyBefore: Math.round(w.energy) });
-      return { ...s, workers: { ...s.workers, [a.worker]: { ...w, energy: 100 } }, manageCdS: b.workers.energy.manage_cooldown_s };
+      const r = { ...s, workers: { ...s.workers, [a.worker]: { ...w, energy: 100 } }, manageCdS: b.workers.energy.manage_cooldown_s };
+      // Pause rule 8 / AC-P12 (PAU-AC8, audit D1): Manage on a paused worker also ends the pause, through the one Resume path
+      // (Market Hand B5 lockout included). isPaused is false with m4.flags.pause off, so flag-off stays byte-identical (E13).
+      return isPaused(w, b) ? resumeWorker(r, a.worker, b, ev, 'manage') : r; // emits worker_resumed{cause:"manage"}
     }
     case 'manageAll': { // v1.1 + P4: 3+ hired; refills only hired workers <= manage_prompt_threshold (Unpaid stays Unpaid, ruling 2); one shared cooldown.
+      if (rc2RefillOn(b)) return s; // G0 OPEN-6 / AC-RF10: no-op at rc2Refill=1
+      // Pause rule 8 (D1): needManage skips paused workers, so Manage all never refills or resumes them.
       const need = needManage(s.workers, b); // ruling 4: nothing below 100% -> disabled, no cooldown started
       if (!showManageAll(s.workers, b) || s.manageCdS > 1e-9 || !need.length) return s;
       const workers = { ...s.workers };
@@ -85,10 +134,12 @@ export function apply(s: GameState, a: Action, b: Balance, ev?: Sink): GameState
       ev?.push({ type: 'worker_manage_all', workers: need, energyBefore: need.map(id => Math.round(s.workers[id]!.energy)) });
       return { ...s, workers, manageCdS: b.workers.energy.manage_cooldown_s };
     }
+    case 'hatch': return startHatch(s, b, ev); // §8 hatch_started (drift row 34)
+    case 'placeBreed': return placeBreed(s, b, a.slot, a.id); // §8 breed_slotted: opens a 1,000 ms window; the tick sink emits it on close
     case 'markCelebrated': return { ...s, celebratedTier: Math.max(s.celebratedTier, a.tier) };
     // Closing the welcome-back modal without tapping Collect still grants the eggs.
     // S2-3a / MK-22: closing the welcome-back modal brings the first customer on the next tick (deterministic: timer -> 0).
-    case 'collectOffline': case 'dismissOffline': return { ...s, basket: s.basket + s.pendingOfflineEggs, pendingOfflineEggs: 0,
+    case 'collectOffline': case 'dismissOffline': return { ...resetClockWageWindow(s, b), basket: s.basket + s.pendingOfflineEggs, pendingOfflineEggs: 0, // AC-FC12: the welcome-back window restarts at modal close (identity with clockWage off)
       nextCustomerInS: s.pendingOfflineEggs > 0 ? Math.min(s.nextCustomerInS, 0) : s.nextCustomerInS };
   }
 }

@@ -58,7 +58,7 @@ describe('M3-AC7 install_id + build', () => {
     resetProgress(s);
     expect(s.getItem(SAVE_KEY)).toBeNull();
     expect(s.getItem(TELEMETRY_KEY)).not.toBeNull();
-    const ev = JSON.parse(s.getItem(TELEMETRY_KEY)!);
+    const ev = JSON.parse(s.getItem(TELEMETRY_KEY)!).events;
     expect(ev.some((e: any) => e.type === 'upgrade')).toBe(true);
     expect(ev.some((e: any) => e.type === 'save_reset')).toBe(true);
     expect(isPinned('save_reset')).toBe(true);

@@ -17,9 +17,10 @@ const egg = { ageS: 12, slotId: 'S3', intervalS: 150 };
 
 describe('F2 flags (D-C1): m4.flags.<item> === 1 and m4.enabled', () => {
   it('shipping balance has no m4.flags: every M5 flag off; SAVE_VERSION stays 6', () => {
-    expect(b.m4!.flags).toBeUndefined(); for (const k of ['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'] as const) expect(m5Flag(b, k)).toBe(false);
+    // F3 merge: shipping balance now carries the m4.flags block (F3), every flag 0 (was: no block at all)
+    expect(b.m4!.flags).toEqual(Object.fromEntries(M5_FLAGS.map(f => [f, 0]))); for (const k of ['golden', 'streak', 'tapCoins', 'broody', 'abilities', 'pause'] as const) expect(m5Flag(b, k)).toBe(false);
     expect(m5Flag({ ...ON, m4: { ...ON.m4!, enabled: 0 } }, 'golden')).toBe(false); expect(m5Flag(only('golden'), 'golden')).toBe(true);
-    expect(m5Flag({ ...b, m4: { ...b.m4!, flags: { golden: true as any } } }, 'golden')).toBe(false); expect(SAVE_VERSION).toBe(6);
+    expect(m5Flag({ ...b, m4: { ...b.m4!, flags: { ...b.m4!.flags, golden: true as any } } }, 'golden')).toBe(false); expect(SAVE_VERSION).toBe(6);
   });
   it('[CCR-77-N1][D-C1] m5Flag is config/flags flagOn for every M5_FLAGS name (one flag type, one rule)', () => {
     for (const f of M5_FLAGS) for (const en of [0, 1]) for (const v of [0, 1, 2]) {
@@ -77,9 +78,9 @@ describe('F2 persist (save shape)', () => {
     const p: any = m5Persist(s); for (const k of M5_SESSION_KEYS) { expect(k in p).toBe(false); expect(s[k]).toBe(1); }
     expect(p.abilities).toEqual({ market_hand: { readyAt: NOW + 42_500, activeS: 7 } }); expect(JSON.parse(serialize(s, NOW)).state).toEqual(p);
   });
-  it('[CCR-77-m1][D-C4] the strip list IS F1a M5_SESSION_FIELDS, pinned to the 8 spec keys; each one is dropped by persist and serialize', () => {
+  it('[CCR-77-m1][D-C4] the strip list IS F1a M5_SESSION_FIELDS, pinned to the 14 keys (8 spec + 2 v5 asleep-clock keys, Architect ruling 4, Hire 2 + pausedForS, pause v1.3.16 471fb534 / QA-D-1110-PAUDUR + stallSession, sales-stopped §7.5 session-only, Saves risk-helpers; + refillAgoMs, refillSession); each one is dropped by persist and serialize', () => {
     expect(M5_SESSION_KEYS).toBe(M5_SESSION_FIELDS);
-    expect([...M5_SESSION_FIELDS].sort()).toEqual(['brRngState', 'broodyNestScaled', 'goldenEgg', 'irefRingCents', 'refWarmS', 'streakHoldS', 'streakS', 'tapCreditCdS']);
+    expect([...M5_SESSION_FIELDS].sort()).toEqual(['asleepPaidCents', 'asleepSessionMs', 'brRngState', 'broodyNestScaled', 'goldenEgg', 'irefRingCents', 'pausedForS', 'refWarmS', 'refillAgoMs', 'refillSession', 'stallSession', 'streakHoldS', 'streakS', 'tapCreditCdS']);
     for (const k of M5_SESSION_FIELDS) {
       const s: any = { ...M5(), [k]: 1 };
       expect(k in m5Persist(s)).toBe(false); expect(k in JSON.parse(serialize(s, NOW)).state).toBe(false);
@@ -93,7 +94,9 @@ describe('F2 settle: a gap of 60 s or more (§9.1 / §9.1a)', () => {
     const ev: SimEvent[] = [], s: any = m5Offline(live(), ON, ev), [x, u] = nextRand(99);
     expect(ev).toEqual([
       { type: 'ability_ended', worker: 'market_hand', cause: 'offline', effect_s: tc.ability_s - 10 },
-      { type: 'collectible_expired', skin: 'golden_egg', reason: 'offline', farm_level: 12 }]);
+      { type: 'collectible_expired', skin: 'golden_egg', reason: 'offline', farm_level: 12 },
+      // #2 streak R11: the run ends with streak_peak{reason:"offline"} (no run stats in this fixture; 0.28 = T_4 = cap of record 0.28)
+      { type: 'streak_peak', value: 0.28, duration_s: 0, credited_taps: 0, time_at_cap_s: 0, extra_coins: 0, frenzy_overlap_s: 0, reason: 'offline', max_tier: 4 }]);
     expect(s.abilities).toEqual({ market_hand: { readyAt: NOW + 200_000 }, coop_hand: { readyAt: NOW + 50_000 } });
     expect('goldenEgg' in s).toBe(false); expect(s.evRngState).toBe(x); expect(s.nextSpawnRemainingS).toBe(tc.egg_gap_min_s + u * (tc.egg_gap_max_s - tc.egg_gap_min_s));
     expect(s).toMatchObject({ frenzyRemainingS: 11, broodyNestCents: 700, broodyHenIdx: 2, broodyNestScaled: 7_000_123, streakS: 0, streakHoldS: 0, rng: base().rng });
@@ -104,6 +107,60 @@ describe('F2 settle: a gap of 60 s or more (§9.1 / §9.1a)', () => {
   it('D-C2: drawGap with no evRngState seeds mixSeed(state.rng ^ 0x6576526E) once and never touches state.rng', () => {
     const s0 = base(); const e = ensureEvRng(s0); expect(e.evRngState).toBe(mixSeed((s0.rng ^ EV_RNG_SALT) >>> 0)); expect(ensureEvRng(e)).toBe(e);
     const g = drawGap(s0, ON); expect(g.rng).toBe(s0.rng); expect(g.evRngState).toBe(nextRand(e.evRngState!)[0]);
+  });
+});
+describe('[D-HOE-41] endCalls / m5Load: AbilityState.durS is the granted length (offline end)', () => {
+  const load = (s: any, bb = ON, now = NOW) => { const ev: SimEvent[] = []; return { s: m5Load(s, bb, now, ev) as any, ev }; };
+  const comboBal = (combo: number) => ({ ...ON, m4: { ...ON.m4!, tc: { ...ON.m4!.tc!, combo_boost_duration_s: combo } } }) as typeof ON;
+  const call = (activeS: number, durS?: number) => ({ readyAt: NOW + 8_000, activeS, ...(durS === undefined ? {} : { durS }) });
+
+  it('[D-HOE-41][AC] legacy save without durS: effect_s = tc_ability_s - activeS; no leftover durS', () => {
+    const raw = { ...base(), abilities: { hawker: call(12) } };
+    const { s, ev } = load(raw);
+    expect(ev).toEqual([{ type: 'ability_ended', worker: 'hawker', cause: 'offline', effect_s: tc.ability_s - 12 }]);
+    expect(s.abilities.hawker).toEqual({ readyAt: NOW + 8_000 });
+    expect('durS' in s.abilities.hawker).toBe(false);
+    expect('activeS' in s.abilities.hawker).toBe(false);
+    expect(raw.abilities.hawker).toEqual({ readyAt: NOW + 8_000, activeS: 12 }); // input not mutated; call does not resume
+    // invalid durS (0, negative, non-finite, non-number) keeps today's tc_ability_s effect and is stripped
+    for (const durS of [0, -4, Number.NaN, '45']) {
+      const x = load({ ...base(), abilities: { grader: { readyAt: NOW, activeS: 12, durS } } });
+      expect(x.ev).toEqual([{ type: 'ability_ended', worker: 'grader', cause: 'offline', effect_s: tc.ability_s - 12 }]);
+      expect(x.s.abilities.grader).toEqual({ readyAt: NOW });
+    }
+    // a leftover durS with no running call is stripped too (no event, readyAt kept)
+    const idle = load({ ...base(), abilities: { hawker: { readyAt: NOW, durS: 45, activeS: 0 } } });
+    expect(idle.ev).toEqual([]); expect(idle.s.abilities.hawker).toEqual({ readyAt: NOW });
+  });
+
+  it('[D-HOE-41][AC] durS=45, activeS=40: effect_s≈5; both cleared (load and offline; with or without the combo key)', () => {
+    const ended = (worker: string) => [{ type: 'ability_ended', worker, cause: 'offline', effect_s: expect.closeTo(5) }];
+    for (const bb of [ON, comboBal(45)]) {
+      const { s, ev } = load({ ...base(), abilities: { coop_hand: call(40, 45) } }, bb);
+      expect(ev).toEqual(ended('coop_hand'));
+      expect(s.abilities.coop_hand).toEqual({ readyAt: NOW + 8_000 });
+      const oev: SimEvent[] = [];
+      const off: any = m5Offline({ ...base(), abilities: { coop_hand: call(40, 45) } }, bb, oev);
+      expect(oev).toEqual(ended('coop_hand'));
+      expect(off.abilities.coop_hand).toEqual({ readyAt: NOW + 8_000 });
+    }
+    expect(SAVE_VERSION).toBe(6);
+  });
+
+  it('[D-HOE-41][AC] durS present but activeS>granted: clamp then clear both', () => {
+    // stored durS is the grant (no combo key): activeS above it clamps, effect_s 0
+    const plain = load({ ...base(), abilities: { market_hand: call(99, 45) } });
+    expect(plain.ev).toEqual([{ type: 'ability_ended', worker: 'market_hand', cause: 'offline', effect_s: 0 }]);
+    expect(plain.s.abilities.market_hand).toEqual({ readyAt: NOW + 8_000 });
+    // combo key present: grant capped at max(tc_ability_s, tc_combo_boost_duration_s)=45, then activeS clamps
+    const bb = comboBal(45);
+    const capped = load({ ...base(), abilities: { grader: { readyAt: NOW, activeS: 80, durS: 90 } } }, bb);
+    expect(capped.ev).toEqual([{ type: 'ability_ended', worker: 'grader', cause: 'offline', effect_s: 0 }]);
+    expect(capped.s.abilities.grader).toEqual({ readyAt: NOW });
+    // same cap, activeS still inside the capped grant: effect_s = 45 - 40, not 90 - 40 and not 0
+    const mid = load({ ...base(), abilities: { hawker: call(40, 90) } }, bb);
+    expect(mid.ev).toEqual([{ type: 'ability_ended', worker: 'hawker', cause: 'offline', effect_s: expect.closeTo(5) }]);
+    expect(mid.s.abilities.hawker).toEqual({ readyAt: NOW + 8_000 });
   });
 });
 describe('F2 settle: a hidden gap under 60 s', () => {

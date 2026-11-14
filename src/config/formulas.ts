@@ -6,7 +6,13 @@ import type { M5Flags } from './flags';
 export interface CostGrowthSegment { from: number; to: number; growth: number }
 export interface EconomyParams {
   maxLevel: number;
-  collection: { baseCost: number; costGrowth: number; eggsPerTapBase: number; eggsPerTapPerLevel: number; pricePercentPerLevel: number };
+  collection: {
+    baseCost: number; costGrowth: number; eggsPerTapBase: number; eggsPerTapPerLevel: number; pricePercentPerLevel: number;
+    /** M4.1 D-HOP-23: collection_cost per level, copied verbatim from the CSV by sync-economy when economy-config
+     *  collectionCostFromCsv is on (index = level, 0..maxLevel). When present it is THE collection cost; costGrowth is then
+     *  informational only. Absent (flag off, the default) = baseCost * costGrowth^C, unchanged. */
+    costTable?: number[];
+  };
   farm: {
     baseCost: number; costGrowth: number; hensBase: number; hensPerLevel: number; eggsPerHenPerSec: number;
     coopCapacityBase: number; coopCapacityPerLevel: number; eggPriceCentsBase: number; eggPriceCentsPerLevel: number;
@@ -46,11 +52,18 @@ export interface M4Params {
   tc?: Record<string, number>;
   /** v5 release flags (config/flags.ts), 0/1, default 0; each needs `enabled`. Kept whole by sync-economy fitM4 (F3). */
   flags?: M5Flags;
+  /** v5 F3: zero-gain UI tunables (spec product/collection/m5.1-zero-gain-purchase-ui.md 1098f14e "m5.zeroGain.confirm", moved to
+   *  m4.zeroGain.* by the single-namespace ruling, manifest row 28). `confirm` 0/1, default 0 (spec "false", off in M5.1). */
+  zeroGain?: { confirm: number };
 }
 /** Round half-up to `dp` decimals on the decimal expansion (avoids 1.005 -> 1.00 style errors). */
 export const roundHalfUp = (x: number, dp: number) => { const m = 10 ** dp; return Math.round(Number((x * m).toPrecision(12))) / m; };
 export const clampL = (L: number, p: EconomyParams) => Math.max(0, Math.min(L, p.maxLevel));
-export const collectionCost = (C: number, p: EconomyParams) => Math.floor(p.collection.baseCost * p.collection.costGrowth ** clampL(C, p));
+export const collectionCost = (C: number, p: EconomyParams) => {
+  const t = p.collection.costTable, L = clampL(C, p);
+  if (t) { const v = t[L]; if (!Number.isInteger(v)) throw new Error(`balance.collection.costTable has no integer cost for level ${L}`); return v; }
+  return Math.floor(p.collection.baseCost * p.collection.costGrowth ** L);
+};
 export const eggsPerTap = (C: number, p: EconomyParams) => p.collection.eggsPerTapBase + p.collection.eggsPerTapPerLevel * clampL(C, p);
 export const collectionPriceBonus = (C: number, p: EconomyParams) => roundHalfUp(p.collection.pricePercentPerLevel * clampL(C, p), 4);
 export const farmCost = (F: number, p: EconomyParams) => {
@@ -138,6 +151,19 @@ export const trackPriceCents = (F: number, H: number, V: number, p: EconomyParam
   return Math.round(Number((100 * (1 + e.baseStep * v) * (1 + e.levelBonus * v) * gradeMult(v, F, p) * balancedMult(F, H, v, p)).toPrecision(12)));
 };
 export const m4On = (p: EconomyParams) => !!p.m4?.enabled;
+/** v5: the tc_* columns each M5 flag reads. validateBalance requires them while that flag is on (missing = load error). */
+export const M5_TC_KEYS: Record<string, readonly string[]> = {
+  golden: ['egg_gap_min_s', 'egg_gap_max_s', 'frenzy_s', 'frenzy_price_mult', 'egg_cash_s', 'egg_eggs_s', 'egg_eggs_as_cash_from_farm', 'egg_w_cash', 'egg_w_frenzy', 'egg_w_eggs',
+    'first_spawn_s', 'egg_unlock_farm', 'egg_despawn_s', 'spawn_grace_ms', 'warn_at_s', 'frenzy_all_sales'], // #1 slice 2 readers + R22 scope
+  abilities: ['ability_s', 'ability_cd_s'],
+  streak: ['streak_unlock_farm', 'streak_per_tap', 'tap_credit_min_s', 'streak_hold_s', 'streak_decay_per_s', 'streak_cap', 'streak_tier_count'],
+  tapCoins: ['streak_unlock_farm', 'tap_credit_min_s', 'tap_income_share', 'tap_bonus_income_window_s'], // #3: R1 unlock, R2 window, A1 share, I_ref window
+};
+/** A tc_* tunable; throws when missing or non-finite (never a silent 0; F3's flags.ts helpers replace this on merge). */
+export function tcNum(p: EconomyParams, k: string): number {
+  const v = p.m4?.tc?.[k]; if (typeof v !== 'number' || !Number.isFinite(v)) throw new Error(`balance.m4.tc.${k} missing (economy.csv tc_${k})`);
+  return v;
+}
 /** One row in economy.csv column format, for verification/parity. */
 export function tableRow(L: number, p: EconomyParams) {
   const [demand_min, demand_max] = demandRange(L, p);

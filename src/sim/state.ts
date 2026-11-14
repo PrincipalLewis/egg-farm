@@ -1,4 +1,5 @@
 import type { Balance } from '../config/balance';
+import type { StreakRun } from './streak';
 import type { Workers } from './workers';
 import type { M5Fields } from './m5-state';
 export type { M5Fields } from './m5-state';
@@ -19,6 +20,12 @@ export interface GameState extends M5Fields {
   coopFullS: number;
   /** S2-8 (Product): wage cents owed but not yet charged (fraction < 1 per worker); charged exactly at the economy.csv rate over time. v6. */
   wageFracCents: { market_hand?: number; coop_hand?: number };
+  /** unpaid_trickle §2.3/§2.7: sub-cent carry + episode/session accumulators. Session only (m5Persist SESSION_ONLY_KEYS); never saved, no SAVE_VERSION bump. */
+  unpaidTrickleFrac?: number;
+  unpaidTrickleWasOn?: boolean;
+  unpaidTrickleEp?: { ms: number; coins: number; farm: number; hands: 1 | 2 };
+  unpaidTrickleSessionMs?: number;
+  unpaidTrickleSessionCents?: number;
   /** M4-A tracks (sim/tracks.ts; live only with balance.m4.enabled). Saved in the v6 file (SAVE_VERSION stays 6); a pre-M4 farm is price-matched once on load (H = F, V per M4A-28). */
   hensLevel: number; eggValueLevel: number;
   /** M4-A: set once the tracks exist for this farm (new M4 game or migrated by migrateTracksV7). A marker in the v6 save, not a save version. Absent = pre-M4 farm. */
@@ -29,6 +36,26 @@ export interface GameState extends M5Fields {
   seenTracksExplainer?: boolean;
   /** M4-A milestone ids already celebrated (never replay on reload; seeded silently by the interim track migration). */
   celebratedMilestones: string[];
+  /** v5 #2 (session only, outside F1a M5Fields): the current run's streak_peak stats. */
+  streakRun?: StreakRun;
+  /** M5.1 breeds E10 / PMC Q5 (session only, outside F1a M5Fields like streakRun): raw unknown slot ids from the save, written
+   *  back by m5Persist (breedsSaveView) while that slot stays null; stripped by m5Persist SESSION_ONLY_KEYS. */
+  breedsRawSlots?: (string | null)[];
+  /** M5.1 breeds §8 telemetry (session only, like breedsRawSlots): breed_slotted windows + session_end accumulators. Stripped by
+   *  m5Persist SESSION_ONLY_KEYS; absent until the first hatch / slot change / settled tick (HoE/breeds-telemetry-emitters). */
+  breedsTel?: import('./breeds').BreedsTel;
+  /** M5.1 breeds BR-R12b calm ring (session only, outside F1a; not saved). Empty / absent = gate open. */
+  breedsCalm?: import('./breeds-traits').BreedsCalm;
+  /** v5 #1 golden (session only, outside F1a M5Fields like streakRun; Architect slice-2 ruling 2/5): the pending spawn's
+   *  interval/deferral/R15 retry and the live Frenzy's frenzy_ended stats. Stripped by m5Persist SESSION_ONLY_KEYS. */
+  goldenPending?: import('./golden').GoldenPending;
+  frenzyRun?: import('./golden').FrenzyRun;
+  /** v5 #5 Broody (session only, outside F1a M5Fields like goldenPending): sub-cent nest, ms remainder, sticky ready, slot/check and
+   *  telemetry counters (sim/broody.ts). Stripped by m5Persist SESSION_ONLY_KEYS. */
+  broodyRun?: import('./broody').BroodyRun;
+  /** Session-only (v1.3.3 GE-AC45 / §8): session_end counters + QA forceReward. Stripped by m5Persist. */
+  goldenSession?: import('./golden').GoldenSession;
+  goldenForceReward?: import('./events').GoldenReward;
 }
 export const initialState = (b: Balance, seed = 1): GameState => ({
   coinsCents: 0, coop: 0, basket: 0, collectionLevel: 0, farmLevel: 0,

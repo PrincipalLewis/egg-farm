@@ -9,8 +9,9 @@ import { apply } from '../src/sim/actions';
 import { EV_RNG_SALT, BR_RNG_SALT, deriveEvRngState, ensureEvRng, evDraw, brDraw, isRngState, pickIndex } from '../src/sim/rng';
 import { FOCUS_DT_MAX_S, focusFrameMs, focusTicks, tickClock, wallRemainingMs, wallReady, tickFocusS } from '../src/sim/clock';
 import { stepTimers, type TimerSystem } from '../src/sim/timers';
+import { G3 } from './v5-f2-helpers';
 
-const B = (flags?: Partial<Record<M5Flag, number>>, enabled = 1) => ({ ...balance, m4: { ...balance.m4!, enabled, ...(flags ? { flags } : {}) } });
+const B = (flags?: Partial<Record<M5Flag, number>>, enabled = 1) => ({ ...balance, m4: { ...balance.m4!, enabled, ...(flags ? { flags: { ...(balance.m4 as any).flags, ...flags } } : {}) } }) as typeof balance;
 /** 10 min of 10 Hz play with collects/sells/buys; returns the customer-facing trace + final state. */
 function play(b: ReturnType<typeof B>, seed: number, onTick?: (s: GameState) => GameState) {
   let s: GameState = { ...initialState(b, seed), coinsCents: 5_000_000 }; const ev: any[] = [];
@@ -23,7 +24,10 @@ function play(b: ReturnType<typeof B>, seed: number, onTick?: (s: GameState) => 
   }
   return { s, ev };
 }
-const strip = (s: GameState) => { const { evRngState: _e, brRngState: _b, ...rest } = s; return rest; };
+// v5 #1 slice 2: golden on now also runs its own focus countdown (nextSpawnRemainingS + session goldenPending); not customer-facing.
+// v5 #5 Broody sim: broody on also runs the session I_ref ring (R7 reads refCents) and the nest/hen fields; not customer-facing.
+const strip = (s: GameState) => { const { evRngState: _e, brRngState: _b, nextSpawnRemainingS: _n, goldenPending: _p, irefRingCents: _r, refWarmS: _w,
+  broodyRun: _br, broodyNestCents: _bn, broodyHenIdx: _bh, ...rest } = s; return rest; };
 
 describe('F1b evRng / brRng', () => {
   it('[GE-AC33][D-C2] derivation matches D-C2 / GE-AC33 (initialState(b,7) at tick 0)', () => {
@@ -75,7 +79,8 @@ describe('F1b evRng / brRng', () => {
   });
   it('[D-C2] flags off (or only non-RNG flags on): no evRngState is ever created', () => {
     expect('evRngState' in play(B(), 5).s).toBe(false);
-    expect('evRngState' in play(B({ streak: 1, abilities: 1 }), 5).s).toBe(false);
+    const SA = B({ streak: 1, abilities: 1 }); // #87: the streak flag needs its tc columns (validateBalance/tcNum), G3 until the CSV PR
+    expect('evRngState' in play({ ...SA, m4: { ...SA.m4, tc: { ...SA.m4.tc!, ...G3 } } } as typeof SA, 5).s).toBe(false);
     expect('evRngState' in play(B({ golden: 1 }, 0), 5).s).toBe(false); // m4.enabled off wins
   });
   it('[F1(a)] pickIndex stays in range', () => { expect(pickIndex(0, 8)).toBe(0); expect(pickIndex(0.999999999, 8)).toBe(7); expect(pickIndex(0.5, 6)).toBe(3); });
@@ -105,7 +110,7 @@ describe('F1b focus (attended) clock', () => {
     const n = focusTicks(fc.focusMs, dtMs); expect(n).toBe(10);
     const rec: number[] = []; const sys: TimerSystem = (st, _d, f) => { rec.push(f); return st; };
     let s = initialState(balance, 1);
-    for (let i = 0; i < 590; i++) { const c = tickClock(i, n, fc); expect(c.nowMs).toBe(123); s = stepTimers(s, dtMs / 1000, B({ golden: 1 }), c, undefined, [sys]); }
+    for (let i = 0; i < 590; i++) { const c = tickClock(i, n, fc, dtMs); expect(c.nowMs).toBe(123); s = stepTimers(s, dtMs / 1000, B({ golden: 1 }), c, undefined, [sys]); }
     expect(rec.reduce((a, x) => a + x, 0)).toBeCloseTo(FOCUS_DT_MAX_S, 9);
     expect(rec.slice(0, 10).every(f => f > 0)).toBe(true); expect(rec.slice(10).every(f => f === 0)).toBe(true);
   });
