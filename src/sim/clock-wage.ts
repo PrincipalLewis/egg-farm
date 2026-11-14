@@ -63,7 +63,7 @@ function addAsleepCents(s: GameState, id: WageWorker, cents: number): GameState 
 }
 /** Called once per step() after the energy loop (signature kept: s, dtMs, b). Same object when M5 is off or no unpaused asleep MH/CH. */
 export function tickAsleepClock(s: GameState, dtMs: number, b: Balance): GameState {
-  if (!M5_FLAGS.some(f => flagOn(b, f))) return s; // flag-off identity (no asleepSessionMs write)
+  if (!M5_FLAGS.some(f => f !== 'unpaidTrickle' && flagOn(b, f))) return s; // flag-off identity (no asleepSessionMs write); unpaidTrickle excluded (AC-T1)
   let out = s;
   for (const id of WAGE_WORKERS) {
     const w = s.workers[id]; if (!w || isPaused(w, b) || mood(w, b) !== 'asleep') continue;

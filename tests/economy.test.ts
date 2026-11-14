@@ -73,6 +73,7 @@ describe('parity with vendored reference sim vendor/economy-sim (fixture: npm ru
     '8dc90e2b36ae18619b6d870c095e77d09a83043788cbe2154feecbf94378996b': 'f1', // M5.0 shipping CSV of record (D-HOP-2026-10-29-01 addendum 19:50): +29 tc_* cols, tc_streak_cap 0.28, w2_asleep_collect_share 0.15, guard_* dropped; farm_cost/w4 unchanged
     'a8c4e26836bf7af98cb51f8e3e8a646750e82a4cdc18be450afe2f86eeeeb07f': 'f1', // M5.1 o1a (D-HOP-2026-10-29-01): 8dc90e2b + farm_cost L27/28/29 = 160000/175000/190000 only
     '58dcf20e72b82df73988726c4da3c13f390da07be9a15ed73561045762c1fe87': 'f1', // D-HOP-2026-11-13-01: a8c4e268 + tc_streak_cool_cue_min_tier=2, tc_autorefill_at_pct=30, tc_autorefill_reserve=0 (no existing cell changed)
+    'dc592848f00990696ebfc547a4ba48aedf84980160569d5b70a57bbc059c051b': 'f1', // unpaid_trickle last column = 0 (spec v1.0.2 9e2acfe9); no other cell changed vs 58dcf20e
   };
   it('fixture is fresh vs the vendored reference sim (config chosen by economy.csv sha256)', () => {
     checkPins();

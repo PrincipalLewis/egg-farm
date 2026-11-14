@@ -51,6 +51,8 @@ const M5_EVENT_SPEC = {
   ability_blocked: ['worker', 'reason', 'count'],
   ability_ended: ['worker', 'cause', 'effect_s'],
   worker_resumed: ['worker', 'farm', 'energy_pct', 'paused_duration_s', 'cause'], // pause §12 v1.3.16 471fb534 (HoE/workers-drift-d1d2, PAU-AC8)
+  unpaid_trickle_started: ['farm', 'hands', 'rate_cents_per_s'], // unpaid_trickle §6, spec v1.0.2 9e2acfe9, flag on only
+  unpaid_trickle_ended: ['farm', 'duration_s', 'coins_cents', 'cause'],
 } as const;
 type Eq<A, B> = (<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2) ? true : false;
 type Spec = typeof M5_EVENT_SPEC;
@@ -58,18 +60,19 @@ type SimFields<K> = Exclude<keyof Extract<M5SimEvent, { type: K }>, 'type'>;
 const _membersPinned: Eq<M5SimEvent['type'], keyof Spec> = true;
 const _fieldsPinned: { [K in keyof Spec]: Eq<SimFields<K>, Spec[K][number]> } = {
   collectible_spawned: true, collectible_collected: true, collectible_expired: true, frenzy_started: true, frenzy_ended: true,
-  streak_started: true, streak_peak: true, abilities_unlocked: true, ability_used: true, ability_blocked: true, ability_ended: true, worker_resumed: true,
+  streak_started: true, streak_peak: true, abilities_unlocked: true, ability_used: true, ability_blocked: true, ability_ended: true, worker_resumed: true, unpaid_trickle_started: true, unpaid_trickle_ended: true,
 };
 type CollectExtra = Exclude<keyof Extract<SimEvent, { type: 'collect' }>, 'type' | 'eggs'>;
 const _collectPinned: Eq<CollectExtra, 'credited' | 'bonus_cents'> = true;
 
 describe('F1a SimEvent members', () => {
-  it('[F1(d)] M5SimEvent members and sim fields are pinned to the spec telemetry tables (12 members incl. worker_resumed; collect + credited/bonus_cents)', () => {
+  it('[F1(d)] M5SimEvent members and sim fields are pinned to the spec telemetry tables (14 members incl. worker_resumed + unpaid_trickle_started/ended (spec v1.0.2 9e2acfe9); collect + credited/bonus_cents)', () => {
     expect(_membersPinned && _collectPinned && Object.values(_fieldsPinned).every(v => v === true)).toBe(true);
     expect(Object.keys(M5_EVENT_SPEC)).toEqual(['collectible_spawned', 'collectible_collected', 'collectible_expired', 'frenzy_started', 'frenzy_ended',
-      'streak_started', 'streak_peak', 'abilities_unlocked', 'ability_used', 'ability_blocked', 'ability_ended', 'worker_resumed']);
+      'streak_started', 'streak_peak', 'abilities_unlocked', 'ability_used', 'ability_blocked', 'ability_ended', 'worker_resumed',
+      'unpaid_trickle_started', 'unpaid_trickle_ended']);
   });
-  const M5_TYPES = new Set(['collectible_spawned', 'collectible_collected', 'collectible_expired', 'frenzy_started', 'frenzy_ended', 'streak_started', 'streak_peak', 'abilities_unlocked', 'ability_used', 'ability_blocked', 'ability_ended', 'worker_resumed']);
+  const M5_TYPES = new Set(['collectible_spawned', 'collectible_collected', 'collectible_expired', 'frenzy_started', 'frenzy_ended', 'streak_started', 'streak_peak', 'abilities_unlocked', 'ability_used', 'ability_blocked', 'ability_ended', 'worker_resumed', 'unpaid_trickle_started', 'unpaid_trickle_ended']);
   it('[F1(d)] 10 min of play with every flag off emits no M5SimEvent and no collect.credited / bonus_cents', () => {
     const ev: SimEvent[] = []; let s: any = { ...initialState(balance, 5), coinsCents: 5_000_000 };
     for (let i = 0; i < 6000; i++) {
@@ -84,9 +87,9 @@ describe('F1a SimEvent members', () => {
 });
 
 describe('F1a flag plumbing (m4.flags.*)', () => {
-  it('[D-C1] M5_FLAGS is exactly the 14 ruled names, in order (D-HOE-20261029-02; fatigueCue D-HOP-2026-10-29-05)', () => {
+  it('[D-C1] M5_FLAGS is exactly the 15 ruled names, in order (D-HOE-20261029-02; fatigueCue D-HOP-2026-10-29-05; unpaidTrickle D-HOP-2026-11-14-10 / spec v1.0.2 9e2acfe9)', () => {
     expect([...M5_FLAGS]).toEqual(['golden', 'streak', 'tapCoins', 'abilities', 'broody', 'salesStopped', 'fatigueCue', 'pause',
-      'rc2Refill', 'autoRefill', 'clockWage', 'breeds', 'zeroGainUi', 'bestBuyV2']);
+      'rc2Refill', 'autoRefill', 'clockWage', 'breeds', 'zeroGainUi', 'bestBuyV2', 'unpaidTrickle']);
   });
   it('[D-C1] flag names are unique camelCase', () => {
     expect(new Set(M5_FLAGS).size).toBe(M5_FLAGS.length);

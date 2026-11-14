@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # pacing-x1-stack: full local run on ONE commit, recorded for the RC gate (HoE 10:52 ruling; HoQA QA-D-1030-X1-TREE).
-# Usage: scripts/pacing-x1-run.sh <target-ref-or-sha> <results-dir> [--seeds 1-200] [--sequential] [--ac7-from <commit>:<path>]   (X1_STUDIO=studio root)
+# Usage: scripts/pacing-x1-run.sh <target-ref-or-sha> <results-dir> [--seeds 1-200] [--sequential] [--ac7-from <commit>:<path>] [--unpaid-trickle]   (X1_STUDIO=studio root)
+#   --unpaid-trickle (or X1_UNPAID_TRICKLE=1) is forwarded to each shard: turns on m4.flags.unpaidTrickle in memory, k from the CSV.
 #   e.g. scripts/pacing-x1-run.sh ci/v5-pacing-x1-stack /workspace/egg-farm-studio/artifacts/pacing-x1-stack/results
 # Long-running (~35 min at 3 parallel shards): start it with ops/tools/lane-run.sh <lane> -- (studio rule 21).
 # What it enforces and records (results-dir, then SHA256SUMS over every file, rule 19):
@@ -21,8 +22,9 @@
 # Any failed condition writes rc-gate.txt = "not RC gate, re-run on RC SHA". The trees check can only downgrade it.
 set -uo pipefail
 REF=${1:?usage: pacing-x1-run.sh <ref|sha> <results-dir> [--seeds a-b]}; OUT=${2:?results-dir required}; shift 2
-SEEDS=1-200; SEQ=0; AC7_FROM=
-while [ $# -gt 0 ]; do case "$1" in --seeds) SEEDS=${2:?}; shift 2;; --sequential) SEQ=1; shift;; --ac7-from) AC7_FROM=${2:?}; shift 2;; *) echo "unknown arg $1" >&2; exit 2;; esac; done
+SEEDS=1-200; SEQ=0; AC7_FROM=; UNPAID_TRICKLE=0
+while [ $# -gt 0 ]; do case "$1" in --seeds) SEEDS=${2:?}; shift 2;; --sequential) SEQ=1; shift;; --ac7-from) AC7_FROM=${2:?}; shift 2;; --unpaid-trickle) UNPAID_TRICKLE=1; shift;; *) echo "unknown arg $1" >&2; exit 2;; esac; done
+if [ "$UNPAID_TRICKLE" = 1 ]; then export X1_UNPAID_TRICKLE=1; fi
 STUDIO=${X1_STUDIO:-/workspace/egg-farm-studio}
 SELF=$(readlink -f "$0"); REPO=$(git -C "$(dirname "$SELF")" rev-parse --show-toplevel) || exit 2
 SHA=$(git -C "$REPO" rev-parse --verify --quiet "$REF^{commit}") || { echo "REFUSED: unknown ref $REF" >&2; exit 2; }

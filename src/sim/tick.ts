@@ -9,6 +9,7 @@ import { stallTick } from '../econ/stall';
 import { isPaused, pausedRecoveredEnergy, tickCallLockout, tickPausedFor } from './pause';
 import { clockWageOn, clockWageAsleepStep, wageState, tickAsleepClock } from './clock-wage';
 import { Workers, WORKERS, mood, isYawning, isOff, hawkerDemandMult, wageCharge, unpaidResumeAtCents } from './workers';
+import { applyUnpaidTrickleLive, shouldRunR9, noteUnpaidTrickleAfterR9 } from './unpaid-trickle';
 import { rc2RefillOn, tickRefill } from './refill';
 /** Pure: advance sim by dt seconds. Optional `ev` collects events.
  *  Order within a tick: worker energy -> coop fill -> timeouts -> arrivals -> Coop Hand -> Market Hand.
@@ -64,7 +65,7 @@ export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: St
   out = tickAsleepClock(out, Math.round(dt * 1000), b); // v5 asleep clock (Architect ruling 4): mood asleep, unpaused MH/CH, integer ms; identity when off
   const pausedForS = tickPausedFor(s, workers, dt, b); // pause: sim seconds paused (never saved; see sim/pause.ts known limits)
   if (pausedForS !== s.pausedForS) out.pausedForS = pausedForS;
-  if (workers.coop_hand || workers.market_hand) out = workerActions(out, dt, b, ev, !!fx?.suspended);
+  if (workers.coop_hand || workers.market_hand || out.unpaidTrickleWasOn) out = workerActions(out, dt, b, ev, !!fx?.suspended);
   if (live) out = stallTick(stepTimers(out, dt, b, clock, ev), tickFocusS(dt, clock), b, ev, ev0); // risk-helpers: identity unless salesStopped
   if (rc2RefillOn(b)) out = tickRefill(out, Math.round(dt * 1000), b, ev); // M4: integer ms; frozen when this tick does not run (offline / hidden ≥ 60 s)
   return out;
@@ -72,19 +73,27 @@ export function step(s: GameState, dt: number, b: Balance, ev?: Sink, clock?: St
 /** Coop Hand: collects eggs_per_tap every every_s (tired_every_s when Tired). Market Hand: serves the queue
  *  (front first, like Sell all) every every_s / tired_every_s. Wage is charged per action interval. Asleep = nothing, no wage. */
 function workerActions(s: GameState, dt: number, b: Balance, ev?: Sink, fxSuspended = false): GameState {
+  // unpaid_trickle §2.3: credit for dt on the pre-R9 sum, then R9 (under T-R9 when it applies), then actions/wages.
+  s = applyUnpaidTrickleLive(s, dt, b, ev);
   let ws = { ...s.workers };
   // §8 items 15.5 + 16 (R9): Unpaid workers resume one at a time, W1 then W2. Each needs coins >= 1 min of its own wage
   // plus 1 min for every worker already being paid (Working/Tired) and every worker resumed earlier in this check.
   // Stops at the first that can't resume (strict order).
   // Pause rule 10 (audit D2): paused workers are neither reserved for nor resumed. One rule: workers.ts unpaidResumeAtCents, read on the
   // pre-resume workers; thresholds rise along the order, so `break` at the first short one is the strict R9 order.
-  for (const id of ['market_hand', 'coop_hand'] as const) {
-    const at = unpaidResumeAtCents(s.workers, s.farmLevel, b, id); if (at === null) continue;
-    if (s.coinsCents < at) break;
-    const w = ws[id]!; ws[id] = { ...w, unpaid: false, cdS: 0 };
-    ev?.push({ type: 'worker_state', worker: id, state: mood(ws[id], b)! });
+  // T-R9 (SIGNED, D-HOP-2026-11-14-10): with the flag on, k > 0 and the sum > 0, this pass runs only when coins cover
+  // unpaidResumeAtCents(last contributing hand). The R9 formula itself is unchanged. Flag off or k = 0: today's R9.
+  if (shouldRunR9(s, b)) {
+    for (const id of ['market_hand', 'coop_hand'] as const) {
+      const at = unpaidResumeAtCents(s.workers, s.farmLevel, b, id); if (at === null) continue;
+      if (s.coinsCents < at) break;
+      const w = ws[id]!; ws[id] = { ...w, unpaid: false, cdS: 0 };
+      ev?.push({ type: 'worker_state', worker: id, state: mood(ws[id], b)! });
+    }
   }
   s = { ...s, workers: ws };
+  s = noteUnpaidTrickleAfterR9(s, b, ev);
+  ws = { ...s.workers };
   for (const id of ['coop_hand', 'market_hand'] as const) {
     const w = ws[id]; if (!w) continue;
     const m = mood(w, b);

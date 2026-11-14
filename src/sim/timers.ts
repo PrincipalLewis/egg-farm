@@ -43,7 +43,8 @@ const abilities: TimerSystem = (s, _dt, f, b, _c, ev) => abilitiesTick(s, f, b, 
 /** #5 Broody R7: nest accrual on this tick's integer focus ms (fT, Σ fT = frame focus), after I_ref. Identity unless m4.flags.broody. */
 const broody: TimerSystem = (s, _dt, f, b, c, ev) => broodyTick(s, f, f > 0 ? c?.focusFtMs ?? Math.round(f * 1000) : 0, b, ev);
 export const TIMER_SYSTEMS: readonly TimerSystem[] = [seedEvRng, streak, breeds, incomeRef, broody, frenzy, golden, abilities];
-export const anyM5FlagOn = (b: Balance) => M5_FLAGS.some(f => flagOn(b, f));
+/** unpaidTrickle has its own path in tick.ts and must not open the M5 live/stepTimers/fx branch (AC-T1: k=0 with the flag on is byte-identical to flag off). */
+export const anyM5FlagOn = (b: Balance) => M5_FLAGS.some(f => f !== 'unpaidTrickle' && flagOn(b, f));
 export function stepTimers(s: GameState, dt: number, b: Balance, clock?: StepClock, ev?: Sink, systems: readonly TimerSystem[] = TIMER_SYSTEMS): GameState {
   const f = tickFocusS(dt, clock);
   for (const sys of systems) s = sys(s, dt, f, b, clock, ev);

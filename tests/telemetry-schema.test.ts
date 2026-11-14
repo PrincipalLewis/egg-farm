@@ -321,8 +321,9 @@ describe('[TEL-AC11] isPinned(e) is event-based (§3.2 + errata V-3, D-HOE-19 F-
   const V3 = ['sales_stall', 'fatigue_cue_shown', 'fatigue_cue_tapped', 'shift_sheet_opened', 'refill_used', 'rest_toggled', 'first_worker_hired', 'autorefill_toggled',
     'abilities_unlocked', 'ability_used', 'ability_ended', 'ability_blocked', 'worker_paused', 'worker_resumed', 'hatch_started', 'flock_complete', 'milestone_reached',
     'balanced_tier', 'zero_gain_purchase', 'dead_zone'];
-  it('[TEL-AC11] the always-pinned types are exactly §3.2 + the 20 V-3 types; coop_full and tip_shown pin by predicate', () => {
-    const always = EVENT_TYPES.filter(t => EVENT_SCHEMA[t].pinned === true).sort(); expect(always).toEqual([...BASE, ...V3].sort());
+  const TRICKLE = ['unpaid_trickle_started', 'unpaid_trickle_ended']; // unpaid_trickle §6 (spec v1.0.2 9e2acfe9)
+  it('[TEL-AC11] the always-pinned types are exactly §3.2 + the 20 V-3 types + unpaid_trickle §6; coop_full and tip_shown pin by predicate', () => {
+    const always = EVENT_TYPES.filter(t => EVENT_SCHEMA[t].pinned === true).sort(); expect(always).toEqual([...BASE, ...V3, ...TRICKLE].sort());
     expect(EVENT_TYPES.filter(t => typeof EVENT_SCHEMA[t].pinned === 'function').sort()).toEqual(['coop_full', 'tip_shown']);
   });
   it('[TEL-AC11] coop_full pins end and capped, not start; tip_shown pins {id:clock_wage} only; unknown types are not pinned', () => {

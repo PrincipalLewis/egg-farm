@@ -37,6 +37,7 @@
       "manage_cooldown_s": 30,
       "manage_all_min_workers": 3,
       "unpaid_resume_wage_min": 1,
+      "unpaid_trickle": 0,
       "manage_prompt_threshold": 0.5
     },
     "market_hand": {
@@ -183,7 +184,8 @@
       "clockWage": 0,
       "breeds": 0,
       "zeroGainUi": 0,
-      "bestBuyV2": 0
+      "bestBuyV2": 0,
+      "unpaidTrickle": 0
     },
     "zeroGain": {
       "confirm": 0
