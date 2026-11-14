@@ -6,7 +6,7 @@
  */
 import type { Balance } from '../config/balance';
 import {
-  BREED_IDS, ROSTER, bc, isBreedId, unlockedSlots, CENTS_PER_DOLLAR,
+  BREED_IDS, ROSTER, bc, isBreedId, rosterTraitBp, unlockedSlots, CENTS_PER_DOLLAR,
   type BreedId, type Family, type Rarity,
 } from '../config/breeds';
 import {
@@ -71,9 +71,10 @@ export const traitPctExact = (bp: number) => `+${(bp / 100).toFixed(2)}%`;
 /** Whole floored HUD percent: 312 → "+3%". */
 export const traitPctFloor = (bp: number) => `+${Math.floor(bp / 100)}%`;
 
-/** Star-scaled base bp (display); ignores settle gate. */
+/** Star-scaled base bp (display); ignores settle gate. Base = rosterTraitBp (#149: m4.bc.trait_<id>_bp, else ROSTER default),
+ *  the same source as sim slotTraitBp, so the reveal/sheet copy never diverges from the applied bonus. */
 export const starBp = (id: BreedId, stars: number, b: Balance) =>
-  Math.floor(ROSTER[id][2] * (10000 + stars * bc(b, 'star_bonus_bp')) / 10000);
+  Math.floor(rosterTraitBp(b, id) * (10000 + stars * bc(b, 'star_bonus_bp')) / 10000);
 
 /** Settling / hatch countdown m:ss from remaining ms (ceil seconds; PMC OQ-3). Never 0:00 while ms>0. */
 export const fmtRemainMs = (ms: number) => {
