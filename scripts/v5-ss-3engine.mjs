@@ -1,6 +1,6 @@
 // #5b/#11 3-engine shots + SS-17 copy-fit (sales-stopped cfff3817 SS-17; FC-SV v1.3.19 sizes) on the QA build, with an
 // Art screenshot manifest (art-ux/screenshot-manifest-template.md; org-plan rule 5). Flag-on = TEST-ONLY patch of m4.flags in
-// the served bundle (src/config/balance.json untouched, shipped flags stay 0). Sim views come from the local stub (window.eggfarmQaStall).
+// the served bundle (src/config/balance.json untouched, shipped flags stay 0). Sim views are planted on the live stallSession via the QA hook (window.eggfarmQaStall); atRisk is a QA-only overlay for worst-case copy.
 // Usage: npx vite build --mode qa --outDir dist-qa && OUT=<dir> PR=<n> [FC=1] [ENGINES=chromium,firefox,webkit] node scripts/v5-ss-3engine.mjs
 import pw from 'playwright-core'; import fs from 'node:fs'; import path from 'node:path'; import { execSync } from 'node:child_process';
 import { serveForRun } from './serve-own.mjs';
