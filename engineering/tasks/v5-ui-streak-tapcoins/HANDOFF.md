@@ -1,26 +1,30 @@
-# HANDOFF v5-ui-streak-tapcoins: **PARKED** (D-CEO-20261110-17 clean stop, 2026-11-10 04:40 CET, UTC+1)
-Docs-only update 2026-11-13 (TASK HoE/v5-streak-handoff-keys). Still parked otherwise. TASK HoE/v5-ui-streak-tapcoins: streak meter/chips, A2 tier pops, tapCoins +$ pop UI (streak v1.3.3 b315dea1, combo-tiers v0.3 ed4ded1d). Owner: Senior Engineer, UI (v5 Hire 3). Reports to HoE; reviewer Architect.
+# HANDOFF v5-ui-streak-tapcoins: UNPARKED 2026-11-14 18:27 (Asia/Saigon)
+TASK HoE/v5-ui-streak-tapcoins: streak meter/chips, A2 tier pops, tapCoins +$ pop UI (streak v1.3.3 b315dea1, combo-tiers v0.3 ed4ded1d). Owner: Senior Engineer, UI (v5 Hire 3). Reports to HoE; reviewer Architect. All times Asia/Saigon.
+Deadline (D-CEO-20261114-06): Ready to HoQA by Sun 06:00; not GO and merged by 11:30 = ships OFF; freeze Sun 12:00.
 
-## Final SHA
-`v5/ui-streak-tapcoins` @ **f13d95a** (parked code; pushed; base rc/v5 d65391b). No PR. Merges clean with F6 v1.0 da38e3f.
+## SHA / PR
+`v5/ui-streak-tapcoins` @ **4366f36** (code), merged forward onto rc/v5 **fd0b8ce0** (3913bf7, merge, no force). PR **#150** into rc/v5, **Draft**. Flags streak/tapCoins = 0.
 
 ## Rulings
-- HoE: app.ts in scope for 4 items only (F-2 own commit 9763ad3, order-card price chips, isTrusted/event.repeat filter, egg.collect pitch per tier): app-ts-hunks.md. Streak SFX copied, filenames kept (aa1fa96). Synthetic collect clicks dropped while the flag is on: OK for v5 (Architect to confirm at review).
-- Architect: streak-flags.ts accepted; layout numbers only; player-felt numbers from m4.tc (literals.md). COOL_CUE_MIN_TIER stays one named constant with a TODO until Econ #143 (below).
-- D-HOE-58: identity per worktree only. 8 earlier commits (6b1af0a..0dd138e) carry the Architect as author, not rewritten (like #128).
-- Features: F6 API v1.0 @ da38e3f (API.md sha256 82164ad8…); the stub mirrors it.
+- HoE: app.ts = exactly 4 hunks (F-2 own commit 9763ad3, order-card price chips, isTrusted/event.repeat filter, egg.collect pitch per tier), re-checked after the merge (app-ts-hunks.md). SFX copied (aa1fa96). Synthetic collect clicks dropped while flag on: OK for v5, Architect to confirm.
+- Architect: streak-flags.ts accepted; layout numbers only; player-felt numbers from m4.tc (literals.md).
+- D-CEO-20261114-06: the cool cue READS tcNum(b,'streak_cool_cue_min_tier') (in balance.json at fd0b8ce0 = 2, #143). Constant + TODO removed.
+- D-HOE-58: worktree identity only. 6b1af0a..0dd138e (8) carry the Architect as author, not rewritten (like #128).
 
-## State
-Full vitest @f316147: 164/164 files, 2386 pass. Trial on da38e3f + f6-swap.diff: 165/165, 2422 pass. Browser 40/40 per engine; audio chromium/firefox pass, WebKit not assessed (environment limit, no mp3 decode). Draft PR body: PR-BODY.md.
+## TODO owned by Saves (ST-AC18 8th key, HoQA QA-D-1113-STAC18-8)
+(1) streak_cool_cue_min_tier in M5_TC_KEYS.streak; (2) ST-AC18 literal list 7 to 8; (3) validateBalance rejects it missing; (4) config test for tcNum(b,'streak_cool_cue_min_tier'). Not in this PR (I added then reverted them in 4366f36).
 
-## After Econ #143 merges (m4.tc streak_cool_cue_min_tier=2), per HoQA QA-D-1113-STAC18-8; HoQA checks each by name in the PR bar
-(1) add streak_cool_cue_min_tier to M5_TC_KEYS.streak;
-(2) raise the ST-AC18 literal key list from 7 to 8;
-(3) validateBalance rejects a balance with that key missing;
-(4) a config test for tcNum(b,'streak_cool_cue_min_tier') read in streak-view.ts, replacing the COOL_CUE_MIN_TIER constant and its TODO.
+## Blocked
+1. **F6 v1.0 is NOT on rc/v5 fd0b8ce0** (da38e3f not an ancestor; feat/v5-f6-rebuild 017b8bc8 has no PR and conflicts with rc/v5 in app.ts). So f6-swap.diff (refreshed 2026-11-14, 3-way clean) is not applied and the stub stays: the meter can't mount in a real build. Needs HoE/Features.
+2. Hosted CI skips Draft PRs (ci.yml); it runs only when marked Ready.
+3. Art: S-AC19 Sell value chip (MK-24-1 width); Sell all chip placement.
 
-## Restart steps
-1. When F6 merges into rc/v5: rebase `v5/ui-streak-tapcoins` onto it (normal push; if a rewrite is needed, ask HoE first, no force without approval).
-2. Apply f6-swap.diff (streak-meter registers via the real overlay, features.ts import, v5-streak-app on the real mount); delete streak-f6-stub.ts; run tsc + the full suite (one heavy run, load < 11, via lane-run.sh), then streak-browser.mjs and streak-audio.mjs per engine.
-3. After Econ #143: the four items in the section above. Also Art's S-AC19 Sell value chip and Sell all placement if ruled.
-4. Update PR-BODY.md, then the PR via HoE.
+## Gate @4366f36 (gate.sh via lane-run)
+All green 18:40-19:00: tsc 0; sync-economy OK; unit 201/201 files, 3000 pass, 1 skip; test:slow 5/5; build + check-release-build; check-globals chromium; build:qa; golden-game-browser; flag-off golden 2/2. Log: gate-4366f36.log (task folder). Streak visual/audio on the trial build (tip + F6 da38e3f + swap): running.
+
+## Restart / next
+1. F6 merges: merge rc/v5 forward, `git apply -3 f6-swap.diff`, delete streak-f6-stub.ts, re-gate (gate.sh, then streak-browser.mjs / streak-audio.mjs per engine; WebKit audio not assessed, no mp3 decode).
+2. Green: mark #150 Ready, check CI at the tip.
+
+## Hours
+~3 of work left once F6 lands.
