@@ -721,6 +721,8 @@ nav [data-nav=upgrades]>.asleep-badge{top:auto;right:calc(50% - 14px - 6px);marg
 .fc-warn{flex:none;width:16px;height:16px}
 @media (max-width:399px){.fsub .fw{display:none}}             /* `Tired −$X/s` below 400 px, `Tired workers −$X/s` at 400+ */
 .fchip{flex:none;width:44px;height:44px;display:grid;place-items:center;margin:0;padding:0;border:0;background:transparent;cursor:pointer}
+/* HoAUX: HUD at 360 width — settings and the chip never shrink below 44px; .spacer (flex:1) absorbs the ~43 px. */
+#settings,.hud .fchip{flex-shrink:0;min-width:44px}
 .fchip[hidden]{display:none}
 .fchip-pill{display:grid;place-items:center;width:36px;height:26px;box-sizing:border-box;border-radius:var(--r-pill);background:var(--c-cream);border:2px solid var(--c-outline);color:var(--c-wood-text)}
 .fchip[data-tone=asleep] .fchip-pill{color:var(--c-danger)}

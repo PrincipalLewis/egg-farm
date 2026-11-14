@@ -1,5 +1,5 @@
 // #5b/#11 flag-on screenshots (worst-case strings: Tired −$999.9K/s) on the QA build. TEST-ONLY flag patch of the served bundle
-// (src/config/balance.json is never edited; shipped flags stay 0). Sim views come from the local stub via window.eggfarmQaStall.
+// (src/config/balance.json is never edited; shipped flags stay 0). Sim views are planted on stallSession via the QA hook window.eggfarmQaStall.
 // Usage: npx vite build --mode qa --outDir dist-qa && OUT=<dir> node scripts/v5-ss-shots.mjs
 import pw from 'playwright-core'; import fs from 'node:fs'; import { serveForRun } from './serve-own.mjs';
 const OUT = process.env.OUT ?? 'artifacts/v5-ss-shots/'; fs.mkdirSync(OUT, { recursive: true });
