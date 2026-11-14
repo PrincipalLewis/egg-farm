@@ -56,17 +56,15 @@ export function tierAria(k: number, b: Balance): string {
   return `${nameAt(ARIA_NAMES, k)}, +${pctFloor(tierThresholds(p)[k - 1])}% price`;
 }
 export const COOLING_ARIA = 'Streak cooling';
-/** TUNABLE pending Economy (Architect ruling 2026-11-10, literals.md): the tier from which a cooling start plays sfx-streak-cool-01 and
- *  announces (combo-tiers §1 tier 2 row, §6). Moves to m4.tc.streak_cool_cue_min_tier once economy.csv (CSV of record) carries
- *  tc_streak_cool_cue_min_tier; then this line becomes tcNum(b, 'streak_cool_cue_min_tier'). */
-// TODO(tc_streak_cool_cue_min_tier): move to m4.tc/CSV at the restart (HoE routes to Econ/HoP/QA)
-const COOL_CUE_MIN_TIER = 2;
+/** The tier from which a cooling start plays sfx-streak-cool-01 and announces (combo-tiers §1 tier 2 row, §6): m4.tc
+ *  streak_cool_cue_min_tier (economy.csv tc_streak_cool_cue_min_tier = 2, #143 / D-HOP-2026-11-13-01; QA-D-1113-STAC18-8). */
+export const coolCueMinTier = (b: Balance): number => tcNum(b, 'streak_cool_cue_min_tier');
 
 /**
  * Eligible upward crossings with hysteresis (§3.3): tier k pops on s going from < T_k to >= T_k, and can pop again only after s
  * has fallen below T_(k-1) (T_0 = 0). Only the highest tier crossed in one step pops (a config edge; one pill at a time). A cap
  * change (K18 clamp, live config reload) re-syncs silently. Also reports the cooling start (once per decay start, only if the
- * run reached tier >= COOL_CUE_MIN_TIER).
+ * run reached tier >= coolCueMinTier(b)).
  */
 export class StreakTiers {
   private prev = 0; private armed: boolean[] = []; private key = ''; private runMax = 0; private wasCooling = false;
@@ -80,7 +78,7 @@ export class StreakTiers {
     if (s > this.prev + EPS) for (let k = 1; k <= T.length; k++) { const t = T[k - 1]; if (this.prev < t - EPS && s >= t - EPS && this.armed[k - 1]) up = k; }
     for (let k = 1; k <= T.length; k++) if (this.prev < T[k - 1] - EPS && s >= T[k - 1] - EPS) this.armed[k - 1] = false;
     if (s <= EPS) this.runMax = 0; else this.runMax = Math.max(this.runMax, streakTier(s, b));
-    const coolStart = cooling && !this.wasCooling && s > EPS && this.runMax >= COOL_CUE_MIN_TIER;
+    const coolStart = cooling && !this.wasCooling && s > EPS && this.runMax >= coolCueMinTier(b);
     this.wasCooling = cooling && s > EPS; this.prev = s;
     if (!fromTap) up = 0;
     return { ...(up ? { tierUp: up } : {}), ...(coolStart ? { coolStart: true as const } : {}) };
