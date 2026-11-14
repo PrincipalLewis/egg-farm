@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # pacing-x1-stack: full local run on ONE commit, recorded for the RC gate (HoE 10:52 ruling; HoQA QA-D-1030-X1-TREE).
-# Usage: scripts/pacing-x1-run.sh <target-ref-or-sha> <results-dir> [--seeds 1-200] [--sequential] [--ac7-from <commit>:<path>]   (X1_STUDIO=studio root)
+# Usage: scripts/pacing-x1-run.sh <target-ref-or-sha> <results-dir> [--seeds 1-200] [--sequential] [--ac7-from <commit>:<path>] [--unpaid-trickle]   (X1_STUDIO=studio root)
+#   --unpaid-trickle (or X1_UNPAID_TRICKLE=1) is forwarded to each shard: turns on m4.flags.unpaidTrickle in memory, k from the CSV.
 #   e.g. scripts/pacing-x1-run.sh ci/v5-pacing-x1-stack /workspace/egg-farm-studio/artifacts/pacing-x1-stack/results
 # Long-running (~35 min at 3 parallel shards): start it with ops/tools/lane-run.sh <lane> -- (studio rule 21).
 # What it enforces and records (results-dir, then SHA256SUMS over every file, rule 19):
@@ -21,8 +22,9 @@
 # Any failed condition writes rc-gate.txt = "not RC gate, re-run on RC SHA". The trees check can only downgrade it.
 set -uo pipefail
 REF=${1:?usage: pacing-x1-run.sh <ref|sha> <results-dir> [--seeds a-b]}; OUT=${2:?results-dir required}; shift 2
-SEEDS=1-200; SEQ=0; AC7_FROM=
-while [ $# -gt 0 ]; do case "$1" in --seeds) SEEDS=${2:?}; shift 2;; --sequential) SEQ=1; shift;; --ac7-from) AC7_FROM=${2:?}; shift 2;; *) echo "unknown arg $1" >&2; exit 2;; esac; done
+SEEDS=1-200; SEQ=0; AC7_FROM=; UNPAID_TRICKLE=0
+while [ $# -gt 0 ]; do case "$1" in --seeds) SEEDS=${2:?}; shift 2;; --sequential) SEQ=1; shift;; --ac7-from) AC7_FROM=${2:?}; shift 2;; --unpaid-trickle) UNPAID_TRICKLE=1; shift;; *) echo "unknown arg $1" >&2; exit 2;; esac; done
+if [ "$UNPAID_TRICKLE" = 1 ]; then export X1_UNPAID_TRICKLE=1; fi
 STUDIO=${X1_STUDIO:-/workspace/egg-farm-studio}
 SELF=$(readlink -f "$0"); REPO=$(git -C "$(dirname "$SELF")" rev-parse --show-toplevel) || exit 2
 SHA=$(git -C "$REPO" rev-parse --verify --quiet "$REF^{commit}") || { echo "REFUSED: unknown ref $REF" >&2; exit 2; }
@@ -77,15 +79,17 @@ X1_KEY=$(sed -n "s/^export const X1_DATA: X1SourceKey = '\(.*\)';/\1/p" tests/pa
 log "X1_DATA=$X1_KEY shipped CSV $SHIP_SHA"
 # (3) + row 904: AC7's 2x active/idle gate per QA-D-1030-X1-TREE (R6 of QA-D-1030-PR93-1; HoE 11:51) PASSES on the tree's
 # data/economy.csv, with its CSV-RECORD line captured (ac7-csv-record.txt). Not a byte-identity check against c7bb783f.
-# Source (job input): default = the tree's qa/m3-scripts/ac7-active-idle-gate.py if the tree has one, else the studio's.
-# Fallback = --ac7-from <commit>:<path>, validated above (R3): the script is taken from that commit with `git show`.
+# Source (job input): default = the tree's scripts/pacing-x1-ac7-active-idle-gate.py (honours --csv, emits CSV-RECORD),
+# else the tree's qa/m3-scripts/ac7-active-idle-gate.py if present, else the studio's (argv[1]-only, will FAIL 904).
+# Override = --ac7-from <commit>:<path>, validated above (R3): the script is taken from that commit with `git show`.
 # Judged by scripts/pacing-x1-ac7.py (R2): behavioural only, CSV-RECORD path+sha256 must equal the shipped CSV, the header must
 # name it and the gate must exit 0; no static source check. Its studio imports are hashed (R4), and m4_active.py as imported
 # is compared with the --ac7-from commit's copy (HoE (b); MISMATCH fails 904). Results: ac7.json, ac7.log, ac7-csv-record.txt.
 H="$WT/scripts/pacing-x1-ac7.py"; [ -f "$H" ] || H="$(dirname "$SELF")/pacing-x1-ac7.py"
 if [ -n "$AC7_FROM" ]; then AC7_SRC="econ-pr"; mkdir -p "$OUT/ac7-src"; AC7="$OUT/ac7-src/$(basename "$AC7_PATH")"
   git -C "$REPO" show "$AC7_COMMIT:$AC7_PATH" > "$AC7" || { fail "--ac7-from: git show $AC7_COMMIT:$AC7_PATH failed"; : > "$AC7"; }
-elif [ -f "qa/m3-scripts/ac7-active-idle-gate.py" ]; then AC7="$WT/qa/m3-scripts/ac7-active-idle-gate.py"; AC7_SRC="tree"
+elif [ -f "$WT/scripts/pacing-x1-ac7-active-idle-gate.py" ]; then AC7="$WT/scripts/pacing-x1-ac7-active-idle-gate.py"; AC7_SRC="tree"
+elif [ -f "qa/m3-scripts/ac7-active-idle-gate.py" ]; then AC7="$WT/qa/m3-scripts/ac7-active-idle-gate.py"; AC7_SRC="tree-qa"
 else AC7="$STUDIO/qa/m3-scripts/ac7-active-idle-gate.py"; AC7_SRC="studio"; fi
 if [ -s "$AC7" ]; then echo "$(sha256sum < "$AC7" | cut -d' ' -f1)  $AC7 (AC7 script, row 904, source $AC7_SRC${AC7_COMMIT:+ commit $AC7_COMMIT path $AC7_PATH})" >> "$OUT/outside-tree.txt"; else fail "AC7 script missing: $AC7"; fi
 python3 "$H" inputs "$STUDIO" > "$OUT/ac7-inputs.json" || fail "AC7 studio inputs missing (ac7-inputs.json)"

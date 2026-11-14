@@ -6,14 +6,21 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from 'node:url';
 import { tableRow, validateCostGrowthSegments, type EconomyParams, type CostGrowthSegment } from '../src/config/formulas';
-import { M5_FLAGS } from '../src/config/flags';
+import { M5_FLAGS, isLegalUnpaidTrickle } from '../src/config/flags';
+import { BC_SPEC_DEFAULTS, BREED_IDS } from '../src/config/breeds';
 const here = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 export const CSV_PATH = here('../data/economy.csv');
 export const OUT_PATH = here('../src/config/balance.json');
 /** Hand-set economy shape config (F1): farm cost growth segments. Not fitted from the CSV; every farm_cost row is verified against them. */
 export const ECON_CONFIG_PATH = here('../data/economy-config.json');
 /** farmCostFromCsv (F1): farm.costTable = the CSV farm_cost column and grader tiers carry the CSV w4_tier_cost (verified on every row). */
-export interface EconomyConfig { farmCostGrowthSegments?: CostGrowthSegment[]; farmCostFromCsv?: boolean }
+/** collectionCostFromCsv (M4.1 D-HOP-23, default OFF): collection.costTable = the CSV collection_cost column (verified on every row);
+ *  no costGrowth fit. Mutually exclusive with any cost fit/segment option (farmCostGrowthSegments or any other collectionCost* key). */
+export interface EconomyConfig { farmCostGrowthSegments?: CostGrowthSegment[]; farmCostFromCsv?: boolean; collectionCostFromCsv?: boolean }
+/** Config keys that select a fitted/segmented cost curve; none may be combined with collectionCostFromCsv. */
+export const collectionTableConflicts = (cfg: EconomyConfig): string[] => Object.entries(cfg as Record<string, unknown>)
+  .filter(([k, v]) => k !== 'collectionCostFromCsv' && (k.startsWith('collectionCost') || /Segments$/.test(k)) && v !== undefined && v !== null && v !== false && !(Array.isArray(v) && v.length === 0))
+  .map(([k]) => k);
 export const readEconomyConfig = (path = ECON_CONFIG_PATH): EconomyConfig => JSON.parse(readFileSync(path, 'utf8'));
 type Row = Record<string, number>;
 const INT_COLS = ['level', 'collection_cost', 'eggs_per_tap', 'farm_cost', 'hens', 'coop_capacity', 'demand_min', 'demand_max', 'offline_max_eggs_2h', 'queue_max', 'hens_cost', 'egg_value_cost', 'hens_cap_over_farm', 'egg_value_cap_over_farm'];
@@ -73,7 +80,14 @@ export function fitParams(rows: Row[], prev: any, cfg: EconomyConfig = {}): Econ
   const plain = R.find(r => r.level > 0 && r.level <= n && !inSeg(r.level));
   const farmGuess = segs && segs.length && plain ? R[plain.level].farm_cost / R[plain.level - 1].farm_cost : (R[n].farm_cost / R[0].farm_cost) ** (1 / n);
   const col = (c: string) => (q: EconomyParams) => all(r => (tableRow(r.level, q) as any)[c] === r[c]);
-  p.collection.costGrowth = fit('collection costGrowth', (R[n].collection_cost / R[0].collection_cost) ** (1 / n), 0.0001, 0.05, v => col('collection_cost')({ ...p, collection: { ...p.collection, costGrowth: v } }));
+  if (cfg.collectionCostFromCsv) {
+    // M4.1 D-HOP-23 (HoE): collection_cost is per-level data, copied verbatim (same pattern as farmCostFromCsv); no fit, no fallback.
+    // costGrowth is kept only as the pre-table shape (informational).
+    const bad = collectionTableConflicts(cfg);
+    if (bad.length) throw new Error(`sync-economy: economy-config collectionCostFromCsv and ${bad.join(', ')} are mutually exclusive`);
+    p.collection.costTable = R.map(r => r.collection_cost);
+    p.collection.costGrowth = prev.collection?.costGrowth ?? 1;
+  } else p.collection.costGrowth = fit('collection costGrowth', (R[n].collection_cost / R[0].collection_cost) ** (1 / n), 0.0001, 0.05, v => col('collection_cost')({ ...p, collection: { ...p.collection, costGrowth: v } }));
   if (cfg.farmCostFromCsv) {
     // F1 (HoE, Oct 17): farm_cost is per-level data, copied verbatim; no formula fit and no fallback. costGrowth/segments are
     // not used for costs and are kept only as the pre-F1 shape (costGrowth = baseline growth, informational).
@@ -107,6 +121,12 @@ export function fitWorkers(rows: Row[], prev: any, perLevel = false) {
     const v = R[0][c]; for (const r of R) if (r[c] !== v) throw new Error(`sync-economy: economy.csv ${c} must be constant (L${r.level}=${r[c]}, L0=${v})`);
     return v;
   };
+  const unpaidTrickle = () => {
+    if (!has('unpaid_trickle')) return 0;
+    const v = one('unpaid_trickle');
+    if (!isLegalUnpaidTrickle(v)) throw new Error(`sync-economy: unpaid_trickle must be in {0} ∪ [0.5, 1.0] (D-HOP-2026-11-14-10 Q2; values >1.0 and values in (0, 0.5) are rejected; 0 is the shipping value), got ${v}`);
+    return v;
+  };
   const W = prev.workers ?? {};
   const perFarmWage = (col: string, unlock: number) => {
     const r = R.find(x => x.level === unlock)!; const v = r4(r[col] / unlock);
@@ -127,6 +147,9 @@ export function fitWorkers(rows: Row[], prev: any, perLevel = false) {
     energy: { start_pct: one('energy_start_pct'), drain_s_per_pct: one('drain_s_per_pct'), tired_below_pct: one('tired_below_pct'),
       yawn_at_pct: one('yawn_at_pct'), manage_cooldown_s: one('manage_cooldown_s'), manage_all_min_workers: one('manage_all_min_workers'),
       unpaid_resume_wage_min: one('unpaid_resume_wage_min'),
+      // D-HOP-2026-11-14-07 / HoE unpaid_trickle: constant, last CSV column; 0 is the shipping value; values > 1.0 are rejected.
+      // Absent on historical fixture CSVs (rc1, ad27fe73, …) maps to 0 so those files stay byte-pinned.
+      unpaid_trickle: unpaidTrickle(),
       // B5 (Product, Oct 15; 0.4 = Yawning): Manage / 'Manage all (N need it)' count a worker only at energy <= this share.
       ...(has('manage_prompt_threshold') ? { manage_prompt_threshold: one('manage_prompt_threshold') } : {}) },
     market_hand: { ...W.market_hand, unlock_farm: u1, hire_cost: hire('w1_cost', u1), wage_per_farm_per_min: perFarmWage('w1_wage_per_min', u1), every_s: one('w1_every_s'), tired_every_s: one('w1_tired_every_s') },
@@ -152,7 +175,7 @@ export const isM4Col = (c: string) => (M4_COLS as readonly string[]).includes(c)
 /** v5 F3: CSV columns that M5 specs read under a non-`tc_` name. Each is copied into m4.tc under its own name (constant on
  *  every row), so `tc` stays the one home of scalar tunables. Economy may later rename them tc_*; then drop the entry here.
  *  leave_attended_window_s: abilities spec rule 9 / §7 (HoE §9.5(1)); rest_recovery_mult: pause spec rule 3 / §6. */
-export const M5_MAPPED_COLS = ['leave_attended_window_s', 'rest_recovery_mult'] as const;
+export const M5_MAPPED_COLS = ['leave_attended_window_s', 'rest_recovery_mult', 'charge_regen_s', 'charge_cap', 'refill_threshold_pct', 'start_charges'] as const; // + rc2 Refill (G0 M1: own names, no alias; combo_* renamed by Econ, D-HOE-57)
 /** v5 F3 (HoE D-C1): release flags live in balance.json m4.flags, never in the CSV. Kept whole from balance.json; every known
  *  flag is present (absent = 0); an unknown name or a value other than 0/1 fails the sync (no silent typos). */
 export function keepFlags(prev: any): Record<string, number> {
@@ -172,6 +195,23 @@ export function keepZeroGain(prev: any): { confirm: number } {
   const v = p.confirm ?? 0; if (v !== 0 && v !== 1) throw new Error(`sync-economy: m4.zeroGain.confirm must be 0 or 1, got ${JSON.stringify(v)}`);
   return { confirm: v };
 }
+/** Known bc_* headers: every BC_SPEC_DEFAULTS key plus each roster trait. Unknown bc_* fails the sync so --check covers every column. */
+export const BC_KNOWN_COLS = [
+  ...Object.keys(BC_SPEC_DEFAULTS).map(k => `bc_${k}`),
+  ...BREED_IDS.map(id => `bc_trait_${id}_bp`),
+] as const;
+/** Map constant bc_* columns into m4.bc (keys drop the bc_ prefix). No bc_* headers => no block (shipping CSV at 32307f32). */
+export function fitBc(rows: Row[]): Record<string, number> | undefined {
+  if (!rows.length) return undefined;
+  const keys = Object.keys(rows[0]).filter(c => c.startsWith('bc_')).sort();
+  if (!keys.length) return undefined;
+  const known = new Set<string>(BC_KNOWN_COLS);
+  for (const c of keys) if (!known.has(c)) throw new Error(`sync-economy: unknown column ${c}`);
+  const one = (c: string) => { const v = rows[0][c]; for (const r of rows) if (r[c] !== v) throw new Error(`sync-economy: economy.csv ${c} must be constant (L${r.level}=${r[c]}, L0=${v})`); return v; };
+  const bc: Record<string, number> = {};
+  for (const c of keys) bc[c.slice(3)] = one(c);
+  return bc;
+}
 /** hens_cost / egg_value_cost are floor(base x growth^L) per row; caps, milestone/grade/Balanced/price-term and tc_* are constant.
  *  A CSV with no M4 columns at all produces no m4 block. From balance.json only `enabled`, the `flags` block and `zeroGain` are kept. */
 export function fitM4(rows: Row[], prev: any) {
@@ -189,6 +229,7 @@ export function fitM4(rows: Row[], prev: any) {
     if (!out.length) throw new Error(`sync-economy: economy.csv has no ${pre}1_level column`);
     return out;
   };
+  const bc = fitBc(R);
   return { enabled: prev.m4?.enabled ?? 0, flags: keepFlags(prev), zeroGain: keepZeroGain(prev),
     hens: { ...geo('hens_cost'), capOverFarm: one('hens_cap_over_farm') },
     offline: { eggsPerSec: R.map(r => r.offline_eggs_per_sec), maxEggs2h: R.map(r => r.offline_max_eggs_2h) }, // spec v1.14 M4A-4
@@ -197,7 +238,7 @@ export function fitM4(rows: Row[], prev: any) {
       hens: list('hens_ms', { level: 'level', coopMult: 'coop_mult', offlineMult: 'offline_mult' }),
       grades: list('egg_grade', { level: 'level', mult: 'mult', minFarm: 'farm_gate' }),
       balanced: list('balanced', { level: 'level', mult: 'mult' }),
-    }, tc };
+    }, tc, ...(bc ? { bc } : {}) };
 }
 export function buildBalance(rows: Row[], prev: any, cfg: EconomyConfig = {}) {
   const p = fitParams(rows, prev, cfg);

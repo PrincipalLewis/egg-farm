@@ -9,7 +9,8 @@ import type { GameState } from '../sim/state';
 import { options, type BuyKey } from '../econ/best-buy';
 import { incomePerSec } from '../econ/income';
 import { trackCoopCapacity } from '../config/formulas';
-import { flagOn } from '../config/flags';
+import { zeroGainUiOn } from '../config/flags';
+export { zeroGainUiOn };
 import type { Scorer } from './pick-hysteresis';
 
 /** Non-exempt keys. FARM and W1–W4 are never ZG (D-HOP-37, ZG-AC2). */
@@ -41,8 +42,7 @@ export function zeroGainInputs(s: GameState, b: Balance, key: BuyKey): { incBefo
 export function isZeroGain(s: GameState, b: Balance, key: BuyKey, dev = DEV): boolean {
   const i = zeroGainInputs(s, b, key); return !!i && zeroGainVerdict(i.incBefore, i.incAfter, i.dCap, dev);
 }
-/** Flag read (boot-time in the UI). Needs m4.enabled (flagOn). */
-export const zeroGainUiOn = (b: Balance): boolean => flagOn(b, 'zeroGainUi');
+/** Flag read (boot-time in the UI): re-exported from config/flags (single source). */
 /** §5.6: drop ZG rows BEFORE the pick; rows (and their payback) are otherwise the stock scorer's. */
 export const zgFiltered = (scorer: Scorer, pred: (s: GameState, b: Balance, k: BuyKey) => boolean = isZeroGain): Scorer =>
   (s, b) => scorer(s, b).filter(r => !pred(s, b, r.key));

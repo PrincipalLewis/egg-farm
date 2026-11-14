@@ -1,12 +1,3 @@
-- 2026-11-10 01:50 CET · Senior Software Architect · **breeds-ui PR-A Ready** tip `0e60c784` tree `9ab15c1`. Code gates green @ 0ae9d907 (8/8). Bundle `scratch/bundles/breeds-ui-pra-0e60c784.bundle`. Not pushed.
-- 2026-11-10 01:49 CET · Senior Software Architect · **breeds-ui PR-A Ready** head `0ae9d907` tree `5ef8abc`. Mergefwd #111 (no conflicts). Final gates **8/8 PASS** (vitest+tsc+sync+build+check-release+release-bundle+flag0-goldens+check-globals-chromium). Bundle `scratch/bundles/breeds-ui-pra-0ae9d907.bundle`. Artifacts `artifacts/v5-breeds-ui-0ae9d907/`. Clamp-bind `v5/breeds-ui-a-clamp-bind` @ 29edfc8. **Not pushed.**
-- 2026-11-10 01:21 CET · Senior Software Architect · **breeds-ui PR-A Ready-candidate** head `cf1ad73` tree `7c200fc` (HoE B stub). Focused **44/44**. hours left **0h eng**. Await Ready auth → final gates → HoQA bundle `scratch/bundles/breeds-ui-pra-cf1ad731.bundle`. Clamp-bind follow-up `v5/breeds-ui-a-clamp-bind` @ bfd4d0f (52/52). rc/v5 moved to d65391b (#111 golden, not drift) — no auto-rebase.
-- 2026-11-10 01:14 CET · Senior Software Architect · **breeds-ui PR-A Ready-candidate** (HoE B: stub on Ready head). Focused **44/44**. hours left PR-A: **0h eng** (await Ready auth for final gates + HoQA bundle `breeds-ui-pra-<sha8>.bundle`). **Open deps:** `#126` familyClamp (bind on `v5/breeds-ui-a-clamp-bind` @ bfd4d0f, verified 52/52 incl. F17→F18); presentGateOpen stub; breeds-drift rebase when on rc/v5. PR body + AC trace under `engineering/reviews/`.
-- 2026-11-10 01:10 CET · Senior Software Architect · **breeds-ui PR-A Ready-candidate** (no final gates). Focused **44/44**. Checklist PR-A rows covered in AC trace. **hours left PR-A: 0h eng** (await Ready auth for single full-gate run). **Open deps:** Saves `familyClamp`/`saves/breeds-sim-prB-traits`; breeds-drift rebase when on rc/v5 (not landed @ f20b918). **paths:** PR body `engineering/reviews/v5-breeds-ui-a-pr-body-draft.md`; AC trace `engineering/reviews/v5-breeds-ui-a-ac-trace.md`.
-- 2026-11-10 01:08 CET · Senior Software Architect · **breeds-ui PR-A** WIP→commit: seams glob `breeds-ext-*.ts` (no PR-B app.ts); ext ctx openFlock/incomeRate/reducedMotion; presentMirror in adapter; familyClamp stub (Saves dep); UI-BR-2b + BR-AC25 + checklist. Focused **37/37**. Seams sha256 `3d40e76e67c05f14dafaf21ec1e4f7008ef8405446f3476313ed08fbd985d083`. **hours left PR-A ~3.5h** (Ready-candidate polish / no final gates yet). **blocked:** none.
-- 2026-11-10 01:02 CET · Senior Software Architect · **breeds-ui PR-A** @ 56d4d46: AC trace draft `engineering/reviews/v5-breeds-ui-a-ac-trace.md`; PR body draft names `?qaBreeds=1` + breeds-on helper. **hours left PR-A ~5.5h**. Burn cut: focused only. **next:** UI-BR-2b fallback test; family-max decision; keep committing ≤30min. **blocked:** none (drift PR not on rc/v5).
-- 2026-11-10 01:00 CET · Senior Software Architect · **breeds-ui PR-A** @ e17e18f+WIP: HoQA breeds-on helper (`tests/helpers/breeds-on.ts`) + `?qaBreeds=1` QA boot (IOS_FLAG / DCE) + check-release-build rejects `get("qaBreeds")`. balance.json untouched (breeds=0). Focused 28/28. **hours left PR-A ~6h**. Burn cut: no full gates. **next:** AC trace table fill-in; commit this milestone; place/settle polish. **blocked:** none.
-- 2026-11-10 00:56 CET · Senior Software Architect · **breeds-ui PR-A** head pending-commit @ worktrees/v5-breeds-ui-a: Farm-soon AC31c/e tests, reveal+RM (no auto-dismiss, online→pendingReveal queue), AC3b highlight tests, silhouette/F20/gate/complete/E10 rows. Focused vitest 22/22. **hours left PR-A ~7h** (Ready-candidate: AC trace table, PR body, family-max if caps land, more AC4/settle/place, final gates once when told Ready). Burn cut D-CEO-20261110-04: no full gates; next commit ≤30min. **blocked:** none (breeds-drift not yet on origin/rc/v5). **next:** AC trace + PR body draft; place/settle AC4 tests.
 # engineering status (repo copy; canonical: egg-farm-studio/engineering/status.md)
 
 - 2026-10-16 Senior Software Architect — **done:** worktree /workspace/wt-architect on arch/m4-design (from origin/main a01faea); engineering/m4-design.md v0.1 draft; ADR M4-1..3. **next:** HoE review; then X-1 gate-all.sh; review A-0 rebase. **blocked:** none; open Qs in m4-design §9 (backup-failure UX, flag-off v7 one-way door, TR-5 blocking).
@@ -145,3 +136,36 @@
 - familyClamp(s,b,family)→{rawBp,clampedBp,atCap}; familyActiveBp(s,b,family); bc keys lay_cap_bp_lt18/lay_cap_bp/lay_cap_farm/away_cap_bp/broody_cap_bp (match PR-B stubs + ea922eb8).
 - Branch saves/breeds-sim-prB-traits-c0 (ordinary push; no force). Commits 1–3 parked park/prB-traits-b381998.
 - tsc + sync-economy --check + focused 72 pass.
+## 2026-11-10 01:00 CET · Senior Engineer, Saves & Persistence · HoE/breeds-sim-prB-traits (row 32)
+- WIP commit 1/3: Present calm-gate (BR-R12/R12b) + session_end present_active_s/present_lost_count; bc present_calm_* + lay_cap_*; breedsCalm session ring; E22b clear on offline ≥ 60 s. Scope: NOT hatch_started/breed_* session_end (gen/breeds-telemetry). Focused tests 128 pass + tsc. Next: Away+Broody (c2), away_bp (c3).
+
+## 2026-11-10 01:02 CET · Saves · HoE/breeds-sim-prB-traits commits 2–3
+- Commit 2: Away (BR-R13) in m4OfflineEggs + Broody bp_eff / broody_cap_bp=2000.
+- Commit 3: telemetry/v5-fields offlineGrantV5 real away_bp; grantOffline emits when breeds on incl. eggs=0.
+- Draft PR #125. Focused 138 pass + tsc. Row 32 only (not row 34 / not #119 paused_*).
+
+## 2026-11-10 01:11 CET · Saves · HoE/breeds-sim-prB-traits #125 Ready
+- Merged #126 c0 (`d4b5fdc`) into tip via ordinary merge `f97be20` (no rebase/force). Harden non-WIP: Present `683b5ef`, Away `c908227`, away_bp `e6bd1da`. Head `e6bd1da`.
+- Row 32 only; sessionEndPresentFields separate from gen/breeds-telemetry. Gates (flock+lane-run saves): tsc 0, sync-economy --check 0, focused 146 pass.
+- #126 body patched (trace/API/stack); #125 marked Ready once.
+
+## 2026-11-10 01:52 CET · Saves · HoE/breeds-sim-prB-traits #125 HoQA F1–F5 fix
+- Merged-forward `origin/rc/v5` `d65391b0` (#111) @ `8f47fd1` (ordinary merge; game.ts goldenEnd then sessionEndPresentFields / T-AC9).
+- F1: FrameClock→StepClock `focusFtMs` = min(100, F−given); Present uses fT/1000; Σ fT = F (BR-R12b(b)).
+- F2: pending counted-tap stamps flush after fT (order (0)→(3)→(4)→(5)); BR-AC53 → present_active_s 660.0.
+- F3: `grantOffline` captures `awayBp` before `applyOffline`.
+- F4: BR-R13 float order `min(away,cap)×rate×(1e4+bp)/1e4` then min/max/floor.
+- F5 / BR-R18 / PMC: emit `offline_grant` only when gap ≥ offlineMinSeconds (60 s); sub-60 emits nothing; eggs=0 + away_bp still at ≥60.
+- F6 Broody nest accrual still out of scope.
+- Gates (flock+lane-run): tsc 0; focused present/away-bp/away-broody/family-caps 34/34; f1b+breeds-state+offline 88/88; sync-economy --check pending in same push.
+- One push; re-bar grades F1–F5 + merge-forward onto d65391b0.
+
+## 2026-11-10 03:24 CET · Saves · HoE/v5-125-fix F7 + F3-no-literal
+- F7: Game.frame was passing only this rAF's focusMs into advance(); leftover accMs carried, leftover focus did not. Σ fT << Σ F at 20–144 fps (60 s @ 60 fps → 9,600 ms). Carry unused focus across the acc window (`FrameClock.focusAccMs` / `advance().focusAccMs`); Σ fT = Σ F at any frame rate, consistent with F1 fT shares.
+- F3-no-literal: dropped bare `tickClock(..., tickMs = 100)` default; callers pass `dtMs`.
+- RED FIRST: `[F7]` Game.frame at 30/60/144 fps + uneven gaps, 60 s focused — verified red (focusMs 20004 / 10008 / 4171 / 14960) then fixed.
+- Gates (flock `.vitest-eng.lock` nice -n 10, maxWorkers=2): tsc 0; sync-economy --check 0; focused present+f3-config+f1b+away-* 89/89 (incl. F3-no-literal).
+- One ordinary push; bundle `scratch/bundles/saves-breeds-sim-prB-traits-<sha8>.bundle`.
+
+## 2026-11-12 22:07 CET · Generalist · HoE/v5-restart-generalist #127 mergefwd
+- Tip (post-status) mergefwd `8e675220` = merge rc/v5 `006bdd72` into `7a7c7b2a` (clean, no content edits). Gates @ 8e675220: tsc 0; focused 28 files / 478 pass; flag-0 goldens 5/16; npm test 164 files / 2394 pass / 1 skip; build + check-release-build ok; k10 known-red g1max 63.12 vs no-breeds/Present-only 63.10. Base retargeted to rc/v5.

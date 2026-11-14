@@ -14,23 +14,35 @@ export const ROSTER = {
 export type BreedId = keyof typeof ROSTER;
 export const BREED_IDS = Object.keys(ROSTER) as BreedId[];
 export const isBreedId = (x: unknown): x is BreedId => typeof x === 'string' && Object.prototype.hasOwnProperty.call(ROSTER, x);
-/** §5 values of record. PENDING Econ (RC-PIN): economy.csv 8dc90e2b has no bc_* columns yet, so bc() reads these.
- *  When the CSV lands, bc() is the ONE place to switch to balance data. */
+/** §5 values of record. Shipping economy.csv has no bc_* columns, so these defaults apply.
+ *  When the columns are present, sync-economy maps them to m4.bc and bc() / rosterTraitBp read that block. */
 export const BC_SPEC_DEFAULTS = {
   unlock_farm: 10, slot2_farm: 14, slot3_farm: 20, rare_farm: 14, legendary_farm: 24, hatch_cost_s: 45, hatch_farm_share_bp: 10000,
   hatch_min_cents: 50000, hatch_time_s: 60, settle_s: 300, incubators: 1, w_common: 70, w_rare: 22, w_epic: 7, w_legendary: 1,
   pity_rare_after: 8, star_cap: 2, star_bonus_bp: 2500,
+  /** BR-R12b / A8: calm-hands Present window (focus s) and counted-tap threshold. */
+  present_calm_w_s: 10, present_calm_k: 6,
   /**
    * Family clamps (spec §4.3 L365–368 / §5; E8/E9). Verified vs m5.1-breeds-spec.ea922eb8:
    * lay_cap_bp_lt18=700, lay_cap_bp=1500, away_cap_bp=3000, broody_cap_bp=2000.
-   * TODO(Econ/RC-PIN): economy.csv (8dc90e2b) and live product CSV have no bc_* columns yet (manifest row 27);
-   * bc() reads these defaults until the M5.1 CSV lands. lay_cap_farm=18 is the E9 F18 boundary implied by lt18 (not a CSV column).
+   * lay_cap_farm=18 is the E9 F18 boundary (PR-B stub / E9). Shipping CSV has no bc_lay_cap_farm yet;
+   * bc() falls back to this default until that column lands.
    */
   lay_cap_bp_lt18: 700, lay_cap_bp: 1500, lay_cap_farm: 18,
   away_cap_bp: 3000, broody_cap_bp: 2000,
 } as const;
 export type BcKey = keyof typeof BC_SPEC_DEFAULTS;
-export const bc = (_b: Balance, k: BcKey): number => BC_SPEC_DEFAULTS[k];
+const bcBlock = (b: Balance): Record<string, number> | undefined =>
+  (b as Balance & { m4?: { bc?: Record<string, number> } }).m4?.bc;
+export const bc = (b: Balance, k: BcKey): number => {
+  const v = bcBlock(b)?.[k];
+  return v === undefined ? BC_SPEC_DEFAULTS[k] : v;
+};
+/** Trait bp at 0★: m4.bc.trait_<id>_bp when the CSV column was mapped, else the hardcoded ROSTER default. */
+export const rosterTraitBp = (b: Balance, id: BreedId): number => {
+  const v = bcBlock(b)?.[`trait_${id}_bp`];
+  return v === undefined ? ROSTER[id][2] : v;
+};
 /** Q1 (tick-semantics note; HoE may re-rule): the §6 salt K for breeds.rng = mixSeed(state.rng ^ K). ASCII "brds".
  *  Must differ from EV_RNG_SALT / BR_RNG_SALT (sim/rng.ts): brRng is Broody's unsaved stream, never used for rolls (BR-R9). */
 export const BREEDS_RNG_SALT = 0x62726473;
