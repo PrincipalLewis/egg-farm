@@ -17,8 +17,12 @@ const files = (d: string): string[] => readdirSync(d).flatMap(f => { const p = j
 let fg = 0;
 const ev = (type: string, f: Record<string, unknown> = {}): TEvent => ({ type, ts: 1_761_830_000_000, sid: 'a1b2c3', fgMs: (fg += 100), ...f });
 const ok = (type: string, f: Record<string, unknown> = {}) => validateEvent(ev(type, f));
-const fieldsOf = (t: string) => Object.keys(EVENT_SCHEMA[t]?.fields ?? {});
-const dynOk = (t: string, k: string) => (EVENT_SCHEMA[t]?.dynamicFields ?? []).some(d => d.keyPattern.test(k));
+const fieldsOf = (t: string) => [...Object.keys(EVENT_SCHEMA[t]?.fields ?? {}), ...Object.keys(EVENT_SCHEMA[t]?.records ?? {})];
+const dynOk = (t: string, k: string) => {
+  const s = EVENT_SCHEMA[t]; if (!s) return false;
+  if ((s.dynamicFields ?? []).some(d => d.keyPattern.test(k))) return true;
+  return Object.values(s.records ?? {}).some(r => (r.dynamicFields ?? []).some(d => d.keyPattern.test(k)));
+};
 const BBV2 = (b as any).telemetry.bbv2 as Record<string, number>;
 const omit = (o: Record<string, unknown>, k: string) => { const { [k]: _x, ...r } = o; return r; };
 
@@ -39,16 +43,24 @@ describe('[TEL-AC11] export contract (D-HOE-20261030-20, -25 N-2)', () => {
     for (const t of EVENT_TYPES) { const s = EVENT_SCHEMA[t]; expect(['boolean', 'function']).toContain(typeof s.pinned); expect(typeof s.fields).toBe('object'); }
     expect(Object.isFrozen(EVENT_SCHEMA)).toBe(true); expect(Object.isFrozen(EVENT_SCHEMA.refill_used.fields)).toBe(true);
   });
-  it('[TEL-AC11] every FieldSpec uses a known kind; str always has an anchored pattern (no free text); arr always has maxLen', () => {
-    const KINDS = ['enum', 'int', 'count', 'bucket', 'bool', 'float', 'str', 'arr', 'obj'], bad: string[] = [];
+  it('[TEL-AC11][F-3] every FieldSpec uses a D-HOE-25 N-2 kind (no obj); str anchored; arr has maxLen; records are one-level only', () => {
+    const KINDS = ['enum', 'int', 'count', 'bucket', 'bool', 'float', 'str', 'arr'], bad: string[] = [];
     const walk = (p: string, f: FieldSpec) => {
       if (!KINDS.includes(f.kind)) bad.push(`${p}: kind ${f.kind}`);
       if (f.kind === 'str' && !(f.pattern.source.startsWith('^') && f.pattern.source.endsWith('$'))) bad.push(`${p}: unanchored`);
       if (f.kind === 'arr') { if (!(f.maxLen >= 1)) bad.push(`${p}: maxLen`); walk(`${p}[]`, f.of); }
-      if (f.kind === 'obj') for (const [k, g] of Object.entries(f.fields)) walk(`${p}.${k}`, g);
     };
-    for (const t of EVENT_TYPES) for (const [k, f] of Object.entries(EVENT_SCHEMA[t].fields)) walk(`${t}.${k}`, f);
+    for (const t of EVENT_TYPES) {
+      for (const [k, f] of Object.entries(EVENT_SCHEMA[t].fields)) walk(`${t}.${k}`, f);
+      for (const [rk, r] of Object.entries(EVENT_SCHEMA[t].records ?? {})) {
+        for (const [k, f] of Object.entries(r.fields)) walk(`${t}.${rk}.${k}`, f);
+      }
+    }
     expect(bad).toEqual([]);
+    expect(EVENT_SCHEMA.session_summary.records?.start).toBeTruthy();
+    expect(EVENT_SCHEMA.session_summary.fields.start).toBeUndefined();
+    expect(EVENT_SCHEMA.session_end.records?.breed_family_s).toBeTruthy();
+    expect(EVENT_SCHEMA.session_end.fields.breed_family_s).toBeUndefined();
   });
   it('[TEL-AC11 / G-8] validateEvent returns [] for valid and string[] errors otherwise; legacy:true events are not validated (V-0)', () => {
     expect(ok('goal_tap', { target: 'FARM', state: 'ready' })).toEqual([]);
@@ -118,14 +130,24 @@ describe('[TEL-AC11] FieldSpec kinds, each tested (D-HOE-25 N-2)', () => {
     expect(validateEvent(omit(ev('best_buy_shown', BBS), 'eta_s') as TEvent)).toEqual(['best_buy_shown.eta_s: required']);
     expect(ok('best_buy_shown', { ...BBS, payback_s: -1 }).length).toBe(1); expect(ok('best_buy_shown', { ...BBS, payback_s: 'Infinity' }).length).toBe(1);
   });
-  it('[TEL-AC11] obj (session_summary nested records): nested fields, null end, unknown nested key fails', () => {
+  it('[TEL-AC11][F-3][QA-D-1105-SCHEMA] EventSpec.records keep nested wire JSON (session_summary start/end/counts/first_upgrade)', () => {
     const sum = { type: 'session_summary', sid: 'a1b2c3', ts: 5, start: { ...omit(omit(START, 'install_id'), 'session_id') }, end: null, counts: { session_start: 1, upgrade: 2 },
       coop_full_ms: 0, eggs_lost_while_full: 0, coop_full_episodes: 0, coop_full_flapping: false, first_upgrade: null, upgrades: 2 };
     expect(validateEvent(sum as any)).toEqual([]);
     expect(validateEvent({ ...sum, counts: { not_an_event: 1 } } as any).length).toBe(1);
     expect(validateEvent({ ...sum, start: { ...sum.start, viewport_h: undefined } } as any)).toEqual(['session_summary.start.viewport_h: required']);
     expect(validateEvent({ ...sum, start: { ...sum.start, extra: 1 } } as any)).toEqual(['session_summary.start.extra: unknown field']);
+    expect(validateEvent({ ...sum, end: { reason: 'unload', fg_ms: 1, taps_total: 0, taps_moved_eggs: 0, eggs_collected_manual: 0 } } as any)).toEqual([]);
+    expect(validateEvent({ ...sum, first_upgrade: { fgMs: 10, upgrade: 'hens', newLevel: 2, cost: 1.5, taps_before: 3 } } as any)).toEqual([]);
     expect(JSON.stringify(sum).length).toBeLessThanOrEqual(1024);
+  });
+  it('[TEL-AC11][F-3] session_end.breed_family_s keeps wire {P,A,B}; optional whole record; bad child fails', () => {
+    expect(ok('session_end', { ...END, breed_family_s: { P: 1.2, A: 0, B: 3.4 } })).toEqual([]);
+    expect(ok('session_end', END)).toEqual([]); // absent OK (optional)
+    expect(ok('session_end', { ...END, breed_family_s: null }).length).toBe(1); // null not allowed (not nullable)
+    expect(ok('session_end', { ...END, breed_family_s: { P: 1.2, A: 0 } }).length).toBe(1); // B required
+    expect(ok('session_end', { ...END, breed_family_s: { P: 1.2, A: 0, B: 3.4, X: 1 } })).toEqual(['session_end.breed_family_s.X: unknown field']);
+    expect(ok('session_end', { ...END, breed_family_s: { P: -1, A: 0, B: 0 } }).length).toBe(1);
   });
 });
 
