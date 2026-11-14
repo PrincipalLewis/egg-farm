@@ -105,7 +105,7 @@ const strip = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$
  *  tc_broody_max_on_screen = 1 is "fixed by design" (§12.2).
  *  STALL_TENTHS (0.1 s telemetry rounding) and CENTS_PER_DOLLAR (§8 loss_per_s integer cents) in econ/stall.ts are the same
  *  class: unit-scale factors, not economy tunables (F3-no-literal, #128 ci 42744963797). */
-const NAMED_OK = /^export const (FOCUS_DT_MAX_S|EV_RNG_SALT|BR_RNG_SALT|ENERGY_FULL|STALL_TENTHS|CENTS_PER_DOLLAR) = [0-9.xa-fA-F]+;$/;
+const NAMED_OK = /^export const (FOCUS_DT_MAX_S|EV_RNG_SALT|BR_RNG_SALT|ENERGY_FULL|STALL_TENTHS|CENTS_PER_DOLLAR|UNPAID_TRICKLE_K_MIN|SECONDS_PER_MINUTE) = [0-9.xa-fA-F]+;$/; // UNPAID_TRICKLE_K_MIN: spec v1.0.2 Q2 bound (not a CSV column); SECONDS_PER_MINUTE: unit scale (wage_per_min → /s)
 /** Named save-schema constants (D-HOE-20261030-01): BROODY_NEST_MAX_CENTS and BROODY_SLOTS in src/save/m5-fields.ts are the
  *  save-schema bounds from F2 #81 (sanitiser clamp / slot range), not economy tunables, so they are not CSV columns. Allowed only
  *  in that file, only as whole `export const NAME = <number>;` declarations. */

@@ -95,6 +95,7 @@ const SCHEMA: Record<string, EventSpec> = {
     shortage_s: opt(C), // D-HOE-18 13:16: whole seconds
     paused_worker_s: opt(F(0)), all_paused_s: opt(F(0)), // rc2Refill = 0 only (V-6)
     zero_gain_purchase_dropped: opt(C), // D-HOE-32 M-2
+    unpaid_trickle_s: opt(F(0)), unpaid_trickle_coins: opt(C), // unpaid_trickle §6, m4.flags.unpaidTrickle = 1 only
   } },
   session_summary: { pinned: true, fields: { // §3.3; ts = session_start.ts, no fgMs
     fgMs: opt(C), start: O(START_FIELDS), end: nul(O({ reason: E('unload', 'hidden'), fg_ms: C, taps_total: C, taps_moved_eggs: C, eggs_collected_manual: C })),
@@ -197,6 +198,8 @@ const SCHEMA: Record<string, EventSpec> = {
   zero_gain_purchase: { pinned: true, fields: { key: ZG_KEY, farm: C, level: C, meaningful_eta_s: S1 } }, // D-HOE-32 M-2 / rev. 13: cap 50, NO marker; overflow -> session_end.zero_gain_purchase_dropped
   dead_zone: { pinned: true, fields: { farm: I(10, 29), s: F(BBV2.dead_zone_min_s, undefined, 0.1), reason: E('none_affordable'), open: opt(BOOL) } }, // rev. 13 #22 / V-2d
   best_buy_suppressed_zero_gain: { pinned: false, fields: { key: ZG_KEY, farm: C, level: C } },
+  unpaid_trickle_started: { pinned: true, fields: { farm: C, hands: E(1, 2), rate_cents_per_s: C } }, // unpaid_trickle §6, flag on only
+  unpaid_trickle_ended: { pinned: true, fields: { farm: C, duration_s: C, coins_cents: C, cause: E('resumed', 'zero_sum', 'flag_off') } },
 };
 SCHEMA.save_recovery_notice_dismissed = { pinned: false, fields: SCHEMA.save_recovery_notice_shown.fields };
 

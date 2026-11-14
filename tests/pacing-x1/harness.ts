@@ -24,9 +24,11 @@ export function parsePred(txt: string): PredRow[] { // RFC 4180 CSV (quoted fiel
 }
 /** Builds the balance IN MEMORY from the source's tree files, exactly as sync-economy does; returns their sha256 for the record.
  *  `root` = the tree to read (default: this checkout). Nothing is pinned here: X1 measures what the tree ships (HoE 10:57). */
-export function x1Balance(key: X1SourceKey, root: URL = ROOT): { b: Balance; csvSha256: string; balanceSha256: string; balance: BalanceRecord } {
+export function x1Balance(key: X1SourceKey, root: URL = ROOT, opts?: { unpaidTrickle?: boolean }): { b: Balance; csvSha256: string; balanceSha256: string; balance: BalanceRecord } {
   const src = X1_SOURCES[key], csv = readFileSync(new URL(src.csv, root)), bj = readFileSync(new URL(src.balanceJson, root));
-  const b = validateBalance(buildBalance(parseEconomyCsv(csv.toString('utf8')), JSON.parse(bj.toString('utf8')), readEconomyConfig() as any) as Balance, false);
+  let b = validateBalance(buildBalance(parseEconomyCsv(csv.toString('utf8')), JSON.parse(bj.toString('utf8')), readEconomyConfig() as any) as Balance, false);
+  // --unpaid-trickle / X1_UNPAID_TRICKLE=1: in-memory only (does not write balance.json). k is the CSV workers.energy.unpaid_trickle.
+  if (opts?.unpaidTrickle) b = validateBalance({ ...b, m4: { ...b.m4!, enabled: 1, flags: { ...b.m4!.flags, unpaidTrickle: 1 } } } as Balance, false);
   return { b, csvSha256: sha256(csv), balanceSha256: sha256(bj), balance: balanceRecord(src.balanceJson, bj, b) };
 }
 /** QA-D-1030-SHIPFLAGS (HoE): what the run read from the tree's src/config/balance.json: its sha256, m4.enabled, every

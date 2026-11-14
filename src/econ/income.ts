@@ -12,6 +12,7 @@ import { prodEggsPerSec, salePriceCents } from '../sim/tracks';
 import { mood, isOff, graderMult, hawkerDemandMult, WORKERS, type WorkerId, type Workers } from '../sim/workers';
 import { isPaused } from '../sim/pause';
 import { bestBuyV2On } from '../config/flags';
+import { unpaidTrickleDollarsPerSec } from '../sim/unpaid-trickle';
 
 export type IncomeOpts = {
   /** When true, treat every hired worker as Working (Economy best() scoring). */
@@ -76,10 +77,20 @@ export function wagesPerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): nu
   return w;
 }
 
-/** Gross eggs sold/s × price − wages. Live moods unless assumeWorking. */
+/** Gross eggs sold/s × price − wages. Live moods unless assumeWorking.
+ *  Sim input (D-HOP-2026-11-14-15): does NOT include unpaid trickle. I_ss (issDollars), grossSalesPerSec and
+ *  fatigueShare all read this. Flag off: unchanged. The HUD income/s display is incomePerSecDisplay. */
 export function incomePerSec(s: GameState, b: Balance, opts: IncomeOpts = {}): number {
   const eggs = Math.min(prodEggsPerSec(s, b), demandPerSec(s, b, opts), collectPerSec(s, b, opts));
   return eggs * priceDollars(s, b, opts) - wagesPerSec(s, b, opts);
+}
+
+/** HUD income/s DISPLAY only (Q3, D-HOP-2026-11-14-15). Live path adds the unpaid trickle when the flag is on and rate > 0.
+ *  The planner path (assumeWorking) and every sim input (incomePerSec) do not. Flag off or k = 0: equals incomePerSec. */
+export function incomePerSecDisplay(s: GameState, b: Balance, opts: IncomeOpts = {}): number {
+  const base = incomePerSec(s, b, opts);
+  if (opts.assumeWorking) return base;
+  return base + unpaidTrickleDollarsPerSec(s, b);
 }
 
 /** TEST-ONLY (CCR #70 n1): no src/ caller. Gross sales per second ($), before wages. */

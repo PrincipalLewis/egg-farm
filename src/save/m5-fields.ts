@@ -35,7 +35,7 @@ export const BROODY_NEST_MAX_CENTS = 1e15; export const BROODY_SLOTS = 12;
 /** Never saved (F1a M5_SESSION_FIELDS: golden R10a on-screen egg, streak R11 s, I_ref ring, Broody nestScaled/brRng). */
 export const M5_SESSION_KEYS = M5_SESSION_FIELDS; // ONE list, owned by sim/m5-state.ts (CCR m1 on #77)
 /** Session keys outside F1a M5Fields: the #2 streak run stats (streak_peak, sim/streak.ts). Never saved either. */
-const SESSION_ONLY_KEYS: readonly string[] = [...M5_SESSION_KEYS, 'streakRun', 'breedsRawSlots', 'breedsCalm', 'goldenPending', 'frenzyRun', 'breedsTel', 'broodyRun', 'goldenSession', 'goldenForceReward']; // + #1 golden // + breeds E10 shadow + BR-R12b calm // + breeds §8 telemetry // + #5 Broody run // + v1.3.3 session_end counters / QA force
+const SESSION_ONLY_KEYS: readonly string[] = [...M5_SESSION_KEYS, 'streakRun', 'breedsRawSlots', 'breedsCalm', 'goldenPending', 'frenzyRun', 'breedsTel', 'broodyRun', 'goldenSession', 'goldenForceReward', 'unpaidTrickleFrac', 'unpaidTrickleWasOn', 'unpaidTrickleEp', 'unpaidTrickleSessionMs', 'unpaidTrickleSessionCents']; // + #1 golden // + breeds E10 shadow + BR-R12b calm // + breeds §8 telemetry // + #5 Broody run // + v1.3.3 session_end counters / QA force // + unpaid_trickle §2.7 session-only carry/episode (never saved)
 const fin = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0;
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 const isU32 = (v: unknown) => Number.isInteger(v) && (v as number) > 0 && (v as number) <= 0xffffffff;

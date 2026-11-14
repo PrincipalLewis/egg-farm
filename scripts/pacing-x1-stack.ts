@@ -1,6 +1,8 @@
 // CI check `pacing-x1-stack` (v5 manifest row 1; economy §13.2a AC-X1; sizing §15b). Owner of the check: HoE.
 // Usage (read-only; writes only under --out):
-//   npx vite-node scripts/pacing-x1-stack.ts -- shard --profile <optimal|seller15|casual> --out <dir> [--seeds 1-200] [--data <key>]
+//   npx vite-node scripts/pacing-x1-stack.ts -- shard --profile <optimal|seller15|casual> --out <dir> [--seeds 1-200] [--data <key>] [--unpaid-trickle]
+//     --unpaid-trickle (or X1_UNPAID_TRICKLE=1) turns on m4.flags.unpaidTrickle in memory and uses the CSV unpaid_trickle (k).
+//     Example: npx vite-node scripts/pacing-x1-stack.ts -- shard --profile optimal --out /tmp/x1-trickle --seeds 1-15 --unpaid-trickle
 //   npx vite-node scripts/pacing-x1-stack.ts -- verdict --in <dir with shard-*.json [+ ac7.json]> --out <dir> [--require-ac7]
 //     If ac7.json is missing, verdict runs the tree gate (scripts/pacing-x1-ac7-active-idle-gate.py) on
 //     data/economy.csv, writes ac7.json + ac7.log + ac7-csv-record.txt, and prints the CSV-RECORD line.
@@ -30,7 +32,8 @@ function shard() {
   const profile = opt('--profile'), outDir = opt('--out'); if (!profile || !PROFS[profile] || !outDir) { console.error('shard: --profile <optimal|seller15|casual> --out <dir> required'); process.exit(2); }
   const key = (opt('--data') ?? X1_DATA) as X1SourceKey; if (!X1_SOURCES[key]) { console.error(`unknown --data ${key}`); process.exit(2); }
   const [s0, s1] = (opt('--seeds') ?? '1-200').split('-').map(Number), t0 = Date.now();
-  const { b, csvSha256, balanceSha256, balance } = x1Balance(key), st = x1Stacks(key), tg = loadTargets();
+  const unpaidTrickle = args.includes('--unpaid-trickle') || process.env.X1_UNPAID_TRICKLE === '1';
+  const { b, csvSha256, balanceSha256, balance } = x1Balance(key, undefined, { unpaidTrickle }), st = x1Stacks(key), tg = loadTargets();
   const g = (cfgs: string[]) => windowGate(b, { cfgs, profs: [profile], seeds: s1 - s0 + 1, s0, T: X1_RUN.T, step: X1_RUN.step, stepFrom: X1_RUN.stepFrom, noWin: false, targets: tg,
     onResult: (k, o) => console.error(`[${((Date.now() - t0) / 1000).toFixed(0)}s] ${k} ${JSON.stringify(o.win ?? o.stepL30)}`) });
   const main = g(['none', 'x1:N', 'x1:H']), gate = { none: main[`none|${profile}`], N: main[`x1:N|${profile}`], H: main[`x1:H|${profile}`] } as Shard['gate'];
