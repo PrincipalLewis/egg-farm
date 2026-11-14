@@ -1,7 +1,7 @@
 // Headless smoke test of the built game: start, collect, sell, buy, queue-full cue, no page errors.
 import { chromium } from 'playwright-core';
-import { spawn } from 'node:child_process';
-const port = 4174; const srv = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
+import { spawnRecorded, stopOrReport } from './recorded-pid.mjs';
+const port = 4174; const { child: srv, rec: srvRec } = spawnRecorded('npx', ['vite', 'preview', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
 await new Promise(r => setTimeout(r, 1500));
 const browser = await chromium.launch({ executablePath: process.env.CHROME ?? '/usr/bin/google-chrome', args: ['--no-sandbox'] });
 const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, acceptDownloads: true })).newPage();
@@ -75,5 +75,5 @@ if (await page.locator('.dbg').count()) fail('debug panel visible without ?debug
   if (id !== await page.evaluate(() => localStorage.getItem('eggfarm.install_id'))) fail('install_id changed after Reset save');
 }
 if (errors.length) fail('page errors: ' + errors.join(' | '));
-await browser.close(); srv.kill();
+await browser.close(); stopOrReport(srv, srvRec, 'smoke');
 console.log(process.exitCode ? 'smoke: FAILED' : 'smoke: OK');

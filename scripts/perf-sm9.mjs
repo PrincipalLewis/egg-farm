@@ -1,10 +1,10 @@
 // SM-9: F20+ save, all 4 workers hired, scripted collect/sell/Manage loop; ?perf=1 sampler (10 s warm-up + 60 s by default).
 // Usage: node scripts/perf-sm9.mjs [--headed] [--short]   (headless numbers are informational per the smoke plan)
 import { chromium } from 'playwright-core';
-import { spawn } from 'node:child_process';
+import { spawnRecorded, stopOrReport } from './recorded-pid.mjs';
 import { readFileSync } from 'node:fs';
 const headed = process.argv.includes('--headed'), short = process.argv.includes('--short');
-const port = 4176; const srv = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
+const port = 4176; const { child: srv, rec: srvRec } = spawnRecorded('npx', ['vite', 'preview', '--port', String(port), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
 await new Promise(r => setTimeout(r, 1500));
 const fx = JSON.parse(readFileSync(new URL('../tests/fixtures/saves/m2-rc1-v5-40min.json', import.meta.url), 'utf8'));
 fx.state.farmLevel = Math.max(20, fx.state.farmLevel); fx.state.coinsCents = 5e9; fx.savedAt = Date.now();
@@ -27,5 +27,5 @@ while (!res) {
 }
 await page.screenshot({ path: '../engineering/screenshots/m3-rc0-sm9-overlay.png' });
 console.log(JSON.stringify({ mode: headed ? 'headed' : 'headless', ...res, errors }));
-await browser.close(); srv.kill();
+await browser.close(); stopOrReport(srv, srvRec, 'perf-sm9');
 if (errors.length) process.exitCode = 1;

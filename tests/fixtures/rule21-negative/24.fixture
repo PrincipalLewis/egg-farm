@@ -1,0 +1,1 @@
+os.killpg(os.getpgid(p), 15)

@@ -1,9 +1,10 @@
 // art-ux/m3-customer-queue-spec.md §7 QA checks 13-20 (+ F24 frame-sampler stress) against dist-qa. Exit 1 if any check fails.
 // Usage: node scripts/queue-qa.mjs [webkit]   -> qa-out/queue-qa-<engine>.json + screenshots
 import { chromium, webkit } from 'playwright-core';
-import { spawn } from 'node:child_process'; import { writeFileSync } from 'node:fs';
+import { spawnRecorded, stopOrReport } from './recorded-pid.mjs';
+import { writeFileSync } from 'node:fs';
 const eng = process.argv[2] === 'webkit' ? 'webkit' : 'chromium'; const port = 4800 + Math.floor(Math.random() * 400);
-const srv = spawn('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore', detached: true });
+const { child: srv, rec: srvRec } = spawnRecorded('npx', ['vite', 'preview', '--outDir', 'dist-qa', '--port', '' + port, '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
 await new Promise(r => setTimeout(r, 2500));
 const br = eng === 'webkit' ? await webkit.launch() : await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] });
 const res = {}; const ok = (k, pass, data) => { res[k] = { pass: !!pass, ...data }; console.log(k, pass ? 'PASS' : 'FAIL', JSON.stringify(data)); };
@@ -87,5 +88,5 @@ try {
   { const { ctx, p } = await page(360, 640, '?perf=1&perfS=30&perfWarmS=5'); await openMarket(p);
     await p.waitForFunction(() => window.eggfarmPerf?.done, null, { timeout: 60000 }); const s = await p.evaluate(() => window.eggfarmPerf.result);
     await p.screenshot({ path: `qa-out/perf-f24-360-${eng}.png` }); ok('F24_frame_sampler', s.pass, s); await ctx.close(); }
-} finally { writeFileSync(`qa-out/queue-qa-${eng}.json`, JSON.stringify(res, null, 1)); await br.close(); process.kill(-srv.pid); }
+} finally { writeFileSync(`qa-out/queue-qa-${eng}.json`, JSON.stringify(res, null, 1)); await br.close(); stopOrReport(srv, srvRec, 'queue-qa'); }
 process.exit(Object.values(res).every(r => r.pass) ? 0 : 1);
